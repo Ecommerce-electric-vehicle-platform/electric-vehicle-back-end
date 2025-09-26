@@ -5,6 +5,7 @@ import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.request.UsernamePasswordSignUpRequest;
 import Green_trade.green_trade_platform.response.SignUpResponse;
 import Green_trade.green_trade_platform.service.AuthServiceImpl;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +23,7 @@ public class AuthController {
     private BuyerMapper mapper;
 
     @PostMapping("/sign-up")
-    public ResponseEntity<SignUpResponse> signUpController(@RequestBody UsernamePasswordSignUpRequest request) {
+    public ResponseEntity<SignUpResponse> signUpController(@Valid @RequestBody UsernamePasswordSignUpRequest request) {
         Buyer buyer = service.signUp(request);
         return ResponseEntity.ok(mapper.toDto(buyer));
     }

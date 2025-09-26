@@ -15,7 +15,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class JwtControllerAdvisor {
     @ExceptionHandler(JwtException.class)
-    public ResponseEntity<?> handleForJwtException(JwtException ex, HttpServletRequest request) {
+    public ResponseEntity<?> handleJwtException(JwtException ex, HttpServletRequest request) {
         Map<String, Object> error = new HashMap<>();
         error.put("timestamp", LocalDateTime.now());
         error.put("status", HttpStatus.UNAUTHORIZED.value());
