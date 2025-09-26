@@ -51,7 +51,7 @@ public class Buyer {
     private String email;
 
     @Column(name = "create_at", nullable = false)
-    private LocalDateTime createAt = LocalDateTime.now();
+    private LocalDateTime createAt;
 
     @Column(name = "update_at")
     private LocalDateTime updateAt;
@@ -59,8 +59,16 @@ public class Buyer {
     @Column(name = "delete_at")
     private LocalDateTime deleteAt;
 
+    @PrePersist
+    public void onCreate() {
+        this.isActive = true;
+        this.score = 0;
+        this.createAt = LocalDateTime.now();
+    }
+
+
     @PreUpdate
-    public void preUpdate(){
+    public void onUpdate(){
         this.updateAt = LocalDateTime.now();
     }
 }

@@ -8,6 +8,7 @@ import Green_trade.green_trade_platform.request.UsernamePasswordSignUpRequest;
 import Green_trade.green_trade_platform.util.Acceptable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,9 @@ public class AuthServiceImpl implements AuthService{
 
     @Autowired
     private BuyerMapper mapper;
+
+    @Autowired
+    private DelegatingPasswordEncoder passwordEncoder;
 
     public void checkValidData(UsernamePasswordSignUpRequest request) {
         Map<String, String> errors = new HashMap<>();
@@ -52,9 +56,12 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public Buyer signUp(UsernamePasswordSignUpRequest request) {
-        checkValidData(request);
+        // Check data validation before save to database
+//        checkValidData(request);
 
         Buyer buyer = mapper.toEntity(request);
+        // Hash password
+        buyer.setPassword(passwordEncoder.encode(buyer.getPassword()));
         return repository.save(buyer);
     }
 }

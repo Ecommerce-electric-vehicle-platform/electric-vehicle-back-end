@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.filter;
 
+import Green_trade.green_trade_platform.exception.AuthException;
 import Green_trade.green_trade_platform.service.UserDetailsServiceCustomer;
 import Green_trade.green_trade_platform.util.JwtUtils;
 import jakarta.servlet.FilterChain;
@@ -31,7 +32,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         String path = request.getServletPath();
 
-        if (path.startsWith("/api/auth/v1") || path.startsWith("/api/reviewers")) {
+        if (path.startsWith("/api/v1/auth") || path.startsWith("/test")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -54,7 +55,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Can not make authentication");
+            throw new AuthException("Authentication failed at AuthTokenFilter: " + e.getMessage());
         }
         filterChain.doFilter(request, response);
     }
