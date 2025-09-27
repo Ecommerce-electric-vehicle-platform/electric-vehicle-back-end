@@ -15,20 +15,10 @@ public class UsernamePasswordSignUpRequest {
 
     @NotBlank(message = "Password must not be blank.")
     @Pattern(
-            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$",
+            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s])[^\\s]{8,}$",
             message = "Password must be at least 8 characters, include letters, numbers, and special characters, and contain no spaces."
     )
     private String password;
-
-    @NotBlank(message = "Full name must not be blank.")
-    private String fullName;
-
-    @NotBlank(message = "Số điện thoại không được để trống")
-    @Pattern(
-            regexp = "^(?:\\\\+84|0)(3|5|7|8|9)\\\\d{8}$",
-            message = "Invalid phone number, it must start with 0 or +84 and contain 10 digits."
-    )
-    private String phoneNumber;
 
     @NotBlank(message = "Email must not be blank.")
     @Pattern(

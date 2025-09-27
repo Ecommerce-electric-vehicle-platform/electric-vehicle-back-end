@@ -11,8 +11,6 @@ public class BuyerMapper {
         return Buyer.builder()
                 .username(request.getUsername())
                 .password(request.getPassword())
-                .fullName(request.getFullName())
-                .phoneNumber(request.getPhoneNumber())
                 .email(request.getEmail())
                 .build();
     }

@@ -65,6 +65,9 @@ public class Buyer {
     public void onCreate() {
         this.isActive = true;
         this.score = 0;
+        this.fullName = "Not have yet";
+        this.defaultShippingAddress = "Not have yet";
+        this.phoneNumber = "Not have yet";
         this.createAt = LocalDateTime.now();
     }
 

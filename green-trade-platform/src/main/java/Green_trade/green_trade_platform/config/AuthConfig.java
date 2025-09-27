@@ -9,6 +9,12 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class AuthConfig {
+    private static final String[] SWAGGER_WHITELIST = {
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/v3/api-docs/**"
+    };
+
     @Bean
     public DelegatingPasswordEncoder passwordEncoder() {
         return (DelegatingPasswordEncoder) (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -19,7 +25,8 @@ public class AuthConfig {
         http
                 .csrf(csrf -> csrf.disable())       // tắt CSRF
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()       // cho phép tất cả request không cần login
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
+                        .anyRequest().permitAll()// cho phép tất cả request không cần login
                 )
                 .formLogin(form -> form.disable())  // tắt form login mặc định
                 .httpBasic(basic -> basic.disable()); // tắt Basic Auth
