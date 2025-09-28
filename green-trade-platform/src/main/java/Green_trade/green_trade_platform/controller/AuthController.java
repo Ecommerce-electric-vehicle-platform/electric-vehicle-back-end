@@ -1,7 +1,8 @@
 package Green_trade.green_trade_platform.controller;
 
-import Green_trade.green_trade_platform.Mapper.BuyerMapper;
-import Green_trade.green_trade_platform.request.UsernamePasswordSignUpRequest;
+import Green_trade.green_trade_platform.mapper.BuyerMapper;
+import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.request.SignUpRequest;
 import Green_trade.green_trade_platform.request.VerifyOtpRequest;
 import Green_trade.green_trade_platform.service.SignupServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-public class SignUpController {
+public class AuthController {
     @Autowired
     private SignupServiceImpl service;
     @Autowired
@@ -26,16 +27,18 @@ public class SignUpController {
     @Operation(summary = "Register for new customer",
             description = "Return response show that register successfully!")
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@Valid @RequestBody UsernamePasswordSignUpRequest req) {
+    public ResponseEntity<?> signup(@Valid @RequestBody SignUpRequest req) {
         service.startSignUp(req);
-        return ResponseEntity.ok(Map.of("message", "OTP đã gửi đến email"));
+        return ResponseEntity.ok(Map.of("message", "Send OTP to email."));
     }
 
     @PostMapping("/verify-otp")
     @Operation(summary = "Verify otp via email",
                 description = "Return verify email.")
-    public ResponseEntity<?> verify(@RequestBody VerifyOtpRequest req) {
-        service.verifyOtp(req);
-        return ResponseEntity.ok(Map.of("message", "Xác thực thành công"));
+    public ResponseEntity<?> verify(@Valid @RequestBody VerifyOtpRequest req) {
+        Buyer buyer = service.verifyOtp(req);
+        return ResponseEntity.ok(mapper.toDto(buyer,
+                        "Not have yet.",
+                        "Not have yet."));
     }
 }

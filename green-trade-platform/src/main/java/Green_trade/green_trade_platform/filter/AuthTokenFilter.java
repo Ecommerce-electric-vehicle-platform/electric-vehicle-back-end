@@ -33,7 +33,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
 
         if (path.startsWith("/api/v1/auth") || path.startsWith("/test")
-                || path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs")) {
+                || path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs")
+                || path.startsWith("/verify-otp") || path.startsWith("/api/test/redis")) {
             filterChain.doFilter(request, response);
             return;
         }

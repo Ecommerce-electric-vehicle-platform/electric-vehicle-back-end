@@ -24,10 +24,12 @@ public class RedisOtpService {
         try {
             Map<String, String> data = Map.of("username", username,
                                                     "password", password,
-                                                        "email", email);
+                                                        "email", email,
+                                                            "otp", otp);
             String json = objectMapper.writeValueAsString(data);
             String key = "signup:email:" + email;
             stringRedisTemplate.opsForValue().set(key, json, Duration.ofMinutes(10));
+            log.debug("Save pending buyer in Redis with key: {}", key);
         } catch (Exception e) {
             log.debug("Error of saving pending buyer to redis: {}", e.getMessage());
         }
@@ -49,6 +51,7 @@ public class RedisOtpService {
     public void deletePendingBuyer(String email) {
         String key = "signup:email:" + email;
         stringRedisTemplate.delete(key);
+        log.debug("Delete pending buyer from Redis: {}", key);
     }
 
 }

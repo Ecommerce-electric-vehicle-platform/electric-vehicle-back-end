@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class SignUpResponse {
+public class BuyerResponse {
     private Long buyerId;
     private String username;
     private String password;
@@ -16,4 +16,7 @@ public class SignUpResponse {
     private String phoneNumber;
     private String email;
     private LocalDateTime createAt;
+    private String accessToken;
+    private String refreshToken;
+    private String message;
 }

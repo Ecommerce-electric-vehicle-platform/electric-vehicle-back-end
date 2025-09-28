@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class UsernamePasswordSignUpRequest {
+public class SignUpRequest {
     @NotBlank(message = "Username must not be blank.")
     @Pattern(regexp = "^[a-zA-Z]{8,}$",
             message = "Username must be at least 8 letters, with no spaces, numbers, or special characters.")

@@ -1,13 +1,13 @@
-package Green_trade.green_trade_platform.Mapper;
+package Green_trade.green_trade_platform.mapper;
 
 import Green_trade.green_trade_platform.model.Buyer;
-import Green_trade.green_trade_platform.request.UsernamePasswordSignUpRequest;
-import Green_trade.green_trade_platform.response.SignUpResponse;
+import Green_trade.green_trade_platform.request.SignUpRequest;
+import Green_trade.green_trade_platform.response.BuyerResponse;
 import org.springframework.stereotype.Component;
 
 @Component
 public class BuyerMapper {
-    public Buyer toEntity(UsernamePasswordSignUpRequest request) {
+    public Buyer toEntity(SignUpRequest request) {
         return Buyer.builder()
                 .username(request.getUsername())
                 .password(request.getPassword())
@@ -15,8 +15,9 @@ public class BuyerMapper {
                 .build();
     }
 
-    public SignUpResponse toDto(Buyer buyer) {
-        return SignUpResponse.builder().
+    public BuyerResponse toDto(Buyer buyer, String accessToken, String refreshToken) {
+        String value = System.getenv("${MAIL_PASSWORD}");
+        return BuyerResponse.builder().
                 buyerId(buyer.getBuyerId())
                 .username(buyer.getUsername())
                 .password(buyer.getPassword())
@@ -25,6 +26,9 @@ public class BuyerMapper {
                 .phoneNumber(buyer.getPhoneNumber())
                 .email(buyer.getEmail())
                 .createAt(buyer.getCreateAt())
+                .message("Verified! Sign up successfully.")
+                .accessToken(accessToken)
+                .refreshToken(value)
                 .build();
     }
 }
