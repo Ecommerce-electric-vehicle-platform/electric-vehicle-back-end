@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/green-trade-platform/green-trade-platform.iml" filepath="$PROJECT_DIR$/green-trade-platform/green-trade-platform.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/green-trade-platform.iml" filepath="$PROJECT_DIR$/.idea/green-trade-platform.iml" />
     </modules>
   </component>
 </project>
