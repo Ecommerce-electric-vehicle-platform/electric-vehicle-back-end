@@ -146,3 +146,5 @@ replay_pid*
 *.rdb
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij,java,redis
+
+.application.properties

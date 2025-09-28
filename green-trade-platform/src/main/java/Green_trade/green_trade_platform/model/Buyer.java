@@ -1,6 +1,8 @@
 package Green_trade.green_trade_platform.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -51,7 +53,7 @@ public class Buyer {
     private String email;
 
     @Column(name = "create_at", nullable = false)
-    private LocalDateTime createAt = LocalDateTime.now();
+    private LocalDateTime createAt;
 
     @Column(name = "update_at")
     private LocalDateTime updateAt;
@@ -59,8 +61,19 @@ public class Buyer {
     @Column(name = "delete_at")
     private LocalDateTime deleteAt;
 
+    @PrePersist
+    public void onCreate() {
+        this.isActive = true;
+        this.score = 0;
+        this.fullName = "Not have yet";
+        this.defaultShippingAddress = "Not have yet";
+        this.phoneNumber = "Not have yet";
+        this.createAt = LocalDateTime.now();
+    }
+
+
     @PreUpdate
-    public void preUpdate(){
+    public void onUpdate(){
         this.updateAt = LocalDateTime.now();
     }
 }
