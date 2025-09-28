@@ -8,7 +8,6 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -17,14 +16,11 @@ import java.util.Date;
 @Component
 @Slf4j
 public class JwtUtils {
-    @Value("S{spring.application.issuer}")
+    @Value("${spring.application.issuer}")
     private String issuer;
 
-    @Value("S{spring.application.secret}")
+    @Value("${spring.application.secret}")
     private String secret;
-
-    @Value("${spring.application.expireAt}")
-    private int expireTime;
 
     public String getTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
@@ -36,8 +32,7 @@ public class JwtUtils {
         }
     }
 
-    public String generateTokenFromUsername(UserDetails userDetails) {
-        String username = userDetails.getUsername();
+    public String generateTokenFromUsername(String username, long expireTime) {
         try {
             return JWT.create()
                     .withSubject(username)

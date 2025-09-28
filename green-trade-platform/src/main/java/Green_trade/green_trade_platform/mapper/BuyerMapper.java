@@ -28,7 +28,7 @@ public class BuyerMapper {
                 .createAt(buyer.getCreateAt())
                 .message("Verified! Sign up successfully.")
                 .accessToken(accessToken)
-                .refreshToken(value)
+                .refreshToken(refreshToken)
                 .build();
     }
 }

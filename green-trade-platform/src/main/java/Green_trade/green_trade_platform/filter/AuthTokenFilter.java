@@ -1,7 +1,7 @@
 package Green_trade.green_trade_platform.filter;
 
 import Green_trade.green_trade_platform.exception.AuthException;
-import Green_trade.green_trade_platform.service.UserDetailsServiceCustomer;
+import Green_trade.green_trade_platform.service.implement.UserDetailsServiceCustomer;
 import Green_trade.green_trade_platform.util.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
