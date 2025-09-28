@@ -1,4 +1,4 @@
-package Green_trade.green_trade_platform.service;
+package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.exception.EmailException;
@@ -6,6 +6,8 @@ import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
 import Green_trade.green_trade_platform.request.SignUpRequest;
 import Green_trade.green_trade_platform.request.VerifyOtpRequest;
+import Green_trade.green_trade_platform.service.SignupService;
+import Green_trade.green_trade_platform.util.JwtUtils;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;

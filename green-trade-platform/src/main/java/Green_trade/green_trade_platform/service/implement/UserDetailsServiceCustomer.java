@@ -1,4 +1,4 @@
-package Green_trade.green_trade_platform.service;
+package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
