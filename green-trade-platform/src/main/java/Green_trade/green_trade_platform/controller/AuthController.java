@@ -4,6 +4,7 @@ import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.request.SignUpRequest;
 import Green_trade.green_trade_platform.request.VerifyOtpRequest;
+import Green_trade.green_trade_platform.service.implement.RedisTokenService;
 import Green_trade.green_trade_platform.service.implement.SignupServiceImpl;
 import Green_trade.green_trade_platform.util.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +27,8 @@ public class AuthController {
     private BuyerMapper mapper;
     @Autowired
     private JwtUtils jwtUtils;
+    @Autowired
+    private RedisTokenService redisTokenService;
 
     @Operation(summary = "Register for new customer",
             description = "Return response show that register successfully!")
@@ -44,6 +47,7 @@ public class AuthController {
         long accessExpireTime = 15 * 60 * 1000; // 15 minutes
         String refreshToken = jwtUtils.generateTokenFromUsername(buyer.getUsername(), refreshExpireTime);
         String accessToken = jwtUtils.generateTokenFromUsername(buyer.getUsername(), accessExpireTime);
+        redisTokenService.saveTokenToRedis(buyer.getEmail(), refreshToken, refreshExpireTime);
         return ResponseEntity.ok(mapper.toDto(buyer,
                         accessToken,
                         refreshToken));

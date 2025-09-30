@@ -52,5 +52,4 @@ public class RedisOtpService {
         stringRedisTemplate.delete(key);
         log.debug("Delete pending buyer from Redis: {}", key);
     }
-
 }
