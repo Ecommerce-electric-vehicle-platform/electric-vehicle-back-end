@@ -26,6 +26,9 @@ public class SecurityConfig {
     @Autowired
     private AuthTokenFilter filter;
 
+    @Autowired
+    private AuthEntryPoint authEntryPoint;
+
     @Bean
     public DelegatingPasswordEncoder passwordEncoder() {
         return (DelegatingPasswordEncoder) (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -39,7 +42,8 @@ public class SecurityConfig {
                         .requestMatchers(WHITE_LIST.toArray(new String[0])).permitAll() // Permit url in WHITE_LIST that do not need to authenticated
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class) //  Add AuthTokenFilter to SecurityFilterChain
+                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(authEntryPoint))//  Add AuthTokenFilter to SecurityFilterChain
                 .formLogin(AbstractHttpConfigurer::disable) // Turn off basic authentication form from Spring Security
                 .httpBasic(AbstractHttpConfigurer::disable); // Turn off Basic Auth
 
