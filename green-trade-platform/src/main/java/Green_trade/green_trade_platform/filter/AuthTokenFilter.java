@@ -30,9 +30,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
         String path = request.getServletPath();
 
-        if (path.startsWith("/api/v1/auth") || path.startsWith("/test")
+        if (path.startsWith("/api/v1/auth")
                 || path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs")
                 || path.startsWith("/verify-otp") || path.startsWith("/api/test/redis")) {
             filterChain.doFilter(request, response);
@@ -42,22 +43,24 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         log.debug("Authentication in request : {}",  request.getRequestURI());
         try {
             String token = getTokenFromRequest(request);
-            if(token != null && jwtUtils.verifyToken(token)) {
+            if (token != null && jwtUtils.verifyToken(token)) {
                 String username = jwtUtils.getUsernameFromToken(token);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                log.debug("User detail loafing: {}", userDetails.getUsername());
 
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
+                UsernamePasswordAuthenticationToken authenticationToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+
                 log.debug("Role from JWT: {}", userDetails.getAuthorities());
 
-                // Set user's information like : cookies, session,...
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         } catch (Exception e) {
-            throw new AuthException("Authentication failed at AuthTokenFilter: " + e.getMessage());
+            // Ném ra AuthenticationException để EntryPoint xử lý (trả về 401 JSON)
+            throw new AuthException("Authentication failed: " + e.getMessage());
         }
         filterChain.doFilter(request, response);
     }
