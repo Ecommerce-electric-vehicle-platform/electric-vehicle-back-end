@@ -30,9 +30,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
         String path = request.getServletPath();
 
-        if (path.startsWith("/api/v1/auth") || path.startsWith("/test")
+        if (path.startsWith("/api/v1/auth")
                 || path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs")
                 || path.startsWith("/verify-otp") || path.startsWith("/api/test/redis")) {
             filterChain.doFilter(request, response);
@@ -46,6 +47,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 String username = jwtUtils.getUsernameFromToken(token);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                log.debug("User detail loafing: {}", userDetails.getUsername());
 
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(
