@@ -53,7 +53,7 @@ public class SellerServiceImpl {
         }
 
         seller = Seller.builder()
-                        .buyerId(buyer)
+                        .buyerId(buyer.getBuyerId())
                         .businessLicenseUrl(businessLicenseUrl)
                         .identityImageUrl(identityUrl)
                         .storePolicyUrl(storePolicyUrl)
