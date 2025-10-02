@@ -18,5 +18,4 @@ public class BuyerResponse {
     private LocalDateTime createAt;
     private String accessToken;
     private String refreshToken;
-    private String message;
 }

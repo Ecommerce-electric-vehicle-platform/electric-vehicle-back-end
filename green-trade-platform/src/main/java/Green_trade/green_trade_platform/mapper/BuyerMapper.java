@@ -26,7 +26,6 @@ public class BuyerMapper {
                 .phoneNumber(buyer.getPhoneNumber())
                 .email(buyer.getEmail())
                 .createAt(buyer.getCreateAt())
-                .message("Verified! Sign up successfully.")
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
