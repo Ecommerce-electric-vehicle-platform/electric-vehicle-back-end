@@ -40,20 +40,20 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             return;
         }
 
-        log.debug("Authentication in request : {}",  request.getRequestURI());
+        log.info(">>> Authentication in request : {}",  request.getRequestURI());
         try {
             String token = getTokenFromRequest(request);
             if (token != null && jwtUtils.verifyToken(token)) {
                 String username = jwtUtils.getUsernameFromToken(token);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                log.debug("User detail loafing: {}", userDetails.getUsername());
+                log.info(">>> User detail loafing: {}", userDetails.getUsername());
 
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
 
-                log.debug("Role from JWT: {}", userDetails.getAuthorities());
+                log.info(">>> Role from JWT: {}", userDetails.getAuthorities());
 
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
@@ -67,7 +67,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     private String getTokenFromRequest(HttpServletRequest request) {
         String jwt = jwtUtils.getTokenFromRequest(request);
-        log.debug("AuthTokenFilter.java: {}", jwt);
+        log.info(">>> AuthTokenFilter.java: {}", jwt);
         return jwt;
     }
 }

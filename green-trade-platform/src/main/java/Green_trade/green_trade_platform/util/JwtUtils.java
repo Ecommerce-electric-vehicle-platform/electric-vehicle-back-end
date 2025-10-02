@@ -41,7 +41,7 @@ public class JwtUtils {
                     .withExpiresAt(new Date((new Date().getTime() + expireTime)))
                     .sign(Algorithm.HMAC256(secret));
         }catch (JWTCreationException e) {
-            log.error("Generate token failed: {}", e.getMessage());
+            log.info("Generate token failed: {}", e.getMessage());
             throw new JwtException("Generate JWT token failed at generateTokenFromUsername: " + e.getMessage());
         }
     }
@@ -63,7 +63,7 @@ public class JwtUtils {
             verifier.verify(token);
             return true;
         } catch (JWTVerificationException e) {
-            log.error("Validate token failed: {}", e.getMessage());
+            log.info("Validate token failed: {}", e.getMessage());
             throw new JwtException("Validate token failed at verifyToken: " + e.getMessage());
         }
     }

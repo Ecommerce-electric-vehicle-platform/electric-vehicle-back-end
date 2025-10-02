@@ -42,11 +42,14 @@ public class SignupServiceImpl implements SignupService {
         }
         // Create OTP
         String otp = String.format("%06d", new Random().nextInt(1_000_000));
+        log.info(">>> OTP: {}", otp);
         String hashPassword = passwordEncoder.encode(request.getPassword());
         // Save user temporary in Redis for verifying OTP via email
         // User send request to sign up -> create OTP + save user to Redis -> user send verify OTP -> save user into database
         otpService.savePendingBuyer(request.getUsername(), hashPassword, request.getEmail(), otp);
+        log.info(">>> Save pending buyer successfully.");
         sendOtpEmail(request.getEmail(), otp);
+        log.info(">>> Send otp successfully.");
     }
 
     // Verify otp

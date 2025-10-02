@@ -19,8 +19,8 @@ import java.util.Map;
 public class AuthEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-        log.error("Authentication errors: {}", authException.getMessage());
-        log.error("Exception: ", authException);
+        log.debug("Authentication errors: {}", authException.getMessage());
+        log.debug("Exception: ", authException);
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
