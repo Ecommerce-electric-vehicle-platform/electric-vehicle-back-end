@@ -46,9 +46,6 @@ public class Buyer {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
-    @Column(name = "score")
-    private Integer score;
-
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
@@ -64,7 +61,6 @@ public class Buyer {
     @PrePersist
     public void onCreate() {
         this.isActive = true;
-        this.score = 0;
         this.fullName = "Not have yet";
         this.defaultShippingAddress = "Not have yet";
         this.phoneNumber = "Not have yet";

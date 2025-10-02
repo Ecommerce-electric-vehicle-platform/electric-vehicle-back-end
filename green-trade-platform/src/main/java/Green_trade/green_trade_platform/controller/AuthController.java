@@ -11,7 +11,9 @@ import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.service.implement.RedisTokenService;
 import Green_trade.green_trade_platform.service.implement.SignInServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SignupServiceImpl;
+import Green_trade.green_trade_platform.util.GoogleVerifierService;
 import Green_trade.green_trade_platform.util.JwtUtils;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +56,7 @@ public class AuthController {
     @Operation(summary = "Sign in for customer",
                 description = "Return response show that user has signed in successfully")
     @PostMapping("/signin")
-    public ResponseEntity<?>  signin(@Valid @RequestBody SignInRequest req) {
+    public ResponseEntity<RestResponse<BuyerResponse, Object>>  signin(@Valid @RequestBody SignInRequest req) {
         Buyer user = signInService.startSignIn(req);
 
         String accessToken = jwtUtils.generateTokenFromUsername(user.getUsername(), ACCESS_EXPIRE_TIME);
@@ -65,6 +67,22 @@ public class AuthController {
 
         return ResponseEntity.status(HttpStatus.OK.value())
                 .body(responseMapper.toDto(true, "LOGIN SUCCESSFULLY", buyerResponse, null));
+    }
+
+    @Operation(summary = "Sign in with Google for customer",
+                            description = "Return response show that user has signed in successfully")
+    @PostMapping("/google")
+    public ResponseEntity<RestResponse<BuyerResponse, Object>> loginWithGoogle(@RequestBody Map<String, String> body) throws Exception {
+        Buyer user = signInService.startSignInWithGoogle(body);
+
+        String accessToken = jwtUtils.generateTokenFromUsername(user.getUsername(), ACCESS_EXPIRE_TIME);
+        String refreshToken = jwtUtils.generateTokenFromUsername(user.getUsername(), REFRESH_EXPIRE_TIME);
+        redisTokenService.saveTokenToRedis(user.getEmail(), refreshToken, REFRESH_EXPIRE_TIME);
+
+        BuyerResponse buyerResponse = mapper.toDto(user, accessToken, refreshToken);
+
+        return ResponseEntity.status(HttpStatus.OK.value())
+                .body(responseMapper.toDto(true, "SIGN UP SUCCESSFULLY", buyerResponse, null));
     }
 
     @PostMapping("/verify-otp")
