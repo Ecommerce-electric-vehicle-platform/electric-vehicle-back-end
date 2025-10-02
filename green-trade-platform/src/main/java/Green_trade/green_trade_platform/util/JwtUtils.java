@@ -25,7 +25,7 @@ public class JwtUtils {
     public String getTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         log.info("Authorization token : {}", token);
-        if(token != null && token.startsWith("Bearer ")) {
+        if (token != null && token.startsWith("Bearer ")) {
             return token.substring(7);
         } else {
             throw new JwtException("Do not have authentication token in request!!!");
@@ -40,8 +40,8 @@ public class JwtUtils {
                     .withIssuedAt(new Date())
                     .withExpiresAt(new Date((new Date().getTime() + expireTime)))
                     .sign(Algorithm.HMAC256(secret));
-        }catch (JWTCreationException e) {
-            log.error("Generate token failed: {}", e.getMessage());
+        } catch (JWTCreationException e) {
+            log.info("Generate token failed: {}", e.getMessage());
             throw new JwtException("Generate JWT token failed at generateTokenFromUsername: " + e.getMessage());
         }
     }
@@ -63,7 +63,7 @@ public class JwtUtils {
             verifier.verify(token);
             return true;
         } catch (JWTVerificationException e) {
-            log.error("Validate token failed: {}", e.getMessage());
+            log.info("Validate token failed: {}", e.getMessage());
             throw new JwtException("Validate token failed at verifyToken: " + e.getMessage());
         }
     }
