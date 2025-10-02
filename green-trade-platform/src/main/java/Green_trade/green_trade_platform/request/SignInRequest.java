@@ -12,12 +12,11 @@ public class SignInRequest {
     @NotBlank(message = "Username must not be blank.")
     @Pattern(regexp = "^[a-zA-Z]{8,}$",
             message = "Username must be at least 8 letters, with no spaces, numbers, or special characters.")
-    private final String username;
-    @NotBlank(message = "Password must not be blank.")
+    private String username;
     @NotBlank(message = "Password must not be blank.")
     @Pattern(
             regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s])[^\\s]{8,}$",
             message = "Password must be at least 8 characters, include letters, numbers, and special characters, and contain no spaces."
     )
-    private final String password;
+    private String password;
 }
