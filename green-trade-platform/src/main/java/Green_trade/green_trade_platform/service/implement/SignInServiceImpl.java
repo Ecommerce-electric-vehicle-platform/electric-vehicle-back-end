@@ -5,7 +5,6 @@ import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
 import Green_trade.green_trade_platform.request.SignInRequest;
 import Green_trade.green_trade_platform.service.SignInService;
-import Green_trade.green_trade_platform.util.GoogleVerifierService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

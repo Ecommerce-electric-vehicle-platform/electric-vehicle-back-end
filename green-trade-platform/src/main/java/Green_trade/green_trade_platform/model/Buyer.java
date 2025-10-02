@@ -58,6 +58,9 @@ public class Buyer {
     @Column(name = "delete_at")
     private LocalDateTime deleteAt;
 
+    @OneToOne(mappedBy = "buyerId")
+    private Seller sellerId;
+
     @PrePersist
     public void onCreate() {
         this.isActive = true;
