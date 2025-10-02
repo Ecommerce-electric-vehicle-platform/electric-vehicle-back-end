@@ -25,7 +25,7 @@ public class JwtUtils {
     public String getTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         log.info("Authorization token : {}", token);
-        if(token != null && token.startsWith("Bearer ")) {
+        if (token != null && token.startsWith("Bearer ")) {
             return token.substring(7);
         } else {
             throw new JwtException("Do not have authentication token in request!!!");
@@ -40,7 +40,7 @@ public class JwtUtils {
                     .withIssuedAt(new Date())
                     .withExpiresAt(new Date((new Date().getTime() + expireTime)))
                     .sign(Algorithm.HMAC256(secret));
-        }catch (JWTCreationException e) {
+        } catch (JWTCreationException e) {
             log.info("Generate token failed: {}", e.getMessage());
             throw new JwtException("Generate JWT token failed at generateTokenFromUsername: " + e.getMessage());
         }

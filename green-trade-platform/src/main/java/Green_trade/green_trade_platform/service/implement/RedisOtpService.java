@@ -22,27 +22,28 @@ public class RedisOtpService {
     public void savePendingBuyer(String username, String password, String email, String otp) {
         try {
             Map<String, String> data = Map.of("username", username,
-                                                    "password", password,
-                                                        "email", email,
-                                                            "otp", otp);
+                    "password", password,
+                    "email", email,
+                    "otp", otp);
             String json = objectMapper.writeValueAsString(data);
             String key = "signup:email:" + email;
             stringRedisTemplate.opsForValue().set(key, json, Duration.ofMinutes(10));
-            log.debug("Save pending buyer in Redis with key: {}", key);
+            log.info("Save pending buyer in Redis with key: {}", key);
         } catch (Exception e) {
-            log.debug("Error of saving pending buyer to redis: {}", e.getMessage());
+            log.info("Error of saving pending buyer to redis: {}", e.getMessage());
         }
     }
 
     public Map<String, String> getPendingBuyer(String email) {
         String key = "signup:email:" + email;
         String json = stringRedisTemplate.opsForValue().get(key);
-        if(json == null)
+        if (json == null)
             return null;
         try {
-            return objectMapper.readValue(json, new TypeReference<Map<String, String>>() {});
+            return objectMapper.readValue(json, new TypeReference<Map<String, String>>() {
+            });
         } catch (Exception e) {
-            log.debug("Error when getting pending buyer from redis: {}", e.getMessage());
+            log.info("Error when getting pending buyer from redis: {}", e.getMessage());
         }
         return null;
     }
@@ -50,6 +51,6 @@ public class RedisOtpService {
     public void deletePendingBuyer(String email) {
         String key = "signup:email:" + email;
         stringRedisTemplate.delete(key);
-        log.debug("Delete pending buyer from Redis: {}", key);
+        log.info("Delete pending buyer from Redis: {}", key);
     }
 }
