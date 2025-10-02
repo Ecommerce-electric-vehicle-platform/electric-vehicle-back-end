@@ -16,6 +16,7 @@ public class GoogleVerifierService {
     private final GoogleIdTokenVerifier verifier;
 
     public GoogleVerifierService() {
+
         //main version
 //        this.verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
 //                .setAudience(Collections.singletonList("YOUR_GOOGLE_CLIENT_ID"))
@@ -23,6 +24,7 @@ public class GoogleVerifierService {
 
         //playground version
         this.verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory()).build();
+
     }
 
     /**
