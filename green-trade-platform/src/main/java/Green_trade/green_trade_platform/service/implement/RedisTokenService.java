@@ -16,7 +16,7 @@ public class RedisTokenService {
     public void saveTokenToRedis(String email, String token, long expireTime) {
         String key = "refresh_token:" + email;
         redisTemplate.opsForValue().set(key, token, expireTime, TimeUnit.SECONDS);
-        log.debug("Refresh token was save in Redis with key: {}", key);
+        log.info("Refresh token was save in Redis with key: {}", key);
     }
 
     public String getRefreshToken(String email) {
@@ -27,8 +27,7 @@ public class RedisTokenService {
     public void deleteRefreshToken(String email) {
         String key = "refresh_token:" + email;
         redisTemplate.delete(key);
-        log.debug("Delete refresh token successfully with key: {}", key);
+        log.info("Delete refresh token successfully with key: {}", key);
     }
-
 
 }

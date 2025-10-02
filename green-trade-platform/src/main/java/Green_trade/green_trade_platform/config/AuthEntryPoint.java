@@ -18,9 +18,11 @@ import java.util.Map;
 @Slf4j
 public class AuthEntryPoint implements AuthenticationEntryPoint {
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-        log.debug("Authentication errors: {}", authException.getMessage());
-        log.debug("Exception: ", authException);
+
+    public void commence(HttpServletRequest request, HttpServletResponse response,
+            AuthenticationException authException) throws IOException, ServletException {
+        log.info("Authentication errors: {}", authException.getMessage());
+        log.info("Exception: ", authException);
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

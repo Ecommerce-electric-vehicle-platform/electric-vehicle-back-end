@@ -3,6 +3,7 @@ package Green_trade.green_trade_platform.controller;
 import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.request.SignInGoogleRequest;
 import Green_trade.green_trade_platform.request.SignInRequest;
 import Green_trade.green_trade_platform.request.SignUpRequest;
 import Green_trade.green_trade_platform.request.VerifyOtpRequest;
@@ -40,6 +41,7 @@ public class AuthController {
     @Autowired
     private RedisTokenService redisTokenService;
 
+
     private final long REFRESH_EXPIRE_TIME = System.currentTimeMillis() + + 7L * 24 * 60 * 60 * 1000; // 7 days
     private final long ACCESS_EXPIRE_TIME = 15 * 60 * 1000; // 15 minutes
 
@@ -69,8 +71,8 @@ public class AuthController {
 
     @Operation(summary = "Sign in with Google for customer",
                             description = "Return response show that user has signed in successfully")
-    @PostMapping("/google")
-    public ResponseEntity<RestResponse<BuyerResponse, Object>> loginWithGoogle(@RequestBody Map<String, String> body) throws Exception {
+    @PostMapping("/signin-google")
+    public ResponseEntity<RestResponse<BuyerResponse, Object>> loginWithGoogle(@RequestBody SignInGoogleRequest body) throws Exception {
         Buyer user = signInService.startSignInWithGoogle(body);
 
         String accessToken = jwtUtils.generateTokenFromUsername(user.getUsername(), ACCESS_EXPIRE_TIME);
@@ -80,7 +82,7 @@ public class AuthController {
         BuyerResponse buyerResponse = mapper.toDto(user, accessToken, refreshToken);
 
         return ResponseEntity.status(HttpStatus.OK.value())
-                .body(responseMapper.toDto(true, "SIGN UP SUCCESSFULLY", buyerResponse, null));
+                .body(responseMapper.toDto(true, "SIGN IN SUCCESSFULLY", buyerResponse, null));
     }
 
     @PostMapping("/verify-otp")
