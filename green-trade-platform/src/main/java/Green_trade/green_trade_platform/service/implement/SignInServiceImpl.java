@@ -69,7 +69,7 @@ public class SignInServiceImpl implements SignInService {
                         .password(password)
                         .email(email)
                         .build();
-                buyerRepository.save(user);
+                return buyerRepository.save(user);
             }
             log.info("startSignInWithGoogle of GoogleVerifierService: end");
             return buyerOpt.get();
