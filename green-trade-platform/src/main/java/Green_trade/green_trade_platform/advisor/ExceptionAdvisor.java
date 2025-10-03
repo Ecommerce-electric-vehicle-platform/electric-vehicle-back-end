@@ -31,6 +31,7 @@ public class ExceptionAdvisor {
         body.put("error", "Internal Server Error");
         body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         body.put("message", e.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
         return ResponseEntity.internalServerError().body(body);
     }
 }

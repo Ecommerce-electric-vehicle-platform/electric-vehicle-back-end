@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
@@ -30,8 +31,15 @@ public class SellerServiceImpl {
                                                      MultipartFile identityFile,
                                                      MultipartFile businessLicenseFile,
                                                      MultipartFile storePolicyFile) throws IOException {
+        // Get buyer information who want to upgrade account
         Buyer buyer = buyerRepository.findById(sellerId)
                 .orElseThrow(() -> new RuntimeException("Seller not found"));
+
+        // Check buyer profile
+        if(buyer.getFullName().equalsIgnoreCase("Not have yet")) {
+            throw new ProfileNotFoundException("Complete your profile to upgrade to a seller account.");
+        }
+
         String identityUrl = "", businessLicenseUrl = "", storePolicyUrl = "";
         Seller seller = null;
 
@@ -42,17 +50,17 @@ public class SellerServiceImpl {
         Map<String, String> uploadedUrls = new HashMap<>();
 
         if (identityFile != null && !identityFile.isEmpty()) {
-            identityUrl = cloudinaryService.upload(identityFile, "sellers/" + sellerId + "/identity");
+            identityUrl = cloudinaryService.upload(identityFile, "sellers/" + sellerId + ": " + buyer.getUsername() + "/identity");
             uploadedUrls.put("identity", identityUrl);
         }
 
         if (businessLicenseFile != null && !businessLicenseFile.isEmpty()) {
-            businessLicenseUrl = cloudinaryService.upload(businessLicenseFile, "sellers/" + sellerId + "/business_license");
+            businessLicenseUrl = cloudinaryService.upload(businessLicenseFile, "sellers/" + sellerId + ": " + buyer.getUsername() + "/business_license");
             uploadedUrls.put("business_license", businessLicenseUrl);
         }
 
         if (storePolicyFile != null && !storePolicyFile.isEmpty()) {
-            storePolicyUrl = cloudinaryService.upload(storePolicyFile, "sellers/" + sellerId + "/store_policy");
+            storePolicyUrl = cloudinaryService.upload(storePolicyFile, "sellers/" + sellerId + ": " + buyer.getUsername() + "/store_policy");
             uploadedUrls.put("store_policy", storePolicyUrl);
         }
 

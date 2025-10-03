@@ -40,7 +40,7 @@ public class SellerController {
         try {
             Map<String, String> result = sellerServiceImpl.uploadSellerDocuments(id, request.getStoreName(),
                     request.getTaxNumber(), request.getIdentityNumber(), identityFile, businessLicenseFile, storePolicyFile);
-            return ResponseEntity.ok(responseMapper.toDto(true, "LOGIN SUCCESSFULLY", result, null));
+            return ResponseEntity.ok(responseMapper.toDto(true, "UPLOAD DOCUMENTS SUCCESSFULLY", result, null));
         } catch (IOException e) {
             throw new ResponseStatusException(
                     org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR,
