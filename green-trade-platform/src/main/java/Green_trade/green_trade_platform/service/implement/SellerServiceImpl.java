@@ -35,6 +35,10 @@ public class SellerServiceImpl {
         String identityUrl = "", businessLicenseUrl = "", storePolicyUrl = "";
         Seller seller = null;
 
+        log.info(">>> identity number: {}", identityNumber);
+        log.info(">>> tax number: {}", taxNumber);
+        log.info(">>> store name: {}", storeName);
+
         Map<String, String> uploadedUrls = new HashMap<>();
 
         if (identityFile != null && !identityFile.isEmpty()) {
@@ -53,7 +57,7 @@ public class SellerServiceImpl {
         }
 
         seller = Seller.builder()
-                        .buyerId(buyer.getBuyerId())
+                        .buyerId(buyer)
                         .businessLicenseUrl(businessLicenseUrl)
                         .identityImageUrl(identityUrl)
                         .storePolicyUrl(storePolicyUrl)
