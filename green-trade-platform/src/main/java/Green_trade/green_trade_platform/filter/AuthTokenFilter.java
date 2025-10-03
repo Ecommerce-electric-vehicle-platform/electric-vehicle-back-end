@@ -49,15 +49,12 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 String username = jwtUtils.getUsernameFromToken(token);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
                 log.info("User detail loafing: {}", userDetails.getUsername());
-
 
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
 
                 log.info("Role from JWT: {}", userDetails.getAuthorities());
-
 
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
@@ -71,9 +68,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     private String getTokenFromRequest(HttpServletRequest request) {
         String jwt = jwtUtils.getTokenFromRequest(request);
-
         log.info("AuthTokenFilter.java: {}", jwt);
-
         return jwt;
     }
 }

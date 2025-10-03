@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
+@NoArgsConstructor
 public class SignInGoogleRequest {
     @NotEmpty(message = "idToken is required")
     private String idToken;
