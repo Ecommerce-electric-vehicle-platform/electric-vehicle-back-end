@@ -5,6 +5,7 @@ import Green_trade.green_trade_platform.request.UpgradeRequest;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +30,10 @@ public class SellerController {
     )
     @PostMapping(
             value = "/{id}/upload-all",
-            consumes = {"multipart/form-data"}
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<?> uploadAll(@PathVariable Long id,
-                                       @RequestBody UpgradeRequest request,
+                                       @ModelAttribute UpgradeRequest request,
                                        @RequestParam(value = "identity", required = false) MultipartFile identityFile,
                                        @RequestParam(value = "business_license", required = false) MultipartFile businessLicenseFile,
                                        @RequestParam(value = "store_policy", required = false) MultipartFile storePolicyFile) {

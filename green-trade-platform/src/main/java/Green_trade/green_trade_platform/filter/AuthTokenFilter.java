@@ -40,7 +40,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             return;
         }
 
+
         log.info("Authentication in request : {}", request.getRequestURI());
+
         try {
             String token = getTokenFromRequest(request);
             if (token != null && jwtUtils.verifyToken(token)) {
