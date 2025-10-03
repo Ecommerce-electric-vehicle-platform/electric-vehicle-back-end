@@ -51,17 +51,17 @@ public class SellerServiceImpl {
 
         try {
             if (identityFile != null && !identityFile.isEmpty()) {
-                identityUrl = cloudinaryService.upload(identityFile, "sellers/" + sellerId + ": " + buyer.getUsername() + "/identity");
+                identityUrl = cloudinaryService.upload(identityFile, "sellers/" + sellerId + ":" + buyer.getUsername() + "/identity");
                 uploadedUrls.put("identity", identityUrl);
             }
 
             if (businessLicenseFile != null && !businessLicenseFile.isEmpty()) {
-                businessLicenseUrl = cloudinaryService.upload(businessLicenseFile, "sellers/" + sellerId + ": " + buyer.getUsername() + "/business_license");
+                businessLicenseUrl = cloudinaryService.upload(businessLicenseFile, "sellers/" + sellerId + ":" + buyer.getUsername() + "/business_license");
                 uploadedUrls.put("business_license", businessLicenseUrl);
             }
 
             if (storePolicyFile != null && !storePolicyFile.isEmpty()) {
-                storePolicyUrl = cloudinaryService.upload(storePolicyFile, "sellers/" + sellerId + ": " + buyer.getUsername() + "/store_policy");
+                storePolicyUrl = cloudinaryService.upload(storePolicyFile, "sellers/" + sellerId + ":" + buyer.getUsername() + "/store_policy");
                 uploadedUrls.put("store_policy", storePolicyUrl);
             }
         } catch (IOException e) {

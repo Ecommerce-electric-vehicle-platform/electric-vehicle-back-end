@@ -14,14 +14,14 @@ import lombok.NoArgsConstructor;
 public class ProfileRequest {
     @NotBlank(message = "Shipping address is required.")
     @Pattern(
-            regexp = "^[\\p{L}0-9\\s,.\\-\\/]+$",
+            regexp = "^[\\p{L}0-9]+$",
             message = "Shipping address contains invalid characters."
     )
     private String defaultShippingAddress;
 
     @NotBlank(message = "Full name is required.")
     @Pattern(
-            regexp = "^[\\p{L}]+(?: [\\p{L}]+)*$",
+            regexp = "^[\\p{L}]+$",
             message = "Full name can only include letters and spaces."
     )
     private String fullName;
