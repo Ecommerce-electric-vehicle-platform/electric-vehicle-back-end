@@ -4,7 +4,9 @@ import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.request.UpgradeRequest;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import org.apache.http.protocol.HTTP;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,5 +52,11 @@ public class SellerController {
                     org.springframework.http.HttpStatus.NOT_FOUND,
                     e.getMessage(), e);
         }
+    }
+
+    @Operation(summary = "Upload a post", description = "Upload a post of product for selling")
+    @PostMapping("/products")
+    public ResponseEntity<?> uploadPost() {
+        return ResponseEntity.status(HttpStatus.OK.value()).body(null);
     }
 }

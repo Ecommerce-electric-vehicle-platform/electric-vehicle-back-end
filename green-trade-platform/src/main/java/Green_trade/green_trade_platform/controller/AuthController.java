@@ -42,15 +42,15 @@ public class AuthController {
     private RedisTokenService redisTokenService;
 
 
-    private final long REFRESH_EXPIRE_TIME = System.currentTimeMillis() + + 7L * 24 * 60 * 60 * 1000; // 7 days
+    private final long REFRESH_EXPIRE_TIME = 7L * 24 * 60 * 60 * 1000; // 7 days
     private final long ACCESS_EXPIRE_TIME = 15 * 60 * 1000; // 15 minutes
 
     @Operation(summary = "Register for new customer",
             description = "Return response show that register successfully!")
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@Valid @RequestBody SignUpRequest req) {
+    public ResponseEntity<RestResponse<Object, Object>> signup(@Valid @RequestBody SignUpRequest req) {
         service.startSignUp(req);
-        return ResponseEntity.ok(Map.of("message", "Send OTP to email."));
+        return ResponseEntity.ok(responseMapper.toDto(true, "Sent OTP to email", null, null));
     }
 
     @Operation(summary = "Sign in for customer",
