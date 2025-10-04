@@ -1,6 +1,8 @@
 package Green_trade.green_trade_platform.advisor;
 
 import Green_trade.green_trade_platform.exception.JwtException;
+import Green_trade.green_trade_platform.mapper.ResponseMapper;
+import Green_trade.green_trade_platform.response.RestResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -14,15 +16,21 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class JwtControllerAdvisor {
-    @ExceptionHandler(JwtException.class)
-    public ResponseEntity<?> handleJwtException(JwtException ex, HttpServletRequest request) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("timestamp", LocalDateTime.now());
-        error.put("status", HttpStatus.UNAUTHORIZED.value());
-        error.put("error", "Unauthorized");
-        error.put("message", ex.getMessage());
-        error.put("path", request.getRequestURI());
+    private final ResponseMapper responseMapper;
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    public JwtControllerAdvisor(ResponseMapper responseMapper) {
+        this.responseMapper = responseMapper;
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<RestResponse<Object, JwtException>> handleJwtException(JwtException ex, HttpServletRequest request) {
+        RestResponse<Object, JwtException> response = responseMapper.toDto(
+                false,
+                "Unauthorized",
+                null,
+                ex
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 }
