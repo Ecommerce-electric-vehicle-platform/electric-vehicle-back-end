@@ -55,6 +55,14 @@ public class SellerController {
         }
     }
 
+    @Operation(summary = "Check if a service package is still valid.",
+    description = "Return result of checking service package validity")
+    @PostMapping("/{id}/check-service-validity")
+    public ResponseEntity<?> checkServiceValidity(@PathVariable Long id) {
+
+        return ResponseEntity.status(HttpStatus.OK.value()).body(null);
+    }
+
     @Operation(summary = "Upload a post",
             description = "Upload a post of product for selling")
     @PostMapping("/products")
@@ -64,6 +72,8 @@ public class SellerController {
         if(false) {
             throw new Exception("Your Service Package is not available, Extend service to continue");
         }
+
+
 
         return ResponseEntity.status(HttpStatus.OK.value()).body(null);
     }
