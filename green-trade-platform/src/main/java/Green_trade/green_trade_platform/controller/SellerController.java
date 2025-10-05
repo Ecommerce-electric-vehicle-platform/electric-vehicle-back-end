@@ -4,6 +4,7 @@ import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.request.UpgradeRequest;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import org.apache.http.protocol.HTTP;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -54,9 +55,16 @@ public class SellerController {
         }
     }
 
-    @Operation(summary = "Upload a post", description = "Upload a post of product for selling")
+    @Operation(summary = "Upload a post",
+            description = "Upload a post of product for selling")
     @PostMapping("/products")
-    public ResponseEntity<?> uploadPost() {
+    public ResponseEntity<?> uploadPost() throws Exception {
+        //check service package still available or not
+        //assume it is available
+        if(false) {
+            throw new Exception("Your Service Package is not available, Extend service to continue");
+        }
+
         return ResponseEntity.status(HttpStatus.OK.value()).body(null);
     }
 }
