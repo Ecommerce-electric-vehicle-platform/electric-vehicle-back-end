@@ -46,4 +46,7 @@ public class SubscriptionPackages {
 
     @OneToMany(mappedBy = "subscriptionPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PackagePrice> packagePrices;
+
+    @OneToMany(mappedBy = "subscriptionPackage", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Subscription> subscriptions;
 }
