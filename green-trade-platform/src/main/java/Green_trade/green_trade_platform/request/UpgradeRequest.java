@@ -11,12 +11,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpgradeRequest {
-    @NotBlank(message = "Store name must not be blank.")
+    @NotBlank(message = "Store name is required.")
     private String storeName;
 
-    @NotBlank(message = "Tax number must not be blank.")
+    @NotBlank(message = "Tax number is required.")
     private String taxNumber;
 
-    @NotBlank(message = "Identity number must not be blank.")
+    @NotBlank(message = "Identity number is required.")
     private String identityNumber;
 }

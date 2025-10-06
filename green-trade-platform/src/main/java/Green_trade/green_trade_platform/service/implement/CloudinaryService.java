@@ -30,7 +30,7 @@ public class CloudinaryService {
                 ObjectUtils.asMap(
                         "folder", folder,
                         "public_id", publicId,
-                        "resource_type", "auto" // auto để tự nhận image/video
+                        "resource_type", "auto"
                 )
         );
         Object secureUrl = res.get("secure_url");

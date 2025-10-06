@@ -58,8 +58,8 @@ public class Buyer {
     @Column(name = "delete_at")
     private LocalDateTime deleteAt;
 
-    @OneToOne(mappedBy = "buyerId")
-    private Seller sellerId;
+    @OneToOne(mappedBy = "buyer")
+    private Seller seller;
 
     @PrePersist
     public void onCreate() {
