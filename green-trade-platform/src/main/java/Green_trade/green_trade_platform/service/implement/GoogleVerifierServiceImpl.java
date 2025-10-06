@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.service.GoogleVerifierService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -11,11 +12,11 @@ import org.springframework.stereotype.Service;
  * Token này được FE gửi về sau khi user login bằng Google.
  */
 @Service
-public class GoogleVerifierService {
+public class GoogleVerifierServiceImpl implements GoogleVerifierService {
 
     private final GoogleIdTokenVerifier verifier;
 
-    public GoogleVerifierService() {
+    public GoogleVerifierServiceImpl() {
         //main version
 //        this.verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
 //                .setAudience(Collections.singletonList("YOUR_GOOGLE_CLIENT_ID"))
