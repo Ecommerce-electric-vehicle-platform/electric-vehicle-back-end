@@ -25,7 +25,7 @@ public class SignInServiceImpl implements SignInService {
     private DelegatingPasswordEncoder passwordEncoder;
 
     @Autowired
-    private GoogleVerifierService googleVerifier;
+    private GoogleVerifierServiceImpl googleVerifier;
 
     public Buyer startSignIn(SignInRequest request) {
         try {
