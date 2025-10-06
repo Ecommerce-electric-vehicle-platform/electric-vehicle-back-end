@@ -37,7 +37,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)       // tắt CSRF
+                .cors(AbstractHttpConfigurer::disable)       // turn off CORS
+                .csrf(AbstractHttpConfigurer::disable)       // turn off CSRF
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(WHITE_LIST.toArray(new String[0])).permitAll() // Permit url in WHITE_LIST that do not need to authenticated
                         .anyRequest().authenticated())

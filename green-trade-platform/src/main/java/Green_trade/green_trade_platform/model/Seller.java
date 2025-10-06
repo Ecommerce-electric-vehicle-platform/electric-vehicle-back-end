@@ -21,11 +21,17 @@ public class Seller {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sellerId;
 
-    @Column(name = "identity_image_url", nullable = false, unique = true)
-    private String identityImageUrl;
+    @Column(name = "identity_front_image_url", nullable = false, unique = true)
+    private String identityFrontImageUrl;
+
+    @Column(name = "identity_back_image_url", nullable = false, unique = true)
+    private String identityBackImageUrl;
 
     @Column(name = "business_license_url", nullable = false, unique = true)
     private String businessLicenseUrl;
+
+    @Column(name = "selfie_url", nullable = false, unique = true)
+    private String selfieUrl;
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
