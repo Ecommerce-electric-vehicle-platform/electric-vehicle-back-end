@@ -24,7 +24,7 @@ public class SellerServiceImpl {
     @Autowired
     private BuyerRepository buyerRepository;
 
-    public Map<String, String> uploadSellerDocuments(Long sellerId,
+    public Map<String, String> uploadSellerDocuments(Long buyerId,
                                                      String storeName,
                                                      String taxNumber,
                                                      String identityNumber,
@@ -32,11 +32,13 @@ public class SellerServiceImpl {
                                                      MultipartFile businessLicenseFile,
                                                      MultipartFile storePolicyFile) throws IOException{
         // Get buyer information who want to upgrade account
-        Buyer buyer = buyerRepository.findById(sellerId)
-                .orElseThrow(() -> new RuntimeException("Seller not found"));
+        Buyer buyer = buyerRepository.findById(buyerId)
+                .orElseThrow(() -> new RuntimeException("Buyer not found not found"));
+
+        log.info(">>> Buyer's full name: {}", buyer.getFullName());
 
         // Check buyer profile
-        if(buyer.getFullName().equalsIgnoreCase("Not have yet")) {
+        if("Not have yet".equalsIgnoreCase(buyer.getFullName())) {
             throw new ProfileNotFoundException("Complete your profile to upgrade to a seller account.");
         }
 
@@ -51,17 +53,17 @@ public class SellerServiceImpl {
 
         try {
             if (identityFile != null && !identityFile.isEmpty()) {
-                identityUrl = cloudinaryService.upload(identityFile, "sellers/" + sellerId + ":" + buyer.getUsername() + "/identity");
+                identityUrl = cloudinaryService.upload(identityFile, "sellers/" + buyerId + ":" + buyer.getUsername() + "/identity");
                 uploadedUrls.put("identity", identityUrl);
             }
 
             if (businessLicenseFile != null && !businessLicenseFile.isEmpty()) {
-                businessLicenseUrl = cloudinaryService.upload(businessLicenseFile, "sellers/" + sellerId + ":" + buyer.getUsername() + "/business_license");
+                businessLicenseUrl = cloudinaryService.upload(businessLicenseFile, "sellers/" + buyerId + ":" + buyer.getUsername() + "/business_license");
                 uploadedUrls.put("business_license", businessLicenseUrl);
             }
 
             if (storePolicyFile != null && !storePolicyFile.isEmpty()) {
-                storePolicyUrl = cloudinaryService.upload(storePolicyFile, "sellers/" + sellerId + ":" + buyer.getUsername() + "/store_policy");
+                storePolicyUrl = cloudinaryService.upload(storePolicyFile, "sellers/" + buyerId + ":" + buyer.getUsername() + "/store_policy");
                 uploadedUrls.put("store_policy", storePolicyUrl);
             }
         } catch (IOException e) {
@@ -70,7 +72,7 @@ public class SellerServiceImpl {
         }
 
         seller = Seller.builder()
-                        .buyerId(buyer)
+                        .buyer(buyer)
                         .businessLicenseUrl(businessLicenseUrl)
                         .identityImageUrl(identityUrl)
                         .storePolicyUrl(storePolicyUrl)

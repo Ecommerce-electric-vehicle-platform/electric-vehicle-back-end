@@ -54,7 +54,7 @@ public class Seller {
 
     @OneToOne()
     @JoinColumn(name = "buyer_id", nullable = false, unique = true)
-    private Buyer buyerId;
+    private Buyer buyer;
 
     @PrePersist
     public void onCreate() {

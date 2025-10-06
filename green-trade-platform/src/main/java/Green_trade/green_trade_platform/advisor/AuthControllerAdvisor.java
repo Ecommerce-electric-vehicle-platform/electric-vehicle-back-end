@@ -35,7 +35,7 @@ public class AuthControllerAdvisor {
         body.put("status", HttpStatus.UNAUTHORIZED.value());
         body.put("timestamp", LocalDateTime.now());
 
-        RestResponse<Object, AuthException> response = responseMapper.toDto(false, "Unauthorized",null, e);
+        RestResponse<Object, AuthException> response = responseMapper.toDto(false, "Unauthorized",body, e);
 
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
@@ -54,7 +54,7 @@ public class AuthControllerAdvisor {
             errors.put(fieldName, errorMessage);
         });
 
-        RestResponse<Object, Map<String, String>> response = responseMapper.toDto(false, "Validated data failed", null, errors);
+        RestResponse<Object, Map<String, String>> response = responseMapper.toDto(false, "Validated data failed", errors, errors);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }

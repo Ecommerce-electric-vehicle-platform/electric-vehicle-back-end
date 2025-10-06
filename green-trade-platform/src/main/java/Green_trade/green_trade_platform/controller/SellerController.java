@@ -32,18 +32,18 @@ public class SellerController {
             description = "Upload all required files (Identity card, Business license, Store policy) at once when registering"
     )
     @PostMapping(
-            value = "/{id}/upload-all",
+            value = "/{id}/seller-documents",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
-    public ResponseEntity<?> uploadAll(@PathVariable Long id,
+    public ResponseEntity<?> uploadSellerDocument(@PathVariable Long id,
                                        @ModelAttribute UpgradeRequest request,
-                                       @RequestParam(value = "identity", required = false) MultipartFile identityFile,
-                                       @RequestParam(value = "business_license", required = false) MultipartFile businessLicenseFile,
-                                       @RequestParam(value = "store_policy", required = false) MultipartFile storePolicyFile) {
+                                       @RequestParam(value = "identity", required = true) MultipartFile identityFile,
+                                       @RequestParam(value = "business_license", required = true) MultipartFile businessLicenseFile,
+                                       @RequestParam(value = "store_policy", required = true) MultipartFile storePolicyFile) {
         try {
             Map<String, String> result = sellerServiceImpl.uploadSellerDocuments(id, request.getStoreName(),
                     request.getTaxNumber(), request.getIdentityNumber(), identityFile, businessLicenseFile, storePolicyFile);
-            return ResponseEntity.ok(responseMapper.toDto(true, "LOGIN SUCCESSFULLY", result, null));
+            return ResponseEntity.ok(responseMapper.toDto(true, "UPLOAD PROFILE SUCCESSFULLY", result, null));
         } catch (IOException e) {
             throw new ResponseStatusException(
                     org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR,

@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.exception.DuplicateProfileException;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
 import Green_trade.green_trade_platform.request.ProfileRequest;
@@ -26,7 +27,10 @@ public class BuyerServiceImpl {
                 .orElseThrow(() -> new UsernameNotFoundException("Can not find buyer with this id."));
 
         Map<String, Object> body = new HashMap<>();
-        String avatarUrl = "";
+        String avatarUrl = (buyer.getAvatarUrl() == null) ? "" : buyer.getAvatarUrl();
+        if(!avatarFile.isEmpty()) {
+            throw new DuplicateProfileException("Profile already exits.");
+        }
         log.info(">>> Profile request: {}", request.toString());
 
         try {
