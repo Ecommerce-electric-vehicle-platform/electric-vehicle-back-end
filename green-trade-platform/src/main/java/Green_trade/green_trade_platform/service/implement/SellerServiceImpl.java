@@ -89,6 +89,6 @@ public class SellerServiceImpl {
     }
 
     public Seller checkSellerPackageValidity(Long id) {
-
+        return null;
     }
 }
