@@ -111,7 +111,7 @@ public class KycService {
     }
 
     private Map<String, String> callOcrApi(String imageUrl) throws IOException {
-        URL url = new URL("https://api.fpt.ai/vision/idr/v1.0/ocr");
+        URL url = new URL("https://api.fpt.ai/vision/idr/v1.0");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("api-key", fptApiKey);
