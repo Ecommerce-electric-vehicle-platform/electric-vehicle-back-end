@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 public class Admin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long admin_id;
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
@@ -45,5 +46,8 @@ public class Admin {
 
     @Column(name = "updated_at", nullable = false, unique = false)
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostProduct> postProducts;
 
 }
