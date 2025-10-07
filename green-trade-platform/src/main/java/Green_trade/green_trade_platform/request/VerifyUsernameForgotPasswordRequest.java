@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VerifyUsernameForgotPassword {
+public class VerifyUsernameForgotPasswordRequest {
     private String username;
 }

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VerifyOtpForgotPassword {
+public class VerifyOtpForgotPasswordRequest {
     @NotBlank(message = "OTP must not be blank.")
     private String otp;
 

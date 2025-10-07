@@ -1,11 +1,14 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.exception.PasswordMismatchException;
 import Green_trade.green_trade_platform.exception.UsernameException;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
-import Green_trade.green_trade_platform.request.VerifyOtpForgotPassword;
+import Green_trade.green_trade_platform.request.ForgotPasswordRequest;
+import Green_trade.green_trade_platform.request.VerifyOtpForgotPasswordRequest;
 import Green_trade.green_trade_platform.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -20,10 +23,13 @@ public class AuthServiceImpl implements AuthService {
 
     private RedisOtpService redisOtpService;
 
-    public AuthServiceImpl(BuyerRepository buyerRepository, RedisOtpService redisOtpService, OtpServiceImpl otpService) {
+    private DelegatingPasswordEncoder passwordEncoder;
+
+    public AuthServiceImpl(BuyerRepository buyerRepository, RedisOtpService redisOtpService, OtpServiceImpl otpService, DelegatingPasswordEncoder passwordEncoder) {
         this.buyerRepository = buyerRepository;
         this.redisOtpService = redisOtpService;
         this.otpService = otpService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -34,6 +40,7 @@ public class AuthServiceImpl implements AuthService {
             if(buyerOpt.isEmpty()) {
                 throw new UsernameException("Username is not existed");
             }
+            log.info(">>> Username is existed");
 
             String otp = otpService.generateOtpCode();
             log.info(">>> OTP: {}", otp);
@@ -45,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    public void verifyOtpForgotPassword(VerifyOtpForgotPassword request) {
+    public void verifyOtpForgotPassword(VerifyOtpForgotPasswordRequest request) {
         Map<String, String> pending = redisOtpService.getPending(request.getEmail());
         if(pending == null) {
             throw new IllegalArgumentException("Invalid email or user did not forget password yet!");
@@ -53,8 +60,8 @@ public class AuthServiceImpl implements AuthService {
         log.info(">>> Passed pending is not null");
 
         String otp = pending.get("otp");
+        log.info(">>> Otp From User: {}", request.getOtp());
         log.info(">>> Otp Redis: {}", otp);
-        log.info(">>> Otp User: {}", request.getOtp());
         if(!request.getOtp().equals(otp)) {
             throw new IllegalArgumentException("Otp are not the same!");
         }
@@ -63,19 +70,28 @@ public class AuthServiceImpl implements AuthService {
         log.info(">>> Passed delete pending on redis");
     }
 
-    // Verify otp
-//    public Buyer verifyForgotPasswordOtp(VerifyOtpRequest request) {
-//        // Get pending buyer in Redis
-//        Map<String, String> pending = redisOtpService.getPendingBuyer(request.getEmail());
-//        if(pending == null) {
-//            throw new IllegalArgumentException("Invalid email or user did not sign up yet!");
-//        }
-//        // Get OTP in map
-//        String otp = pending.get("otp");
-//        if(!request.getOtp().equals(otp)) {
-//            throw new IllegalArgumentException("Otp are not the same!");
-//        }
-//        redisOtpService.deletePendingBuyer(request.getEmail());
-//        return repository.save(buyer);
-//    }
+    public Buyer forgotPassword(ForgotPasswordRequest request) throws Exception {
+        try {
+            log.info(">>> Executed forgotPassword");
+            Optional<Buyer> buyerOpt = buyerRepository.findByUsername(request.getUsername());
+            if(buyerOpt.isEmpty()) {
+                throw new UsernameException("Username is not existed");
+            }
+            log.info(">>> Username is existed");
+
+            if(!request.getNewPassword().equals(request.getConfirmPassword())) {
+                throw new PasswordMismatchException();
+            }
+            log.info(">>> Password and Confirm Password is matched");
+
+            String updatePassword = passwordEncoder.encode(request.getNewPassword());
+            buyerOpt.get().setPassword(updatePassword);
+            log.info(">>> Updated new password successfully");
+
+            return buyerRepository.save(buyerOpt.get());
+        } catch (Exception e) {
+            log.info(">>> Error at forgotPassword: " + e);
+            throw e;
+        }
+    }
 }

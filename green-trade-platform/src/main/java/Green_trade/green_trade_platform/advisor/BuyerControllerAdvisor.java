@@ -53,7 +53,12 @@ public class BuyerControllerAdvisor {
                 false,
                 "Email Exception",
                 null,
-                e.getMessage());
+                Map.of(
+                        "origin", e.getStackTrace()[0].toString(),
+                        "message", e.getMessage(),
+                        "errorType", e.getClass().getSimpleName()
+                )
+        );
         return ResponseEntity.internalServerError().body(response);
     }
 }

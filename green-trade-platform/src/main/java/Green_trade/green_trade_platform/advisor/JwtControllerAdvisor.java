@@ -23,12 +23,14 @@ public class JwtControllerAdvisor {
     }
 
     @ExceptionHandler(JwtException.class)
-    public ResponseEntity<RestResponse<Object, JwtException>> handleJwtException(JwtException ex, HttpServletRequest request) {
-        RestResponse<Object, JwtException> response = responseMapper.toDto(
+    public ResponseEntity<RestResponse<Object, Map<String, String>>> handleJwtException(JwtException ex, HttpServletRequest request) {
+        RestResponse<Object, Map<String, String>> response = responseMapper.toDto(
                 false,
                 "Unauthorized",
                 null,
-                ex
+                Map.of("origin", ex.getStackTrace()[0].toString(),
+                        "message", ex.getMessage(),
+                        "errorType", ex.getClass().getSimpleName())
         );
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
