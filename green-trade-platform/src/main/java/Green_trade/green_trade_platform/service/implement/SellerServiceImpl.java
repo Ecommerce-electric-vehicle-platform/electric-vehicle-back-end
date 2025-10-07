@@ -24,13 +24,15 @@ public class SellerServiceImpl {
     @Autowired
     private BuyerRepository buyerRepository;
 
-    public Map<String, String> uploadSellerDocuments(Long buyerId,
-                                                     String storeName,
-                                                     String taxNumber,
-                                                     String identityNumber,
-                                                     MultipartFile identityFile,
-                                                     MultipartFile businessLicenseFile,
-                                                     MultipartFile storePolicyFile) throws IOException{
+    public Map<String, String> uploadSellerDocuments(
+            Long buyerId,
+            String storeName,
+            String taxNumber,
+            String identityNumber,
+            MultipartFile identityFile,
+            MultipartFile businessLicenseFile,
+            MultipartFile storePolicyFile
+    ) throws IOException{
         // Get buyer information who want to upgrade account
         Buyer buyer = buyerRepository.findById(buyerId)
                 .orElseThrow(() -> new RuntimeException("Buyer not found not found"));
@@ -84,5 +86,9 @@ public class SellerServiceImpl {
         sellerRepository.save(seller);
 
         return uploadedUrls;
+    }
+
+    public Seller checkSellerPackageValidity(Long id) {
+
     }
 }

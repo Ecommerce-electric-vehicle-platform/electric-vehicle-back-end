@@ -13,18 +13,22 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Category {
+@Table(name = "dispute_category")
+public class DisputeCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "category_id")
-    private int id;
+    @Column(name = "dispute_category_id")
+    private Long id;
 
-    @Column(name = "name", nullable = false, unique = true)
-    private String name;
+    @Column(name = "title", nullable = false, unique = false)
+    private String title;
+
+    @Column(name = "reason", nullable = false, unique = false)
+    private String reason;
 
     @Column(name = "description", nullable = false, unique = false)
     private String description;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostProduct> postProducts;
+    @OneToMany(mappedBy = "disputeCategory", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Dispute> disputes;
 }

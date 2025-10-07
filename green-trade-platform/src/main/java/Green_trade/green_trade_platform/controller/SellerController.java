@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
+import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.request.UpgradeRequest;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,9 +58,9 @@ public class SellerController {
 
     @Operation(summary = "Check if a service package is still valid.",
     description = "Return result of checking service package validity")
-    @PostMapping("/{id}/check-service-validity")
+    @PostMapping("/{id}/check-seller-package-validity")
     public ResponseEntity<?> checkServiceValidity(@PathVariable Long id) {
-
+        Seller result = sellerServiceImpl.
         return ResponseEntity.status(HttpStatus.OK.value()).body(null);
     }
 

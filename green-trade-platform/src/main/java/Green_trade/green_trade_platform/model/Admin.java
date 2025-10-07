@@ -18,7 +18,8 @@ import java.util.List;
 public class Admin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long admin_id;
+    @Column(name = "admin_id")
+    private Long id;
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
@@ -49,5 +50,8 @@ public class Admin {
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostProduct> postProducts;
+
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Dispute> disputes;
 
 }
