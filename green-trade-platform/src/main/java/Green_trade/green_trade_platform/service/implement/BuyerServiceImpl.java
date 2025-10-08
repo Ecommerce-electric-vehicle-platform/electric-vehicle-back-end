@@ -28,7 +28,7 @@ public class BuyerServiceImpl {
 
         Map<String, Object> body = new HashMap<>();
         String avatarUrl = (buyer.getAvatarUrl() == null) ? "" : buyer.getAvatarUrl();
-        if(!avatarFile.isEmpty()) {
+        if(!avatarUrl.isEmpty()) {
             throw new DuplicateProfileException("Profile already exits.");
         }
         log.info(">>> Profile request: {}", request.toString());
