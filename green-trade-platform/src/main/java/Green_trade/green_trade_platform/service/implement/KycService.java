@@ -14,13 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.List;
 
@@ -39,7 +38,7 @@ public class KycService {
 
     @Value("${api-key}")
     private String fptApiKey;
-    @Value(("${api-key-Face}"))
+    @Value(("${api-key-face}"))
     private String faceApiKey;
     @Value(("${api-key-secret}"))
     private String faceApiSecret;
@@ -111,37 +110,59 @@ public class KycService {
     }
 
     private Map<String, String> callOcrApi(String imageUrl) throws IOException {
-        URL url = new URL("https://api.fpt.ai/vision/idr/v1.0");
+        log.info(">>> Calling OCR API...");
+        URL imageDownloadUrl = new URL(imageUrl);
+        File tempFile = File.createTempFile("ocr", ".jpg");
+        try (InputStream in = imageDownloadUrl.openStream();
+             OutputStream out = new FileOutputStream(tempFile)) {
+            in.transferTo(out);
+        }
+
+        String boundary = "----WebKitFormBoundary" + System.currentTimeMillis();
+        URL url = new URL("https://api.fpt.ai/vision/idr/vnm");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
-        conn.setRequestProperty("api-key", fptApiKey);
-        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setRequestProperty("api_key", fptApiKey);
+        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
         conn.setDoOutput(true);
 
-        String jsonInputString = "{ \"url\": \"" + imageUrl + "\" }";
-
-        try(OutputStream os = conn.getOutputStream()) {
-            os.write(jsonInputString.getBytes(StandardCharsets.UTF_8));
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(("--" + boundary + "\r\n").getBytes());
+            os.write(("Content-Disposition: form-data; name=\"image\"; filename=\"" + tempFile.getName() + "\"\r\n").getBytes());
+            os.write(("Content-Type: image/jpeg\r\n\r\n").getBytes());
+            Files.copy(tempFile.toPath(), os);
+            os.write(("\r\n--" + boundary + "--\r\n").getBytes());
         }
 
-        StringBuilder response = new StringBuilder();
-        try(BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                response.append(line);
-            }
+        InputStream responseStream = conn.getResponseCode() == 200
+                ? conn.getInputStream()
+                : conn.getErrorStream();
+
+        String response = new String(responseStream.readAllBytes(), StandardCharsets.UTF_8);
+        log.info("FPT OCR Response: {}", response);
+
+        if (!response.trim().startsWith("{")) {
+            throw new IOException("Invalid response: " + response);
         }
 
-        // Parse JSON bằng Jackson
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> result = mapper.readValue(response.toString(), Map.class);
+        Map<String, Object> result = mapper.readValue(response, Map.class);
 
-        String name = (String) result.get("name");
-        String idNumber = (String) result.get("id_number");
+        List<Map<String, Object>> dataList = (List<Map<String, Object>>) result.get("data");
+        if (dataList == null || dataList.isEmpty()) {
+            throw new IOException("FPT OCR returned empty data: " + response);
+        }
+
+        Map<String, Object> data = dataList.get(0);
+        String name = (String) data.get("name");
+        String idNumber = (String) data.get("id");
+
         return Map.of("name", name, "id_number", idNumber);
     }
 
+
     private boolean callFaceCompareApi(String idImageUrl, String selfieUrl) throws IOException {
+        log.info(">>> Calling Face API...");
         URL url = new URL("https://api-us.faceplusplus.com/facepp/v3/compare");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
