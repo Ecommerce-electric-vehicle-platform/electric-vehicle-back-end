@@ -19,6 +19,41 @@ public class RedisOtpService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    public void savePending(String username, String email, String otp) {
+        try {
+            Map<String, String> data = Map.of("username", username,
+                    "email", email,
+                    "otp", otp
+                    );
+            String json = objectMapper.writeValueAsString(data);
+            String key = "pending:email:" + email;
+            stringRedisTemplate.opsForValue().set(key, json, Duration.ofMinutes(10));
+            log.info("Save pending buyer in Redis with key: {}", key);
+        } catch (Exception e) {
+            log.info(">>> Error at SavePending: " + e);
+        }
+    }
+
+    public Map<String, String> getPending(String email) {
+        String key = "pending:email:" + email;
+        String json = stringRedisTemplate.opsForValue().get(key);
+        if (json == null)
+            return null;
+        try {
+            return objectMapper.readValue(json, new TypeReference<Map<String, String>>() {
+            });
+        } catch (Exception e) {
+            log.info("Error when getting pending user from redis: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    public void deletePending(String email) {
+        String key = "pending:email:" + email;
+        stringRedisTemplate.delete(key);
+        log.info("Delete pending buyer from Redis: {}", key);
+    }
+
     public void savePendingBuyer(String username, String password, String email, String otp) {
         try {
             Map<String, String> data = Map.of("username", username,

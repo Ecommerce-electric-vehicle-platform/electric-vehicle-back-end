@@ -15,19 +15,15 @@ public class BuyerMapper {
                 .build();
     }
 
-    public BuyerResponse toDto(Buyer buyer, String accessToken, String refreshToken) {
-        String value = System.getenv("${MAIL_PASSWORD}");
+    public BuyerResponse toDto(Buyer buyer) {
         return BuyerResponse.builder().
                 buyerId(buyer.getBuyerId())
                 .username(buyer.getUsername())
-                .password(buyer.getPassword())
                 .fullName(buyer.getFullName())
                 .defaultShippingAddress(buyer.getDefaultShippingAddress())
                 .phoneNumber(buyer.getPhoneNumber())
                 .email(buyer.getEmail())
                 .createAt(buyer.getCreateAt())
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
                 .build();
     }
 }

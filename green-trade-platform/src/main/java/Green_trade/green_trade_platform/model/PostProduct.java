@@ -44,10 +44,6 @@ public class PostProduct {
     @Column(name = "condition_level", nullable = false, unique = false)
     private String conditionLevel;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
-
     @Column(name = "location_trading", nullable = false, unique = false)
     private String locationTrading;
 
@@ -62,5 +58,13 @@ public class PostProduct {
 
     @Column(name = "deleted_At", nullable = false, unique = false)
     private LocalDateTime deletedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admin_id", nullable = false)
+    private Admin admin;
 
 }

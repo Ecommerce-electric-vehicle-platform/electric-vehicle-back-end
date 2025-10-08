@@ -6,8 +6,7 @@ import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
 import Green_trade.green_trade_platform.request.SignUpRequest;
 import Green_trade.green_trade_platform.request.VerifyOtpRequest;
-import Green_trade.green_trade_platform.service.SignupService;
-import Green_trade.green_trade_platform.util.JwtUtils;
+import Green_trade.green_trade_platform.service.SignUpService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,7 @@ import java.util.Random;
 
 @Service
 @Slf4j
-public class SignupServiceImpl implements SignupService {
+public class SignUpServiceImpl implements SignUpService {
     @Autowired
     private BuyerRepository repository;
     @Autowired
