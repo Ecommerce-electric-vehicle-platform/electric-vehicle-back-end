@@ -19,6 +19,7 @@ public class SellerMapper {
                 .storeName(request.getStoreName())
                 .taxNumber(request.getTaxNumber())
                 .identityNumber(request.getIdentityNumber())
+                .storePolicyUrl(policy)
                 .build();
     }
 }
