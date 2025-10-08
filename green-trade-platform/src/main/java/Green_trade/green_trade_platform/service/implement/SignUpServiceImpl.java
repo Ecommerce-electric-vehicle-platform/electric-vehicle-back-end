@@ -3,6 +3,7 @@ package Green_trade.green_trade_platform.service.implement;
 import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.exception.EmailException;
 import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.model.Wallet;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
 import Green_trade.green_trade_platform.request.SignUpRequest;
 import Green_trade.green_trade_platform.request.VerifyOtpRequest;
@@ -32,6 +33,8 @@ public class SignUpServiceImpl implements SignUpService {
     private JavaMailSender mailSender;
     @Autowired
     private DelegatingPasswordEncoder passwordEncoder;
+    @Autowired
+    private WalletService walletService;
 
     // Starting sign up: saving buyer to redis and sending otp
     @Override
@@ -71,6 +74,8 @@ public class SignUpServiceImpl implements SignUpService {
                 .password(pending.get("password"))
                 .email(request.getEmail())
                 .build();
+        Wallet wallet = walletService.createLocalWalletForBuyer(buyer);
+        log.info(">>> Created wallet for buyer: {} with id {}", buyer.getUsername(), wallet.getWalletId());
         otpService.deletePendingBuyer(request.getEmail());
         return repository.save(buyer);
     }

@@ -61,6 +61,9 @@ public class Buyer {
     @OneToOne(mappedBy = "buyer")
     private Seller seller;
 
+    @OneToOne(mappedBy = "buyer")
+    private Wallet wallet;
+
     @PrePersist
     public void onCreate() {
         this.isActive = true;
@@ -69,7 +72,6 @@ public class Buyer {
         this.phoneNumber = "Not have yet";
         this.createAt = LocalDateTime.now();
     }
-
 
     @PreUpdate
     public void onUpdate(){
