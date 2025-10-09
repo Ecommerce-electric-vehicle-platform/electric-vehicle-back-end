@@ -18,6 +18,7 @@ import java.util.List;
 public class SubscriptionPackages {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "subscription_package_id")
     private Long id;
 
     @Column(name = "package_name", nullable = false, unique = true)
