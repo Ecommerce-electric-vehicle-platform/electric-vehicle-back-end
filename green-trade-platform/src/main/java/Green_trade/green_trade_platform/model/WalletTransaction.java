@@ -36,8 +36,20 @@ public class WalletTransaction {
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
+    @Column(name = "payOsReference")
+    private String payosReference;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "external_transaction_reference")
+    private String externalTransactionReference;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @ManyToOne()
     @JoinColumn(name = "wallet_id")
@@ -47,4 +59,7 @@ public class WalletTransaction {
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    @PreUpdate
+    public void onUpdate() {this.updatedAt = LocalDateTime.now(); }
 }

@@ -12,15 +12,15 @@ import java.math.BigDecimal;
 @Service
 @Slf4j
 public class WalletService {
-    private WalletRepository walletRepository;
+//    private final WalletRepository walletRepository;
 
-    public WalletService(WalletRepository walletRepository) {
-        this.walletRepository = walletRepository;
-    }
-    public Wallet createLocalWalletForBuyer(Buyer buyer) {
-        Wallet w = new Wallet();
-        w.setBuyer(buyer);
-        walletRepository.save(w);
-        return w;
-    }
+//    public WalletService(WalletRepository walletRepository) {
+//        this.walletRepository = walletRepository;
+//    }
+//    public Wallet createLocalWalletForBuyer(Buyer buyer) {
+//        Wallet w = new Wallet();
+//        w.setBuyer(buyer);
+//        walletRepository.save(w);
+//        return w;
+//    }
 }
