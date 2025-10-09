@@ -24,7 +24,7 @@ public class Subscription {
     private Seller seller;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "package_id", nullable = false)
+    @JoinColumn(name = "subscription_package_id", nullable = false)
     private SubscriptionPackages subscriptionPackage;
 
     @Column(name = "start_day", nullable = false)
