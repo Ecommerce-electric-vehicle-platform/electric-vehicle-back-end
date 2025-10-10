@@ -74,8 +74,8 @@ public class SignUpServiceImpl implements SignUpService {
                 .password(pending.get("password"))
                 .email(request.getEmail())
                 .build();
-        Wallet wallet = walletService.createLocalWalletForBuyer(buyer);
-        log.info(">>> Created wallet for buyer: {} with id {}", buyer.getUsername(), wallet.getWalletId());
+//        Wallet wallet = walletService.createLocalWalletForBuyer(buyer);
+//        log.info(">>> Created wallet for buyer: {} with id {}", buyer.getUsername(), wallet.getWalletId());
         otpService.deletePendingBuyer(request.getEmail());
         return repository.save(buyer);
     }

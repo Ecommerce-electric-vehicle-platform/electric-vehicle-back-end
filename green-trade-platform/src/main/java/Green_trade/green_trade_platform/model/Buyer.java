@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.model;
 
+import Green_trade.green_trade_platform.enumerate.Gender;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -8,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -38,7 +40,7 @@ public class Buyer {
     private String defaultShippingAddress;
 
     @Column(name = "is_active")
-    private boolean isActive = true;
+    private boolean isActive;
 
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
@@ -48,6 +50,13 @@ public class Buyer {
 
     @Column(name = "email", unique = true, nullable = false)
     private String email;
+
+    @Column(name = "gender")
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dob;
 
     @Column(name = "create_at", nullable = false)
     private LocalDateTime createAt;
@@ -71,6 +80,7 @@ public class Buyer {
         this.defaultShippingAddress = "Not have yet";
         this.phoneNumber = "Not have yet";
         this.createAt = LocalDateTime.now();
+        this.isActive = true;
     }
 
     @PreUpdate

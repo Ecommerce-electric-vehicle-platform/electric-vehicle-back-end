@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.model;
 
 import Green_trade.green_trade_platform.enumerate.SellerStatus;
+import Green_trade.green_trade_platform.request.ApproveSellerRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -61,6 +62,9 @@ public class Seller {
     @OneToOne()
     @JoinColumn(name = "buyer_id", nullable = false, unique = true)
     private Buyer buyer;
+
+    @OneToOne(mappedBy = "seller", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private ApproveProcess approveProcess;
 
     @PrePersist
     public void onCreate() {

@@ -26,7 +26,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class KycService {
+public class KycServiceImpl {
     @Autowired
     private BuyerRepository buyerRepository;
     @Autowired

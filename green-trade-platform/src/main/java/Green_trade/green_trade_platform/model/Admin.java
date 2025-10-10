@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.model;
 
+import Green_trade.green_trade_platform.request.ApproveSellerRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -55,4 +56,6 @@ public class Admin {
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Dispute> disputes;
 
+    @OneToOne(mappedBy = "admin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private ApproveProcess approveProcess;
 }
