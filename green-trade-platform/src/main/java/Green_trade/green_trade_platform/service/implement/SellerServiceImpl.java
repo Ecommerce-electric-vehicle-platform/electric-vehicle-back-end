@@ -46,7 +46,7 @@ public class SellerServiceImpl implements SellerService {
                 throw new Exception("Subscription is expired");
             }
 
-            return subscriptionMapper.toDto(true, subscription.getEndDay(), "");
+            return subscriptionMapper.toDto(true, subscription.getEndDay(), subscription.getSubscriptionPackage().getName());
         } catch (Exception e) {
             log.info("Error at checkServicePackageValidity: {}", e);
             throw e;

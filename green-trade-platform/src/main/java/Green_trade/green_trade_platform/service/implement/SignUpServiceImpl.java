@@ -63,19 +63,23 @@ public class SignUpServiceImpl implements SignUpService {
         if(pending == null) {
             throw new IllegalArgumentException("Invalid email or user did not sign up yet!");
         }
+        log.info(">>> Passed pending: {}", pending);
         // Get OTP in map
         String otp = pending.get("otp");
+        log.info(">>> Otp from request: {}", request.getOtp());
+        log.info(">>> Otp from pending: {}", otp);
         if(!request.getOtp().equals(otp)) {
             throw new IllegalArgumentException("Otp are not the same!");
         }
+        log.info(">>> Passed OTP matched");
 
         Buyer buyer = Buyer.builder()
                 .username(pending.get("username"))
                 .password(pending.get("password"))
                 .email(request.getEmail())
                 .build();
-        Wallet wallet = walletService.createLocalWalletForBuyer(buyer);
-        log.info(">>> Created wallet for buyer: {} with id {}", buyer.getUsername(), wallet.getWalletId());
+//        Wallet wallet = walletService.createLocalWalletForBuyer(buyer);
+//        log.info(">>> Created wallet for buyer: {} with id {}", buyer.getUsername(), wallet.getWalletId());
         otpService.deletePendingBuyer(request.getEmail());
         return repository.save(buyer);
     }

@@ -29,7 +29,6 @@ public class AuthController {
 
     private SignInServiceImpl signInService;
     private SignUpServiceImpl signUpService;
-    private BuyerMapper buyerMapper;
     private ResponseMapper responseMapper;
     private JwtUtils jwtUtils;
     private RedisTokenService redisTokenService;
@@ -39,7 +38,6 @@ public class AuthController {
     public AuthController (
             SignInServiceImpl signInService,
             SignUpServiceImpl signUpService,
-            BuyerMapper buyerMapper,
             ResponseMapper responseMapper,
             JwtUtils jwtUtils,
             RedisTokenService redisTokenService,
@@ -47,7 +45,6 @@ public class AuthController {
             AuthMapper authMapper) {
         this.signInService = signInService;
         this.signUpService = signUpService;
-        this.buyerMapper = buyerMapper;
         this.responseMapper = responseMapper;
         this.jwtUtils = jwtUtils;
         this.redisTokenService = redisTokenService;

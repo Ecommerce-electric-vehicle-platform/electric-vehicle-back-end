@@ -44,9 +44,15 @@ public class KycService {
     private String faceApiSecret;
 
 
-    public KycResponse verify(Long buyerId, MultipartFile identityFrontImageUrl,
-                              MultipartFile businessLicenseUrl, MultipartFile selfieImageUrl,
-                              MultipartFile identityBackImageUrl, MultipartFile storePolicyUrl, UpgradeRequest request) throws IOException {
+    public KycResponse verify(
+            Long buyerId,
+            MultipartFile identityFrontImageUrl,
+            MultipartFile businessLicenseUrl,
+            MultipartFile selfieImageUrl,
+            MultipartFile identityBackImageUrl,
+            MultipartFile storePolicyUrl,
+            UpgradeRequest request
+    ) throws IOException {
         // Get buyer information who want to upgrade account
         Buyer buyer = buyerRepository.findById(buyerId)
                 .orElseThrow(() -> new RuntimeException("Buyer not found not found"));
