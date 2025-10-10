@@ -57,5 +57,5 @@ public class Admin {
     private List<Dispute> disputes;
 
     @OneToOne(mappedBy = "admin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private ApproveSellerRequest approveSellerRequest;
+    private ApproveProcess approveProcess;
 }

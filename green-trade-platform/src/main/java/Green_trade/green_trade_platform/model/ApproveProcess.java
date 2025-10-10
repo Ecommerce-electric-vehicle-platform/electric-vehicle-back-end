@@ -22,6 +22,7 @@ public class ApproveProcess {
     private Long approveProcessId;
 
     @Column(name = "decision")
+    @Enumerated(EnumType.STRING)
     private SellerStatus decision;
 
     @Column(name = "reason")
@@ -30,13 +31,11 @@ public class ApproveProcess {
     @Column(name = "decided_at")
     private LocalDateTime decidedAt;
 
-    @JoinColumn(name = "seller_id")
-    @OneToOne()
+    @OneToOne
+    @JoinColumn(name = "seller_id", nullable = false, unique = true)
     private Seller seller;
 
+    @OneToOne
     @JoinColumn(name = "admin_id")
-    @OneToOne()
     private Admin admin;
-
-
 }

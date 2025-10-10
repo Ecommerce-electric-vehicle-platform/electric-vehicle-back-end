@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.request;
 
+import Green_trade.green_trade_platform.enumerate.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -7,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,4 +36,8 @@ public class ProfileRequest {
             message = "Shipping address contains invalid characters."
     )
     private String defaultShippingAddress;
+
+    private Gender gender;
+
+    private String dob;
 }

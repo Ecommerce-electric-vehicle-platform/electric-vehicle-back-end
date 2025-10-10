@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ApproveSellerResponse {
+    private Long sellerId;
     private SellerStatus decision;
     private String reason;
     private LocalDateTime decidedAt;

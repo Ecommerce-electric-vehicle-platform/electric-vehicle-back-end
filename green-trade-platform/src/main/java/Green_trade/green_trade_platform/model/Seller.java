@@ -64,7 +64,7 @@ public class Seller {
     private Buyer buyer;
 
     @OneToOne(mappedBy = "seller", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private ApproveSellerRequest approveProcess;
+    private ApproveProcess approveProcess;
 
     @PrePersist
     public void onCreate() {

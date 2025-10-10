@@ -18,6 +18,6 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
 
     @Transactional
     @Modifying
-    @Query("UPDATE seller s SET s.status = :status WHERE s.sellerId = :id")
-    void updatePendingSeller(@Param("status") SellerStatus status, @Param("id") Long sellerId);
+    @Query("UPDATE Seller s SET s.status = :status WHERE s.sellerId = :sellerId")
+    int updatePendingSeller(@Param("status") SellerStatus status, @Param("sellerId") Long sellerId);
 }

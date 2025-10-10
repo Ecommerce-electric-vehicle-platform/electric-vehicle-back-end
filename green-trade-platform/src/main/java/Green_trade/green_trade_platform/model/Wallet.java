@@ -1,7 +1,6 @@
 package Green_trade.green_trade_platform.model;
 
 import Green_trade.green_trade_platform.enumerate.WalletConcurrency;
-import Green_trade.green_trade_platform.enumerate.WalletStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,10 +32,6 @@ public class Wallet {
     @Column(name = "provider")
     private String provider;
 
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    private WalletStatus status;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -50,8 +45,7 @@ public class Wallet {
     @PrePersist
     public void onCreate() {
         this.balance = BigDecimal.ZERO;
-        this.provider = "PAYOS";
-        this.status = WalletStatus.UNPROVISIONED;
+        this.provider = "VNPay";
         this.createdAt = LocalDateTime.now();
     }
 
