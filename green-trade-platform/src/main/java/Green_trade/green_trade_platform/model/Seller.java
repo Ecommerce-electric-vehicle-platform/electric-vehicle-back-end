@@ -19,6 +19,7 @@ import java.util.List;
 public class Seller {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "seller_id")
     private Long sellerId;
 
     @Column(name = "identity_front_image_url", nullable = false, unique = true)
@@ -49,28 +50,31 @@ public class Seller {
     @Column(name = "identity_number", unique = true, nullable = false)
     private String identityNumber;
 
-    @Column(name = "create_at")
-    private LocalDateTime createAt;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    @Column(name = "update_at")
-    private LocalDateTime updateAt;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
-    @Column(name = "delete_at")
-    private LocalDateTime deleteAt;
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @OneToOne()
     @JoinColumn(name = "buyer_id", nullable = false, unique = true)
     private Buyer buyer;
 
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostProduct> postProducts;
+
     @PrePersist
     public void onCreate() {
         this.status = SellerStatus.PENDING;
-        this.createAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 
     @PreUpdate
     public void onUpdate() {
-        this.updateAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)

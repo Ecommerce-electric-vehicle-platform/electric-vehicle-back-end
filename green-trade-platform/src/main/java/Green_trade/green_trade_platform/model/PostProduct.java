@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -53,13 +54,13 @@ public class PostProduct {
     @Column(name = "status", nullable = false, unique = false)
     private boolean status;
 
-    @Column(name = "created_at", nullable = false, unique = false)
+    @Column(name = "created_at", nullable = true, unique = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false, unique = false)
+    @Column(name = "updated_at", nullable = true, unique = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "deleted_at", nullable = false, unique = false)
+    @Column(name = "deleted_at", nullable = true, unique = false)
     private LocalDateTime deletedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -69,4 +70,11 @@ public class PostProduct {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id")
     private Admin admin;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id")
+    private Seller seller;
+
+    @OneToMany(mappedBy = "postProduct", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductImage> productImages;
 }

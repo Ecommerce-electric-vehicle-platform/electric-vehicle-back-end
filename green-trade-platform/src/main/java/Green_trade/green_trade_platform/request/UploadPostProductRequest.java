@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UploadPostProductRequest {
+    private Long sellerId;
     private String title;
     private String brand;
     private String model;
