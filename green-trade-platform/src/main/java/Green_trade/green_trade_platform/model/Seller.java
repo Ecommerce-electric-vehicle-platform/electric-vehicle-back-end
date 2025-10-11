@@ -1,7 +1,6 @@
 package Green_trade.green_trade_platform.model;
 
 import Green_trade.green_trade_platform.enumerate.SellerStatus;
-import Green_trade.green_trade_platform.request.ApproveSellerRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,31 +49,28 @@ public class Seller {
     @Column(name = "identity_number", unique = true, nullable = false)
     private String identityNumber;
 
-    @Column(name = "create_at")
-    private LocalDateTime createAt;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    @Column(name = "update_at")
-    private LocalDateTime updateAt;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
-    @Column(name = "delete_at")
-    private LocalDateTime deleteAt;
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @OneToOne()
     @JoinColumn(name = "buyer_id", nullable = false, unique = true)
     private Buyer buyer;
 
-    @OneToOne(mappedBy = "seller", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private ApproveProcess approveProcess;
-
     @PrePersist
     public void onCreate() {
         this.status = SellerStatus.PENDING;
-        this.createAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 
     @PreUpdate
     public void onUpdate() {
-        this.updateAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
