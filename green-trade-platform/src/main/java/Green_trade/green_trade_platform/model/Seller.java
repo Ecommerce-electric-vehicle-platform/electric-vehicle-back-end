@@ -19,7 +19,6 @@ import java.util.List;
 public class Seller {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "seller_id")
     private Long sellerId;
 
     @Column(name = "identity_front_image_url", nullable = false, unique = true)
@@ -62,9 +61,6 @@ public class Seller {
     @OneToOne()
     @JoinColumn(name = "buyer_id", nullable = false, unique = true)
     private Buyer buyer;
-
-    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostProduct> postProducts;
 
     @PrePersist
     public void onCreate() {
