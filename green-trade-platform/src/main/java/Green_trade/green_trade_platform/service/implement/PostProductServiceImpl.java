@@ -34,7 +34,9 @@ public class PostProductServiceImpl {
             PostProductRepository postProductRepository,
             CategoryRepository categoryRepository,
             FileUtils fileUtils,
-            CloudinaryService cloudinaryService, SellerRepository sellerRepository, ProductImageRepository productImageRepository) {
+            CloudinaryService cloudinaryService,
+            SellerRepository sellerRepository,
+            ProductImageRepository productImageRepository) {
         this.postProductRepository = postProductRepository;
         this.categoryRepository = categoryRepository;
         this.fileUtils = fileUtils;

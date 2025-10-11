@@ -31,7 +31,7 @@ public class PostProduct {
     private String model;
 
     @Column(name = "manufacture_year", nullable = false, unique = false)
-    private String manufactureYear;
+    private Long manufactureYear;
 
     @Column(name = "used_duration", nullable = false, unique = false)
     public String usedDuration;

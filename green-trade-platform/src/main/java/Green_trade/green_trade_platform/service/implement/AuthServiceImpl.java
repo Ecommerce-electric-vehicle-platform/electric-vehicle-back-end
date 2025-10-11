@@ -25,7 +25,11 @@ public class AuthServiceImpl implements AuthService {
 
     private DelegatingPasswordEncoder passwordEncoder;
 
-    public AuthServiceImpl(BuyerRepository buyerRepository, RedisOtpService redisOtpService, OtpServiceImpl otpService, DelegatingPasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(
+            BuyerRepository buyerRepository,
+                           RedisOtpService redisOtpService,
+                           OtpServiceImpl otpService,
+            DelegatingPasswordEncoder passwordEncoder) {
         this.buyerRepository = buyerRepository;
         this.redisOtpService = redisOtpService;
         this.otpService = otpService;

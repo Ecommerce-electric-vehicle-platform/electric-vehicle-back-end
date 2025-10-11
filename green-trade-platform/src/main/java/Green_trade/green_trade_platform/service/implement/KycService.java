@@ -8,6 +8,7 @@ import Green_trade.green_trade_platform.repository.BuyerRepository;
 import Green_trade.green_trade_platform.repository.SellerRepository;
 import Green_trade.green_trade_platform.request.UpgradeRequest;
 import Green_trade.green_trade_platform.response.KycResponse;
+import Green_trade.green_trade_platform.util.FileUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +28,30 @@ import java.util.List;
 @Service
 @Slf4j
 public class KycService {
-    @Autowired
-    private BuyerRepository buyerRepository;
-    @Autowired
-    private CloudinaryService cloudinaryService;
-    @Autowired
-    private SellerRepository sellerRepository;
-    @Autowired
-    private SellerMapper sellerMapper;
+
+    private final BuyerRepository buyerRepository;
+
+    private final CloudinaryService cloudinaryService;
+
+    private final SellerRepository sellerRepository;
+
+    private final SellerMapper sellerMapper;
+
+    private final FileUtils fileUtils;
+
+    public KycService(
+            BuyerRepository buyerRepository,
+            CloudinaryService cloudinaryService,
+            SellerRepository sellerRepository,
+            SellerMapper sellerMapper,
+            FileUtils fileUtils
+    ) {
+        this.buyerRepository = buyerRepository;
+        this.cloudinaryService = cloudinaryService;
+        this.sellerRepository = sellerRepository;
+        this.sellerMapper = sellerMapper;
+        this.fileUtils = fileUtils;
+    }
 
     @Value("${api-key}")
     private String fptApiKey;
@@ -65,11 +82,11 @@ public class KycService {
         }
 
         // Validate file storage before upload into Cloudinary
-        validateFile(identityFrontImageUrl);
-        validateFile(businessLicenseUrl);
-        validateFile(selfieImageUrl);
-        validateFile(identityBackImageUrl);
-        validateFile(storePolicyUrl);
+        fileUtils.validateFile(identityFrontImageUrl);
+        fileUtils.validateFile(businessLicenseUrl);
+        fileUtils.validateFile(selfieImageUrl);
+        fileUtils.validateFile(identityBackImageUrl);
+        fileUtils.validateFile(storePolicyUrl);
 
         // Upload file into Cloudinary
         String frontImageUrl = cloudinaryService.upload(identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/identity_front_image");
@@ -98,21 +115,6 @@ public class KycService {
 
         return new KycResponse(true, "KYC verified successfully", "VERIFIED", null);
 
-    }
-
-    private void validateFile(MultipartFile file) {
-        if(file == null || file.isEmpty())
-            throw new IllegalArgumentException("File does not exist.");
-
-        long maxSize = 5 * 1024 * 1024; // 5MB
-        if (file.getSize() > maxSize) {
-            throw new IllegalArgumentException("File " + file.getOriginalFilename() + " is too large.");
-        }
-
-        String contentType = file.getContentType();
-        if (!List.of("image/jpeg", "image/png").contains(contentType)) {
-            throw new IllegalArgumentException("Only JPEG or PNG allowed.");
-        }
     }
 
     private Map<String, String> callOcrApi(String imageUrl) throws IOException {

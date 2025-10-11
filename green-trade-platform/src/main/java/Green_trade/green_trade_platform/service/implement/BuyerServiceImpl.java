@@ -17,10 +17,17 @@ import java.util.Map;
 @Service
 @Slf4j
 public class BuyerServiceImpl {
-    @Autowired
-    private BuyerRepository buyerRepository;
-    @Autowired
-    private CloudinaryService cloudinaryService;
+
+    private final BuyerRepository buyerRepository;
+    private final CloudinaryService cloudinaryService;
+
+
+    private BuyerServiceImpl(
+            BuyerRepository buyerRepository,
+            CloudinaryService cloudinaryService) {
+        this.buyerRepository = buyerRepository;
+        this.cloudinaryService = cloudinaryService;
+    }
 
     public Map<String, Object> uploadBuyerProfile(Long id, ProfileRequest request, MultipartFile avatarFile) throws IOException {
         Buyer buyer = buyerRepository.findById(id)
