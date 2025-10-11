@@ -1,8 +1,17 @@
 package Green_trade.green_trade_platform.response;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PostProductResponse {
-    private String sellerId;
-    private String sellerName;
+    private Long sellerId;
+    private String sellerStoreName;
     private String title;
     private String brand;
     private String model;

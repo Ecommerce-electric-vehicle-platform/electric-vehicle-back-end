@@ -1,8 +1,10 @@
 package Green_trade.green_trade_platform.controller;
 
+import Green_trade.green_trade_platform.mapper.PostProductMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
+import Green_trade.green_trade_platform.response.PostProductResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.response.SubscriptionResponse;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
@@ -26,15 +28,17 @@ public class SellerController {
     private final SellerServiceImpl sellerService;
 
     private final PostProductServiceImpl postProductService;
+    private final PostProductMapper postProductMapper;
 
     public SellerController(
             SellerServiceImpl sellerService,
             ResponseMapper responseMapper,
-            PostProductServiceImpl postProductService
-    ) {
+            PostProductServiceImpl postProductService,
+            PostProductMapper postProductMapper) {
         this.sellerService = sellerService;
         this.responseMapper = responseMapper;
         this.postProductService = postProductService;
+        this.postProductMapper = postProductMapper;
     }
 
     @Operation(summary = "Verify Service Package Validity",
@@ -54,7 +58,7 @@ public class SellerController {
     @Operation(summary = "Upload Post For Selling Product Of Seller",
                 description = "Return result of uploading products")
     @PostMapping("/post-products")
-    public ResponseEntity<RestResponse<?, ?>> uploadPostProduct(
+    public ResponseEntity<RestResponse<PostProductResponse, Object>> uploadPostProduct(
             @ModelAttribute UploadPostProductRequest request,
             @RequestPart("picture1") MultipartFile picture1,
             @RequestPart("picture2") MultipartFile picture2,
@@ -72,10 +76,11 @@ public class SellerController {
         );
         log.info(">>> Passed mapped files data: {}", files);
         PostProduct newPostProduct = postProductService.createNewPostProduct(request, files);
-        RestResponse<PostProduct, Object> response = responseMapper.toDto(
+        PostProductResponse responseData = postProductMapper.toDto(newPostProduct);
+        RestResponse<PostProductResponse, Object> response = responseMapper.toDto(
                 true,
                 "UPLOADED POST SUCCESSFULLY",
-                newPostProduct,
+                responseData,
                 null
         );
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
