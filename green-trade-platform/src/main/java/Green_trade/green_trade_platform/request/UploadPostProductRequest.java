@@ -15,7 +15,7 @@ public class UploadPostProductRequest {
     private String title;
     private String brand;
     private String model;
-    private String manufactureYear;
+    private Long manufactureYear;
     private String usedDuration;
     private String conditionLevel;
     private double price;
