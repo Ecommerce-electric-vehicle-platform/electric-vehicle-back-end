@@ -47,6 +47,7 @@ public class Wallet {
         this.balance = BigDecimal.ZERO;
         this.provider = "VNPay";
         this.createdAt = LocalDateTime.now();
+        this.concurrency = WalletConcurrency.VND;
     }
 
 }

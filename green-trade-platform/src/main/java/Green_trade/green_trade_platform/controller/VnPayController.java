@@ -3,14 +3,12 @@ package Green_trade.green_trade_platform.controller;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.service.implement.VnPayServiceImpl;
 import Green_trade.green_trade_platform.util.VnPayUtils;
+import com.google.gson.JsonObject;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Enumeration;
@@ -34,10 +32,23 @@ public class VnPayController {
         this.responseMapper = responseMapper;
     }
 
-    @GetMapping("/pay")
-    public ResponseEntity<?> createPaymentUrl(HttpServletRequest request, @RequestParam long amount, @RequestParam Long buyerId) throws IOException {
-        Map<String, Object> paymentUrl = vnPayService.processCreatePaymentUrl(request, buyerId, amount);
-        return  ResponseEntity.ok(responseMapper.toDto(true, "Tạo liên kết thanh toán thành công.", paymentUrl, null));
+//    @GetMapping("/pay")
+//    public ResponseEntity<?> createPaymentUrl(HttpServletRequest request, @RequestParam long amount, @RequestParam Long buyerId) throws IOException {
+//        Map<String, Object> paymentUrl = vnPayService.processCreatePaymentUrl(request, buyerId, amount);
+//        return  ResponseEntity.ok(responseMapper.toDto(true, "Tạo liên kết thanh toán thành công.", paymentUrl, null));
+//    }
+
+    @PostMapping("/create-payment")
+    public ResponseEntity<?> createPayment(HttpServletRequest request,@RequestParam long buyerId, @RequestParam long amount) {
+        try {
+            Map<String, Object> result = vnPayService.createPaymentUrl(request, buyerId, amount);
+            return ResponseEntity.ok(responseMapper.toDto(true, "Tạo liên kết thanh toán thành công.", result.toString(), null));
+        } catch (Exception e) {
+            JsonObject error = new JsonObject();
+            error.addProperty("code", "99");
+            error.addProperty("message", "error: " + e.getMessage());
+            return ResponseEntity.badRequest().body(responseMapper.toDto(false, "Không thể tạo link thanh toán.", error.toString(), e));
+        }
     }
 
     @GetMapping("/return")
