@@ -5,7 +5,10 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
 
 /**
  * Service dùng để xác minh Google ID Token (JWT từ Google Identity Service).
@@ -14,16 +17,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class GoogleVerifierServiceImpl implements GoogleVerifierService {
 
+    @Value("${google.client.id}")
+    private String GOOGLE_CLIENT_ID;
+
     private final GoogleIdTokenVerifier verifier;
 
     public GoogleVerifierServiceImpl() {
         //main version
-//        this.verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-//                .setAudience(Collections.singletonList("YOUR_GOOGLE_CLIENT_ID"))
-//                .build();
-
-        //playground version
-        this.verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory()).build();
+        this.verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                .setAudience(Collections.singletonList(GOOGLE_CLIENT_ID))
+                .build();
+//
+//        playground version
+//        this.verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory()).build();
     }
 
     /**
