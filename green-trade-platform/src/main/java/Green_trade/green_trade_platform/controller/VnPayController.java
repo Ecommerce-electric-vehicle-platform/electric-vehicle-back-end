@@ -34,38 +34,19 @@ public class VnPayController {
         this.responseMapper = responseMapper;
     }
 
-    // Tạo link thanh toán
     @GetMapping("/pay")
-    public ResponseEntity<?> createPayment(HttpServletRequest request, @RequestParam long amount, @RequestParam Long buyerId) throws IOException {
-        Map<String, Object> paymentUrl = vnPayService.createInvoiceVNPAY(request, buyerId, amount);
-        return  ResponseEntity.ok(responseMapper.toDto(true, "CREATE PAYMENT URL SUCCESS.", paymentUrl, null));
-    }
-
-    // Callback xử lý khi thanh toán xong
-    @GetMapping("/callback")
-    public String callback(@RequestParam Map<String, String> params) {
-        String responseCode = params.get("vnp_ResponseCode");
-        String txnRef = params.get("vnp_TxnRef");
-        String amount = params.get("vnp_Amount");
-
-        if ("00".equals(responseCode)) {
-            // Thành công: cập nhật số dư user tại đây
-            return "✅ Thanh toán thành công! Mã giao dịch: " + txnRef +
-                    ", Số tiền: " + (Integer.parseInt(amount) / 100) + " VND";
-        } else {
-            return "❌ Thanh toán thất bại. Mã giao dịch: " + txnRef +
-                    ", Mã lỗi: " + responseCode;
-        }
+    public ResponseEntity<?> createPaymentUrl(HttpServletRequest request, @RequestParam long amount, @RequestParam Long buyerId) throws IOException {
+        Map<String, Object> paymentUrl = vnPayService.processCreatePaymentUrl(request, buyerId, amount);
+        return  ResponseEntity.ok(responseMapper.toDto(true, "Tạo liên kết thanh toán thành công.", paymentUrl, null));
     }
 
     @GetMapping("/return")
-    public ResponseEntity<?> returnUrl(@RequestParam Map<String, String> params) {
-        String responseCode = params.get("vnp_ResponseCode");
-        if ("00".equals(responseCode)) {
-            return ResponseEntity.ok("Thanh toán thành công! Bạn có thể quay lại ví.");
-        }
-        return ResponseEntity.ok("Thanh toán thất bại hoặc bị hủy.");
+    public ResponseEntity<?> handleVnPayReturn(HttpServletRequest request) {
+        return ResponseEntity.ok(vnPayService.processReturn(request));
     }
+
+
+
 
 //    @GetMapping("/ipn")
 //    public ResponseEntity<String> vnpayIpn(@RequestParam Map<String, String> params) {
