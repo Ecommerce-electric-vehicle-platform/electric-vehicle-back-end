@@ -36,8 +36,8 @@ public class VnPayController {
 
     // Tạo link thanh toán
     @GetMapping("/pay")
-    public ResponseEntity<?> createPayment(@RequestParam int amount, @RequestParam Long buyerId) throws IOException {
-        String paymentUrl = vnPayService.createPaymentUrl(buyerId, amount);
+    public ResponseEntity<?> createPayment(HttpServletRequest request, @RequestParam long amount, @RequestParam Long buyerId) throws IOException {
+        Map<String, Object> paymentUrl = vnPayService.createInvoiceVNPAY(request, buyerId, amount);
         return  ResponseEntity.ok(responseMapper.toDto(true, "CREATE PAYMENT URL SUCCESS.", paymentUrl, null));
     }
 
