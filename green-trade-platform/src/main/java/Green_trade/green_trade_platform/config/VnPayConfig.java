@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -14,9 +15,9 @@ import java.util.*;
 @Component
 public class VnPayConfig {
     public static String vnp_TmnCode = "KSEJI2S0";
-    public static String vnp_HashSecret = "EE5SMYAH8MJ0B3LAYI4Z2H3K2PPSXIHY";
+    public static String vnp_HashSecret = "TJ57O52COT9VEXTFD8VY5E7V57833KOG";
     public static String vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_ReturnUrl = "https://husbandless-inspectingly-kimora.ngrok-free.dev/api/v1/vnpay/return";
+    public static String vnp_ReturnUrl = "http://localhost:8080/api/v1/vnpay/return";
 
     public static String getRandomNumber(int len) {
         String chars = "0123456789";
@@ -30,20 +31,23 @@ public class VnPayConfig {
 
     public static String hmacSHA512(String key, String data) {
         try {
-            javax.crypto.Mac hmac512 = javax.crypto.Mac.getInstance("HmacSHA512");
-            javax.crypto.spec.SecretKeySpec secretKey = new javax.crypto.spec.SecretKeySpec(key.getBytes("UTF-8"), "HmacSHA512");
-            hmac512.init(secretKey);
-            byte[] bytes = hmac512.doFinal(data.getBytes("UTF-8"));
+            SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
+            Mac mac = Mac.getInstance("HmacSHA512");
+            mac.init(secretKey);
+            byte[] hashBytes = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
             StringBuilder hash = new StringBuilder();
-            for (byte b : bytes) {
-                hash.append(String.format("%02x", b & 0xff));
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hash.append('0');
+                hash.append(hex);
             }
             return hash.toString();
         } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi tạo chữ ký HMAC SHA512", e);
+            throw new RuntimeException("Error while generating HMAC", e);
         }
     }
-    public static String md5(String message) {
+
+    public String md5(String message) {
         String digest = null;
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -61,7 +65,7 @@ public class VnPayConfig {
         return digest;
     }
 
-    public static String Sha256(String message) {
+    public String Sha256(String message) {
         String digest = null;
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -80,39 +84,24 @@ public class VnPayConfig {
     }
 
     //Util for VNPAY
-    public static String hashAllFields(Map fields) {
-        List fieldNames = new ArrayList(fields.keySet());
+    public static String hashAllFields(Map<String, String> fields) {
+        // Bắt buộc phải sort
+        List<String> fieldNames = new ArrayList<>(fields.keySet());
         Collections.sort(fieldNames);
+
         StringBuilder sb = new StringBuilder();
-        Iterator itr = fieldNames.iterator();
-        while (itr.hasNext()) {
-            String fieldName = (String) itr.next();
-            String fieldValue = (String) fields.get(fieldName);
-            if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                sb.append(fieldName);
-                sb.append("=");
-                sb.append(fieldValue);
-            }
-            if (itr.hasNext()) {
-                sb.append("&");
+        for (int i = 0; i < fieldNames.size(); i++) {
+            String fieldName = fieldNames.get(i);
+            String fieldValue = fields.get(fieldName);
+            if (fieldValue != null && !fieldValue.isEmpty()) {
+                sb.append(fieldName).append("=").append(fieldValue);
+                if (i < fieldNames.size() - 1) {
+                    sb.append("&");
+                }
             }
         }
-        return hmacSHA512(vnp_HashSecret,sb.toString());
+
+        return hmacSHA512(VnPayConfig.vnp_HashSecret, sb.toString());
     }
-
-
-    public static String getIpAddress(HttpServletRequest request) {
-        String ipAdress;
-        try {
-            ipAdress = request.getHeader("X-FORWARDED-FOR");
-            if (ipAdress == null) {
-                ipAdress = request.getRemoteAddr();
-            }
-        } catch (Exception e) {
-            ipAdress = "Invalid IP:" + e.getMessage();
-        }
-        return ipAdress;
-    }
-
 
 }
