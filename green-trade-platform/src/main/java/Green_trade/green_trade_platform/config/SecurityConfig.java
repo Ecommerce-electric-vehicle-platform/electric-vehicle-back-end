@@ -48,7 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("/error",
                                 "/api/v1/vnpay/return",
                                 "/api/v1/vnpay/callback").permitAll()
-                        .anyRequest().authenticated())
+                        .anyRequest().permitAll())
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authEntryPoint))//  Add AuthTokenFilter to SecurityFilterChain
                 .formLogin(AbstractHttpConfigurer::disable) // Turn off basic authentication form from Spring Security

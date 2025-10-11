@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -60,20 +61,9 @@ public class SellerController {
     @PostMapping("/post-products")
     public ResponseEntity<RestResponse<PostProductResponse, Object>> uploadPostProduct(
             @ModelAttribute UploadPostProductRequest request,
-            @RequestPart("picture1") MultipartFile picture1,
-            @RequestPart("picture2") MultipartFile picture2,
-            @RequestPart("picture3") MultipartFile picture3,
-            @RequestPart("picture4") MultipartFile picture4,
-            @RequestPart("picture5") MultipartFile picture5
+            @RequestPart("pictures") List<MultipartFile> files
             ) throws Exception {
         log.info(">>> Passed came uploadPostProduct");
-        Map<String, MultipartFile> files = Map.of(
-                "picture1", picture1,
-                "picture2", picture2,
-                "picture3", picture3,
-                "picture4", picture4,
-                "picture5", picture5
-        );
         log.info(">>> Passed mapped files data: {}", files);
         PostProduct newPostProduct = postProductService.createNewPostProduct(request, files);
         PostProductResponse responseData = postProductMapper.toDto(newPostProduct);
