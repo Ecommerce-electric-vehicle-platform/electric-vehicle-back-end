@@ -32,14 +32,14 @@ public class WalletServiceImpl {
     }
 
     public Wallet processDepositMoneyIntoWallet(Map<String, String> params) {
-        Wallet wallet = getWalletWithVnPay(params.get("vnp_OrderInfo"));
+        Wallet wallet = getWalletWithVnPayRequest(params.get("vnp_OrderInfo"));
         WalletTransaction walletTransaction = walletTransactionService.handleDepositIntoMoney(wallet, params);
         wallet.setBalance(wallet.getBalance().add(walletTransaction.getAmount()));
         walletRepository.save(wallet);
         return wallet;
     }
 
-    public Wallet getWalletWithVnPay(String params) {
+    public Wallet getWalletWithVnPayRequest(String params) {
         Buyer buyer = buyerService.getBuyerFromVnPayRequest(params);
         return  walletRepository.findByBuyer(buyer).orElseThrow(() -> new WalletNotFoundException("Người dùng chưa được tạo ví."));
     }

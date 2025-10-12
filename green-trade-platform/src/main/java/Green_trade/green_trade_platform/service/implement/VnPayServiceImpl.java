@@ -2,23 +2,15 @@ package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.config.VnPayConfig;
 import Green_trade.green_trade_platform.model.Buyer;
-import Green_trade.green_trade_platform.repository.WalletRepository;
-import Green_trade.green_trade_platform.util.VnPayUtils;
-import com.google.gson.JsonObject;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -64,7 +56,7 @@ public class VnPayServiceImpl {
         }
 
         vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-        vnp_Params.put("vnp_OrderInfo", buyer.getBuyerId().toString() + " : " + buyer.getUsername() + " thanh toán đơn hàng.");
+        vnp_Params.put("vnp_OrderInfo", buyer.getBuyerId().toString() + " : " + buyer.getUsername() + " nạp tiền vào ví.");
         vnp_Params.put("vnp_OrderType", Optional.ofNullable(req.getParameter("ordertype")).orElse("other"));
         vnp_Params.put("vnp_Locale", Optional.ofNullable(req.getParameter("language")).orElse("vn"));
         vnp_Params.put("vnp_ReturnUrl", VnPayConfig.vnp_ReturnUrl);

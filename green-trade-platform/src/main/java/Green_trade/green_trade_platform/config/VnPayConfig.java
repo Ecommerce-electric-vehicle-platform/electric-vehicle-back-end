@@ -18,6 +18,7 @@ public class VnPayConfig {
     public static String vnp_HashSecret = "TJ57O52COT9VEXTFD8VY5E7V57833KOG";
     public static String vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     public static String vnp_ReturnUrl = "http://localhost:8080/api/v1/vnpay/return";
+    public static String vnp_IpnUrl = "https://husbandless-inspectingly-kimora.ngrok-free.dev/api/v1/vnpay/ipn";
 
     public static String getRandomNumber(int len) {
         String chars = "0123456789";

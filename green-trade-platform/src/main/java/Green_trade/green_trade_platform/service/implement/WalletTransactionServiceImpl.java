@@ -21,18 +21,23 @@ public class WalletTransactionServiceImpl {
     }
 
     public WalletTransaction handleDepositIntoMoney(Wallet wallet, Map<String, String> params) {
-        String amountTemp = params.get("vnp_Amount");
-        long amount = Long.parseLong(amountTemp) / 100;
-        WalletTransaction walletTransaction = WalletTransaction.builder()
-                .type(TransactionType.DEPOSIT)
-                .amount(BigDecimal.valueOf(amount))
-                .balanceBefore(wallet.getBalance())
-                .status(TransactionStatus.SUCCESS)
-                .description("Nạp tiền vào ví người dùng")
-                .externalTransactionReference(params.get("vnp_TxnRef"))
-                .wallet(wallet)
-                .build();
-        WalletTransaction walletTransaction1 =  walletTransactionRepository.save(walletTransaction);
-        return walletTransaction1;
+        try {
+            String amountTemp = params.get("vnp_Amount");
+            long amount = Long.parseLong(amountTemp) / 100;
+            log.info(">>> Amount of transaction: {}", amount);
+            WalletTransaction walletTransaction = WalletTransaction.builder()
+                    .type(TransactionType.DEPOSIT)
+                    .amount(BigDecimal.valueOf(amount))
+                    .balanceBefore(wallet.getBalance())
+                    .status(TransactionStatus.SUCCESS)
+                    .description("Nạp tiền vào ví người dùng")
+                    .externalTransactionReference(params.get("vnp_TxnRef"))
+                    .wallet(wallet)
+                    .build();
+            return walletTransactionRepository.save(walletTransaction);
+        } catch (Exception e) {
+            log.info(">>> Exception when deposit money into wallet: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 }
