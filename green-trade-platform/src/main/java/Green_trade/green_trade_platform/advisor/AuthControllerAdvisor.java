@@ -12,7 +12,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,14 +27,18 @@ public class AuthControllerAdvisor {
     }
 
     @ExceptionHandler(AuthException.class)
-    public ResponseEntity<?> handleAuthException(AuthException e) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("error", "Unauthorized");
-        body.put("message", e.getMessage());
-        body.put("status", HttpStatus.UNAUTHORIZED.value());
-        body.put("timestamp", LocalDateTime.now());
-
-        RestResponse<Object, AuthException> response = responseMapper.toDto(false, "Unauthorized",body, e);
+    public ResponseEntity<RestResponse<Object, Map<String, String>>> handleAuthException(AuthException e) {
+        RestResponse<Object, Map<String, String>> response = responseMapper.toDto(
+                false,
+                "Unauthorized",
+                null ,
+                Map.of(
+                        "errorType", e.getClass().getSimpleName(),
+                        "message", e.getMessage(),
+                        "origin", e.getStackTrace()[0].toString(),
+                        "status", HttpStatus.UNAUTHORIZED.toString()
+                )
+        );
 
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)

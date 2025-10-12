@@ -16,7 +16,25 @@ public class ChangePasswordRequest {
     @Pattern(regexp = "^[a-zA-Z]{8,}$",
             message = "Username must be at least 8 letters, with no spaces, numbers, or special characters.")
     private String username;
+
+    @NotBlank(message = "Old Password is required.")
+    @Pattern(
+            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s])[^\\s]{8,}$",
+            message = "Password must be at least 8 characters, include letters, numbers, and special characters, and contain no spaces."
+    )
     private String oldPassword;
+
+    @NotBlank(message = "New Password is required.")
+    @Pattern(
+            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s])[^\\s]{8,}$",
+            message = "Password must be at least 8 characters, include letters, numbers, and special characters, and contain no spaces."
+    )
     private String newPassword;
+
+    @NotBlank(message = "Confirm Password is required.")
+    @Pattern(
+            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s])[^\\s]{8,}$",
+            message = "Password must be at least 8 characters, include letters, numbers, and special characters, and contain no spaces."
+    )
     private String confirmPassword;
 }
