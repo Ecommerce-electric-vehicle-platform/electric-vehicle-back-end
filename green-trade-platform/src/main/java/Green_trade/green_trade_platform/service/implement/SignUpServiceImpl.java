@@ -34,7 +34,7 @@ public class SignUpServiceImpl implements SignUpService {
     @Autowired
     private DelegatingPasswordEncoder passwordEncoder;
     @Autowired
-    private WalletService walletService;
+    private WalletServiceImpl walletServiceImpl;
 
     // Starting sign up: saving buyer to redis and sending otp
     @Override
@@ -79,7 +79,7 @@ public class SignUpServiceImpl implements SignUpService {
                 .email(request.getEmail())
                 .build();
         buyer = repository.save(buyer);
-        Wallet wallet = walletService.createLocalWalletForBuyer(buyer);
+        Wallet wallet = walletServiceImpl.createLocalWalletForBuyer(buyer);
         log.info(">>> Created wallet for buyer: {} with id {}", buyer.getUsername(), wallet.getWalletId());
         otpService.deletePendingBuyer(request.getEmail());
         return buyer;
