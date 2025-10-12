@@ -13,6 +13,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VerifyOtpForgotPasswordRequest {
     @NotBlank(message = "OTP must not be blank.")
+    @Pattern(
+            regexp = "^[0-9]{6}$",
+            message = "OTP must be exactly 6 digits."
+    )
     private String otp;
 
     @NotBlank(message = "Email must not be blank.")
