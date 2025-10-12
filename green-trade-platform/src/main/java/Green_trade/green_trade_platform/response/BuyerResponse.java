@@ -18,7 +18,5 @@ public class BuyerResponse {
     private String defaultShippingAddress;
     private String phoneNumber;
     private String email;
-    private LocalDateTime createAt;
-    private String accessToken;
-    private String refreshToken;
+    private LocalDateTime createdAt;
 }
