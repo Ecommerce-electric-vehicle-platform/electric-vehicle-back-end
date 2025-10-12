@@ -6,6 +6,7 @@ import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.request.*;
 import Green_trade.green_trade_platform.response.AuthResponse;
+import Green_trade.green_trade_platform.response.BuyerResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.service.implement.AuthServiceImpl;
 import Green_trade.green_trade_platform.service.implement.RedisTokenService;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
+    private final BuyerMapper buyerMapper;
     private SignInServiceImpl signInService;
     private SignUpServiceImpl signUpService;
     private ResponseMapper responseMapper;
@@ -42,7 +44,7 @@ public class AuthController {
             JwtUtils jwtUtils,
             RedisTokenService redisTokenService,
             AuthServiceImpl authService,
-            AuthMapper authMapper) {
+            AuthMapper authMapper, BuyerMapper buyerMapper) {
         this.signInService = signInService;
         this.signUpService = signUpService;
         this.responseMapper = responseMapper;
@@ -50,6 +52,7 @@ public class AuthController {
         this.redisTokenService = redisTokenService;
         this.authService = authService;
         this.authMapper = authMapper;
+        this.buyerMapper = buyerMapper;
     }
 
 
@@ -148,6 +151,21 @@ public class AuthController {
         ));
     }
 
+    @Operation(summary = "Change Password API",
+                description = "Return response show that new password is updated")
+    @PostMapping("/change-password")
+    public ResponseEntity<RestResponse<BuyerResponse, Object>> changePassword(@Valid @RequestBody ChangePasswordRequest request) throws Exception {
+        Buyer buyer = authService.changePassword(request);
+        BuyerResponse responseData = buyerMapper.toDto(buyer);
+        return ResponseEntity.status(HttpStatus.OK.value()).body(
+                responseMapper.toDto(
+                        true,
+                        "CHANGE PASSWORD SUCCESSFULLY",
+                        responseData,
+                        null)
+        );
+    }
+
     @PostMapping("/verify-otp")
     @Operation(
             summary = "Verify otp via email",
@@ -160,8 +178,13 @@ public class AuthController {
         redisTokenService.saveTokenToRedis(buyer.getEmail(), refreshToken, REFRESH_EXPIRE_TIME);
 
         AuthResponse authResponse = authMapper.toDto(buyer, accessToken, refreshToken);
-        return ResponseEntity.status(HttpStatus.OK.value()).body(responseMapper.toDto(
-                true, "SIGN UP SUCCESSFULLY", authResponse, null
-        ));
+        return ResponseEntity.status(HttpStatus.OK.value()).body(
+                responseMapper.toDto(
+                true,
+                        "SIGN UP SUCCESSFULLY",
+                        authResponse,
+                        null
+                )
+        );
     }
 }

@@ -4,6 +4,7 @@ import Green_trade.green_trade_platform.exception.PasswordMismatchException;
 import Green_trade.green_trade_platform.exception.UsernameException;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
+import Green_trade.green_trade_platform.request.ChangePasswordRequest;
 import Green_trade.green_trade_platform.request.ForgotPasswordRequest;
 import Green_trade.green_trade_platform.request.VerifyOtpForgotPasswordRequest;
 import Green_trade.green_trade_platform.service.AuthService;
@@ -97,5 +98,33 @@ public class AuthServiceImpl implements AuthService {
             log.info(">>> Error at forgotPassword: " + e);
             throw e;
         }
+    }
+
+    public Buyer changePassword(ChangePasswordRequest request) throws Exception {
+        try {
+            Buyer buyer = buyerRepository.findByUsername(request.getUsername()).orElseThrow(
+                    () -> new RuntimeException("Buyer is not Existed")
+            );
+
+            boolean isPasswordMatched = passwordEncoder.matches(request.getOldPassword(), buyer.getPassword());
+            if(!isPasswordMatched) {
+                throw new Exception("Password is incorrect");
+            }
+
+            boolean isConfirmPasswordMatched = request.getNewPassword().equals(request.getConfirmPassword());
+            if(!isConfirmPasswordMatched) {
+                throw new PasswordMismatchException();
+            }
+
+            String newHashPassword = passwordEncoder.encode(request.getNewPassword());
+            buyer.setPassword(newHashPassword);
+
+            return buyerRepository.save(buyer);
+        } catch (Exception e) {
+            log.info(">>> Error at changePassword: " + e.getMessage());
+            throw e;
+        }
+
+
     }
 }
