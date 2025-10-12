@@ -36,9 +36,6 @@ public class WalletTransaction {
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
-    @Column(name = "payOsReference")
-    private String payosReference;
-
     @Column(name = "description")
     private String description;
 

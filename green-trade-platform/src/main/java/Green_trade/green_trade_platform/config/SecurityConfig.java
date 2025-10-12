@@ -47,8 +47,8 @@ public class SecurityConfig {
                         .requestMatchers(WHITE_LIST.toArray(new String[0])).permitAll() // Permit url in WHITE_LIST that do not need to authenticated
                         .requestMatchers("/error",
                                 "/api/v1/vnpay/return",
-                                "/api/v1/vnpay/callback").permitAll()
-                        .anyRequest().permitAll())
+                                "/api/v1/vnpay/ipn").permitAll()
+                        .anyRequest().authenticated())
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authEntryPoint))//  Add AuthTokenFilter to SecurityFilterChain
                 .formLogin(AbstractHttpConfigurer::disable) // Turn off basic authentication form from Spring Security

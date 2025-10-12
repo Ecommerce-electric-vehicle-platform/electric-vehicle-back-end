@@ -81,14 +81,14 @@ public class SellerServiceImpl implements SellerService {
     @Transactional
     public Seller updatePendingSeller(ApproveSellerRequest request) {
         Seller seller = sellerRepository.findById(request.getSellerId())
-                .orElseThrow(() -> new RuntimeException("Seller not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ seller này: " + request.getSellerId()));
 
         if(request.getDecision().equals(SellerStatus.ACCEPTED)) {
             seller.setStatus(SellerStatus.ACCEPTED);
-
             return sellerRepository.save(seller);
+        } else {
+            sellerRepository.delete(seller);
+            return null;
         }
-
-        return seller;
     }
 }

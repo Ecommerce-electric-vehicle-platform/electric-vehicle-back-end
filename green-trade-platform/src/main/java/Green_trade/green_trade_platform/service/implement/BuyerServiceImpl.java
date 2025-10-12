@@ -7,6 +7,8 @@ import Green_trade.green_trade_platform.request.ProfileRequest;
 import Green_trade.green_trade_platform.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,5 +59,19 @@ public class BuyerServiceImpl {
         }
 
         return body;
+    }
+
+    public Buyer getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName(); // Lấy username hiện tại
+
+        return buyerRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng: " + username));
+    }
+
+    public Buyer getBuyerFromVnPayRequest(String vnpOtherType) {
+        String[] temp = vnpOtherType.split(" ");
+        return buyerRepository.findById(Long.parseLong(temp[0])).
+                orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng: " + temp[0]));
     }
 }
