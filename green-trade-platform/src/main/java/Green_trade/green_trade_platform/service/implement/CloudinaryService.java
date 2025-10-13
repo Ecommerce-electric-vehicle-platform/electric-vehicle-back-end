@@ -23,7 +23,7 @@ public class CloudinaryService {
      * @param folder folder trên Cloudinary (ví dụ: "sellers/123")
      * @return secure_url
      */
-    public String upload(MultipartFile file, String folder) throws IOException {
+    public Map<String, String> upload(MultipartFile file, String folder) throws IOException {
         String publicId = UUID.randomUUID().toString();
         Map<?,?> res = cloudinary.uploader().upload(
                 file.getBytes(),
@@ -33,10 +33,36 @@ public class CloudinaryService {
                         "resource_type", "auto"
                 )
         );
-        Object secureUrl = res.get("secure_url");
-        if (secureUrl != null) return secureUrl.toString();
-        // fallback: try "url"
-        Object url = res.get("url");
-        return url != null ? url.toString() : null;
+
+        String fileUrl = res.get("secure_url") != null
+                ? res.get("secure_url").toString()
+                : res.get("url") != null
+                ? res.get("url").toString()
+                : null;
+
+        return fileUrl != null ? Map.of(
+                "fileUrl", fileUrl,
+                "publicId", publicId
+        ) : null;
     }
+
+    public boolean delete(String publicId, String folder) {
+        try {
+            String fullPublicId = folder != null && !folder.isEmpty()
+                    ? folder + "/" + publicId
+                    : publicId;
+
+            Map<?,?> res = cloudinary.uploader().destroy(
+                    fullPublicId,
+                    ObjectUtils.asMap("resource_type", "image")
+            );
+
+            Object result = res.get("result");
+            return "ok".equals(result); // Cloudinary trả về {"result": "ok"} nếu xoá thành công
+        } catch (Exception e) {
+            log.error("Delete image failed for public_id={} in folder={}, error={}", publicId, folder, e.getMessage());
+            return false;
+        }
+    }
+
 }

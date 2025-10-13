@@ -88,7 +88,8 @@ public class PostProductServiceImpl {
             newPost = postProductRepository.save(newPost);
 
             for(int i = 0; i <= files.size() - 1; i++) {
-                String imageUrl = cloudinaryService.upload(files.get(i), "PostImages/" + newPost.getId() + ":" + seller.getBuyer().getUsername() + "/product_image_" + i);
+                Map<String, String> uploadResult = cloudinaryService.upload(files.get(i), "PostImages/" + newPost.getId() + ":" + seller.getBuyer().getUsername() + "/product_image_" + i);
+                String imageUrl =uploadResult.get("fileUrl");
                 log.info(">>> Passed uploaded picture {}", i);
                 ProductImage productImage = ProductImage.builder()
                         .imageUrl(imageUrl)

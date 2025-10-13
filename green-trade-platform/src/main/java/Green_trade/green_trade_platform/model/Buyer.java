@@ -46,6 +46,9 @@ public class Buyer {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
+    @Column(name = "avatar_public_id")
+    private String avatarPublicId;
+
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
