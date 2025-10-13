@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,5 +74,10 @@ public class BuyerServiceImpl {
         String[] temp = vnpOtherType.split(" ");
         return buyerRepository.findById(Long.parseLong(temp[0])).
                 orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng: " + temp[0]));
+    }
+
+    public BigDecimal getWalletBalance() {
+        Buyer buyer = getCurrentUser();
+        return buyerRepository.findBalanceByBuyerId(buyer.getBuyerId());
     }
 }

@@ -1,8 +1,10 @@
 package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
+import Green_trade.green_trade_platform.request.SignPackageRequest;
 import Green_trade.green_trade_platform.response.SubscriptionPackageResponse;
 import Green_trade.green_trade_platform.service.implement.SubscriptionPackageServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +19,10 @@ public class SubscriptionPackageController {
     private final SubscriptionPackageServiceImpl subscriptionPackageService;
     private final ResponseMapper responseMapper;
 
+    @Operation(
+            summary = "Trả về các gói (active) của hệ thống dành cho seller,",
+            description = "Trả về các gói của hệ thống để người dùng đăng ký."
+    )
     @GetMapping("/active")
     public ResponseEntity<?> getActivePackages(
             @RequestParam(defaultValue = "0") int page,
@@ -27,5 +33,8 @@ public class SubscriptionPackageController {
                 subscriptionPackageService.getActivePackageResponses(PageRequest.of(page, size)), null));
     }
 
-
+    @PostMapping("/sign-package")
+    public ResponseEntity<?> signPackage(@RequestBody SignPackageRequest request) {
+        subscriptionPackageService.signPackage(request);
+    }
 }
