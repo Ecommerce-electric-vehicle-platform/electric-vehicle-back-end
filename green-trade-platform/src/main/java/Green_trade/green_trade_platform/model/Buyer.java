@@ -69,11 +69,11 @@ public class Buyer {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @OneToOne(mappedBy = "buyer")
+    @OneToOne(mappedBy = "buyer", cascade = CascadeType.REMOVE)
     @JsonBackReference
     private Seller seller;
 
-    @OneToOne(mappedBy = "buyer")
+    @OneToOne(mappedBy = "buyer", cascade = CascadeType.REMOVE)
     @JsonBackReference
     private Wallet wallet;
 

@@ -3,6 +3,7 @@ package Green_trade.green_trade_platform.controller;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.model.Seller;
+import Green_trade.green_trade_platform.request.ApproveSellerRequest;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.response.SellerResponse;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
@@ -30,7 +31,7 @@ public class AdminController {
         this.responseMapper = responseMapper;
     }
 
-    @PreAuthorize("hasRole('ROLE_BUYER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("")
     public ResponseEntity<?> findAllPendingSeller(
             @RequestParam(defaultValue = "0") int page,
@@ -46,8 +47,10 @@ public class AdminController {
         return ResponseEntity.ok(body);
     }
 
-//    @PostMapping("/approve-decision")
-//    public ResponseEntity<?>
+    @PostMapping("/approve-seller")
+    public ResponseEntity<?> handlePendingSeller(@RequestBody ApproveSellerRequest request) {
+        Seller seller = sellerService.handlePendingSeller(request);
+        return ResponseEntity.ok(seller);
 
     @GetMapping("/review-post-product-seller")
     public ResponseEntity<RestResponse<List<PostProduct>, Object>> getAllPostProductForReview() {
