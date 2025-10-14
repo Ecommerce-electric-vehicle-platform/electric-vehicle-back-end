@@ -41,7 +41,11 @@ public class PostProductServiceImpl {
         this.productImageRepository = productImageRepository;
         this.subscriptionRepository = subscriptionRepository;
     }
-    public PostProduct createNewPostProduct(UploadPostProductRequest request, List<MultipartFile> files) throws Exception {
+
+    public PostProduct createNewPostProduct(
+            UploadPostProductRequest request,
+            List<MultipartFile> files
+    ) throws Exception {
         try {
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(
@@ -103,6 +107,15 @@ public class PostProductServiceImpl {
             return newPost;
         } catch (Exception e) {
             log.info("Error at createNewPostProduct: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    public List<PostProduct> getAllPostProduct() {
+        try {
+            return postProductRepository.findAll();
+        } catch (Exception e) {
+            log.info(">>> Error at PostProductServiceImpl: {}", e.getMessage());
             throw e;
         }
     }
