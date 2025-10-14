@@ -14,6 +14,7 @@ public interface BuyerRepository extends JpaRepository<Buyer, Long> {
     Optional<Buyer> findByUsername(String username);
     boolean existsByEmail(String email);
     Optional<Buyer> findByEmail(String email);
+    boolean existsByUsername(String username);
 
     @Query("SELECT w.balance FROM Wallet w WHERE w.buyer.buyerId = :buyerId")
     BigDecimal findBalanceByBuyerId(@Param("buyerId") Long buyerId);

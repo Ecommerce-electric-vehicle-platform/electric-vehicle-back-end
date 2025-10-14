@@ -22,7 +22,7 @@ public class WalletTransaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long transactionId;
 
-    @Column(name = "type")
+    @Column(name = "type", length = 50)
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
@@ -32,7 +32,7 @@ public class WalletTransaction {
     @Column(name = "balance_before")
     private BigDecimal balanceBefore;
 
-    @Column(name = "status")
+    @Column(name = "status", length = 50)
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 

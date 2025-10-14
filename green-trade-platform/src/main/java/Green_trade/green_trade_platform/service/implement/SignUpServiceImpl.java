@@ -40,7 +40,10 @@ public class SignUpServiceImpl implements SignUpService {
     @Override
     public void startSignUp(SignUpRequest request) {
         if(repository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Duplicate email!");
+            throw new IllegalArgumentException("Email đã được đăng ký, xin vui lòng dùng email khác.");
+        }
+        if(repository.existsByUsername(request.getUsername())) {
+            throw new IllegalArgumentException("Tên người dùng đã được đăng kí, xin vui lòng đổi tên");
         }
         // Create OTP
         String otp = String.format("%06d", new Random().nextInt(1_000_000));

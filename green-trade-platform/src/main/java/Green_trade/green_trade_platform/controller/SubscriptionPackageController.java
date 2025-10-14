@@ -8,8 +8,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/packages")
@@ -33,8 +37,18 @@ public class SubscriptionPackageController {
                 subscriptionPackageService.getActivePackageResponses(PageRequest.of(page, size)), null));
     }
 
+    @PreAuthorize("hasRole('ROLE_SELLER')")
     @PostMapping("/sign-package")
     public ResponseEntity<?> signPackage(@RequestBody SignPackageRequest request) {
-        subscriptionPackageService.signPackage(request);
+        Map<String, Object> ans = subscriptionPackageService.handlesignPackage(request);
+        if(true == (Boolean) ans.get("success")) {
+            return ResponseEntity.ok(responseMapper.toDto(true,
+                    "Đăng kí gói người bán thành công.",
+                    ans, null));
+        } else {
+            return ResponseEntity.badRequest().body(responseMapper.toDto(false,
+                    "Số dư ví không đủ, vui lòng nạp thêm.",
+                    null, ans));
+        }
     }
 }

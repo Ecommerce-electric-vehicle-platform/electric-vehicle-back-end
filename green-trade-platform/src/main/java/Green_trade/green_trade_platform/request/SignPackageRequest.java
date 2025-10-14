@@ -9,4 +9,5 @@ public class SignPackageRequest {
     private Long packageId;
     private Long priceId;
     private double price;
+    private Long durationByDay;
 }

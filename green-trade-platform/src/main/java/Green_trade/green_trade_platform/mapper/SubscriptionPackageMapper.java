@@ -27,7 +27,6 @@ public class SubscriptionPackageMapper {
                 .description(pkg.getDescription())
                 .isActive(pkg.isActive())
                 .maxProduct(pkg.getMaxProduct())
-                .maxStoragePerImg(pkg.getMaxStoragePerImg())
                 .maxImgPerPost(pkg.getMaxImgPerPost())
                 .prices(prices)
                 .build();

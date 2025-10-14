@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.model;
 
 import Green_trade.green_trade_platform.enumerate.Gender;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -66,9 +67,11 @@ public class Buyer {
     private LocalDateTime deletedAt;
 
     @OneToOne(mappedBy = "buyer")
+    @JsonBackReference
     private Seller seller;
 
     @OneToOne(mappedBy = "buyer")
+    @JsonBackReference
     private Wallet wallet;
 
     @PrePersist

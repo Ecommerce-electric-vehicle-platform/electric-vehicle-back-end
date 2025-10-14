@@ -51,6 +51,8 @@ public class WalletServiceImpl {
         Map<String, Object> result = new HashMap<>();
 
         Wallet wallet = walletRepository.findByBuyer(buyer).orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy ví người dùng."));
+
+        walletTransactionService.handleSignPackageForSeller(wallet, amount);
         wallet.setBalance(wallet.getBalance().subtract(BigDecimal.valueOf(amount)));
 
         result.put("success", false);

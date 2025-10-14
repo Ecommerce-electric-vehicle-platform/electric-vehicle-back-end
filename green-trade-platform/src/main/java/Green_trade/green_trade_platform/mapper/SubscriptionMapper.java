@@ -1,6 +1,9 @@
 package Green_trade.green_trade_platform.mapper;
 
+import Green_trade.green_trade_platform.model.Subscription;
+import Green_trade.green_trade_platform.response.SignPackageResponse;
 import Green_trade.green_trade_platform.response.SubscriptionResponse;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -12,6 +15,22 @@ public class SubscriptionMapper {
                 .valid(valid)
                 .expiryDate(expiryDate)
                 .packageName(packageName)
+                .build();
+    }
+
+    public SignPackageResponse toSignPackageResponse(String packageName,
+                                                     String fullName,
+                                                     double price,
+                                                     Long durationByDay,
+                                                     LocalDateTime startDate,
+                                                     LocalDateTime endDate) {
+        return SignPackageResponse.builder()
+                .packageName(packageName)
+                .fullName(fullName)
+                .price(price)
+                .durationByDay(durationByDay)
+                .startDate(startDate)
+                .endDate(endDate)
                 .build();
     }
 }
