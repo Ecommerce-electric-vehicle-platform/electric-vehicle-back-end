@@ -18,6 +18,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -115,6 +116,7 @@ public class AuthController {
             summary = "Verify Username Forgot Password",
                 description = "Return response show that verify username forgot password request successfully"
     )
+    @PreAuthorize("hasAnyAuthority('ROLE_BUYER', 'ROLE_SELLER', 'ROLE_ADMIN')")
     @PostMapping("/verify-username-forgot-password")
     public ResponseEntity<RestResponse<Object, Object>> verifyForgotPassword(@RequestBody VerifyUsernameForgotPasswordRequest req) throws Exception {
         authService.verifyUsernameForgotPassword(req.getUsername());
