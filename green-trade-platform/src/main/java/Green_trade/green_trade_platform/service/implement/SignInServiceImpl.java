@@ -26,6 +26,8 @@ public class SignInServiceImpl implements SignInService {
 
     @Autowired
     private GoogleVerifierServiceImpl googleVerifier;
+    @Autowired
+    private WalletService walletService;
 
     public Buyer startSignIn(SignInRequest request) {
         try {
@@ -69,7 +71,9 @@ public class SignInServiceImpl implements SignInService {
                         .password(password)
                         .email(email)
                         .build();
-                return buyerRepository.save(user);
+                user = buyerRepository.save(user);
+                walletService.createLocalWalletForBuyer(user);
+                return user;
             }
             log.info("startSignInWithGoogle of GoogleVerifierService: end");
             return buyerOpt.get();

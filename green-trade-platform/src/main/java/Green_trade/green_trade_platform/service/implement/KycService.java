@@ -83,11 +83,30 @@ public class KycService {
         }
 
         // Upload file into Cloudinary
-        String frontImageUrl = cloudinaryService.upload(identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/identity_front_image");
-        String license = cloudinaryService.upload(identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/business_license_image");
-        String backImageUrl = cloudinaryService.upload(identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/identity_back_image");
-        String selfieUrl = cloudinaryService.upload(identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/selfie_image");
-        String policyUrl = cloudinaryService.upload(identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/policy_image");
+        Map<String, String> uploadResult = cloudinaryService.upload(
+                identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/identity_front_image"
+        );
+        String frontImageUrl = uploadResult.get("fileUrl");
+
+        uploadResult = cloudinaryService.upload(
+                identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/business_license_image"
+        );
+        String license = uploadResult.get("fileUrl");
+
+        uploadResult = cloudinaryService.upload(
+                identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/identity_back_image"
+        );
+        String backImageUrl = uploadResult.get("fileUrl");
+
+        uploadResult = cloudinaryService.upload(
+                identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/selfie_image"
+        );
+        String selfieUrl = uploadResult.get("fileUrl");
+
+        uploadResult = cloudinaryService.upload(
+                identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/policy_image"
+        );
+        String policyUrl = uploadResult.get("fileUrl");
 
         // Check data validation
         Map<String, String> identityData = callOcrApi(frontImageUrl);

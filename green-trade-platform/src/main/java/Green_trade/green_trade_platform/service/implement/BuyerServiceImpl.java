@@ -4,7 +4,9 @@ import Green_trade.green_trade_platform.exception.DuplicateProfileException;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
 import Green_trade.green_trade_platform.request.ProfileRequest;
+import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.util.DateUtils;
+import Green_trade.green_trade_platform.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -28,6 +30,8 @@ public class BuyerServiceImpl {
     private CloudinaryService cloudinaryService;
     @Autowired
     private DateUtils dateUtils;
+    @Autowired
+    private FileUtils fileUtils;
 
     public Map<String, Object> uploadBuyerProfile(Long id, ProfileRequest request, MultipartFile avatarFile) throws IOException {
         Buyer buyer = buyerRepository.findById(id)
@@ -44,22 +48,81 @@ public class BuyerServiceImpl {
 
         try {
             if(!avatarFile.isEmpty() && !avatarFile.isEmpty()) {
-                avatarUrl = cloudinaryService.upload(avatarFile, "buyers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/avatar");
+                Map<String, String> uploadResult = cloudinaryService.upload(avatarFile, "buyers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/avatar");
+                avatarUrl = uploadResult.get("fileUrl");
+                buyer.setAvatarPublicId(uploadResult.get("publicId"));
                 body.put("avatar", avatarUrl);
             }
             buyer.setAvatarUrl(avatarUrl);
             buyer.setDefaultShippingAddress(request.getDefaultShippingAddress());
             buyer.setFullName(request.getFullName());
             buyer.setPhoneNumber(request.getPhoneNumber());
-            buyerRepository.save(buyer);
             buyer.setDob(dob);
             buyer.setGender(request.getGender());
+            buyerRepository.save(buyer);
             body.put("profile", buyer.toString());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
         return body;
+    }
+
+    public Buyer updateProfile(Long id, UpdateBuyerProfileRequest request, MultipartFile avatarFile) throws Exception {
+        try {
+            if (avatarFile != null && !avatarFile.isEmpty()) {
+                fileUtils.validateFile(avatarFile);
+                log.info(">>> Passed validate file");
+            }
+
+            Buyer buyer = buyerRepository.findById(id).orElseThrow(() -> new Exception("User is not existed"));
+            log.info(">>> Passed buyer existed");
+            buyer.setFullName(request.getFullName() == null ? "" : request.getFullName());
+            buyer.setEmail(request.getEmail() == null ? "" : request.getEmail());
+            buyer.setGender(request.getGender());
+            buyer.setDob(request.getBirthDay());
+            buyer.setPhoneNumber(request.getPhoneNumber() == null ? "" : request.getPhoneNumber());
+            buyer.setDefaultShippingAddress(request.getDefaultShippingAddress());
+            log.info(">>> Passed buyer update text information");
+
+            //delete old avatar on cloudinary
+            if(avatarFile != null && !avatarFile.isEmpty()) {
+                log.info(">>> Passed avatarFile existed to update Avatar");
+                if (buyer.getAvatarUrl() != null && !buyer.getAvatarUrl().equals("")) {
+                    log.info(">>> Passed avatar existed before but update new");
+                    boolean isDeleted = cloudinaryService.delete(
+                            buyer.getAvatarPublicId(),
+                            "buyers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/avatar"
+                    );
+                    log.info(">>> Passed avatar cloudinary delete working");
+
+                    if(!isDeleted) {
+                        throw new Exception("Avatar Profile is deleted failed");
+                    }
+                    log.info(">>> Passed avatar cloudinary delete successfully");
+                }
+
+                //upload new avatar on cloudinary
+                Map<String, String> uploadResult = cloudinaryService.upload(
+                        avatarFile,
+                        "buyers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/avatar"
+                );
+                log.info(">>> Passed avatar cloudinary update working");
+
+                if(uploadResult == null) {
+                    throw new Exception("Avatar Profile is saved failed");
+                }
+                log.info(">>> Passed avatar cloudinary update successfully");
+
+                buyer.setAvatarUrl(uploadResult.get("fileUrl"));
+                buyer.setAvatarPublicId(uploadResult.get("publicId"));
+            }
+            log.info(">>> Passed Save Buyer Profile New Information");
+            return buyerRepository.save(buyer);
+        } catch (Exception e) {
+             log.info(">>> Error at buyerServiceImpl: {}", e.getMessage());
+             throw e;
+        }
     }
 
     public Buyer getCurrentUser() {
