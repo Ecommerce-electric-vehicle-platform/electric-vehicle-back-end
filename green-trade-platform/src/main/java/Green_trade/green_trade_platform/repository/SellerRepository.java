@@ -12,6 +12,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Repository
 public interface SellerRepository extends JpaRepository<Seller, Long> {
     Page<Seller> findAllByStatus(SellerStatus status, Pageable pageable);
@@ -20,4 +22,7 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
     @Modifying
     @Query("UPDATE Seller s SET s.status = :status WHERE s.sellerId = :sellerId")
     int updatePendingSeller(@Param("status") SellerStatus status, @Param("sellerId") Long sellerId);
+
+    @Query("SELECT s FROM Seller s WHERE s.buyer = :buyer")
+    Optional<Seller> findByBuyer(Buyer buyer);
 }

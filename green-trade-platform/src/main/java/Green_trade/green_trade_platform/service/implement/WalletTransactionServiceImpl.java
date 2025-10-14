@@ -40,4 +40,21 @@ public class WalletTransactionServiceImpl {
             throw new RuntimeException(e);
         }
     }
+
+    public WalletTransaction handleSignPackageForSeller(Wallet wallet, double amount) {
+        try {
+           WalletTransaction walletTransaction = WalletTransaction.builder()
+                   .wallet(wallet)
+                   .type(TransactionType.SIGN_PACKAGE)
+                   .amount(BigDecimal.valueOf(amount))
+                   .balanceBefore(wallet.getBalance())
+                   .status(TransactionStatus.SUCCESS)
+                   .externalTransactionReference("None")
+                   .build();
+           return walletTransactionRepository.save(walletTransaction);
+        } catch (Exception e) {
+            log.info(">>> Exception when minus money from wallet to sign package: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
 }
