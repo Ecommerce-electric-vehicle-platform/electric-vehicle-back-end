@@ -25,26 +25,35 @@ public class BuyerControllerAdvisor {
     private ResponseMapper responseMapper;
 
     @ExceptionHandler(ProfileNotFoundException.class)
-    public ResponseEntity<?> handleProfileNotFoundException(ProfileNotFoundException e, HttpServletRequest request) {
+    public ResponseEntity<RestResponse<Object, Map<String, String>>> handleProfileNotFoundException(ProfileNotFoundException e, HttpServletRequest request) {
         log.info(">>> Exception message of profile not found: {}", e.getMessage());
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now().toString());
-        body.put("error", "Bad Request");
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("message", e.getMessage());
-        body.put("path", request.getRequestURI());
-        return ResponseEntity.badRequest().body(body);
+
+        RestResponse<Object, Map<String, String>> response = responseMapper.toDto(
+                false,
+                "PROFILE NOT FOUND",
+                null,
+                Map.of(
+                        "origin", e.getStackTrace()[0].toString(),
+                        "message", e.getMessage(),
+                        "errorType", e.getClass().getSimpleName()
+                )
+        );
+        return ResponseEntity.badRequest().body(response);
     }
 
     @ExceptionHandler(DuplicateProfileException.class)
-    public ResponseEntity<?> handleProfileNotFoundException(DuplicateProfileException e, HttpServletRequest request) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now().toString());
-        body.put("error", "Bad Request");
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("message", e.getMessage());
-        body.put("path", request.getRequestURI());
-        return ResponseEntity.badRequest().body(body);
+    public ResponseEntity<RestResponse<Object, Map<String, String>>> handleProfileNotFoundException(DuplicateProfileException e, HttpServletRequest request) {
+        RestResponse<Object, Map<String, String>> response = responseMapper.toDto(
+                false,
+                "DUPLICATE PROFILE",
+                null,
+                Map.of(
+                        "origin", e.getStackTrace()[0].toString(),
+                        "message", e.getMessage(),
+                        "errorType", e.getClass().getSimpleName()
+                )
+        );
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
     @ExceptionHandler(EmailException.class)

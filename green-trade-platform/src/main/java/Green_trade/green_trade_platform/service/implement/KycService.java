@@ -11,7 +11,6 @@ import Green_trade.green_trade_platform.response.KycResponse;
 import Green_trade.green_trade_platform.util.FileUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,8 +21,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.Normalizer;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 
 @Service
