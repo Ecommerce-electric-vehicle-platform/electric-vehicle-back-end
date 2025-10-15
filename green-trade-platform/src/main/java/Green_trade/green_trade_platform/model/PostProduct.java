@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.model;
 
+import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -51,8 +52,9 @@ public class PostProduct {
     @Column(name = "location_trading", nullable = false, unique = false)
     private String locationTrading;
 
-    @Column(name = "status", nullable = false, unique = false)
-    private String status;
+    @Column(name = "verified_decision_status", nullable = false, unique = false)
+    @Enumerated(EnumType.STRING)
+    private VerifiedDecisionStatus verifiedDecisionstatus;
 
     @Column(name = "active", nullable = false, unique = false)
     private boolean active;
