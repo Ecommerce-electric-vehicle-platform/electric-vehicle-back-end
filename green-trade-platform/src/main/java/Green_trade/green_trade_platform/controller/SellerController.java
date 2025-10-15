@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,6 +43,7 @@ public class SellerController {
         this.postProductMapper = postProductMapper;
     }
 
+    @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(summary = "Verify Service Package Validity",
                 description = "Return a result to verify that service package is valid")
     @PostMapping("/{username}/check-service-package-validity")
@@ -56,6 +58,7 @@ public class SellerController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
+    @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(summary = "Upload Post For Selling Product Of Seller",
                 description = "Return result of uploading products")
     @PostMapping("/post-products")

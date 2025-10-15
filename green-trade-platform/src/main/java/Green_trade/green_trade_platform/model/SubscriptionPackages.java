@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,21 +34,30 @@ public class SubscriptionPackages {
     @Column(name = "max_product", nullable = false, unique = false)
     private Long maxProduct;
 
-    @Column(name = "max_storage_per_img", nullable = false, unique = false)
-    private Long maxStoragePerImg;
-
-    @Column(name = "max_img_per_cost", nullable = false, unique = false)
+    @Column(name = "max_img_per_post", nullable = false, unique = false)
     private Long maxImgPerPost;
 
-    @Column(name = "created_at", nullable = false, unique = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false, unique = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "subscriptionPackage", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<PackagePrice> packagePrices;
 
     @OneToMany(mappedBy = "subscriptionPackage", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<Subscription> subscriptions;
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

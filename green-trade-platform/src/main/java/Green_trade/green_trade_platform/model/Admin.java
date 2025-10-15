@@ -56,6 +56,8 @@ public class Admin {
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Dispute> disputes;
 
-    @OneToOne(mappedBy = "admin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private ApproveProcess approveProcess;
+    @OneToMany(mappedBy = "admin", fetch = FetchType.LAZY)
+    private List<Seller> sellers;
+
+
 }

@@ -1,6 +1,9 @@
 package Green_trade.green_trade_platform.model;
 
 import Green_trade.green_trade_platform.enumerate.SellerStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -60,6 +63,7 @@ public class Seller {
 
     @OneToOne()
     @JoinColumn(name = "buyer_id", nullable = false, unique = true)
+    @JsonManagedReference
     private Buyer buyer;
 
     @PrePersist
@@ -74,6 +78,12 @@ public class Seller {
     }
 
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<Subscription> subscriptions;
+
+    @OneToOne()
+    @JoinColumn(name = "admin_id")
+    @JsonManagedReference
+    private Admin admin;
 
 }

@@ -1,17 +1,21 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.enumerate.Decision;
 import Green_trade.green_trade_platform.enumerate.SellerStatus;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.mapper.SellerMapper;
 import Green_trade.green_trade_platform.mapper.SubscriptionMapper;
+import Green_trade.green_trade_platform.model.Admin;
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.model.Subscription;
+import Green_trade.green_trade_platform.repository.AdminRepository;
 import Green_trade.green_trade_platform.repository.SellerRepository;
 import Green_trade.green_trade_platform.repository.SubscriptionRepository;
 import Green_trade.green_trade_platform.request.ApproveSellerRequest;
 import Green_trade.green_trade_platform.response.SellerResponse;
 import Green_trade.green_trade_platform.response.SubscriptionResponse;
 import Green_trade.green_trade_platform.service.SellerService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -25,6 +29,7 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class SellerServiceImpl implements SellerService {
 
     private final SellerRepository sellerRepository;
@@ -35,17 +40,9 @@ public class SellerServiceImpl implements SellerService {
 
     private final SubscriptionMapper subscriptionMapper;
 
-    public SellerServiceImpl(
-            SellerRepository sellerRepository,
-            SubscriptionRepository subscriptionRepository,
-            SubscriptionMapper subscriptionMapper,
-            ResponseMapper responseMapper,
-            SellerMapper sellerMapper) {
-        this.sellerRepository = sellerRepository;
-        this.subscriptionRepository = subscriptionRepository;
-        this.subscriptionMapper = subscriptionMapper;
-        this.sellerMapper = sellerMapper;
-    }
+    private final AdminServiceImpl adminService;
+
+
     public SubscriptionResponse checkServicePackageValidity(Long id) throws Exception {
         try {
             Optional<Seller> sellerOpt = sellerRepository.findById(id);
@@ -79,11 +76,13 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Transactional
-    public Seller updatePendingSeller(ApproveSellerRequest request) {
+    public Seller handlePendingSeller(ApproveSellerRequest request) {
         Seller seller = sellerRepository.findById(request.getSellerId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ seller này: " + request.getSellerId()));
 
-        if(request.getDecision().equals(SellerStatus.ACCEPTED)) {
+        Admin admin = adminService.getCurrentUser();
+
+        if(request.getDecision().equals(Decision.OK)) {
             seller.setStatus(SellerStatus.ACCEPTED);
             return sellerRepository.save(seller);
         } else {

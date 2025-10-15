@@ -4,6 +4,7 @@ import Green_trade.green_trade_platform.mapper.PostProductMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.model.Seller;
+import Green_trade.green_trade_platform.request.ApproveSellerRequest;
 import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
 import Green_trade.green_trade_platform.response.PostProductResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
@@ -38,7 +39,7 @@ public class AdminController {
         this.postProductMapper = postProductMapper;
     }
 
-    @PreAuthorize("hasRole('ROLE_BUYER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("")
     public ResponseEntity<?> findAllPendingSeller(
             @RequestParam(defaultValue = "0") int page,
@@ -54,8 +55,11 @@ public class AdminController {
         return ResponseEntity.ok(body);
     }
 
-//    @PostMapping("/approve-decision")
-//    public ResponseEntity<?>
+    @PostMapping("/approve-seller")
+    public ResponseEntity<?> handlePendingSeller(@RequestBody ApproveSellerRequest request) {
+        Seller seller = sellerService.handlePendingSeller(request);
+        return ResponseEntity.ok(seller);
+    }
 
     @PreAuthorize("hasRole('ROLE_BUYER')")
     @Operation(summary = "Review Post Product List API",
@@ -106,7 +110,7 @@ public class AdminController {
                 description = "Return a result show that post product decision")
     @PostMapping("/review-post-product-decision")
     public ResponseEntity<RestResponse<?, ?>> reviewPostProductDecision(@Valid PostProductDecisionRequest request) {
-        PostProduct result = postProductServiceImpl.decideContentValidation(request);
+//        PostProduct result = postProductServiceImpl.decideContentValidation(request);
         return ResponseEntity.status(HttpStatus.OK.value()).body(null);
     }
 }

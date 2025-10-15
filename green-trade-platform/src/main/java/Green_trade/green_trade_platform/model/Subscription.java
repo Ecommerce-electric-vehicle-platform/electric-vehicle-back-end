@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,15 +22,25 @@ public class Subscription {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
+    @JsonManagedReference
     private Seller seller;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subscription_package_id", nullable = false)
+    @JsonManagedReference
     private SubscriptionPackages subscriptionPackage;
+
+    @Column(name = "is_active")
+    private boolean isActive;
 
     @Column(name = "start_day", nullable = false)
     private LocalDateTime startDay;
 
     @Column(name = "end_day", nullable = false)
     private LocalDateTime endDay;
+
+    @PrePersist
+    public void onCreate() {
+        this.isActive = true;
+    }
 }

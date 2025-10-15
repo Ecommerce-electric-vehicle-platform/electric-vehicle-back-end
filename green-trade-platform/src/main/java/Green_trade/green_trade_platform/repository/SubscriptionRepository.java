@@ -7,9 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 @Repository
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
     Optional<Subscription> findBySeller_SellerIdOrderByEndDayDesc(Long sellerId);
-
-    Long seller(Seller seller);
 }

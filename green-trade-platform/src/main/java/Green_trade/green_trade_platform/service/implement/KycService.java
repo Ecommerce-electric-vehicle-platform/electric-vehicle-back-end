@@ -21,6 +21,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.text.Normalizer;
 import java.util.Map;
 import java.util.List;
 
@@ -72,21 +73,14 @@ public class KycService {
     ) throws IOException {
         // Get buyer information who want to upgrade account
         Buyer buyer = buyerRepository.findById(buyerId)
-                .orElseThrow(() -> new RuntimeException("Buyer not found not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
 
         log.info(">>> Buyer's full name: {}", buyer.getFullName());
 
         // Check buyer profile
         if("Not have yet".equalsIgnoreCase(buyer.getFullName())) {
-            throw new ProfileNotFoundException("Complete your profile to upgrade to a seller account.");
+            throw new ProfileNotFoundException("Hoàn tất hồ sơ người dùng trước khi nâng cáp tài khoản");
         }
-
-        // Validate file storage before upload into Cloudinary
-        fileUtils.validateFile(identityFrontImageUrl);
-        fileUtils.validateFile(businessLicenseUrl);
-        fileUtils.validateFile(selfieImageUrl);
-        fileUtils.validateFile(identityBackImageUrl);
-        fileUtils.validateFile(storePolicyUrl);
 
         // Upload file into Cloudinary
         Map<String, String> uploadResult = cloudinaryService.upload(
@@ -120,8 +114,12 @@ public class KycService {
         String idNumber = identityData.get("id_number");
 
         if(!idNumber.equalsIgnoreCase(request.getIdentityNumber())) {
-            return new KycResponse(false, "Document number mismatch", "REJECTED", "ID number not match");
+            return new KycResponse(false, "CCCD không trùng khớp.", "REJECTED", "ID number not match");
         }
+        if(equalsIgnoreAccentAndCase(name, buyer.getUsername())) {
+            return new KycResponse(false, "Tên không trùng khớp", "REJECTED", "ID number not match");
+        }
+
 
         // Check face
         boolean isMatchFace = callFaceCompareApi(frontImageUrl, selfieUrl);
@@ -221,6 +219,25 @@ public class KycService {
         // Lấy confidence
         double confidence = ((Number) result.get("confidence")).doubleValue();
         return confidence > 80; // Ngưỡng match 80%
+    }
+
+    private boolean equalsIgnoreAccentAndCase(String s1, String s2) {
+        if (s1 == null || s2 == null) return false;
+
+        // Change both of string to the same form
+        s1 = Normalizer.normalize(s1, Normalizer.Form.NFD);
+        s2 = Normalizer.normalize(s2, Normalizer.Form.NFD);
+
+        s1 = s1.replaceAll("\\p{M}", "");
+        s2 = s2.replaceAll("\\p{M}", "");
+
+        s1 = s1.toLowerCase();
+        s2 = s2.toLowerCase();
+
+        s1 = s1.replaceAll("\\s+", "");
+        s2 = s2.replaceAll("\\s+", "");
+
+        return s1.equals(s2);
     }
 
 
