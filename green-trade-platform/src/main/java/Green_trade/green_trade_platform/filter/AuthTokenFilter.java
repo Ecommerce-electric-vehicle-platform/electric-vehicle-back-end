@@ -36,7 +36,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         if (path.startsWith("/api/v1/auth")
                 || path.startsWith("/api/v1/vnpay/return") || path.startsWith("/api/v1/vnpay/ipn")
                 || path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs")
-                || path.startsWith("/verify-otp") || path.startsWith("/api/test/redis")) {
+                || path.startsWith("/verify-otp") || path.startsWith("/api/test/redis")
+                || path.startsWith("/forgot-password") || path.startsWith("/verify-otp-forgot-password")
+                || path.startsWith("/verify-username-forgot-password") || path.startsWith("/signin-google")) {
             filterChain.doFilter(request, response);
             return;
         }

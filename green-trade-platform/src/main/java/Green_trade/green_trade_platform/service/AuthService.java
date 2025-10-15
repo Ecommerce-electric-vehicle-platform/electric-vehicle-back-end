@@ -1,5 +1,7 @@
 package Green_trade.green_trade_platform.service;
 
+import java.util.Map;
+
 public interface AuthService {
-    void verifyUsernameForgotPassword(String username) throws Exception;
+    Map<String, Object> verifyUsernameForgotPassword(String username) throws Exception;
 }
