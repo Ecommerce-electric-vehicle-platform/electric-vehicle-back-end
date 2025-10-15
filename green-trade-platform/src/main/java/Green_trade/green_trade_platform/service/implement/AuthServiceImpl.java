@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -38,7 +39,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void verifyUsernameForgotPassword(String username) throws Exception {
+    public Map<String, Object> verifyUsernameForgotPassword(String username) throws Exception {
+        Map<String, Object> result = new HashMap<>();
         try {
             log.info(">>> username from request: {}", username);
             Optional<Buyer> buyerOpt = buyerRepository.findByUsername(username);
@@ -52,8 +54,19 @@ public class AuthServiceImpl implements AuthService {
 
             redisOtpService.savePending(buyerOpt.get().getUsername(), buyerOpt.get().getEmail(), otp);
             otpService.sendOtpEmail(buyerOpt.get().getEmail(), otp);
+
+            result.put("success", true);
+            result.put("message", "Username exits.");
+            result.put("data", buyerOpt.get());
+            result.put("error", null);
+            return result;
         } catch (Exception e) {
             log.info(">>> Error at verifyForgotPassword: " + e);
+            result.put("success", false);
+            result.put("message", "Username is not exits.");
+            result.put("data", null);
+            result.put("error", e);
+            return result;
         }
     }
 
