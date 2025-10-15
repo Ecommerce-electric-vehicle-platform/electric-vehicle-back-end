@@ -82,7 +82,9 @@ public class PostProductServiceImpl {
                     .price(request.getPrice())
                     .description(request.getDescription())
                     .locationTrading(request.getLocationTrading())
-                    .isLabeled(false)
+                    .active(true)
+                    .status("APPROVAL")
+                    .verified(false)
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .deletedAt(null)
@@ -125,13 +127,9 @@ public class PostProductServiceImpl {
             for(int i = 0; i <= postProducts.size() - 1; i++) {
                 PostProduct postProduct = postProducts.get(i);
                 Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(postProduct.getSeller().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
-                if(subscription.getEndDay().isBefore(LocalDateTime.now())) {
-                    throw new Exception("Service package is expired");
+                if(subscription.getSubscriptionPackage().getId() >= 2) {
+                    result.add(postProduct);
                 }
-                if(subscription.getSubscriptionPackage().getId() < 2) {
-                    throw new Exception("Service package of user is not available this feature");
-                }
-                result.add(postProduct);
             }
             return result;
         } catch (Exception e) {
@@ -153,7 +151,7 @@ public class PostProductServiceImpl {
 
     public PostProduct checkPostProductVerification(PostProductDecisionRequest request) throws Exception {
         try {
-            Admin admin = adminRepository.findByUsername(request.getAdminUsername());
+            Admin admin = adminRepository.findByUsername(request.getAdminUsername()).orElseThrow(() -> new Exception("Admin is not existed"));
             PostProduct postProduct = postProductRepository.findById(
                     request.getPostProductId()).orElseThrow(() -> new Exception("Post Product is not existed")
             );

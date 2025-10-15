@@ -31,7 +31,7 @@ public class Subscription {
     private SubscriptionPackages subscriptionPackage;
 
     @Column(name = "is_active")
-    private boolean isActive;
+    private Boolean isActive;
 
     @Column(name = "start_day", nullable = false)
     private LocalDateTime startDay;

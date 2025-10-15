@@ -1,8 +1,11 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.exception.AuthException;
+import Green_trade.green_trade_platform.model.Admin;
 import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.repository.AdminRepository;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
+import Green_trade.green_trade_platform.request.SignInAdminRequest;
 import Green_trade.green_trade_platform.request.SignInGoogleRequest;
 import Green_trade.green_trade_platform.request.SignInRequest;
 import Green_trade.green_trade_platform.service.SignInService;
@@ -28,6 +31,8 @@ public class SignInServiceImpl implements SignInService {
     private GoogleVerifierServiceImpl googleVerifier;
     @Autowired
     private WalletService walletService;
+    @Autowired
+    private AdminRepository adminRepository;
 
     public Buyer startSignIn(SignInRequest request) {
         try {
@@ -46,6 +51,27 @@ public class SignInServiceImpl implements SignInService {
         } catch (Exception e) {
             log.info("startSignIn of SignServiceImpl: Error occurred");
             log.info("startSignIn of SignInServiceImpl: ended");
+            throw e;
+        }
+    }
+
+    public Admin startSignInAdmin(SignInAdminRequest request) {
+        try {
+            log.info(">>> startSignInAdmin of SignInServiceImpl: started");
+            String username = request.getUsername();
+            String password = request.getPassword();
+
+            Optional<Admin> adminOpt = adminRepository.findByUsername(username);
+            if (adminOpt.isEmpty() || !passwordEncoder.matches(password, adminOpt.get().getPassword())) {
+                log.info(">>> startSignInAdmin at SignInServiceImpl: user: {} authenticated failed", username);
+                throw new AuthException("Username/password is incorrect");
+            }
+            log.info(">>> startSignInAdmin at SignInServiceImpl: user: {} authenticated successfully", username);
+            log.info(">>> startSignInAdmin of SignInServiceImpl: ended");
+            return adminOpt.get();
+        } catch (Exception e) {
+            log.info(">>> startSignInAdmin of SignServiceImpl: Error occurred");
+            log.info(">>> startSignInAdmin of SignInServiceImpl: ended");
             throw e;
         }
     }
