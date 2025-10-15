@@ -19,6 +19,8 @@ public class PostProductResponse {
     private String usedDuration;
     private String rejectedReason;
     private String conditionLevel;
-    private boolean status;
+    private String status;
+    private boolean active;
+    private boolean verified;
     private String categoryName;
 }
