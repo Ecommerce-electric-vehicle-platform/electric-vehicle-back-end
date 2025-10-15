@@ -51,6 +51,7 @@ public class AdminController {
     public ResponseEntity<?> handlePendingSeller(@RequestBody ApproveSellerRequest request) {
         Seller seller = sellerService.handlePendingSeller(request);
         return ResponseEntity.ok(seller);
+    }
 
     @GetMapping("/review-post-product-seller")
     public ResponseEntity<RestResponse<List<PostProduct>, Object>> getAllPostProductForReview() {
