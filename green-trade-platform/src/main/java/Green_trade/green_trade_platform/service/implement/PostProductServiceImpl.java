@@ -6,6 +6,7 @@ import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.request.NeedVerifyPostRequest;
 import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
+import Green_trade.green_trade_platform.service.PostProductService;
 import Green_trade.green_trade_platform.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -19,7 +20,7 @@ import java.util.Map;
 
 @Service
 @Slf4j
-public class PostProductServiceImpl {
+public class PostProductServiceImpl implements PostProductService {
 
     private final PostProductRepository postProductRepository;
 
