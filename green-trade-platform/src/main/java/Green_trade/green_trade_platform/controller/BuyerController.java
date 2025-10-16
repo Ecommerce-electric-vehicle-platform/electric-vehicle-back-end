@@ -44,12 +44,11 @@ public class BuyerController {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     @PreAuthorize("hasRole('ROLE_BUYER')")
-    public ResponseEntity<?> uploadBuyerProfile(@PathVariable Long id,
-                                                @Parameter(description = "profile request for buyer")
+    public ResponseEntity<?> uploadBuyerProfile(@Parameter(description = "profile request for buyer")
                                                 @Valid @ModelAttribute ProfileRequest profileRequest,
                                                 @Parameter(description = "avatar of buyer")
                                                 @RequestPart(value = "avatar_url", required = true) MultipartFile avatarFile) throws IOException {
-        Map<String, Object> body = buyerService.uploadBuyerProfile(id, profileRequest, avatarFile);
+        Map<String, Object> body = buyerService.uploadBuyerProfile(profileRequest, avatarFile);
         return ResponseEntity.ok(responseMapper.toDto(
                 true,
                 "UPLOAD PROFILE SUCCESS.",
@@ -64,7 +63,6 @@ public class BuyerController {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<RestResponse<BuyerResponse, Object>> updateProfile(
-            @PathVariable Long id,
             @Valid @ModelAttribute UpdateBuyerProfileRequest updateProfileRequest,
             @RequestPart(value = "avatarImage") MultipartFile avatarFile
     ) throws Exception {
@@ -72,7 +70,7 @@ public class BuyerController {
         log.info(">>> updateProfileRequest: {}", updateProfileRequest);
         log.info(">>> avatarFile: {}", avatarFile);
 
-        Buyer buyer = buyerService.updateProfile(id, updateProfileRequest, avatarFile);
+        Buyer buyer = buyerService.updateProfile(updateProfileRequest, avatarFile);
         BuyerResponse responseData = buyerMapper.toDto(buyer);
 
         return ResponseEntity.status(HttpStatus.OK.value()).body(

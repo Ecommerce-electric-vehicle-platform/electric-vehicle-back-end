@@ -6,7 +6,7 @@ import Green_trade.green_trade_platform.response.BuyerResponse;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BuyerMapper {
+public class  BuyerMapper {
     public Buyer toEntity(SignUpRequest request) {
         return Buyer.builder()
                 .username(request.getUsername())

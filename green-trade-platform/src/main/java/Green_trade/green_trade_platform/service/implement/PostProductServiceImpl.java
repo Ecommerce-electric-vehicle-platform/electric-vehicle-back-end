@@ -5,6 +5,8 @@ import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
 import Green_trade.green_trade_platform.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -111,9 +113,9 @@ public class PostProductServiceImpl {
         }
     }
 
-    public List<PostProduct> getAllPostProduct() {
+    public Page<PostProduct> getAllPostProduct(int page, int size) {
         try {
-            return postProductRepository.findAll();
+            return postProductRepository.findAll(PageRequest.of(page, size));
         } catch (Exception e) {
             log.info(">>> Error at PostProductServiceImpl: {}", e.getMessage());
             throw e;

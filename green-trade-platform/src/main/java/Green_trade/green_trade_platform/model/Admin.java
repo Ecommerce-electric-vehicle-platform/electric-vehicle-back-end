@@ -1,5 +1,7 @@
 package Green_trade.green_trade_platform.model;
 
+import Green_trade.green_trade_platform.enumerate.AccountStatus;
+import Green_trade.green_trade_platform.enumerate.Gender;
 import Green_trade.green_trade_platform.request.ApproveSellerRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,8 +25,14 @@ public class Admin {
     @Column(name = "admin_id")
     private Long id;
 
-    @Column(name = "username", nullable = false, unique = true)
-    private String username;
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    @Column(name = "avatar_public_id")
+    private String avatarPublicId;
+
+    @Column(name = "employee_number", nullable = false, unique = true)
+    private String employeeNumber;
 
     @Column(name = "password", nullable = false, unique = false)
     private String password;
@@ -36,18 +44,23 @@ public class Admin {
     private String phoneNumber;
 
     @Column(name = "is_super_admin", nullable = false, unique = false)
-    private String isSuperAdmin;
+    private boolean isSuperAdmin;
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "status", nullable = false, unique = false)
-    private boolean status;
+    @Column(name = "status", nullable = false, unique = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private AccountStatus status;
 
-    @Column(name = "created_at", nullable = false, unique = false)
+    @Column(name = "gender")
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false, unique = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -58,6 +71,14 @@ public class Admin {
 
     @OneToMany(mappedBy = "admin", fetch = FetchType.LAZY)
     private List<Seller> sellers;
+
+    @PrePersist
+    public void onCreate() {
+        this.isSuperAdmin = false;
+        this.gender = Gender.MALE;
+        this.status = AccountStatus.ACTIVE;
+        this.createdAt = LocalDateTime.now();
+    }
 
 
 }

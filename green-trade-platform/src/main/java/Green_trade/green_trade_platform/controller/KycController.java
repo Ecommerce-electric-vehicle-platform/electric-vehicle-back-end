@@ -29,12 +29,11 @@ public class KycController {
             description = "Upload buyer profile: avatar, full name, shipping address, and so on"
     )
     @PostMapping(
-            value = "/{userId}/verify-kyc",
+            value = "/verify-kyc",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     @PreAuthorize("hasRole('ROLE_BUYER')")
     public ResponseEntity<?> verifyKyc(
-            @PathVariable Long userId,
             @ModelAttribute UpgradeRequest request,
             @RequestPart("front of identity")MultipartFile fronOfIdentity,
             @RequestPart("back of identity")MultipartFile backOfIdentity,
@@ -44,7 +43,6 @@ public class KycController {
     ) {
         try {
             KycResponse response = kycService.verify(
-                    userId,
                     fronOfIdentity,
                     license,
                     selfie,

@@ -33,9 +33,8 @@ public class BuyerServiceImpl {
     @Autowired
     private FileUtils fileUtils;
 
-    public Map<String, Object> uploadBuyerProfile(Long id, ProfileRequest request, MultipartFile avatarFile) throws IOException {
-        Buyer buyer = buyerRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("Can not find buyer with this id."));
+    public Map<String, Object> uploadBuyerProfile(ProfileRequest request, MultipartFile avatarFile) throws IOException {
+        Buyer buyer = getCurrentUser();
 
         Map<String, Object> body = new HashMap<>();
         String avatarUrl = (buyer.getAvatarUrl() == null) ? "" : buyer.getAvatarUrl();
@@ -60,7 +59,7 @@ public class BuyerServiceImpl {
             buyer.setDob(dob);
             buyer.setGender(request.getGender());
             buyerRepository.save(buyer);
-            body.put("profile", buyer.toString());
+            body.put("profile", buyer);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -68,14 +67,15 @@ public class BuyerServiceImpl {
         return body;
     }
 
-    public Buyer updateProfile(Long id, UpdateBuyerProfileRequest request, MultipartFile avatarFile) throws Exception {
+    public Buyer updateProfile(UpdateBuyerProfileRequest request, MultipartFile avatarFile) throws Exception {
         try {
+            Buyer buyer = getCurrentUser();
+            Long id = buyer.getBuyerId();
             if (avatarFile != null && !avatarFile.isEmpty()) {
                 fileUtils.validateFile(avatarFile);
                 log.info(">>> Passed validate file");
             }
 
-            Buyer buyer = buyerRepository.findById(id).orElseThrow(() -> new Exception("User is not existed"));
             log.info(">>> Passed buyer existed");
             buyer.setFullName(request.getFullName() == null ? "" : request.getFullName());
             buyer.setEmail(request.getEmail() == null ? "" : request.getEmail());
