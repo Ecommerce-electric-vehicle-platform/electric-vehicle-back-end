@@ -13,6 +13,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostProductResponse {
+    private Long postId;
     private Long sellerId;
     private String sellerStoreName;
     private String title;

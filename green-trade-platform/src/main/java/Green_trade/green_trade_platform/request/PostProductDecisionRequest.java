@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostProductDecisionRequest {
-    private String employeeNo;
+    private String employeeNumber;
     private Long postProductId;
-    private boolean isPassed;
+    private boolean passed;
     private String rejectedReason;
 }

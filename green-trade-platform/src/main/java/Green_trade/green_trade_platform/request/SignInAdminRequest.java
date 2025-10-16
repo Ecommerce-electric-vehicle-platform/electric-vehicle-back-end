@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SignInAdminRequest {
     @NotBlank(message = "employeeNo is required.")
-    private String employeeNo;
+    private String employeeNumber;
     @NotBlank(message = "Password is required.")
     @Pattern(
             regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s])[^\\s]{8,}$",

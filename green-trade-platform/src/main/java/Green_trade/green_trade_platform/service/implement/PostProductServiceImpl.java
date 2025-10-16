@@ -143,12 +143,14 @@ public class PostProductServiceImpl {
             for(int i = 0; i <= postProducts.size() - 1; i++) {
                 PostProduct postProduct = postProducts.get(i);
                 Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(postProduct.getSeller().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
-                if(subscription.getSubscriptionPackage().getId() >= 2) {
+                log.info(">>> subscription package id: {}", subscription.getSubscriptionPackage().getId());
+                log.info(">>> postProduct verified status: {}", postProduct.getVerifiedDecisionstatus().toString());
+                if(subscription.getSubscriptionPackage().getId() >= 2 && postProduct.getVerifiedDecisionstatus().equals(VerifiedDecisionStatus.PENDING)) {
+                    log.info(">>> result add: {} and {}", postProduct.getVerifiedDecisionstatus(), subscription.getSubscriptionPackage().getId());
                     result.add(postProduct);
                 }
             }
-            postProductsPaging.getContent().addAll(0, result);
-            return new PageImpl<>(result, pageable, postProductsPaging.getTotalElements());
+            return new PageImpl<>(result, pageable, result.size());
         } catch (Exception e) {
             log.info(">>> Error at PostProductServiceImpl: {}", e.getMessage());
             throw e;
@@ -168,7 +170,9 @@ public class PostProductServiceImpl {
 
     public PostProduct checkPostProductVerification(PostProductDecisionRequest request) throws Exception {
         try {
-            Admin admin = adminRepository.findByEmployeeNumber(request.getEmployeeNo()).orElseThrow(() -> new Exception("Admin is not existed"));
+            log.info(">>> request: {}", request);
+            log.info(">>> admin list: {}", adminRepository.findByEmployeeNumber("EMP002").get());
+            Admin admin = adminRepository.findByEmployeeNumber(request.getEmployeeNumber()).orElseThrow(() -> new Exception("Admin is not existed"));
             PostProduct postProduct = postProductRepository.findById(
                     request.getPostProductId()).orElseThrow(() -> new Exception("Post Product is not existed")
             );
@@ -176,13 +180,11 @@ public class PostProductServiceImpl {
             if(!request.isPassed()) {
                 postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.REJECTED);
                 postProduct.setVerified(false);
-                postProduct.setActive(false);
                 postProduct.setAdmin(admin);
                 postProduct.setRejectedReason(request.getRejectedReason());
             } else {
                 postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.APPROVED);
                 postProduct.setVerified(true);
-                postProduct.setActive(true);
                 postProduct.setAdmin(admin);
                 postProduct.setRejectedReason("");
             }

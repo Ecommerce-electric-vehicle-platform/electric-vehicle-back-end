@@ -23,7 +23,7 @@ public class PostProductListMapper {
                 )
                 .toList();
         return PostProductListResponse.builder()
-                .postProductResponses(postProductListResponses)
+                .postList(postProductListResponses)
                 .meta(meta)
                 .build();
     }

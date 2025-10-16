@@ -59,15 +59,15 @@ public class SignInServiceImpl implements SignInService {
     public Admin startSignInAdmin(SignInAdminRequest request) {
         try {
             log.info(">>> startSignInAdmin of SignInServiceImpl: started");
-            String employeeNo = request.getEmployeeNo();
+            String employeeNumber= request.getEmployeeNumber();
             String password = request.getPassword();
 
-            Optional<Admin> adminOpt = adminRepository.findByEmployeeNumber(employeeNo);
+            Optional<Admin> adminOpt = adminRepository.findByEmployeeNumber(employeeNumber);
             if (adminOpt.isEmpty() || !passwordEncoder.matches(password, adminOpt.get().getPassword())) {
-                log.info(">>> startSignInAdmin at SignInServiceImpl: user: {} authenticated failed", employeeNo);
+                log.info(">>> startSignInAdmin at SignInServiceImpl: user: {} authenticated failed", employeeNumber);
                 throw new AuthException("Username/password is incorrect");
             }
-            log.info(">>> startSignInAdmin at SignInServiceImpl: user: {} authenticated successfully", employeeNo);
+            log.info(">>> startSignInAdmin at SignInServiceImpl: user: {} authenticated successfully", employeeNumber);
             log.info(">>> startSignInAdmin of SignInServiceImpl: ended");
             return adminOpt.get();
         } catch (Exception e) {

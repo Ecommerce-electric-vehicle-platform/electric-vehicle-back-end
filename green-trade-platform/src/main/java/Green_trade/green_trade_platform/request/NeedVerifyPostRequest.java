@@ -11,8 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NeedVerifyPostRequest {
-    @NotBlank
     private int size;
-    @NotBlank
     private int page;
 }

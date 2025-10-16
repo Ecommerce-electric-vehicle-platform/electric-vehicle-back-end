@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 public class PostProductMapper {
     public PostProductResponse toDto(PostProduct postProduct) {
         return PostProductResponse.builder()
+                .postId(postProduct.getId())
                 .sellerId(postProduct.getSeller().getSellerId())
                 .sellerStoreName(postProduct.getSeller().getStoreName())
                 .title(postProduct.getTitle())

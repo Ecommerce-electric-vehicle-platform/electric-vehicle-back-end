@@ -13,6 +13,6 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostProductListResponse {
-    List<PostProductResponse> postProductResponses;
+    List<PostProductResponse> postList;
     Map<String, Object> meta;
 }
