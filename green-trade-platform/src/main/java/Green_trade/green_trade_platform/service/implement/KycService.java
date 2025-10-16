@@ -10,6 +10,7 @@ import Green_trade.green_trade_platform.request.UpgradeRequest;
 import Green_trade.green_trade_platform.response.KycResponse;
 import Green_trade.green_trade_platform.util.FileUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,31 +28,16 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class KycService {
 
     private final BuyerRepository buyerRepository;
-
     private final CloudinaryService cloudinaryService;
-
     private final SellerRepository sellerRepository;
-
     private final SellerMapper sellerMapper;
-
     private final FileUtils fileUtils;
+    private final BuyerServiceImpl buyerService;
 
-    public KycService(
-            BuyerRepository buyerRepository,
-            CloudinaryService cloudinaryService,
-            SellerRepository sellerRepository,
-            SellerMapper sellerMapper,
-            FileUtils fileUtils
-    ) {
-        this.buyerRepository = buyerRepository;
-        this.cloudinaryService = cloudinaryService;
-        this.sellerRepository = sellerRepository;
-        this.sellerMapper = sellerMapper;
-        this.fileUtils = fileUtils;
-    }
 
     @Value("${api-key}")
     private String fptApiKey;
@@ -62,7 +48,6 @@ public class KycService {
 
 
     public KycResponse verify(
-            Long buyerId,
             MultipartFile identityFrontImageUrl,
             MultipartFile businessLicenseUrl,
             MultipartFile selfieImageUrl,
@@ -70,9 +55,7 @@ public class KycService {
             MultipartFile storePolicyUrl,
             UpgradeRequest request
     ) throws IOException {
-        // Get buyer information who want to upgrade account
-        Buyer buyer = buyerRepository.findById(buyerId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
+        Buyer buyer = buyerService.getCurrentUser();
 
         log.info(">>> Buyer's full name: {}", buyer.getFullName());
 
@@ -83,27 +66,27 @@ public class KycService {
 
         // Upload file into Cloudinary
         Map<String, String> uploadResult = cloudinaryService.upload(
-                identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/identity_front_image"
+                identityFrontImageUrl, "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/identity_front_image"
         );
         String frontImageUrl = uploadResult.get("fileUrl");
 
         uploadResult = cloudinaryService.upload(
-                identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/business_license_image"
+                identityFrontImageUrl, "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/business_license_image"
         );
         String license = uploadResult.get("fileUrl");
 
         uploadResult = cloudinaryService.upload(
-                identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/identity_back_image"
+                identityFrontImageUrl, "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/identity_back_image"
         );
         String backImageUrl = uploadResult.get("fileUrl");
 
         uploadResult = cloudinaryService.upload(
-                identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/selfie_image"
+                identityFrontImageUrl, "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/selfie_image"
         );
         String selfieUrl = uploadResult.get("fileUrl");
 
         uploadResult = cloudinaryService.upload(
-                identityFrontImageUrl, "sellers/" + buyerId + ":" + buyer.getUsername() + "/policy_image"
+                identityFrontImageUrl, "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/policy_image"
         );
         String policyUrl = uploadResult.get("fileUrl");
 

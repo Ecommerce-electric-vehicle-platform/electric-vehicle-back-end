@@ -7,6 +7,8 @@ import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
 import Green_trade.green_trade_platform.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -122,11 +124,11 @@ public class PostProductServiceImpl {
         }
     }
 
-    public List<PostProduct> getAllPostProduct() throws Exception {
+    public Page<PostProduct> getAllPostProduct(int page, int size) {
         try {
-            List<PostProduct> postProducts = postProductRepository.findAll();
-            List<PostProduct> result = new ArrayList<>();
-            for(int i = 0; i <= postProducts.size() - 1; i++) {
+            Page<PostProduct> postProducts = postProductRepository.findAll();
+            Page<PostProduct> result = new ArrayList<>();
+            for(int i = 0; i <= postProducts.getTotalPages() - 1; i++) {
                 PostProduct postProduct = postProducts.get(i);
                 Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(postProduct.getSeller().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
                 if(subscription.getSubscriptionPackage().getId() >= 2) {
@@ -134,6 +136,7 @@ public class PostProductServiceImpl {
                 }
             }
             return result;
+            return postProductRepository.findAll(PageRequest.of(page, size));
         } catch (Exception e) {
             log.info(">>> Error at PostProductServiceImpl: {}", e.getMessage());
             throw e;
