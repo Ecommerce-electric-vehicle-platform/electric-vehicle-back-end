@@ -1,6 +1,5 @@
 package Green_trade.green_trade_platform.request;
 
-import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApproveSellerRequest {
-    private Long sellerId;
-    private VerifiedDecisionStatus decision;
+public class PostProductDecisionRequest {
+    private String adminUsername;
+    private Long postProductId;
+    private boolean isPassed;
+    private String rejectedReason;
 }

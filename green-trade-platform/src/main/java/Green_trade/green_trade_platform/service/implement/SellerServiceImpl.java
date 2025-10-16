@@ -1,14 +1,13 @@
 package Green_trade.green_trade_platform.service.implement;
 
-import Green_trade.green_trade_platform.enumerate.Decision;
 import Green_trade.green_trade_platform.enumerate.SellerStatus;
-import Green_trade.green_trade_platform.mapper.ResponseMapper;
+import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
+import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
 import Green_trade.green_trade_platform.mapper.SellerMapper;
 import Green_trade.green_trade_platform.mapper.SubscriptionMapper;
 import Green_trade.green_trade_platform.model.Admin;
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.model.Subscription;
-import Green_trade.green_trade_platform.repository.AdminRepository;
 import Green_trade.green_trade_platform.repository.SellerRepository;
 import Green_trade.green_trade_platform.repository.SubscriptionRepository;
 import Green_trade.green_trade_platform.request.ApproveSellerRequest;
@@ -24,8 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 @Slf4j
@@ -50,10 +47,10 @@ public class SellerServiceImpl implements SellerService {
                 throw new Exception("Seller is not existed");
             }
 
-            Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(id);
+            Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(id).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
 
             if(LocalDateTime.now().isAfter(subscription.getEndDay())) {
-                throw new Exception("Subscription is expired");
+                throw new SubscriptionExpiredException();
             }
 
             return subscriptionMapper.toDto(true, subscription.getEndDay(), subscription.getSubscriptionPackage().getName());
@@ -82,7 +79,7 @@ public class SellerServiceImpl implements SellerService {
 
         Admin admin = adminService.getCurrentUser();
 
-        if(request.getDecision().equals(Decision.OK)) {
+        if(request.getDecision().equals(VerifiedDecisionStatus.APPROVED)) {
             seller.setStatus(SellerStatus.ACCEPTED);
             return sellerRepository.save(seller);
         } else {
