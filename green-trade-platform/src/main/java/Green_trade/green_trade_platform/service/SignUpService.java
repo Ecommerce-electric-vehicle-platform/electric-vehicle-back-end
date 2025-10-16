@@ -8,5 +8,4 @@ import jakarta.mail.MessagingException;
 public interface SignUpService {
     void startSignUp(SignUpRequest request);
     Buyer verifyOtp(VerifyOtpRequest request);
-    void sendOtpEmail(String to, String otp) throws MessagingException;
 }

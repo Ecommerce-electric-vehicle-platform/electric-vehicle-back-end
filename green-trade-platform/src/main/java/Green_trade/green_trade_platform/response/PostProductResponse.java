@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.response;
 
+import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +20,7 @@ public class PostProductResponse {
     private String usedDuration;
     private String rejectedReason;
     private String conditionLevel;
-    private String status;
+    private VerifiedDecisionStatus verifiedDecisionStatus;
     private boolean active;
     private boolean verified;
     private String categoryName;

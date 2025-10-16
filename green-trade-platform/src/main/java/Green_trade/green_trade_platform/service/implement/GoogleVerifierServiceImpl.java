@@ -5,7 +5,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.Value;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -15,29 +16,24 @@ import java.util.Collections;
  * Token này được FE gửi về sau khi user login bằng Google.
  */
 @Service
+@Slf4j
 public class GoogleVerifierServiceImpl implements GoogleVerifierService {
 
-    @Value("${google.client.id}")
-    private String GOOGLE_CLIENT_ID;
+    private GoogleIdTokenVerifier verifier;
 
-    private final GoogleIdTokenVerifier verifier;
+    public GoogleVerifierServiceImpl(@Value("${google.client.id:}") String googleClientId) {
+        GoogleIdTokenVerifier.Builder builder = new GoogleIdTokenVerifier.Builder(
+                new NetHttpTransport(),
+                new GsonFactory()
+        );
 
-    public GoogleVerifierServiceImpl() {
-        //main version
-        this.verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                .setAudience(Collections.singletonList(GOOGLE_CLIENT_ID))
-                .build();
-//
-//        playground version
-//        this.verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory()).build();
+        if (googleClientId != null && !googleClientId.isBlank()) {
+            builder.setAudience(Collections.singletonList(googleClientId));
+        }
+
+        this.verifier = builder.build();
     }
 
-    /**
-     * Xác minh idToken nhận từ FE.
-     * @param idTokenString token mà FE gửi lên
-     * @return payload chứa thông tin user (email, name, picture, ...)
-     * @throws Exception nếu token không hợp lệ
-     */
     public GoogleIdToken.Payload verify(String idTokenString) throws Exception {
         GoogleIdToken idToken = verifier.verify(idTokenString);
         if (idToken != null) {

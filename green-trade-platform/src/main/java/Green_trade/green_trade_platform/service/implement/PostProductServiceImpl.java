@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
@@ -13,7 +14,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -54,6 +54,15 @@ public class PostProductServiceImpl {
             List<MultipartFile> files
     ) throws Exception {
         try {
+            Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(request.getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
+            Long maxImg = subscription.getSubscriptionPackage().getMaxImgPerPost();
+            if (subscription.getEndDay().isBefore(LocalDateTime.now())) {
+                throw new Exception("Seller subsrciption is expired");
+            }
+            if(files.size() > maxImg) {
+                throw new Exception("Your subscription only allowed " + maxImg + "per post");
+            }
+
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(
                             () -> new RuntimeException("Category is not existed")
@@ -63,12 +72,6 @@ public class PostProductServiceImpl {
                     .orElseThrow(
                             () -> new RuntimeException("Seller is not existed")
                     );
-
-            Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(request.getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
-            Long maxImg = subscription.getSubscriptionPackage().getMaxImgPerPost();
-            if(files.size() > maxImg) {
-                throw new Exception("Your subscription only allowed " + maxImg + "per post");
-            }
 
             PostProduct newPost = PostProduct.builder()
                     .seller(seller)
@@ -83,7 +86,7 @@ public class PostProductServiceImpl {
                     .description(request.getDescription())
                     .locationTrading(request.getLocationTrading())
                     .active(true)
-                    .status("APPROVAL")
+                    .verifiedDecisionstatus(VerifiedDecisionStatus.UNVAILABLE)
                     .verified(false)
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
@@ -92,7 +95,6 @@ public class PostProductServiceImpl {
                     .admin(null)
                     .build();
             log.info(">>> request data: {}", request.toString());
-
             log.info(">>> files data: {}", files);
             files.forEach((file) -> {
                 fileUtils.validateFile(file);
@@ -157,13 +159,13 @@ public class PostProductServiceImpl {
             );
 
             if(!request.isPassed()) {
-                postProduct.setStatus("REJECTED");
+                postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.REJECTED);
                 postProduct.setVerified(false);
                 postProduct.setActive(false);
                 postProduct.setAdmin(admin);
                 postProduct.setRejectedReason(request.getRejectedReason());
             } else {
-                postProduct.setStatus("APPROVED");
+                postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.APPROVED);
                 postProduct.setVerified(true);
                 postProduct.setActive(true);
                 postProduct.setAdmin(admin);
