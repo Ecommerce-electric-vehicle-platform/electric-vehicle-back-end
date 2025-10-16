@@ -1,24 +1,26 @@
 package Green_trade.green_trade_platform.controller;
 
-import Green_trade.green_trade_platform.mapper.PostProductMapper;
 import Green_trade.green_trade_platform.mapper.AdminMapper;
+import Green_trade.green_trade_platform.mapper.PostProductListMapper;
+import Green_trade.green_trade_platform.mapper.PostProductMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.model.Admin;
 import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.request.ApproveSellerRequest;
 import Green_trade.green_trade_platform.request.CreateAdminRequest;
+import Green_trade.green_trade_platform.request.NeedVerifyPostRequest;
 import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
+import Green_trade.green_trade_platform.response.PostProductListResponse;
 import Green_trade.green_trade_platform.response.PostProductResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.response.SellerResponse;
 import Green_trade.green_trade_platform.service.implement.AdminServiceImpl;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -43,6 +45,7 @@ public class AdminController {
     private final AdminServiceImpl adminService;
     private final AdminMapper adminMapper;
     private final PostProductMapper postProductMapper;
+    private final PostProductListMapper postProductListMapper;
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("")
@@ -66,35 +69,6 @@ public class AdminController {
         return ResponseEntity.ok(seller);
     }
 
-    @PreAuthorize("hasRole('ROLE_SELLER')")
-    @Operation(summary = "Review Post Product List API",
-            description = "Return a post product list")
-    @GetMapping("/review-post-seller-list")
-    public ResponseEntity<RestResponse<List<PostProductResponse>, Object>> getAllPostProductForReview() throws Exception {
-        log.info(">>> Server came getAllPostProductForReview API");
-        List<PostProduct> postProducts = postProductServiceImpl.getAllPostProduct();
-        log.info(">>> Server ran postProductServiceImpl.getAllPostProduct()");
-        List<PostProductResponse> postProductResponses = new ArrayList<>();
-
-        postProducts.forEach(
-                (
-                        postProduct -> {
-                            postProductResponses.add(
-                                    postProductMapper.toDto(postProduct)
-                            );
-                        }
-                )
-        );
-
-        RestResponse<List<PostProductResponse>, Object> response = responseMapper.toDto(
-                true,
-                "POST PRODUCT LIST",
-                postProductResponses,
-                null
-        );
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-    }
-
     @PostMapping("creating-admin")
     public ResponseEntity<?> handleCreatingAdmin(@Valid @ModelAttribute CreateAdminRequest request,
                                                  @RequestPart(value = "avatar_url", required = true)MultipartFile avatarFile) {
@@ -114,65 +88,29 @@ public class AdminController {
     }
 
     @PreAuthorize("hasRole('ROLE_SELLER')")
-    @Operation(summary = "View Post Details For Admin Review API",
-            description = "Return post product detail")
-    @GetMapping("/{postProductId}/post-details")
-    public ResponseEntity<RestResponse<PostProductResponse, Object>> viewPostProductDetail(
-            @PathVariable Long postProductId
-    ) throws Exception {
-        PostProduct postProduct = postProductServiceImpl.getPostProductById(postProductId);
-        PostProductResponse responseData = postProductMapper.toDto(postProduct);
-        RestResponse<PostProductResponse, Object> response = responseMapper.toDto(
-                true,
-                "POST PRODUCT DETAIL",
-                responseData,
-                null
-        );
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-    }
-
-    @PreAuthorize("hasRole('ROLE_SELLER')")
-    @Operation(summary = "Decide Post Product API",
-            description = "Return a result show that post product decision")
-    @PostMapping("/review-post-product-decision")
-    public ResponseEntity<RestResponse<PostProductResponse, Object>> reviewPostProductDecision(@Valid PostProductDecisionRequest request) throws Exception {
-        PostProduct result = postProductServiceImpl.checkPostProductVerification(request);
-        PostProductResponse responseData = postProductMapper.toDto(result);
-        RestResponse response = responseMapper.toDto(
-                true,
-                "POST HAS BEEN CHECKED",
-                responseData,
-                null
-        );
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-    }
-
-    @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(summary = "Review Post Product List API",
             description = "Return a post product list")
     @GetMapping("/review-post-seller-list")
-    public ResponseEntity<RestResponse<List<PostProductResponse>, Object>> getAllPostProductForReview() throws Exception {
+    public ResponseEntity<RestResponse<PostProductListResponse, Object>> getAllPostProductForReview(@Valid @RequestBody NeedVerifyPostRequest request) throws Exception {
         log.info(">>> Server came getAllPostProductForReview API");
-        List<PostProduct> postProducts = postProductServiceImpl.getAllPostProduct();
+        Page<PostProduct> postProducts = postProductServiceImpl.getAllPostProductForVerifiedReview(request);
         log.info(">>> Server ran postProductServiceImpl.getAllPostProduct()");
-        List<PostProductResponse> postProductResponses = new ArrayList<>();
 
-        postProducts.forEach(
-                (
-                        postProduct -> {
-                            postProductResponses.add(
-                                    postProductMapper.toDto(postProduct)
-                            );
-                        }
-                )
+        Map<String, Object> meta = Map.of(
+                "currentPage", postProducts.getNumber(),
+                "totalElements", postProducts.getTotalElements(),
+                "totalPage", postProducts.getTotalPages()
         );
 
-        RestResponse<List<PostProductResponse>, Object> response = responseMapper.toDto(
+        PostProductListResponse responseData = postProductListMapper.toDto(postProducts.getContent(), meta);
+
+        RestResponse<PostProductListResponse, Object> response = responseMapper.toDto(
                 true,
                 "POST PRODUCT LIST",
-                postProductResponses,
+                responseData,
                 null
         );
+
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 

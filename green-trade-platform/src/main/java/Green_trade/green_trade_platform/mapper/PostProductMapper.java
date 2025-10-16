@@ -2,6 +2,7 @@ package Green_trade.green_trade_platform.mapper;
 
 import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.response.PostProductResponse;
+import org.hibernate.query.Page;
 import org.springframework.stereotype.Component;
 
 @Component
