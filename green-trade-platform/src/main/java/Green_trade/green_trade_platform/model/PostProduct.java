@@ -52,7 +52,13 @@ public class PostProduct {
     private String locationTrading;
 
     @Column(name = "status", nullable = false, unique = false)
-    private boolean status;
+    private String status;
+
+    @Column(name = "active", nullable = false, unique = false)
+    private boolean active;
+
+    @Column(name = "verified", nullable = false, unique = false)
+    private boolean verified ;
 
     @Column(name = "created_at", nullable = true, unique = false)
     private LocalDateTime createdAt;

@@ -22,7 +22,11 @@ public class AuthControllerAdvisor {
 
     @ExceptionHandler(InvalidArgumentException.class)
     public ResponseEntity<RestResponse<Object, InvalidArgumentException>> handleInvalidArgumentException(InvalidArgumentException ex) {
-        RestResponse<Object, InvalidArgumentException> response = responseMapper.toDto(false, ex.getMessage(), null, ex);
+        RestResponse<Object, InvalidArgumentException> response = responseMapper.toDto(
+                false,
+                ex.getMessage(),
+                null,
+                ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(response);
     }
 
@@ -57,7 +61,11 @@ public class AuthControllerAdvisor {
             errors.put(fieldName, errorMessage);
         });
 
-        RestResponse<Object, Map<String, String>> response = responseMapper.toDto(false, "Validated data failed", errors, errors);
+        RestResponse<Object, Map<String, String>> response = responseMapper.toDto(
+                false,
+                "Validated data failed",
+                null,
+                errors);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }

@@ -2,6 +2,7 @@ package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
+import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
 import Green_trade.green_trade_platform.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -9,8 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -25,6 +28,8 @@ public class PostProductServiceImpl {
     private final SellerRepository sellerRepository;
     private final ProductImageRepository productImageRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final BuyerRepository buyerRepository;
+    private final AdminRepository adminRepository;
 
     public PostProductServiceImpl(
             PostProductRepository postProductRepository,
@@ -32,7 +37,7 @@ public class PostProductServiceImpl {
             FileUtils fileUtils,
             CloudinaryService cloudinaryService,
             SellerRepository sellerRepository,
-            ProductImageRepository productImageRepository, SubscriptionRepository subscriptionRepository) {
+            ProductImageRepository productImageRepository, SubscriptionRepository subscriptionRepository, BuyerRepository buyerRepository, AdminRepository adminRepository) {
         this.postProductRepository = postProductRepository;
         this.categoryRepository = categoryRepository;
         this.fileUtils = fileUtils;
@@ -40,6 +45,8 @@ public class PostProductServiceImpl {
         this.sellerRepository = sellerRepository;
         this.productImageRepository = productImageRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.buyerRepository = buyerRepository;
+        this.adminRepository = adminRepository;
     }
 
     public PostProduct createNewPostProduct(
@@ -57,7 +64,7 @@ public class PostProductServiceImpl {
                             () -> new RuntimeException("Seller is not existed")
                     );
 
-            Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(request.getSellerId());
+            Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(request.getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
             Long maxImg = subscription.getSubscriptionPackage().getMaxImgPerPost();
             if(files.size() > maxImg) {
                 throw new Exception("Your subscription only allowed " + maxImg + "per post");
@@ -75,7 +82,9 @@ public class PostProductServiceImpl {
                     .price(request.getPrice())
                     .description(request.getDescription())
                     .locationTrading(request.getLocationTrading())
-                    .status(false)
+                    .active(true)
+                    .status("APPROVAL")
+                    .verified(false)
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .deletedAt(null)
@@ -111,11 +120,59 @@ public class PostProductServiceImpl {
         }
     }
 
-    public List<PostProduct> getAllPostProduct() {
+    public List<PostProduct> getAllPostProduct() throws Exception {
         try {
-            return postProductRepository.findAll();
+            List<PostProduct> postProducts = postProductRepository.findAll();
+            List<PostProduct> result = new ArrayList<>();
+            for(int i = 0; i <= postProducts.size() - 1; i++) {
+                PostProduct postProduct = postProducts.get(i);
+                Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(postProduct.getSeller().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
+                if(subscription.getSubscriptionPackage().getId() >= 2) {
+                    result.add(postProduct);
+                }
+            }
+            return result;
         } catch (Exception e) {
             log.info(">>> Error at PostProductServiceImpl: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    public PostProduct getPostProductById(Long postProductId) throws Exception {
+        try {
+            PostProduct foundPostProduct = postProductRepository.findById(postProductId).orElseThrow(
+                    () -> new Exception("Post is not existed")
+            );
+            return foundPostProduct;
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    public PostProduct checkPostProductVerification(PostProductDecisionRequest request) throws Exception {
+        try {
+            Admin admin = adminRepository.findByUsername(request.getAdminUsername()).orElseThrow(() -> new Exception("Admin is not existed"));
+            PostProduct postProduct = postProductRepository.findById(
+                    request.getPostProductId()).orElseThrow(() -> new Exception("Post Product is not existed")
+            );
+
+            if(!request.isPassed()) {
+                postProduct.setStatus("REJECTED");
+                postProduct.setVerified(false);
+                postProduct.setActive(false);
+                postProduct.setAdmin(admin);
+                postProduct.setRejectedReason(request.getRejectedReason());
+            } else {
+                postProduct.setStatus("APPROVED");
+                postProduct.setVerified(true);
+                postProduct.setActive(true);
+                postProduct.setAdmin(admin);
+                postProduct.setRejectedReason("");
+            }
+
+            return postProduct;
+        } catch(Exception e) {
+            log.info(">>> Error at decidePostContentValidation: {}" + e.getMessage());
             throw e;
         }
     }

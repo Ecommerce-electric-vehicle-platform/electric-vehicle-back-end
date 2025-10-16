@@ -3,6 +3,7 @@ package Green_trade.green_trade_platform.controller;
 import Green_trade.green_trade_platform.mapper.AuthMapper;
 import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
+import Green_trade.green_trade_platform.model.Admin;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.request.*;
 import Green_trade.green_trade_platform.response.AuthResponse;
@@ -74,12 +75,32 @@ public class AuthController {
     }
 
     @Operation(
-            summary = "Sign in for customer",
+            summary = "Sign in for Admin",
                 description = "Return response show that user has signed in successfully"
     )
     @PostMapping("/signin")
     public ResponseEntity<RestResponse<AuthResponse, Object>>  signIn(@Valid @RequestBody SignInRequest req) {
         Buyer user = signInService.startSignIn(req);
+
+        String accessToken = jwtUtils.generateTokenFromUsername(user.getUsername(), ACCESS_EXPIRE_TIME);
+        String refreshToken = jwtUtils.generateTokenFromUsername(user.getUsername(), REFRESH_EXPIRE_TIME);
+        redisTokenService.saveTokenToRedis(user.getEmail(), refreshToken, REFRESH_EXPIRE_TIME);
+
+        AuthResponse authResponse = authMapper.toDto(user, accessToken, refreshToken);
+
+        return ResponseEntity.status(HttpStatus.OK.value())
+                .body(responseMapper.toDto(
+                        true, "LOGIN SUCCESSFULLY", authResponse, null
+                ));
+    }
+
+    @Operation(
+            summary = "Sign in for Admin",
+            description = "Return response show that admin has signed in successfully"
+    )
+    @PostMapping("/admin/signin")
+    public ResponseEntity<RestResponse<AuthResponse, Object>>  signInAdmin(@Valid @RequestBody SignInAdminRequest req) {
+        Admin user = signInService.startSignInAdmin(req);
 
         String accessToken = jwtUtils.generateTokenFromUsername(user.getUsername(), ACCESS_EXPIRE_TIME);
         String refreshToken = jwtUtils.generateTokenFromUsername(user.getUsername(), REFRESH_EXPIRE_TIME);

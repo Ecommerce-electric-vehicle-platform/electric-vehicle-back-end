@@ -17,7 +17,9 @@ public class PostProductMapper {
                 .usedDuration(postProduct.getUsedDuration())
                 .rejectedReason(postProduct.getRejectedReason())
                 .conditionLevel(postProduct.getConditionLevel())
-                .status(postProduct.isStatus())
+                .status(postProduct.getStatus())
+                .verified(postProduct.isVerified())
+                .active(postProduct.isActive())
                 .categoryName(postProduct.getCategory().getName())
                 .build();
     }

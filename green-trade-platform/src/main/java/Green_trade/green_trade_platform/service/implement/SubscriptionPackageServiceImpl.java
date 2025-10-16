@@ -57,7 +57,7 @@ public class SubscriptionPackageServiceImpl {
         SubscriptionPackages subscriptionPackages = subscriptionPackageRepository.findById(request.getPackageId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói người bán với id " + request.getPackageId()));
 
-        Optional<Subscription> exitsSubscription = subscriptionRepository.findFirstBySellerOrderByEndDayDesc(seller);
+        Optional<Subscription> exitsSubscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(seller.getSellerId());
         if(exitsSubscription.isPresent()) {
             throw new IllegalArgumentException("Bạn đã đăng kí gói. Vui lòng hủy gói để đăng kí gói mới.");
         }
