@@ -7,11 +7,10 @@ import Green_trade.green_trade_platform.response.PostProductListResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,6 +24,7 @@ public class PostProductController {
     private final ResponseMapper responseMapper;
     private final PostProductListMapper postProductListMapper;
 
+    @GetMapping("")
     public ResponseEntity<RestResponse<?, ?>> getAllProduct() {
         try {
             int size = 10, page = 0;
