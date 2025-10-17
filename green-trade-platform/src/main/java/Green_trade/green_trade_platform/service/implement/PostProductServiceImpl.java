@@ -35,6 +35,7 @@ public class PostProductServiceImpl implements PostProductService {
     private final SubscriptionRepository subscriptionRepository;
     private final BuyerRepository buyerRepository;
     private final AdminRepository adminRepository;
+    private final SubscriptionServiceImpl subscriptionService;
 
     public PostProductServiceImpl(
             PostProductRepository postProductRepository,
@@ -42,7 +43,11 @@ public class PostProductServiceImpl implements PostProductService {
             FileUtils fileUtils,
             CloudinaryService cloudinaryService,
             SellerRepository sellerRepository,
-            ProductImageRepository productImageRepository, SubscriptionRepository subscriptionRepository, BuyerRepository buyerRepository, AdminRepository adminRepository) {
+            ProductImageRepository productImageRepository,
+            SubscriptionRepository subscriptionRepository,
+            BuyerRepository buyerRepository,
+            AdminRepository adminRepository,
+            SubscriptionServiceImpl subscriptionService) {
         this.postProductRepository = postProductRepository;
         this.categoryRepository = categoryRepository;
         this.fileUtils = fileUtils;
@@ -52,6 +57,7 @@ public class PostProductServiceImpl implements PostProductService {
         this.subscriptionRepository = subscriptionRepository;
         this.buyerRepository = buyerRepository;
         this.adminRepository = adminRepository;
+        this.subscriptionService = subscriptionService;
     }
 
     public PostProduct createNewPostProduct(
@@ -191,8 +197,9 @@ public class PostProductServiceImpl implements PostProductService {
                 postProduct.setAdmin(admin);
                 postProduct.setRejectedReason("");
             }
+            postProductRepository.save(postProduct);
 
-            return postProduct;
+            return postProductRepository.save(postProduct);
         } catch(Exception e) {
             log.info(">>> Error at decidePostContentValidation: {}" + e.getMessage());
             throw e;
@@ -202,23 +209,11 @@ public class PostProductServiceImpl implements PostProductService {
     public PostProduct postProductVerifiedRequest(VerifiedPostProductRequest request) throws Exception {
         PostProduct postProduct = postProductRepository.findById(request.getPostId()).orElseThrow(() -> new Exception("Post is not existed"));
         Long sellerId = postProduct.getSeller().getSellerId();
-        if(isServicePackageExpired(sellerId)) {
+        if(subscriptionService.isServicePackageExpired(sellerId)) {
             throw new SubscriptionExpiredException();
         }
         postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.PENDING);
         return postProductRepository.save(postProduct);
-    }
-
-    public boolean isServicePackageExpired(Long sellerId) throws Exception {
-        boolean result = false;
-        Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(sellerId)
-                .orElseThrow(
-                        () -> new Exception("Seller doesn't subscripe any service")
-                );
-        if(LocalDateTime.now().isAfter(subscription.getEndDay())) {
-            result = true;
-        }
-        return result;
     }
 
 }

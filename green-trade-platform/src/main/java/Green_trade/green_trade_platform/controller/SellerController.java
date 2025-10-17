@@ -84,9 +84,16 @@ public class SellerController {
     @Operation(summary = "Request verified for post product",
                 description = "Retrun result that the request has been sent")
     @PostMapping("/verified-post-product-request")
-    public ResponseEntity<?> postProductVerifiedRequest(@Valid @RequestBody VerifiedPostProductRequest request) throws Exception {
-        postProductService.postProductVerifiedRequest(request);
-        return ResponseEntity.status(HttpStatus.OK.value()).body(null);
+    public ResponseEntity<RestResponse<PostProductResponse, Object>> postProductVerifiedRequest(@Valid @RequestBody VerifiedPostProductRequest request) throws Exception {
+        PostProduct result = postProductService.postProductVerifiedRequest(request);
+        PostProductResponse responseData = postProductMapper.toDto(result);
+        RestResponse<PostProductResponse, Object> response = responseMapper.toDto(
+                true,
+                "VERIFIED POST REQUEST SENT",
+                responseData,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
 
