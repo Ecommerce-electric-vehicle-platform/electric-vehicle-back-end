@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -25,9 +26,9 @@ public class PostProductController {
     private final PostProductListMapper postProductListMapper;
 
     @GetMapping("")
-    public ResponseEntity<RestResponse<?, ?>> getAllProduct() {
+    public ResponseEntity<RestResponse<?, ?>> getAllProduct(@RequestParam(name = "page", defaultValue = "0") int page,
+                                                            @RequestParam(name = "size", defaultValue = "10") int size) {
         try {
-            int size = 10, page = 0;
             Page<PostProduct> postProductPage = postProductService.getAllProductPaging(page, size);
             Map<String, Object> meta = Map.of(
                     "currentPage", postProductPage.getNumber(),

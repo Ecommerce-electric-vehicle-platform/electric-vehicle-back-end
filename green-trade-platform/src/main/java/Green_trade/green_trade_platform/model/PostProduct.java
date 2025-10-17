@@ -37,7 +37,7 @@ public class PostProduct {
     @Column(name = "used_duration", nullable = false, unique = false)
     public String usedDuration;
 
-    @Column(name = "rejected_reason", nullable = false, unique = false)
+    @Column(name = "rejected_reason")
     private String rejectedReason;
 
     @Column(name = "condition_level", nullable = false, unique = false)

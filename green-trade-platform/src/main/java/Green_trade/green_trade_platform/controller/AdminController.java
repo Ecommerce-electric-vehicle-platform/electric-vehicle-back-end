@@ -5,6 +5,7 @@ import Green_trade.green_trade_platform.mapper.PostProductListMapper;
 import Green_trade.green_trade_platform.mapper.PostProductMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.model.Admin;
+import Green_trade.green_trade_platform.model.Notification;
 import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.request.ApproveSellerRequest;
@@ -65,11 +66,19 @@ public class AdminController {
 
     @PostMapping("/approve-seller")
     public ResponseEntity<RestResponse<?, ?>> handlePendingSeller(@RequestBody ApproveSellerRequest request) {
-        Seller seller = sellerService.handlePendingSeller(request);
+        Notification sellerNotification = sellerService.handlePendingSeller(request);
+        if(sellerNotification != null) {
+            return ResponseEntity.status(HttpStatus.OK.value()).body(responseMapper.toDto(
+                    true,
+                    "FETCH SELLER SUCCESSFULLY",
+                    sellerNotification,
+                    null
+            ));
+        }
         return ResponseEntity.status(HttpStatus.OK.value()).body(responseMapper.toDto(
-                true,
-                "FETCH SELLER SUCCESSFULLY",
-                seller,
+                false,
+                "REJECT SELLER APPROVEMENT",
+                null,
                 null
         ));
     }
