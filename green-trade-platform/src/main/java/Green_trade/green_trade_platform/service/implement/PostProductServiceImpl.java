@@ -1,11 +1,13 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
+import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.request.NeedVerifyPostRequest;
 import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
+import Green_trade.green_trade_platform.request.VerifiedPostProductRequest;
 import Green_trade.green_trade_platform.service.PostProductService;
 import Green_trade.green_trade_platform.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,7 @@ public class PostProductServiceImpl implements PostProductService {
     private final SubscriptionRepository subscriptionRepository;
     private final BuyerRepository buyerRepository;
     private final AdminRepository adminRepository;
+    private final SubscriptionServiceImpl subscriptionService;
 
     public PostProductServiceImpl(
             PostProductRepository postProductRepository,
@@ -40,7 +43,11 @@ public class PostProductServiceImpl implements PostProductService {
             FileUtils fileUtils,
             CloudinaryService cloudinaryService,
             SellerRepository sellerRepository,
-            ProductImageRepository productImageRepository, SubscriptionRepository subscriptionRepository, BuyerRepository buyerRepository, AdminRepository adminRepository) {
+            ProductImageRepository productImageRepository,
+            SubscriptionRepository subscriptionRepository,
+            BuyerRepository buyerRepository,
+            AdminRepository adminRepository,
+            SubscriptionServiceImpl subscriptionService) {
         this.postProductRepository = postProductRepository;
         this.categoryRepository = categoryRepository;
         this.fileUtils = fileUtils;
@@ -50,6 +57,7 @@ public class PostProductServiceImpl implements PostProductService {
         this.subscriptionRepository = subscriptionRepository;
         this.buyerRepository = buyerRepository;
         this.adminRepository = adminRepository;
+        this.subscriptionService = subscriptionService;
     }
 
     public PostProduct createNewPostProduct(
@@ -179,7 +187,7 @@ public class PostProductServiceImpl implements PostProductService {
                     request.getPostProductId()).orElseThrow(() -> new Exception("Post Product is not existed")
             );
 
-            if(!request.isPassed()) {
+            if(!request.getPassed()) {
                 postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.REJECTED);
                 postProduct.setVerified(false);
                 postProduct.setAdmin(admin);
@@ -190,11 +198,23 @@ public class PostProductServiceImpl implements PostProductService {
                 postProduct.setAdmin(admin);
                 postProduct.setRejectedReason("");
             }
+            postProductRepository.save(postProduct);
 
-            return postProduct;
+            return postProductRepository.save(postProduct);
         } catch(Exception e) {
             log.info(">>> Error at decidePostContentValidation: {}" + e.getMessage());
             throw e;
         }
     }
+
+    public PostProduct postProductVerifiedRequest(VerifiedPostProductRequest request) throws Exception {
+        PostProduct postProduct = postProductRepository.findById(request.getPostId()).orElseThrow(() -> new Exception("Post is not existed"));
+        Long sellerId = postProduct.getSeller().getSellerId();
+        if(subscriptionService.isServicePackageExpired(sellerId)) {
+            throw new SubscriptionExpiredException();
+        }
+        postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.PENDING);
+        return postProductRepository.save(postProduct);
+    }
+
 }

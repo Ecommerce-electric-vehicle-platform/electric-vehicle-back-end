@@ -4,12 +4,14 @@ import Green_trade.green_trade_platform.mapper.PostProductMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
+import Green_trade.green_trade_platform.request.VerifiedPostProductRequest;
 import Green_trade.green_trade_platform.response.PostProductResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.response.SubscriptionResponse;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/seller")
@@ -78,6 +79,23 @@ public class SellerController {
         );
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
+
+    @PreAuthorize("hasRole('ROLER_SELLER')")
+    @Operation(summary = "Request verified for post product",
+                description = "Retrun result that the request has been sent")
+    @PostMapping("/verified-post-product-request")
+    public ResponseEntity<RestResponse<PostProductResponse, Object>> postProductVerifiedRequest(@Valid @RequestBody VerifiedPostProductRequest request) throws Exception {
+        PostProduct result = postProductService.postProductVerifiedRequest(request);
+        PostProductResponse responseData = postProductMapper.toDto(result);
+        RestResponse<PostProductResponse, Object> response = responseMapper.toDto(
+                true,
+                "VERIFIED POST REQUEST SENT",
+                responseData,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+    }
+
 
 
 }
