@@ -2,12 +2,14 @@ package Green_trade.green_trade_platform.mapper;
 
 import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.response.PostProductResponse;
+import org.hibernate.query.Page;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PostProductMapper {
     public PostProductResponse toDto(PostProduct postProduct) {
         return PostProductResponse.builder()
+                .postId(postProduct.getId())
                 .sellerId(postProduct.getSeller().getSellerId())
                 .sellerStoreName(postProduct.getSeller().getStoreName())
                 .title(postProduct.getTitle())

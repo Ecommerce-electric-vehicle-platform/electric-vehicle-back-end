@@ -19,7 +19,7 @@ public class AuthMapper {
 
     public AuthResponse toDto(Admin admin, String accessToken, String refreshToken) {
         return AuthResponse.builder()
-                .username(admin.getUsername())
+                .username(admin.getEmployeeNumber())
                 .email(admin.getEmail())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
