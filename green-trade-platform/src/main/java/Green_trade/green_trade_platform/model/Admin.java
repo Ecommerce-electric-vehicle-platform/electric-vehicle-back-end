@@ -72,6 +72,9 @@ public class Admin {
     @OneToMany(mappedBy = "admin", fetch = FetchType.LAZY)
     private List<Seller> sellers;
 
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders;
+
     @PrePersist
     public void onCreate() {
         this.isSuperAdmin = false;

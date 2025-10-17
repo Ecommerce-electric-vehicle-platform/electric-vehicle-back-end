@@ -3,6 +3,8 @@ package Green_trade.green_trade_platform.controller;
 import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.model.Seller;
+import Green_trade.green_trade_platform.request.PlaceOrderRequest;
 import Green_trade.green_trade_platform.request.ProfileRequest;
 import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.response.BuyerResponse;
@@ -81,5 +83,10 @@ public class BuyerController {
                         null
                 )
         );
+    }
+
+    public ResponseEntity<?> placeOrder(@Valid PlaceOrderRequest request) {
+
+        return ResponseEntity.status(HttpStatus.OK.value()).body(null);
     }
 }

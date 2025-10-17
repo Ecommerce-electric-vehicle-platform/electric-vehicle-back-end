@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -76,6 +77,9 @@ public class Buyer {
     @OneToOne(mappedBy = "buyer", cascade = CascadeType.REMOVE)
     @JsonBackReference
     private Wallet wallet;
+
+    @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders;
 
     @PrePersist
     public void onCreate() {
