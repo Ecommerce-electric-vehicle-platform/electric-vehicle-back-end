@@ -70,9 +70,10 @@ public class AdminController {
     @Operation(summary = "Review Post Product List API",
             description = "Return a post product list")
     @GetMapping("/review-post-seller-list")
-    public ResponseEntity<RestResponse<List<PostProductResponse>, Object>> getAllPostProductForReview() throws Exception {
+    public ResponseEntity<RestResponse<Page<PostProductResponse>, Object>> getAllPostProductForReview() throws Exception {
         log.info(">>> Server came getAllPostProductForReview API");
-        List<PostProduct> postProducts = postProductServiceImpl.getAllPostProduct();
+        int page = 0, size = 10;
+        Page<PostProduct> postProducts = postProductServiceImpl.getAllPostProduct(page, size);
         log.info(">>> Server ran postProductServiceImpl.getAllPostProduct()");
         List<PostProductResponse> postProductResponses = new ArrayList<>();
 
@@ -86,7 +87,7 @@ public class AdminController {
                 )
         );
 
-        RestResponse<List<PostProductResponse>, Object> response = responseMapper.toDto(
+        RestResponse<Page<PostProductResponse>, Object> response = responseMapper.toDto(
                 true,
                 "POST PRODUCT LIST",
                 postProductResponses,

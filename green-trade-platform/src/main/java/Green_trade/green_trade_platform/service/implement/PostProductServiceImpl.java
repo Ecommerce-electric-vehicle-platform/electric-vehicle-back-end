@@ -8,6 +8,7 @@ import Green_trade.green_trade_platform.request.UploadPostProductRequest;
 import Green_trade.green_trade_platform.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -126,20 +127,30 @@ public class PostProductServiceImpl {
 
     public Page<PostProduct> getAllPostProduct(int page, int size) {
         try {
-            Page<PostProduct> postProducts = postProductRepository.findAll();
-            Page<PostProduct> result = new ArrayList<>();
-            for(int i = 0; i <= postProducts.getTotalPages() - 1; i++) {
-                PostProduct postProduct = postProducts.get(i);
-                Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(postProduct.getSeller().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
-                if(subscription.getSubscriptionPackage().getId() >= 2) {
-                    result.add(postProduct);
-                }
-            }
-            return result;
-            return postProductRepository.findAll(PageRequest.of(page, size));
+            // Lấy tất cả PostProduct theo phân trang
+            Page<PostProduct> postProducts = postProductRepository.findAll(PageRequest.of(page, size));
+
+            // Lọc danh sách PostProduct thỏa điều kiện
+            List<PostProduct> filteredProducts = postProducts.getContent().stream()
+                    .filter(postProduct -> {
+                        try {
+                            Subscription subscription = subscriptionRepository
+                                    .findBySeller_SellerIdOrderByEndDayDesc(postProduct.getSeller().getSellerId())
+                                    .orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
+                            return subscription.getSubscriptionPackage().getId() >= 2;
+                        } catch (Exception e) {
+                            log.warn(">>> Seller {} does not have a valid subscription: {}", postProduct.getSeller().getSellerId(), e.getMessage());
+                            return false;
+                        }
+                    })
+                    .toList();
+
+            // Trả về Page chứa các kết quả đã lọc
+            return new PageImpl<>(filteredProducts, PageRequest.of(page, size), postProducts.getTotalElements());
+
         } catch (Exception e) {
-            log.info(">>> Error at PostProductServiceImpl: {}", e.getMessage());
-            throw e;
+            log.error(">>> Error at PostProductServiceImpl: {}", e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -156,7 +167,7 @@ public class PostProductServiceImpl {
 
     public PostProduct checkPostProductVerification(PostProductDecisionRequest request) throws Exception {
         try {
-            Admin admin = adminRepository.findByUsername(request.getAdminUsername()).orElseThrow(() -> new Exception("Admin is not existed"));
+            Admin admin = adminRepository.findByEmployeeNumber(request.getAdminUsername()).orElseThrow(() -> new Exception("Admin is not existed"));
             PostProduct postProduct = postProductRepository.findById(
                     request.getPostProductId()).orElseThrow(() -> new Exception("Post Product is not existed")
             );
