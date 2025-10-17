@@ -6,6 +6,7 @@ import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.response.PostProductListResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,11 @@ public class PostProductController {
     private final ResponseMapper responseMapper;
     private final PostProductListMapper postProductListMapper;
 
+    @Operation(
+            summary = "Get all post product with pagination",
+            description = "When buyer click to one page then FE will send page, size to BE." +
+                    "Size can be default 10 or more."
+    )
     @GetMapping("")
     public ResponseEntity<RestResponse<?, ?>> getAllProduct(@RequestParam(name = "page", defaultValue = "0") int page,
                                                             @RequestParam(name = "size", defaultValue = "10") int size) {
