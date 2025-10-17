@@ -40,7 +40,7 @@ public class BuyerController {
             description = "Upload buyer profile: avatar, full name, shipping address, and so on"
     )
     @PostMapping(
-            value = "/{id}/upload-profile",
+            value = "/upload-profile",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     @PreAuthorize("hasRole('ROLE_BUYER')")
@@ -59,7 +59,7 @@ public class BuyerController {
     @Operation(summary = "Update Profile Buyer",
                 description = "Update buyer profile: buyer profile information")
     @PutMapping(
-            value = "/{id}/update-profile",
+            value = "/update-profile",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<RestResponse<BuyerResponse, Object>> updateProfile(

@@ -7,9 +7,9 @@ DELETE FROM subscription_packages;
 DELETE FROM post_product;
 DELETE FROM category;
 DELETE FROM product_image;
-DELETE FROM admin;
-DELETE FROM seller;
-DELETE FROM buyer;
+--DELETE FROM admin;
+--DELETE FROM seller;
+--DELETE FROM buyer;
 
 -- Reset auto increment để tránh lệch ID
 ALTER TABLE buyer AUTO_INCREMENT = 1;

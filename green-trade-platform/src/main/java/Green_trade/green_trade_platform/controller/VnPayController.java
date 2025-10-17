@@ -81,9 +81,6 @@ public class VnPayController {
                 result.get("response_code"), null));
     }
 
-
-
-//    Nếu deploy được thì lấy code này để làm
     @GetMapping("/ipn")
     public ResponseEntity<?> ipn(HttpServletRequest request) {
         log.info(">>> Chạy vào ipn rồi.");
