@@ -29,9 +29,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -75,8 +73,10 @@ public class AdminController {
     }
 
     @PostMapping("creating-admin")
-    public ResponseEntity<?> handleCreatingAdmin(@Valid @ModelAttribute CreateAdminRequest request,
-                                                 @RequestPart(value = "avatar_url", required = true)MultipartFile avatarFile) {
+    public ResponseEntity<?> handleCreatingAdmin(
+            @Valid @ModelAttribute CreateAdminRequest request,
+            @RequestPart(value = "avatar_url", required = true)MultipartFile avatarFile
+    ) {
        try {
            Admin data = adminService.handleCreateAdminAccount(avatarFile, request);
            return ResponseEntity.ok(responseMapper.toDto(true,
@@ -92,11 +92,13 @@ public class AdminController {
 
     }
 
-    @PreAuthorize("hasRole('ROLE_SELLER')")
+//    @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(summary = "Review Post Product List API",
             description = "Return a post product list")
     @GetMapping("/review-post-seller-list")
-    public ResponseEntity<RestResponse<PostProductListResponse, Object>> getAllPostProductForReview(@Valid @RequestBody NeedVerifyPostRequest request) throws Exception {
+    public ResponseEntity<RestResponse<PostProductListResponse, Object>> getAllPostProductForReview(
+            @Valid @RequestBody NeedVerifyPostRequest request
+    ) throws Exception {
         log.info(">>> Server came getAllPostProductForReview API");
         Page<PostProduct> postProducts = postProductServiceImpl.getAllPostProductForVerifiedReview(request);
         log.info(">>> Server ran postProductServiceImpl.getAllPostProduct()");
@@ -119,7 +121,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_SELLER')")
+//    @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(summary = "View Post Details For Admin Review API",
             description = "Return post product detail")
     @GetMapping("/{postProductId}/post-details")
@@ -137,8 +139,8 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_SELLER')")
-    @Operation(summary = "Decide Post Product API",
+//    @PreAuthorize("hasRole('ROLE_SELLER')")
+    @Operation(summary = "Decide Post Product Verified API",
             description = "Return a result show that post product decision")
     @PostMapping("/review-post-product-decision")
     public ResponseEntity<RestResponse<PostProductResponse, Object>> reviewPostProductDecision(@Valid @RequestBody PostProductDecisionRequest request) throws Exception {
