@@ -6,11 +6,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostProductResponse {
+    private Long postId;
     private Long sellerId;
     private String sellerStoreName;
     private String title;

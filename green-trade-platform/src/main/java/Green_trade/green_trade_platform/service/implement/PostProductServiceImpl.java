@@ -3,13 +3,13 @@ package Green_trade.green_trade_platform.service.implement;
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
+import Green_trade.green_trade_platform.request.NeedVerifyPostRequest;
 import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
+import Green_trade.green_trade_platform.service.PostProductService;
 import Green_trade.green_trade_platform.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,7 +20,7 @@ import java.util.Map;
 
 @Service
 @Slf4j
-public class PostProductServiceImpl {
+public class PostProductServiceImpl implements PostProductService {
 
     private final PostProductRepository postProductRepository;
 
@@ -125,32 +125,36 @@ public class PostProductServiceImpl {
         }
     }
 
-    public Page<PostProduct> getAllPostProduct(int page, int size) {
+    public Page<PostProduct> getAllProductPaging(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        Page<PostProduct> postProductsPaging = postProductRepository.findAll(pageable);
+        return new PageImpl<>(
+                postProductsPaging.getContent(),
+                pageable,
+                postProductsPaging.getTotalElements()
+        );
+    }
+
+    public Page<PostProduct> getAllPostProductForVerifiedReview(NeedVerifyPostRequest request) throws Exception {
         try {
-            // Lấy tất cả PostProduct theo phân trang
-            Page<PostProduct> postProducts = postProductRepository.findAll(PageRequest.of(page, size));
-
-            // Lọc danh sách PostProduct thỏa điều kiện
-            List<PostProduct> filteredProducts = postProducts.getContent().stream()
-                    .filter(postProduct -> {
-                        try {
-                            Subscription subscription = subscriptionRepository
-                                    .findBySeller_SellerIdOrderByEndDayDesc(postProduct.getSeller().getSellerId())
-                                    .orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
-                            return subscription.getSubscriptionPackage().getId() >= 2;
-                        } catch (Exception e) {
-                            log.warn(">>> Seller {} does not have a valid subscription: {}", postProduct.getSeller().getSellerId(), e.getMessage());
-                            return false;
-                        }
-                    })
-                    .toList();
-
-            // Trả về Page chứa các kết quả đã lọc
-            return new PageImpl<>(filteredProducts, PageRequest.of(page, size), postProducts.getTotalElements());
-
+            Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), Sort.by("id").ascending());
+            Page<PostProduct> postProductsPaging = postProductRepository.findAll(pageable);
+            List<PostProduct> postProducts = postProductsPaging.getContent();
+            List<PostProduct> result = new ArrayList<>();
+            for(int i = 0; i <= postProducts.size() - 1; i++) {
+                PostProduct postProduct = postProducts.get(i);
+                Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(postProduct.getSeller().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
+                log.info(">>> subscription package id: {}", subscription.getSubscriptionPackage().getId());
+                log.info(">>> postProduct verified status: {}", postProduct.getVerifiedDecisionstatus().toString());
+                if(subscription.getSubscriptionPackage().getId() >= 2 && postProduct.getVerifiedDecisionstatus().equals(VerifiedDecisionStatus.PENDING)) {
+                    log.info(">>> result add: {} and {}", postProduct.getVerifiedDecisionstatus(), subscription.getSubscriptionPackage().getId());
+                    result.add(postProduct);
+                }
+            }
+            return new PageImpl<>(result, pageable, result.size());
         } catch (Exception e) {
-            log.error(">>> Error at PostProductServiceImpl: {}", e.getMessage(), e);
-            throw new RuntimeException(e);
+            log.info(">>> Error at PostProductServiceImpl: {}", e.getMessage());
+            throw e;
         }
     }
 
@@ -167,7 +171,9 @@ public class PostProductServiceImpl {
 
     public PostProduct checkPostProductVerification(PostProductDecisionRequest request) throws Exception {
         try {
-            Admin admin = adminRepository.findByEmployeeNumber(request.getAdminUsername()).orElseThrow(() -> new Exception("Admin is not existed"));
+            log.info(">>> request: {}", request);
+            log.info(">>> admin list: {}", adminRepository.findByEmployeeNumber("EMP002").get());
+            Admin admin = adminRepository.findByEmployeeNumber(request.getEmployeeNumber()).orElseThrow(() -> new Exception("Admin is not existed"));
             PostProduct postProduct = postProductRepository.findById(
                     request.getPostProductId()).orElseThrow(() -> new Exception("Post Product is not existed")
             );
@@ -175,13 +181,11 @@ public class PostProductServiceImpl {
             if(!request.isPassed()) {
                 postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.REJECTED);
                 postProduct.setVerified(false);
-                postProduct.setActive(false);
                 postProduct.setAdmin(admin);
                 postProduct.setRejectedReason(request.getRejectedReason());
             } else {
                 postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.APPROVED);
                 postProduct.setVerified(true);
-                postProduct.setActive(true);
                 postProduct.setAdmin(admin);
                 postProduct.setRejectedReason("");
             }

@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,9 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostProductDecisionRequest {
-    private String employeeNumber;
-    private Long postProductId;
-    private boolean passed;
-    private String rejectedReason;
+public class NeedVerifyPostRequest {
+    private int size;
+    private int page;
 }

@@ -102,8 +102,8 @@ public class AuthController {
     public ResponseEntity<RestResponse<AuthResponse, Object>>  signInAdmin(@Valid @RequestBody SignInAdminRequest req) {
         Admin user = signInService.startSignInAdmin(req);
 
-        String accessToken = jwtUtils.generateTokenFromUsername(user.getUsername(), ACCESS_EXPIRE_TIME);
-        String refreshToken = jwtUtils.generateTokenFromUsername(user.getUsername(), REFRESH_EXPIRE_TIME);
+        String accessToken = jwtUtils.generateTokenFromUsername(user.getEmployeeNumber(), ACCESS_EXPIRE_TIME);
+        String refreshToken = jwtUtils.generateTokenFromUsername(user.getEmployeeNumber(), REFRESH_EXPIRE_TIME);
         redisTokenService.saveTokenToRedis(user.getEmail(), refreshToken, REFRESH_EXPIRE_TIME);
 
         AuthResponse authResponse = authMapper.toDto(user, accessToken, refreshToken);

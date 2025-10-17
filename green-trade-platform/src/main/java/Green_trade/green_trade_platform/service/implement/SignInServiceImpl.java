@@ -41,6 +41,7 @@ public class SignInServiceImpl implements SignInService {
             String password = request.getPassword();
 
             Optional<Buyer> buyerOpt = buyerRepository.findByUsername(username);
+            log.info("buyerOpt: {}", buyerOpt.get());
             if (buyerOpt.isEmpty() || !passwordEncoder.matches(password, buyerOpt.get().getPassword())) {
                 log.info("startSignIn at SignInServiceImpl: user: {} authenticated failed", username);
                 throw new AuthException("Username/password is incorrect");
@@ -58,15 +59,15 @@ public class SignInServiceImpl implements SignInService {
     public Admin startSignInAdmin(SignInAdminRequest request) {
         try {
             log.info(">>> startSignInAdmin of SignInServiceImpl: started");
-            String username = request.getUsername();
+            String employeeNumber= request.getEmployeeNumber();
             String password = request.getPassword();
 
-            Optional<Admin> adminOpt = adminRepository.findByUsername(username);
+            Optional<Admin> adminOpt = adminRepository.findByEmployeeNumber(employeeNumber);
             if (adminOpt.isEmpty() || !passwordEncoder.matches(password, adminOpt.get().getPassword())) {
-                log.info(">>> startSignInAdmin at SignInServiceImpl: user: {} authenticated failed", username);
+                log.info(">>> startSignInAdmin at SignInServiceImpl: user: {} authenticated failed", employeeNumber);
                 throw new AuthException("Username/password is incorrect");
             }
-            log.info(">>> startSignInAdmin at SignInServiceImpl: user: {} authenticated successfully", username);
+            log.info(">>> startSignInAdmin at SignInServiceImpl: user: {} authenticated successfully", employeeNumber);
             log.info(">>> startSignInAdmin of SignInServiceImpl: ended");
             return adminOpt.get();
         } catch (Exception e) {
