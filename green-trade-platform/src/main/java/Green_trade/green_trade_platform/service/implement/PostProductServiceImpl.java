@@ -133,6 +133,7 @@ public class PostProductServiceImpl implements PostProductService {
         }
     }
 
+
     public Page<PostProduct> getAllProductPaging(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
         Page<PostProduct> postProductsPaging = postProductRepository.findAll(pageable);

@@ -64,17 +64,19 @@ public class VnPayController {
     public ResponseEntity<?> handleVnPayReturn(HttpServletRequest request) {
         Map<String, Object> result = vnPayService.processReturn(request);
         if(result.get("response_code").equals("00")) {
-//            Map<String, String> inputData = new HashMap<>();
+            Map<String, String> inputData = new HashMap<>();
 
-//            // Get all parameters of VNPay response
-//            request.getParameterMap().forEach((key, value) -> {
-//                if (key.startsWith("vnp_")) {
-//                    inputData.put(key, value[0]);
-//                }
-//            });
+            // Lấy toàn bộ tham số vnp_ gửi về
+            request.getParameterMap().forEach((key, value) -> {
+                if (key.startsWith("vnp_")) {
+                    inputData.put(key, value[0]);
+                }
+            });
+
+            Wallet wallet = walletServiceImpl.processDepositMoneyIntoWallet(inputData);
             return ResponseEntity.ok(responseMapper.toDto(
-                    false, "Nạp tiền thành công.",
-                    result.get("response_code"), null));
+                    true, "Nạp tiền thành công.",
+                    walletMapper.toDto(wallet), null));
         }
         return ResponseEntity.ok(responseMapper.toDto(
                 false, "Nạp tiền không thành công.",
@@ -84,22 +86,27 @@ public class VnPayController {
 
 
 //    Nếu deploy được thì lấy code này để làm
-    @GetMapping("/ipn")
-    public ResponseEntity<?> ipn(HttpServletRequest request) {
-        log.info(">>> Chạy vào ipn rồi.");
-        Map<String, String> inputData = new HashMap<>();
-
-        // Lấy toàn bộ tham số vnp_ gửi về
-        request.getParameterMap().forEach((key, value) -> {
-            if (key.startsWith("vnp_")) {
-                inputData.put(key, value[0]);
-            }
-        });
-
-        Wallet wallet = walletServiceImpl.processDepositMoneyIntoWallet(inputData);
-        return ResponseEntity.ok(responseMapper.toDto(
-                true, "Nạp tiền thành công.",
-                walletMapper.toDto(wallet), null));
-    }
+//    @GetMapping("/ipn")
+//    public ResponseEntity<?> ipn(HttpServletRequest request) {
+//        Map<String, Object> result = vnPayService.processReturn(request);
+//        if(result.get("response_code").equals("00")) {
+//            Map<String, String> inputData = new HashMap<>();
+//
+//            // Lấy toàn bộ tham số vnp_ gửi về
+//            request.getParameterMap().forEach((key, value) -> {
+//                if (key.startsWith("vnp_")) {
+//                    inputData.put(key, value[0]);
+//                }
+//            });
+//
+//            Wallet wallet = walletServiceImpl.processDepositMoneyIntoWallet(inputData);
+//            return ResponseEntity.ok(responseMapper.toDto(
+//                    true, "Nạp tiền thành công.",
+//                    walletMapper.toDto(wallet), null));
+//        }
+//        return ResponseEntity.ok(responseMapper.toDto(
+//                false, "Nạp tiền không thành công.",
+//                result.get("response_code"), null));
+//    }
 
 }

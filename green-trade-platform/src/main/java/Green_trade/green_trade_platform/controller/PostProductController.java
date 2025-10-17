@@ -6,13 +6,14 @@ import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.response.PostProductListResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -25,9 +26,15 @@ public class PostProductController {
     private final ResponseMapper responseMapper;
     private final PostProductListMapper postProductListMapper;
 
-    public ResponseEntity<RestResponse<?, ?>> getAllProduct() {
+    @Operation(
+            summary = "Get all post product with pagination",
+            description = "When buyer click to one page then FE will send page, size to BE." +
+                    "Size can be default 10 or more."
+    )
+    @GetMapping("")
+    public ResponseEntity<RestResponse<?, ?>> getAllProduct(@RequestParam(name = "page", defaultValue = "0") int page,
+                                                            @RequestParam(name = "size", defaultValue = "10") int size) {
         try {
-            int size = 10, page = 0;
             Page<PostProduct> postProductPage = postProductService.getAllProductPaging(page, size);
             Map<String, Object> meta = Map.of(
                     "currentPage", postProductPage.getNumber(),
