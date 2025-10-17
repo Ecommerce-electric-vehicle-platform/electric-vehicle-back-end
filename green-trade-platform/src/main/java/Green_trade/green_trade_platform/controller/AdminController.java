@@ -92,7 +92,7 @@ public class AdminController {
 
     }
 
-    @PreAuthorize("hasRole('ROLE_SELLER')")
+//    @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(summary = "Review Post Product List API",
             description = "Return a post product list")
     @GetMapping("/review-post-seller-list")
@@ -119,7 +119,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_SELLER')")
+//    @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(summary = "View Post Details For Admin Review API",
             description = "Return post product detail")
     @GetMapping("/{postProductId}/post-details")
@@ -137,7 +137,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_SELLER')")
+//    @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(summary = "Decide Post Product API",
             description = "Return a result show that post product decision")
     @PostMapping("/review-post-product-decision")

@@ -1,11 +1,13 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
+import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.request.NeedVerifyPostRequest;
 import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
+import Green_trade.green_trade_platform.request.VerifiedPostProductRequest;
 import Green_trade.green_trade_platform.service.PostProductService;
 import Green_trade.green_trade_platform.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -178,7 +180,7 @@ public class PostProductServiceImpl implements PostProductService {
                     request.getPostProductId()).orElseThrow(() -> new Exception("Post Product is not existed")
             );
 
-            if(!request.isPassed()) {
+            if(!request.getPassed()) {
                 postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.REJECTED);
                 postProduct.setVerified(false);
                 postProduct.setAdmin(admin);
@@ -196,4 +198,27 @@ public class PostProductServiceImpl implements PostProductService {
             throw e;
         }
     }
+
+    public PostProduct postProductVerifiedRequest(VerifiedPostProductRequest request) throws Exception {
+        PostProduct postProduct = postProductRepository.findById(request.getPostId()).orElseThrow(() -> new Exception("Post is not existed"));
+        Long sellerId = postProduct.getSeller().getSellerId();
+        if(isServicePackageExpired(sellerId)) {
+            throw new SubscriptionExpiredException();
+        }
+        postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.PENDING);
+        return postProductRepository.save(postProduct);
+    }
+
+    public boolean isServicePackageExpired(Long sellerId) throws Exception {
+        boolean result = false;
+        Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(sellerId)
+                .orElseThrow(
+                        () -> new Exception("Seller doesn't subscripe any service")
+                );
+        if(LocalDateTime.now().isAfter(subscription.getEndDay())) {
+            result = true;
+        }
+        return result;
+    }
+
 }
