@@ -125,7 +125,7 @@ INSERT INTO buyer (
 )
 VALUES (
     'truongdoanvien',
-    '$2a$10$WZRTczN8rJXwb8.6g/Al/OeAqC6STHqWZMuSn9sB1MF4f04R74vQ.', -- password: 123456
+    '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', -- password: Vien.123456@
     'Truong Doan Vien',
     '123 Nguyen Van Cu, TP HCM',
     TRUE,

@@ -1,10 +1,12 @@
 package Green_trade.green_trade_platform.response;
 
+import Green_trade.green_trade_platform.enumerate.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -18,5 +20,8 @@ public class BuyerResponse {
     private String defaultShippingAddress;
     private String phoneNumber;
     private String email;
+    private Gender gender;
+    private LocalDate dob;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
