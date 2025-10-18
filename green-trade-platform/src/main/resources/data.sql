@@ -12,6 +12,7 @@ DELETE FROM buyer;
 DELETE FROM admin;
 DELETE FROM subscription_packages;
 DELETE FROM package_price;
+DELETE FROM wallet;
 
 ALTER TABLE product_image AUTO_INCREMENT = 1;
 ALTER TABLE post_product AUTO_INCREMENT = 1;
@@ -91,7 +92,7 @@ INSERT INTO admin (
 VALUES (
     'https://cdn.example.com/avatar/admin1.png',
     '1234567890',
-    '$2a$10$6x/hnD9yYSkFVhHCP2SxEOMuFocUpJ1gPMzYZ5RXkmUCPHD1dYJei', -- password: 123456
+    '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', -- password: Vien.123456@
     'Nguyen Van Quan Tri',
     '0901123456',
     TRUE,
@@ -139,6 +140,13 @@ VALUES (
     NULL,
     NULL
 );
+
+-- =========================================================
+-- 🏪 WALLET
+-- =========================================================
+
+INSERT INTO wallet (balance, concurrency, provider, created_at, buyer_id)
+VALUES (1000000.00, 'VND', 'VNPay', NOW(), 1);
 
 -- =========================================================
 -- 🏪 SELLER

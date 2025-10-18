@@ -61,4 +61,19 @@ public class KycController {
             return ResponseEntity.internalServerError().body("KYC verification failed: " + e.getMessage());
         }
     }
+
+    @Operation(
+            summary = "Update seller information",
+            description = "This end-point when buyer want to update their information"
+    )
+    @PostMapping("/update")
+    public ResponseEntity<?> updateProfile( @ModelAttribute UpgradeRequest request,
+                                            @RequestPart("front of identity")MultipartFile fronOfIdentity,
+                                            @RequestPart("back of identity")MultipartFile backOfIdentity,
+                                            @RequestPart("business license")MultipartFile license,
+                                            @RequestPart("store policy")MultipartFile policy,
+                                            @RequestPart("selfie")MultipartFile selfie) {
+
+
+    }
 }

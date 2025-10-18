@@ -2,11 +2,15 @@ package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.exception.DuplicateProfileException;
 import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.model.Wallet;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
+import Green_trade.green_trade_platform.repository.WalletRepository;
 import Green_trade.green_trade_platform.request.ProfileRequest;
 import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.util.DateUtils;
 import Green_trade.green_trade_platform.util.FileUtils;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -24,15 +28,13 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class BuyerServiceImpl {
-    @Autowired
-    private BuyerRepository buyerRepository;
-    @Autowired
-    private CloudinaryService cloudinaryService;
-    @Autowired
-    private DateUtils dateUtils;
-    @Autowired
-    private FileUtils fileUtils;
+    private final BuyerRepository buyerRepository;
+    private final CloudinaryService cloudinaryService;
+    private final DateUtils dateUtils;
+    private final FileUtils fileUtils;
+    private final WalletRepository walletRepository;
 
     public Map<String, Object> uploadBuyerProfile(ProfileRequest request, MultipartFile avatarFile) throws IOException {
         Buyer buyer = getCurrentUser();
@@ -142,5 +144,10 @@ public class BuyerServiceImpl {
     public BigDecimal getWalletBalance() {
         Buyer buyer = getCurrentUser();
         return buyerRepository.findBalanceByBuyerId(buyer.getBuyerId());
+    }
+
+    public Wallet getWallet() {
+        Buyer buyer = getCurrentUser();
+        return walletRepository.findByBuyer(buyer).orElseThrow();
     }
 }

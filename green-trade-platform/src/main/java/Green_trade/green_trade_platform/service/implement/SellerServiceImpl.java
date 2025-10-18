@@ -7,6 +7,7 @@ import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
 import Green_trade.green_trade_platform.mapper.SellerMapper;
 import Green_trade.green_trade_platform.mapper.SubscriptionMapper;
 import Green_trade.green_trade_platform.model.*;
+import Green_trade.green_trade_platform.repository.NotificationRepository;
 import Green_trade.green_trade_platform.repository.SellerRepository;
 import Green_trade.green_trade_platform.repository.SubscriptionRepository;
 import Green_trade.green_trade_platform.request.ApproveSellerRequest;
@@ -30,18 +31,13 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class SellerServiceImpl implements SellerService {
-
     private final SellerRepository sellerRepository;
-
     private final SellerMapper sellerMapper;
-
     private final SubscriptionRepository subscriptionRepository;
-
     private final SubscriptionMapper subscriptionMapper;
-
     private final AdminServiceImpl adminService;
-
     private final BuyerServiceImpl buyerService;
+    private final NotificationRepository notificationRepository;
 
 
     public SubscriptionResponse checkServicePackageValidity(Long id) throws Exception {
@@ -82,24 +78,32 @@ public class SellerServiceImpl implements SellerService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ seller này: " + request.getSellerId()));
 
         Admin admin = adminService.getCurrentUser();
+        Notification notice = null;
 
         if(request.getDecision().equals(VerifiedDecisionStatus.APPROVED)) {
             seller.setAdmin(admin);
             seller.setStatus(SellerStatus.ACCEPTED);
             Seller tempSeller = sellerRepository.save(seller);
 
-            Notification notification = Notification.builder()
+            notice =  Notification.builder()
                     .receiverId(seller.getSellerId())
                     .type(AccountType.SELLER)
                     .title("UPGRADE ACCOUNT INFORMATION RESULT")
-                    .content("You are a seller right now.")
+                    .content(request.getMessage())
+                    .createdAt(LocalDateTime.now())
                     .build();
-            return notification;
 
         } else {
             sellerRepository.delete(seller);
-            return null;
+            notice = Notification.builder()
+                    .receiverId(seller.getBuyer().getBuyerId())
+                    .type(AccountType.BUYER)
+                    .title("UPGRADE ACCOUNT INFORMATION RESULT")
+                    .content(request.getMessage())
+                    .createdAt(LocalDateTime.now())
+                    .build();
         }
+        return notificationRepository.save(notice);
     }
 
     public Seller getCurrentUser() {
