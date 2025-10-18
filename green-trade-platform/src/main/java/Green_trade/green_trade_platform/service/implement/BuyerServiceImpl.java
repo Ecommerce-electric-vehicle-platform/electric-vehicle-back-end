@@ -128,8 +128,7 @@ public class BuyerServiceImpl {
 
     public Buyer getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName(); // Lấy username hiện tại
-
+        String username = authentication.getName();
         return buyerRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User is not existed: " + username));
     }

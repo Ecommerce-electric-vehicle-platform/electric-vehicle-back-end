@@ -6,10 +6,7 @@ import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
 import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
 import Green_trade.green_trade_platform.mapper.SellerMapper;
 import Green_trade.green_trade_platform.mapper.SubscriptionMapper;
-import Green_trade.green_trade_platform.model.Admin;
-import Green_trade.green_trade_platform.model.Notification;
-import Green_trade.green_trade_platform.model.Seller;
-import Green_trade.green_trade_platform.model.Subscription;
+import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.SellerRepository;
 import Green_trade.green_trade_platform.repository.SubscriptionRepository;
 import Green_trade.green_trade_platform.request.ApproveSellerRequest;
@@ -19,6 +16,9 @@ import Green_trade.green_trade_platform.service.SellerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +40,8 @@ public class SellerServiceImpl implements SellerService {
     private final SubscriptionMapper subscriptionMapper;
 
     private final AdminServiceImpl adminService;
+
+    private final BuyerServiceImpl buyerService;
 
 
     public SubscriptionResponse checkServicePackageValidity(Long id) throws Exception {
@@ -98,5 +100,11 @@ public class SellerServiceImpl implements SellerService {
             sellerRepository.delete(seller);
             return null;
         }
+    }
+
+    public Seller getCurrentUser() {
+        Buyer buyer = buyerService.getCurrentUser();
+        return sellerRepository.findByBuyer(buyer).orElseThrow(
+                () -> new UsernameNotFoundException("User not existsed."));
     }
 }

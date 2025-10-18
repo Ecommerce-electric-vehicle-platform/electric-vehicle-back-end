@@ -2,7 +2,9 @@ package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.mapper.PostProductMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
+import Green_trade.green_trade_platform.mapper.SellerMapper;
 import Green_trade.green_trade_platform.model.PostProduct;
+import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
 import Green_trade.green_trade_platform.request.VerifiedPostProductRequest;
 import Green_trade.green_trade_platform.response.PostProductResponse;
@@ -12,6 +14,7 @@ import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,25 +27,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/seller")
 @Slf4j
+@RequiredArgsConstructor
 public class SellerController {
 
     private final ResponseMapper responseMapper;
-
     private final SellerServiceImpl sellerService;
-
+    private final SellerMapper sellerMapper;
     private final PostProductServiceImpl postProductService;
     private final PostProductMapper postProductMapper;
-
-    public SellerController(
-            SellerServiceImpl sellerService,
-            ResponseMapper responseMapper,
-            PostProductServiceImpl postProductService,
-            PostProductMapper postProductMapper) {
-        this.sellerService = sellerService;
-        this.responseMapper = responseMapper;
-        this.postProductService = postProductService;
-        this.postProductMapper = postProductMapper;
-    }
 
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(summary = "Verify Service Package Validity",
@@ -96,6 +88,23 @@ public class SellerController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
+    @Operation(
+            description = "Front-end just pass token then will get seller profile (if seller exists).",
+            summary = "Get seller profile."
+    )
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile() {
+        try {
+            Seller seller = sellerService.getCurrentUser();
+            return ResponseEntity.ok(responseMapper.toDto(true,
+                    "Get seller profile successfully.",
+                    sellerMapper.toDto(seller), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(responseMapper.toDto(false,
+                    "Error occured during get seller profile,",
+                    null, e));
+        }
+    }
 
 
 }
