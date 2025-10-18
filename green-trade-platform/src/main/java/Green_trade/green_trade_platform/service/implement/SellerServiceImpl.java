@@ -1,11 +1,13 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.enumerate.AccountType;
 import Green_trade.green_trade_platform.enumerate.SellerStatus;
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
 import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
 import Green_trade.green_trade_platform.mapper.SellerMapper;
 import Green_trade.green_trade_platform.mapper.SubscriptionMapper;
 import Green_trade.green_trade_platform.model.Admin;
+import Green_trade.green_trade_platform.model.Notification;
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.model.Subscription;
 import Green_trade.green_trade_platform.repository.SellerRepository;
@@ -73,15 +75,25 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Transactional
-    public Seller handlePendingSeller(ApproveSellerRequest request) {
+    public Notification handlePendingSeller(ApproveSellerRequest request) {
         Seller seller = sellerRepository.findById(request.getSellerId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ seller này: " + request.getSellerId()));
 
         Admin admin = adminService.getCurrentUser();
 
         if(request.getDecision().equals(VerifiedDecisionStatus.APPROVED)) {
+            seller.setAdmin(admin);
             seller.setStatus(SellerStatus.ACCEPTED);
-            return sellerRepository.save(seller);
+            Seller tempSeller = sellerRepository.save(seller);
+
+            Notification notification = Notification.builder()
+                    .receiverId(seller.getSellerId())
+                    .type(AccountType.SELLER)
+                    .title("UPGRADE ACCOUNT INFORMATION RESULT")
+                    .content("You are a seller right now.")
+                    .build();
+            return notification;
+
         } else {
             sellerRepository.delete(seller);
             return null;

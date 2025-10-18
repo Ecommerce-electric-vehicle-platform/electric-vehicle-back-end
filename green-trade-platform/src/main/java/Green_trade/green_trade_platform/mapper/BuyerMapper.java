@@ -23,7 +23,11 @@ public class  BuyerMapper {
                 .defaultShippingAddress(buyer.getDefaultShippingAddress())
                 .phoneNumber(buyer.getPhoneNumber())
                 .email(buyer.getEmail())
+                .gender(buyer.getGender())
+                .dob(buyer.getDob())
                 .createdAt(buyer.getCreatedAt())
+                .updatedAt(buyer.getUpdatedAt())
                 .build();
     }
+
 }

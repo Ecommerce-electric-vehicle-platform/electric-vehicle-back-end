@@ -1,7 +1,9 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.model.Admin;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Seller;
+import Green_trade.green_trade_platform.repository.AdminRepository;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
 import Green_trade.green_trade_platform.repository.SellerRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +22,23 @@ import java.util.Optional;
 public class UserDetailsServiceCustomer implements UserDetailsService {
     private final BuyerRepository buyerRepo;
     private final SellerRepository sellerRepository;
+    private final AdminRepository adminRepository;
+    private final String regex = "^\\d{10}$";
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // Check admin
+        if(username.matches(regex)) {
+            Optional<Admin> admin = adminRepository.findByEmployeeNumber(username);
+            if(admin.isPresent()) {
+                return new org.springframework.security.core.userdetails.User(
+                        admin.get().getEmployeeNumber(),
+                        admin.get().getPassword(),
+                        List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                );
+            }
+        }
+
         // Check buyer table
         Optional<Buyer> buyer = buyerRepo.findByUsername(username);
         if (buyer.isPresent()) {

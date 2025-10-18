@@ -51,10 +51,11 @@ public class BuyerController {
                                                 @Parameter(description = "avatar of buyer")
                                                 @RequestPart(value = "avatar_url", required = true) MultipartFile avatarFile) throws IOException {
         Map<String, Object> body = buyerService.uploadBuyerProfile(profileRequest, avatarFile);
+        Buyer tempProfile = (Buyer) body.get("profile");
         return ResponseEntity.ok(responseMapper.toDto(
                 true,
                 "UPLOAD PROFILE SUCCESS.",
-                body,
+                buyerMapper.toDto(tempProfile),
                 null));
     }
 
@@ -84,6 +85,29 @@ public class BuyerController {
                 )
         );
     }
+
+    @Operation(
+            summary = "Get buyer profile.",
+            description = "This API return user profile. Front-end just pass token into header of request," +
+                    " then system will return profile based on token passed."
+    )
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile() {
+        try {
+            Buyer buyer = buyerService.getCurrentUser();
+            return ResponseEntity.ok(responseMapper.toDto(true,
+                    "Get user profile successfully.",
+                    buyerMapper.toDto(buyer),
+                    null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(responseMapper.toDto(false,
+                    "Error occur during get user profile.",
+                    null, e));
+        }
+    }
+
+
+
 
     public ResponseEntity<?> placeOrder(@Valid PlaceOrderRequest request) {
 

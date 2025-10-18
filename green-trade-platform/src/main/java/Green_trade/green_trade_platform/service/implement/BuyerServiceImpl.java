@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -130,13 +131,13 @@ public class BuyerServiceImpl {
         String username = authentication.getName(); // Lấy username hiện tại
 
         return buyerRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng: " + username));
+                .orElseThrow(() -> new RuntimeException("User is not existed: " + username));
     }
 
     public Buyer getBuyerFromVnPayRequest(String vnpOtherType) {
         String[] temp = vnpOtherType.split(" ");
         return buyerRepository.findById(Long.parseLong(temp[0])).
-                orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng: " + temp[0]));
+                orElseThrow(() -> new UsernameNotFoundException("User is not existed: " + temp[0]));
     }
 
     public BigDecimal getWalletBalance() {

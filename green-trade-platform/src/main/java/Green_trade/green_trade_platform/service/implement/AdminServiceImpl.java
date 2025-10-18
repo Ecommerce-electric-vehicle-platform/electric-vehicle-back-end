@@ -53,7 +53,9 @@ public class AdminServiceImpl {
 
         admin.setPassword(passwordEncoder.encode(admin.getPassword()));
 
-        cloudinaryService.upload(avatarFile, "admin/" + admin.getFullName() + "/avatar");
+        Map<String, String> temp = cloudinaryService.upload(avatarFile, "admin/" + admin.getFullName() + "/avatar");
+        admin.setAvatarPublicId(temp.get("publicId"));
+        admin.setAvatarUrl(temp.get("fileUrl"));
 
         return adminRepository.save(admin);
     }
