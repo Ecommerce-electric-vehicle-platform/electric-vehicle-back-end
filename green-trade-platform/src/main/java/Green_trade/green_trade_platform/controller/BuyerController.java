@@ -110,7 +110,7 @@ public class BuyerController {
 
 
     public ResponseEntity<?> placeOrder(@Valid PlaceOrderRequest request) {
-
+        buyerService.placeOrder(request);
         return ResponseEntity.status(HttpStatus.OK.value()).body(null);
     }
 }

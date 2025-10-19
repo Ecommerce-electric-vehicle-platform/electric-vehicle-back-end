@@ -1,8 +1,16 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.exception.DuplicateProfileException;
+import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
+import Green_trade.green_trade_platform.exception.WalletNotFoundException;
 import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.model.Order;
+import Green_trade.green_trade_platform.model.PostProduct;
+import Green_trade.green_trade_platform.model.Wallet;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
+import Green_trade.green_trade_platform.repository.PostProductRepository;
+import Green_trade.green_trade_platform.repository.WalletRepository;
+import Green_trade.green_trade_platform.request.PlaceOrderRequest;
 import Green_trade.green_trade_platform.request.ProfileRequest;
 import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.util.DateUtils;
@@ -21,6 +29,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
 
 @Service
 @Slf4j
@@ -33,6 +43,12 @@ public class BuyerServiceImpl {
     private DateUtils dateUtils;
     @Autowired
     private FileUtils fileUtils;
+    @Autowired
+    private WalletRepository walletRepository;
+    @Autowired
+    private PostProductRepository postProductRepository;
+    @Autowired
+    private WalletService walletService;
 
     public Map<String, Object> uploadBuyerProfile(ProfileRequest request, MultipartFile avatarFile) throws IOException {
         Buyer buyer = getCurrentUser();
@@ -143,5 +159,64 @@ public class BuyerServiceImpl {
     public BigDecimal getWalletBalance() {
         Buyer buyer = getCurrentUser();
         return buyerRepository.findBalanceByBuyerId(buyer.getBuyerId());
+    }
+
+    public boolean isBuyerExisted(Long buyerId) {
+        boolean result = false;
+        Optional<Buyer> buyerOpt = buyerRepository.findById(buyerId);
+        if(buyerOpt.isPresent()){
+            result = true;
+        }
+        return result;
+    }
+
+    public boolean isBuyerExisted(String username) {
+        boolean result = false;
+        Optional<Buyer> buyerOpt = buyerRepository.findByUsername(username);
+        if(buyerOpt.isPresent()){
+            result = true;
+        }
+        return result;
+    }
+
+    public Order placeOrder(PlaceOrderRequest request) throws Exception {
+        if(!isBuyerExisted(request.getUsername())) {
+            throw new ProfileNotFoundException("User is not existed");
+        }
+
+        Optional<Buyer> buyerOpt = buyerRepository.findByUsername(request.getUsername());
+        if(!walletService.isBuyerHasWallet(buyerOpt.get())) {
+            throw new WalletNotFoundException("The wallet of User is not existed");
+        }
+
+        Optional<PostProduct> postProductOpt = postProductRepository.findById(request.getPostProductId());
+        if(postProductOpt.isEmpty()) {
+            throw new Exception("Post is not existed");
+        }
+
+        if(postProductOpt.get().isSold()) {
+            throw new Exception("The product has been sold");
+        }
+
+        Order newOrder = Order.builder()
+                .admin(null)
+                .buyer(buyerOpt.get())
+                .orderCode(String.format("%09d", new Random().nextInt(1_000_000_000)))
+                .shippingAddress(
+                        request.getShippingAddress().isBlank() ?
+                                buyerOpt.get().getDefaultShippingAddress() :
+                                request.getShippingAddress()
+                )
+                .phoneNumber(
+                        request.getPhoneNumber().isBlank() ?
+                                buyerOpt.get().getPhoneNumber() :
+                                request.getPhoneNumber()
+                )
+                .price(postProductOpt.get().getPrice())
+                .status("PENDING")
+                .cancelReason("Not Canceled Yet")
+                .build();
+
+        return null;
     }
 }

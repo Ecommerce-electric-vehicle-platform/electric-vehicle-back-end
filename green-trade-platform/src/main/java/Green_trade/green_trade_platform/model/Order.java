@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.cglib.core.Local;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,6 +30,9 @@ public class Order {
 
     @Column(name = "phone_number", nullable = false, unique = false)
     private String phoneNumber;
+
+    @Column(name = "price",  nullable = false, unique = false)
+    private BigDecimal price;
 
     @Column(name = "shipping_fee", nullable = false, unique = false)
     private double shippingFee;
@@ -62,7 +66,9 @@ public class Order {
     @OneToOne(fetch = FetchType.LAZY)
     private Invoice invoice;
 
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "partner_id")
+    private ShippingPartner shippingPartner;
 
     @PrePersist
     public void onCreate() {
