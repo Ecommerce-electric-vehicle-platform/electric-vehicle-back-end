@@ -49,7 +49,7 @@ public class AdminController {
     private final NotificationSocketController socketController;
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping("")
+    @GetMapping("/pending-seller")
     public ResponseEntity<?> findAllPendingSeller(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
