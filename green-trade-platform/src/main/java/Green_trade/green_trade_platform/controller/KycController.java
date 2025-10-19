@@ -74,6 +74,6 @@ public class KycController {
                                             @RequestPart("store policy")MultipartFile policy,
                                             @RequestPart("selfie")MultipartFile selfie) {
 
-
+        return null;
     }
 }

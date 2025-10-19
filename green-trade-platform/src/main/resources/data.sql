@@ -6,22 +6,23 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 DELETE FROM product_image;
 DELETE FROM post_product;
-DELETE FROM category;
+DELETE FROM wallet;
 DELETE FROM seller;
 DELETE FROM buyer;
 DELETE FROM admin;
 DELETE FROM subscription_packages;
 DELETE FROM package_price;
-DELETE FROM wallet;
+DELETE FROM category;
 
 ALTER TABLE product_image AUTO_INCREMENT = 1;
 ALTER TABLE post_product AUTO_INCREMENT = 1;
-ALTER TABLE category AUTO_INCREMENT = 1;
+ALTER TABLE wallet AUTO_INCREMENT = 1;
 ALTER TABLE seller AUTO_INCREMENT = 1;
 ALTER TABLE buyer AUTO_INCREMENT = 1;
 ALTER TABLE admin AUTO_INCREMENT = 1;
 ALTER TABLE subscription_packages AUTO_INCREMENT = 1;
 ALTER TABLE package_price AUTO_INCREMENT = 1;
+ALTER TABLE category AUTO_INCREMENT = 1;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -124,29 +125,74 @@ INSERT INTO buyer (
     updated_at,
     deleted_at
 )
-VALUES (
-    'truongdoanvien',
-    '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', -- password: Vien.123456@
-    'Truong Doan Vien',
-    '123 Nguyen Van Cu, TP HCM',
-    TRUE,
-    '0909876543',
-    'https://cdn.example.com/avatars/buyer1.jpg',
-    'buyer1_public_id',
-    'truongvien@example.com',
-    'MALE',
-    '2000-05-15',
-    NOW(),
-    NULL,
-    NULL
-);
+VALUES
+('buyer1','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 1','123 Nguyen Van Cu, HCM',TRUE,'0900000001','https://cdn.example.com/avatars/buyer1.jpg','buyer1_public_id','buyer1@example.com','MALE','2000-01-01',NOW(),NULL,NULL),
+('buyer2','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 2','124 Nguyen Van Cu, HCM',TRUE,'0900000002','https://cdn.example.com/avatars/buyer2.jpg','buyer2_public_id','buyer2@example.com','FEMALE','2000-02-02',NOW(),NULL,NULL),
+('buyer3','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 3','125 Nguyen Van Cu, HCM',TRUE,'0900000003','https://cdn.example.com/avatars/buyer3.jpg','buyer3_public_id','buyer3@example.com','MALE','2000-03-03',NOW(),NULL,NULL),
+('buyer4','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 4','126 Nguyen Van Cu, HCM',TRUE,'0900000004','https://cdn.example.com/avatars/buyer4.jpg','buyer4_public_id','buyer4@example.com','FEMALE','2000-04-04',NOW(),NULL,NULL),
+('buyer5','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 5','127 Nguyen Van Cu, HCM',TRUE,'0900000005','https://cdn.example.com/avatars/buyer5.jpg','buyer5_public_id','buyer5@example.com','MALE','2000-05-05',NOW(),NULL,NULL),
+('buyer6','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 6','128 Nguyen Van Cu, HCM',TRUE,'0900000006','https://cdn.example.com/avatars/buyer6.jpg','buyer6_public_id','buyer6@example.com','FEMALE','2000-06-06',NOW(),NULL,NULL),
+('buyer7','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 7','129 Nguyen Van Cu, HCM',TRUE,'0900000007','https://cdn.example.com/avatars/buyer7.jpg','buyer7_public_id','buyer7@example.com','MALE','2000-07-07',NOW(),NULL,NULL),
+('buyer8','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 8','130 Nguyen Van Cu, HCM',TRUE,'0900000008','https://cdn.example.com/avatars/buyer8.jpg','buyer8_public_id','buyer8@example.com','FEMALE','2000-08-08',NOW(),NULL,NULL),
+('buyer9','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 9','131 Nguyen Van Cu, HCM',TRUE,'0900000009','https://cdn.example.com/avatars/buyer9.jpg','buyer9_public_id','buyer9@example.com','MALE','2000-09-09',NOW(),NULL,NULL),
+('buyer10','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 10','132 Nguyen Van Cu, HCM',TRUE,'0900000010','https://cdn.example.com/avatars/buyer10.jpg','buyer10_public_id','buyer10@example.com','FEMALE','2000-10-10',NOW(),NULL,NULL),
+('buyer11','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 11','133 Nguyen Van Cu, HCM',TRUE,'0900000011','https://cdn.example.com/avatars/buyer11.jpg','buyer11_public_id','buyer11@example.com','MALE','2000-11-11',NOW(),NULL,NULL),
+('buyer12','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 12','134 Nguyen Van Cu, HCM',TRUE,'0900000012','https://cdn.example.com/avatars/buyer12.jpg','buyer12_public_id','buyer12@example.com','FEMALE','2000-12-12',NOW(),NULL,NULL),
+('buyer13','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 13','135 Nguyen Van Cu, HCM',TRUE,'0900000013','https://cdn.example.com/avatars/buyer13.jpg','buyer13_public_id','buyer13@example.com','MALE','2001-01-13',NOW(),NULL,NULL),
+('buyer14','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 14','136 Nguyen Van Cu, HCM',TRUE,'0900000014','https://cdn.example.com/avatars/buyer14.jpg','buyer14_public_id','buyer14@example.com','FEMALE','2001-02-14',NOW(),NULL,NULL),
+('buyer15','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 15','137 Nguyen Van Cu, HCM',TRUE,'0900000015','https://cdn.example.com/avatars/buyer15.jpg','buyer15_public_id','buyer15@example.com','MALE','2001-03-15',NOW(),NULL,NULL),
+('buyer16','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 16','138 Nguyen Van Cu, HCM',TRUE,'0900000016','https://cdn.example.com/avatars/buyer16.jpg','buyer16_public_id','buyer16@example.com','FEMALE','2001-04-16',NOW(),NULL,NULL),
+('buyer17','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 17','139 Nguyen Van Cu, HCM',TRUE,'0900000017','https://cdn.example.com/avatars/buyer17.jpg','buyer17_public_id','buyer17@example.com','MALE','2001-05-17',NOW(),NULL,NULL),
+('buyer18','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 18','140 Nguyen Van Cu, HCM',TRUE,'0900000018','https://cdn.example.com/avatars/buyer18.jpg','buyer18_public_id','buyer18@example.com','FEMALE','2001-06-18',NOW(),NULL,NULL),
+('buyer19','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 19','141 Nguyen Van Cu, HCM',TRUE,'0900000019','https://cdn.example.com/avatars/buyer19.jpg','buyer19_public_id','buyer19@example.com','MALE','2001-07-19',NOW(),NULL,NULL),
+('buyer20','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 20','142 Nguyen Van Cu, HCM',TRUE,'0900000020','https://cdn.example.com/avatars/buyer20.jpg','buyer20_public_id','buyer20@example.com','FEMALE','2001-08-20',NOW(),NULL,NULL),
+('buyer21','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 21','143 Nguyen Van Cu, HCM',TRUE,'0900000021','https://cdn.example.com/avatars/buyer21.jpg','buyer21_public_id','buyer21@example.com','MALE','2001-09-21',NOW(),NULL,NULL),
+('buyer22','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 22','144 Nguyen Van Cu, HCM',TRUE,'0900000022','https://cdn.example.com/avatars/buyer22.jpg','buyer22_public_id','buyer22@example.com','FEMALE','2001-10-22',NOW(),NULL,NULL),
+('buyer23','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 23','145 Nguyen Van Cu, HCM',TRUE,'0900000023','https://cdn.example.com/avatars/buyer23.jpg','buyer23_public_id','buyer23@example.com','MALE','2001-11-23',NOW(),NULL,NULL),
+('buyer24','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 24','146 Nguyen Van Cu, HCM',TRUE,'0900000024','https://cdn.example.com/avatars/buyer24.jpg','buyer24_public_id','buyer24@example.com','FEMALE','2001-12-24',NOW(),NULL,NULL),
+('buyer25','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 25','147 Nguyen Van Cu, HCM',TRUE,'0900000025','https://cdn.example.com/avatars/buyer25.jpg','buyer25_public_id','buyer25@example.com','MALE','2002-01-25',NOW(),NULL,NULL),
+('buyer26','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 26','148 Nguyen Van Cu, HCM',TRUE,'0900000026','https://cdn.example.com/avatars/buyer26.jpg','buyer26_public_id','buyer26@example.com','FEMALE','2002-02-26',NOW(),NULL,NULL),
+('buyer27','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 27','149 Nguyen Van Cu, HCM',TRUE,'0900000027','https://cdn.example.com/avatars/buyer27.jpg','buyer27_public_id','buyer27@example.com','MALE','2002-03-27',NOW(),NULL,NULL),
+('buyer28','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 28','150 Nguyen Van Cu, HCM',TRUE,'0900000028','https://cdn.example.com/avatars/buyer28.jpg','buyer28_public_id','buyer28@example.com','FEMALE','2002-04-28',NOW(),NULL,NULL),
+('buyer29','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 29','151 Nguyen Van Cu, HCM',TRUE,'0900000029','https://cdn.example.com/avatars/buyer29.jpg','buyer29_public_id','buyer29@example.com','MALE','2002-05-29',NOW(),NULL,NULL),
+('buyer30','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 30','152 Nguyen Van Cu, HCM',TRUE,'0900000030','https://cdn.example.com/avatars/buyer30.jpg','buyer30_public_id','buyer30@example.com','FEMALE','2002-06-30',NOW(),NULL,NULL);
 
 -- =========================================================
 -- 🏪 WALLET
 -- =========================================================
 
 INSERT INTO wallet (balance, concurrency, provider, created_at, buyer_id)
-VALUES (1000000.00, 'VND', 'VNPay', NOW(), 1);
+VALUES
+(1000000.00, 'VND', 'VNPay', NOW(), 1),
+(1100000.00, 'VND', 'VNPay', NOW(), 2),
+(1200000.00, 'VND', 'VNPay', NOW(), 3),
+(1300000.00, 'VND', 'VNPay', NOW(), 4),
+(1400000.00, 'VND', 'VNPay', NOW(), 5),
+(1500000.00, 'VND', 'VNPay', NOW(), 6),
+(1600000.00, 'VND', 'VNPay', NOW(), 7),
+(1700000.00, 'VND', 'VNPay', NOW(), 8),
+(1800000.00, 'VND', 'VNPay', NOW(), 9),
+(1900000.00, 'VND', 'VNPay', NOW(), 10),
+(2000000.00, 'VND', 'VNPay', NOW(), 11),
+(2100000.00, 'VND', 'VNPay', NOW(), 12),
+(2200000.00, 'VND', 'VNPay', NOW(), 13),
+(2300000.00, 'VND', 'VNPay', NOW(), 14),
+(2400000.00, 'VND', 'VNPay', NOW(), 15),
+(2500000.00, 'VND', 'VNPay', NOW(), 16),
+(2600000.00, 'VND', 'VNPay', NOW(), 17),
+(2700000.00, 'VND', 'VNPay', NOW(), 18),
+(2800000.00, 'VND', 'VNPay', NOW(), 19),
+(2900000.00, 'VND', 'VNPay', NOW(), 20),
+(3000000.00, 'VND', 'VNPay', NOW(), 21),
+(3100000.00, 'VND', 'VNPay', NOW(), 22),
+(3200000.00, 'VND', 'VNPay', NOW(), 23),
+(3300000.00, 'VND', 'VNPay', NOW(), 24),
+(3400000.00, 'VND', 'VNPay', NOW(), 25),
+(3500000.00, 'VND', 'VNPay', NOW(), 26),
+(3600000.00, 'VND', 'VNPay', NOW(), 27),
+(3700000.00, 'VND', 'VNPay', NOW(), 28),
+(3800000.00, 'VND', 'VNPay', NOW(), 29),
+(3900000.00, 'VND', 'VNPay', NOW(), 30);
 
 -- =========================================================
 -- 🏪 SELLER
@@ -167,22 +213,27 @@ INSERT INTO seller (
     buyer_id,
     admin_id
 )
-VALUES (
-    'https://cdn.example.com/images/id_front_1.jpg',
-    'https://cdn.example.com/images/id_back_1.jpg',
-    'https://cdn.example.com/images/business_license_1.jpg',
-    'https://cdn.example.com/images/selfie_1.jpg',
-    'ACCEPTED',
-    'Neko Store',
-    'https://cdn.example.com/policies/policy_1.pdf',
-    'TAX123456789',
-    'ID987654321',
-    NOW(),
-    NULL,
-    NULL,
-    1,
-    1
-);
+VALUES
+('https://cdn.example.com/images/id_front_1.jpg', 'https://cdn.example.com/images/id_back_1.jpg', 'https://cdn.example.com/images/business_license_1.jpg', 'https://cdn.example.com/images/selfie_1.jpg', 'PENDING', 'Neko Store 1', 'https://cdn.example.com/policies/policy_1.pdf', 'TAX123456781', 'ID987654321', NOW(), NULL, NULL, 1, 1),
+('https://cdn.example.com/images/id_front_2.jpg', 'https://cdn.example.com/images/id_back_2.jpg', 'https://cdn.example.com/images/business_license_2.jpg', 'https://cdn.example.com/images/selfie_2.jpg', 'ACCEPTED', 'Neko Store 2', 'https://cdn.example.com/policies/policy_2.pdf', 'TAX123456782', 'ID987654322', NOW(), NULL, NULL, 2, 1),
+('https://cdn.example.com/images/id_front_3.jpg', 'https://cdn.example.com/images/id_back_3.jpg', 'https://cdn.example.com/images/business_license_3.jpg', 'https://cdn.example.com/images/selfie_3.jpg', 'ACCEPTED', 'Neko Store 3', 'https://cdn.example.com/policies/policy_3.pdf', 'TAX123456783', 'ID987654323', NOW(), NULL, NULL, 3, 1),
+('https://cdn.example.com/images/id_front_4.jpg', 'https://cdn.example.com/images/id_back_4.jpg', 'https://cdn.example.com/images/business_license_4.jpg', 'https://cdn.example.com/images/selfie_4.jpg', 'PENDING', 'Neko Store 4', 'https://cdn.example.com/policies/policy_4.pdf', 'TAX123456784', 'ID987654324', NOW(), NULL, NULL, 4, 1),
+('https://cdn.example.com/images/id_front_5.jpg', 'https://cdn.example.com/images/id_back_5.jpg', 'https://cdn.example.com/images/business_license_5.jpg', 'https://cdn.example.com/images/selfie_5.jpg', 'ACCEPTED', 'Neko Store 5', 'https://cdn.example.com/policies/policy_5.pdf', 'TAX123456785', 'ID987654325', NOW(), NULL, NULL, 5, 1),
+('https://cdn.example.com/images/id_front_6.jpg', 'https://cdn.example.com/images/id_back_6.jpg', 'https://cdn.example.com/images/business_license_6.jpg', 'https://cdn.example.com/images/selfie_6.jpg', 'ACCEPTED', 'Neko Store 6', 'https://cdn.example.com/policies/policy_6.pdf', 'TAX123456786', 'ID987654326', NOW(), NULL, NULL, 6, 1),
+('https://cdn.example.com/images/id_front_7.jpg', 'https://cdn.example.com/images/id_back_7.jpg', 'https://cdn.example.com/images/business_license_7.jpg', 'https://cdn.example.com/images/selfie_7.jpg', 'PENDING', 'Neko Store 7', 'https://cdn.example.com/policies/policy_7.pdf', 'TAX123456787', 'ID987654327', NOW(), NULL, NULL, 7, 1),
+('https://cdn.example.com/images/id_front_8.jpg', 'https://cdn.example.com/images/id_back_8.jpg', 'https://cdn.example.com/images/business_license_8.jpg', 'https://cdn.example.com/images/selfie_8.jpg', 'ACCEPTED', 'Neko Store 8', 'https://cdn.example.com/policies/policy_8.pdf', 'TAX123456788', 'ID987654328', NOW(), NULL, NULL, 8, 1),
+('https://cdn.example.com/images/id_front_9.jpg', 'https://cdn.example.com/images/id_back_9.jpg', 'https://cdn.example.com/images/business_license_9.jpg', 'https://cdn.example.com/images/selfie_9.jpg', 'ACCEPTED', 'Neko Store 9', 'https://cdn.example.com/policies/policy_9.pdf', 'TAX123456789', 'ID987654329', NOW(), NULL, NULL, 9, 1),
+('https://cdn.example.com/images/id_front_10.jpg', 'https://cdn.example.com/images/id_back_10.jpg', 'https://cdn.example.com/images/business_license_10.jpg', 'https://cdn.example.com/images/selfie_10.jpg', 'PENDING', 'Neko Store 10', 'https://cdn.example.com/policies/policy_10.pdf', 'TAX123456790', 'ID987654330', NOW(), NULL, NULL, 10, 1),
+('https://cdn.example.com/images/id_front_11.jpg', 'https://cdn.example.com/images/id_back_11.jpg', 'https://cdn.example.com/images/business_license_11.jpg', 'https://cdn.example.com/images/selfie_11.jpg', 'ACCEPTED', 'Neko Store 11', 'https://cdn.example.com/policies/policy_11.pdf', 'TAX123456791', 'ID987654331', NOW(), NULL, NULL, 11, 1),
+('https://cdn.example.com/images/id_front_12.jpg', 'https://cdn.example.com/images/id_back_12.jpg', 'https://cdn.example.com/images/business_license_12.jpg', 'https://cdn.example.com/images/selfie_12.jpg', 'ACCEPTED', 'Neko Store 12', 'https://cdn.example.com/policies/policy_12.pdf', 'TAX123456792', 'ID987654332', NOW(), NULL, NULL, 12, 1),
+('https://cdn.example.com/images/id_front_13.jpg', 'https://cdn.example.com/images/id_back_13.jpg', 'https://cdn.example.com/images/business_license_13.jpg', 'https://cdn.example.com/images/selfie_13.jpg', 'PENDING', 'Neko Store 13', 'https://cdn.example.com/policies/policy_13.pdf', 'TAX123456793', 'ID987654333', NOW(), NULL, NULL, 13, 1),
+('https://cdn.example.com/images/id_front_14.jpg', 'https://cdn.example.com/images/id_back_14.jpg', 'https://cdn.example.com/images/business_license_14.jpg', 'https://cdn.example.com/images/selfie_14.jpg', 'ACCEPTED', 'Neko Store 14', 'https://cdn.example.com/policies/policy_14.pdf', 'TAX123456794', 'ID987654334', NOW(), NULL, NULL, 14, 1),
+('https://cdn.example.com/images/id_front_15.jpg', 'https://cdn.example.com/images/id_back_15.jpg', 'https://cdn.example.com/images/business_license_15.jpg', 'https://cdn.example.com/images/selfie_15.jpg', 'ACCEPTED', 'Neko Store 15', 'https://cdn.example.com/policies/policy_15.pdf', 'TAX123456795', 'ID987654335', NOW(), NULL, NULL, 15, 1),
+('https://cdn.example.com/images/id_front_16.jpg', 'https://cdn.example.com/images/id_back_16.jpg', 'https://cdn.example.com/images/business_license_16.jpg', 'https://cdn.example.com/images/selfie_16.jpg', 'PENDING', 'Neko Store 16', 'https://cdn.example.com/policies/policy_16.pdf', 'TAX123456796', 'ID987654336', NOW(), NULL, NULL, 16, 1),
+('https://cdn.example.com/images/id_front_17.jpg', 'https://cdn.example.com/images/id_back_17.jpg', 'https://cdn.example.com/images/business_license_17.jpg', 'https://cdn.example.com/images/selfie_17.jpg', 'ACCEPTED', 'Neko Store 17', 'https://cdn.example.com/policies/policy_17.pdf', 'TAX123456797', 'ID987654337', NOW(), NULL, NULL, 17, 1),
+('https://cdn.example.com/images/id_front_18.jpg', 'https://cdn.example.com/images/id_back_18.jpg', 'https://cdn.example.com/images/business_license_18.jpg', 'https://cdn.example.com/images/selfie_18.jpg', 'PENDING', 'Neko Store 18', 'https://cdn.example.com/policies/policy_18.pdf', 'TAX123456798', 'ID987654338', NOW(), NULL, NULL, 18, 1),
+('https://cdn.example.com/images/id_front_19.jpg', 'https://cdn.example.com/images/id_back_19.jpg', 'https://cdn.example.com/images/business_license_19.jpg', 'https://cdn.example.com/images/selfie_19.jpg', 'ACCEPTED', 'Neko Store 19', 'https://cdn.example.com/policies/policy_19.pdf', 'TAX123456799', 'ID987654339', NOW(), NULL, NULL, 19, 1),
+('https://cdn.example.com/images/id_front_20.jpg', 'https://cdn.example.com/images/id_back_20.jpg', 'https://cdn.example.com/images/business_license_20.jpg', 'https://cdn.example.com/images/selfie_20.jpg', 'PENDING', 'Neko Store 20', 'https://cdn.example.com/policies/policy_20.pdf', 'TAX123456800', 'ID987654340', NOW(), NULL, NULL, 20, 1);
 
 -- =========================================================
 -- 🗂 CATEGORY
