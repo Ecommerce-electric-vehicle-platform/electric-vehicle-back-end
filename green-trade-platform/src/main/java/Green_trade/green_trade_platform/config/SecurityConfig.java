@@ -28,7 +28,9 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/verify-otp",
-            "/api/test/redis"
+            "/api/test/redis",
+            "/ws/**",
+            "/queue/**"
     );
 
     @Autowired

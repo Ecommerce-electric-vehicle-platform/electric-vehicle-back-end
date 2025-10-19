@@ -81,7 +81,7 @@ public class Seller {
     @JsonBackReference
     private List<Subscription> subscriptions;
 
-    @OneToOne()
+    @ManyToOne
     @JoinColumn(name = "admin_id")
     @JsonManagedReference
     private Admin admin;

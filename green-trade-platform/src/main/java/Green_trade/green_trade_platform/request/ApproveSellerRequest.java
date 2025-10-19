@@ -13,4 +13,5 @@ import lombok.NoArgsConstructor;
 public class ApproveSellerRequest {
     private Long sellerId;
     private VerifiedDecisionStatus decision;
+    private String message;
 }
