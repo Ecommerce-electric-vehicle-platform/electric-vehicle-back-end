@@ -56,4 +56,13 @@ public class WalletServiceImpl {
 
         return result;
     }
+
+    public boolean isBuyerHasWallet(Buyer buyer) {
+        boolean result = false;
+        Optional<Wallet> walletOpt = walletRepository.findByBuyer(buyer);
+        if(walletOpt.isPresent()) {
+            result = true;
+        }
+        return result;
+    }
 }

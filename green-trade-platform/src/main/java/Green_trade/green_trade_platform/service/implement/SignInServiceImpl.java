@@ -30,7 +30,7 @@ public class SignInServiceImpl implements SignInService {
     @Autowired
     private GoogleVerifierServiceImpl googleVerifier;
     @Autowired
-    private WalletService walletService;
+    private WalletServiceImpl walletService;
     @Autowired
     private AdminRepository adminRepository;
 

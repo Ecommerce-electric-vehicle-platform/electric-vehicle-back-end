@@ -1,0 +1,135 @@
+package Green_trade.green_trade_platform.service.implement;
+
+import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
+import Green_trade.green_trade_platform.exception.WalletNotFoundException;
+import Green_trade.green_trade_platform.model.*;
+import Green_trade.green_trade_platform.repository.*;
+import Green_trade.green_trade_platform.request.WalletPaymentRequest;
+import Green_trade.green_trade_platform.service.TransactionService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.Optional;
+
+@Service
+@Slf4j
+public class TransactionServiceImpl implements TransactionService {
+
+    private final WalletServiceImpl walletService;
+    private final BuyerServiceImpl buyerService;
+    private final BuyerRepository buyerRepository;
+    private final PostProductRepository postProductRepository;
+    private final PostProductServiceImpl postProductService;
+    private final WalletRepository walletRepository;
+    private final PaymentRepository paymentRepository;
+    private final TransactionRepository transactionRepository;
+
+    public TransactionServiceImpl(
+            WalletServiceImpl walletService,
+            BuyerServiceImpl buyerService,
+            BuyerRepository buyerRepository,
+            PostProductRepository postProductRepository,
+            PostProductServiceImpl postProductService,
+            WalletRepository walletRepository, PaymentRepository paymentRepository, TransactionRepository transactionRepository) {
+        this.walletService = walletService;
+        this.buyerService = buyerService;
+        this.buyerRepository = buyerRepository;
+        this.postProductRepository = postProductRepository;
+        this.postProductService = postProductService;
+        this.walletRepository = walletRepository;
+        this.paymentRepository = paymentRepository;
+        this.transactionRepository = transactionRepository;
+    }
+
+    public Transaction checkoutWalletPayment (String username, Long postProductId, Long paymentId, Order order) throws Exception {
+        try {
+            Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
+            if(paymentOpt.isEmpty()) {
+                throw new Exception("Payment method is not existed");
+            }
+            if(!buyerService.isBuyerExisted(username)) {
+                throw new ProfileNotFoundException("Buyer is not existed");
+            }
+
+            Buyer buyer = buyerRepository.findByUsername(username)
+                    .orElseThrow(() -> new ProfileNotFoundException("Buyer is not existed"));
+            if(!walletService.isBuyerHasWallet(buyer)) {
+                throw new WalletNotFoundException("The wallet of Buyer is not existed");
+            }
+
+            Optional<PostProduct> postProductOpt = postProductRepository.findById(postProductId);
+            if(postProductOpt.isEmpty()) {
+                throw new Exception("Post is not existed");
+            }
+
+            if(postProductOpt.get().isSold()) {
+                throw new Exception("The product is unavailable");
+            }
+
+            Wallet wallet = buyerService.getWallet();
+            BigDecimal moneyHandler = wallet.getBalance().subtract(postProductOpt.get().getPrice());
+            if(moneyHandler.compareTo(new BigDecimal("0")) < 0) {
+                Transaction newTransaction = Transaction.builder()
+                        .order(order)
+                        .payment(paymentOpt.get())
+                        .amount(postProductOpt.get().getPrice())
+                        .currency("VND")
+                        .paymentMethod(paymentOpt.get().getGatewayName())
+                        .status("FAILED")
+                        .build();
+                transactionRepository.save(newTransaction);
+                throw new Exception("The money in wallet is not enough to checkout");
+            }
+            wallet.setBalance(moneyHandler);
+            walletRepository.save(wallet);
+            Transaction newTransaction = Transaction.builder()
+                    .order(order)
+                    .payment(paymentOpt.get())
+                    .amount(postProductOpt.get().getPrice())
+                    .currency("VND")
+                    .paymentMethod(paymentOpt.get().getGatewayName())
+                    .status("SUCCESS")
+                    .build();
+            return transactionRepository.save(newTransaction);
+        } catch (Exception e) {
+            log.info(">>> Error at checkoutWalletPayment: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    public Transaction checkoutCODPayment (String username, Long postProductId, Long paymentId, Order order) throws Exception {
+        try {
+            Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
+            if(paymentOpt.isEmpty()) {
+                throw new Exception("Payment method is not existed");
+            }
+            if(!buyerService.isBuyerExisted(username)) {
+                throw new ProfileNotFoundException("Buyer is not existed");
+            }
+
+            Buyer buyer = buyerRepository.findByUsername(username)
+                    .orElseThrow(() -> new ProfileNotFoundException("Buyer is not existed"));
+
+            Optional<PostProduct> postProductOpt = postProductRepository.findById(paymentId);
+            if(postProductOpt.isEmpty()) {
+                throw new Exception("Post is not existed");
+            }
+
+            Transaction newTransaction = Transaction.builder()
+                    .order(null)
+                    .payment(paymentOpt.get())
+                    .amount(postProductOpt.get().getPrice())
+                    .currency("VND")
+                    .paymentMethod(paymentOpt.get().getGatewayName())
+                    .status("FAILED")
+                    .build();
+            transactionRepository.save(newTransaction);
+
+            return transactionRepository.save(newTransaction);
+        } catch (Exception e) {
+            log.info(">>> Error at checkoutWalletPayment: {}", e.getMessage());
+            throw e;
+        }
+    }
+}

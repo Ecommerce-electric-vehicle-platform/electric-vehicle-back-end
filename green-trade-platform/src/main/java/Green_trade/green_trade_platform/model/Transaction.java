@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,7 +21,7 @@ public class Transaction {
     private Long id;
 
     @Column(name = "amount", nullable = false, unique = false)
-    private String amount;
+    private BigDecimal amount;
 
     @Column(name = "currency", nullable = false, unique = false)
     private String currency;
