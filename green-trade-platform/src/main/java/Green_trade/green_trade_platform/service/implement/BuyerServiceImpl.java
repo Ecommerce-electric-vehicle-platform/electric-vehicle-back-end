@@ -208,6 +208,7 @@ public class BuyerServiceImpl {
                                 buyerOpt.get().getPhoneNumber() :
                                 request.getPhoneNumber()
                 )
+                .transactions(null)
                 .price(postProductOpt.get().getPrice())
                 .status("PENDING")
                 .cancelReason("Not Canceled Yet")

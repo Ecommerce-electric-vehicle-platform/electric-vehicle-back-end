@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.request;
 
+import Green_trade.green_trade_platform.model.Payment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,4 +16,5 @@ public class PlaceOrderRequest {
     private String shippingAddress;
     private String phoneNumber;
     private Long shippingPartnerId;
+    private Long transactionId;
 }

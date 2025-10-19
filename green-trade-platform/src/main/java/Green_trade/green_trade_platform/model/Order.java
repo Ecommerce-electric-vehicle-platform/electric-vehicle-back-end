@@ -66,8 +66,11 @@ public class Order {
     @OneToOne(fetch = FetchType.LAZY)
     private Invoice invoice;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transaction> transactions;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "partner_id")
+    @JoinColumn(name = "shipping_partner_id")
     private ShippingPartner shippingPartner;
 
     @PrePersist
