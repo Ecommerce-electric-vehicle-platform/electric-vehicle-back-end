@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -37,6 +38,9 @@ public class Dispute {
 
     @Column(name = "status", nullable = false, unique = false)
     private String status;
+
+    @OneToMany(mappedBy = "dispute", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Evidence> evidences;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dispute_category_id", nullable = false)
