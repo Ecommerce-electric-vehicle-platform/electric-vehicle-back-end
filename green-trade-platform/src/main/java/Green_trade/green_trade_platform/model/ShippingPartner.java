@@ -13,6 +13,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "shipping_partner")
 public class ShippingPartner {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

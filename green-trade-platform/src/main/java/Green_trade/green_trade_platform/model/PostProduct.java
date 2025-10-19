@@ -92,4 +92,7 @@ public class PostProduct {
 
     @OneToMany(mappedBy = "postProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> productImages;
+
+    @OneToMany(mappedBy = "postProduct", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WishListing> wishListings;
 }

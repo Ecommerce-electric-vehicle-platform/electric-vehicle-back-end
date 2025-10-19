@@ -11,20 +11,20 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "product_image")
-public class ProductImage {
+@Table(name = "review_image")
+public class ReviewImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "image_id")
-    private Long imageId;
+    private Long id;
 
     @Column(name = "order_image", nullable = false, unique = false)
-    private Long orderImage;
+    private int orderImage;
 
     @Column(name = "image_url", nullable = false, unique = false)
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    private PostProduct postProduct;
+    @JoinColumn(name = "review_id")
+    private Review review;
 }
