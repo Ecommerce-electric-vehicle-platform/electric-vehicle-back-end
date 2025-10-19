@@ -4,6 +4,8 @@ import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.mapper.WalletMapper;
 import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.model.Seller;
+import Green_trade.green_trade_platform.request.PlaceOrderRequest;
 import Green_trade.green_trade_platform.model.Wallet;
 import Green_trade.green_trade_platform.request.ProfileRequest;
 import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
@@ -62,7 +64,7 @@ public class BuyerController {
     @Operation(summary = "Update Profile Buyer",
                 description = "Update buyer profile: buyer profile information")
     @PutMapping(
-            value = "/update-profile",
+            value = "/{id}/update-profile",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<RestResponse<BuyerResponse, Object>> updateProfile(
@@ -127,4 +129,9 @@ public class BuyerController {
 
 
 
+
+    public ResponseEntity<?> placeOrder(@Valid PlaceOrderRequest request) {
+        buyerService.placeOrder(request);
+        return ResponseEntity.status(HttpStatus.OK.value()).body(null);
+    }
 }

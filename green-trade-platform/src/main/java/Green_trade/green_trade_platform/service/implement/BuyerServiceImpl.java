@@ -1,7 +1,11 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.exception.DuplicateProfileException;
-import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
+import Green_trade.green_trade_platform.exception.WalletNotFoundException;
+import Green_trade.green_trade_platform.model.*;
+import Green_trade.green_trade_platform.repository.*;
+import Green_trade.green_trade_platform.request.PlaceOrderRequest;
 import Green_trade.green_trade_platform.model.Wallet;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
 import Green_trade.green_trade_platform.repository.WalletRepository;
@@ -23,8 +27,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -35,6 +38,12 @@ public class BuyerServiceImpl {
     private final DateUtils dateUtils;
     private final FileUtils fileUtils;
     private final WalletRepository walletRepository;
+    private final OrderRepository orderRepository;
+    private final TransactionServiceImpl transactionService;
+    private final PaymentRepository paymentRepository;
+    private final TransactionRepository transactionRepository;
+    private WalletServiceImpl walletService;
+    private PostProductRepository postProductRepository;
 
     public Map<String, Object> uploadBuyerProfile(ProfileRequest request, MultipartFile avatarFile) throws IOException {
         Buyer buyer = getCurrentUser();
@@ -144,6 +153,110 @@ public class BuyerServiceImpl {
     public BigDecimal getWalletBalance() {
         Buyer buyer = getCurrentUser();
         return buyerRepository.findBalanceByBuyerId(buyer.getBuyerId());
+    }
+
+    public boolean isBuyerExisted(Long buyerId) {
+        boolean result = false;
+        Optional<Buyer> buyerOpt = buyerRepository.findById(buyerId);
+        if(buyerOpt.isPresent()){
+            result = true;
+        }
+        return result;
+    }
+
+    public boolean isBuyerExisted(String username) {
+        boolean result = false;
+        Optional<Buyer> buyerOpt = buyerRepository.findByUsername(username);
+        if(buyerOpt.isPresent()){
+            result = true;
+        }
+        return result;
+    }
+
+    public Order placeOrder(PlaceOrderRequest request) throws Exception {
+        //kiểm tra các thứ
+        if (!isBuyerExisted(request.getUsername())) {
+            throw new ProfileNotFoundException("User is not existed");
+        }
+
+        Optional<Buyer> buyerOpt = buyerRepository.findByUsername(request.getUsername());
+        if (!walletService.isBuyerHasWallet(buyerOpt.get())) {
+            throw new WalletNotFoundException("The wallet of User is not existed");
+        }
+
+        Optional<PostProduct> postProductOpt = postProductRepository.findById(request.getPostProductId());
+        if (postProductOpt.isEmpty()) {
+            throw new Exception("Post is not existed");
+        }
+
+        if (postProductOpt.get().isSold()) {
+            throw new Exception("The product has been sold");
+        }
+
+        //tạo mới một đơn hàng
+        Order newOrder = Order.builder()
+                .admin(null)
+                .buyer(buyerOpt.get())
+                .orderCode(String.format("%09d", new Random().nextInt(1_000_000_000)))
+                .shippingAddress(
+                        request.getShippingAddress().isBlank() ?
+                                buyerOpt.get().getDefaultShippingAddress() :
+                                request.getShippingAddress()
+                )
+                .phoneNumber(
+                        request.getPhoneNumber().isBlank() ?
+                                buyerOpt.get().getPhoneNumber() :
+                                request.getPhoneNumber()
+                )
+                .transactions(null)
+                .price(postProductOpt.get().getPrice())
+                .status("PENDING")
+                .cancelReason("Not Canceled Yet")
+                .canceledAt(null)
+                .build();
+        //lưu đơn hàng mới
+        //để lấy order gán cho transaction
+        newOrder = orderRepository.save(newOrder);
+
+        //kiểm tra phương thức thanh toán
+        Payment payment = paymentRepository.findById(
+                request.getPaymentId()).orElseThrow(() -> new Exception("Payment method is not supported")
+        );
+
+        //phân chia cách xử lý dựa trên phương thức thanh toán
+        if(!payment.getGatewayName().equals("COD")) {
+            //tạo transaction cho việc thanh toán
+            Transaction transaction = transactionService.checkoutWalletPayment(
+                    request.getUsername(),
+                    request.getPostProductId(),
+                    request.getPaymentId(),
+                    newOrder
+            );
+            //luôn luôn success vì nếu failed thì đã kiểm tra bên trong với ném lỗi rồi
+            if(transaction.getStatus().equals("SUCCESS")) {
+                //lấy các lần giao dịch trước nếu có
+                //nếu thành công ở lần thanh toán đầu thì danh sách transaction chỉ có một
+                List<Transaction> transactions = transactionRepository.findAllByOrder(newOrder);
+                //set transactions cho order
+                newOrder.setTransactions(transactions);
+                //cập nhật trạng thái
+                newOrder.setStatus("PAID");
+            }
+        } else {
+            //đây là luồng xử lý cho thanh toán COD
+            Transaction transaction = transactionService.checkoutCODPayment(
+                    request.getUsername(),
+                    request.getPostProductId(),
+                    request.getPaymentId(),
+                    newOrder
+            );
+            //luôn luôn success vì nếu failed thì đã kiểm tra bên trong với ném lỗi rồi
+            if(transaction.getStatus().equals("SUCCESS")) {
+                List<Transaction> transactions = transactionRepository.findAllByOrder(newOrder);
+                newOrder.setTransactions(transactions);
+            }
+        }
+        return null;
     }
 
     public Wallet getWallet() {

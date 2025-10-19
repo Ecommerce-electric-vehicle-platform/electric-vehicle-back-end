@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -44,7 +45,7 @@ public class PostProduct {
     private String conditionLevel;
 
     @Column(name = "price", nullable = false, unique = false)
-    private double price;
+    private BigDecimal price;
 
     @Column(name = "description", nullable = false, unique = false)
     public String description;
@@ -52,12 +53,15 @@ public class PostProduct {
     @Column(name = "location_trading", nullable = false, unique = false)
     private String locationTrading;
 
-    @Column(name = "verified_decision_status", nullable = false, unique = false)
-    @Enumerated(EnumType.STRING)
-    private VerifiedDecisionStatus verifiedDecisionstatus;
+    @Column(name = "is_sold", nullable = false, unique = false)
+    private boolean sold;
 
     @Column(name = "active", nullable = false, unique = false)
     private boolean active;
+
+    @Column(name = "verified_decision_status", nullable = false, unique = false)
+    @Enumerated(EnumType.STRING)
+    private VerifiedDecisionStatus verifiedDecisionstatus;
 
     @Column(name = "verified", nullable = false, unique = false)
     private boolean verified ;
