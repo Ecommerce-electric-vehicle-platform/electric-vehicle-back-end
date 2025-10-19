@@ -11,10 +11,15 @@ import Green_trade.green_trade_platform.repository.BuyerRepository;
 import Green_trade.green_trade_platform.repository.PostProductRepository;
 import Green_trade.green_trade_platform.repository.WalletRepository;
 import Green_trade.green_trade_platform.request.PlaceOrderRequest;
+import Green_trade.green_trade_platform.model.Wallet;
+import Green_trade.green_trade_platform.repository.BuyerRepository;
+import Green_trade.green_trade_platform.repository.WalletRepository;
 import Green_trade.green_trade_platform.request.ProfileRequest;
 import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.util.DateUtils;
 import Green_trade.green_trade_platform.util.FileUtils;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -34,21 +39,13 @@ import java.util.Random;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class BuyerServiceImpl {
-    @Autowired
-    private BuyerRepository buyerRepository;
-    @Autowired
-    private CloudinaryService cloudinaryService;
-    @Autowired
-    private DateUtils dateUtils;
-    @Autowired
-    private FileUtils fileUtils;
-    @Autowired
-    private WalletRepository walletRepository;
-    @Autowired
-    private PostProductRepository postProductRepository;
-    @Autowired
-    private WalletService walletService;
+    private final BuyerRepository buyerRepository;
+    private final CloudinaryService cloudinaryService;
+    private final DateUtils dateUtils;
+    private final FileUtils fileUtils;
+    private final WalletRepository walletRepository;
 
     public Map<String, Object> uploadBuyerProfile(ProfileRequest request, MultipartFile avatarFile) throws IOException {
         Buyer buyer = getCurrentUser();
@@ -144,8 +141,7 @@ public class BuyerServiceImpl {
 
     public Buyer getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName(); // Lấy username hiện tại
-
+        String username = authentication.getName();
         return buyerRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User is not existed: " + username));
     }
@@ -218,5 +214,8 @@ public class BuyerServiceImpl {
                 .build();
 
         return null;
+    public Wallet getWallet() {
+        Buyer buyer = getCurrentUser();
+        return walletRepository.findByBuyer(buyer).orElseThrow();
     }
 }

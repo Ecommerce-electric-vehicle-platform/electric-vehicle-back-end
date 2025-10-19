@@ -2,9 +2,11 @@ package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
+import Green_trade.green_trade_platform.mapper.WalletMapper;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.request.PlaceOrderRequest;
+import Green_trade.green_trade_platform.model.Wallet;
 import Green_trade.green_trade_platform.request.ProfileRequest;
 import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.response.BuyerResponse;
@@ -13,6 +15,7 @@ import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,13 +32,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/buyer")
 @Slf4j
+@AllArgsConstructor
 public class BuyerController {
-    @Autowired
-    private BuyerServiceImpl buyerService;
-    @Autowired
-    private ResponseMapper responseMapper;
-    @Autowired
-    private BuyerMapper buyerMapper;
+    private final BuyerServiceImpl buyerService;
+    private final ResponseMapper responseMapper;
+    private final BuyerMapper buyerMapper;
+    private final WalletMapper walletMapper;
 
     @Operation(
             summary = "Upload buyer profile",
@@ -102,6 +104,25 @@ public class BuyerController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(responseMapper.toDto(false,
                     "Error occur during get user profile.",
+                    null, e));
+        }
+    }
+
+    @Operation(
+            summary = "Get user wallet.",
+            description = "Front-end put access token in the header request. " +
+                    "Back-end will give user's wallet information."
+    )
+    @GetMapping("/wallet")
+    public ResponseEntity<?> getWallet() {
+        try {
+            Wallet wallet = buyerService.getWallet();
+            return ResponseEntity.ok(responseMapper.toDto(true,
+                    "Get wallet's information successfully.",
+                    walletMapper.toDto(wallet), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(responseMapper.toDto(false,
+                    "Get wallet information failed.",
                     null, e));
         }
     }

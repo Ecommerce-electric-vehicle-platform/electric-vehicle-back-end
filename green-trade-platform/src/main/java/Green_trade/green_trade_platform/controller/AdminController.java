@@ -30,6 +30,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,9 +46,10 @@ public class AdminController {
     private final AdminMapper adminMapper;
     private final PostProductMapper postProductMapper;
     private final PostProductListMapper postProductListMapper;
+    private final NotificationSocketController socketController;
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping("")
+    @GetMapping("/pending-seller")
     public ResponseEntity<?> findAllPendingSeller(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -65,20 +67,11 @@ public class AdminController {
     @PostMapping("/approve-seller")
     public ResponseEntity<RestResponse<?, ?>> handlePendingSeller(@RequestBody ApproveSellerRequest request) {
         Notification sellerNotification = sellerService.handlePendingSeller(request);
-        if(sellerNotification != null) {
-            return ResponseEntity.status(HttpStatus.OK.value()).body(responseMapper.toDto(
-                    true,
-                    "FETCH SELLER SUCCESSFULLY",
-                    sellerNotification,
-                    null
-            ));
-        }
-        return ResponseEntity.status(HttpStatus.OK.value()).body(responseMapper.toDto(
-                false,
-                "REJECT SELLER APPROVEMENT",
-                null,
-                null
-        ));
+        sellerNotification.setSendAt(LocalDateTime.now());
+        socketController.sendNotificationToUser(sellerNotification);
+        return ResponseEntity.ok(responseMapper.toDto(true,
+                "Approve request was be solved.",
+                sellerNotification, null));
     }
 
     @PostMapping("creating-admin")
