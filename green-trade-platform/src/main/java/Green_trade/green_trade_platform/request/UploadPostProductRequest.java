@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -39,7 +41,7 @@ public class UploadPostProductRequest {
     private String conditionLevel;
 
     @Positive(message = "Price must be greater than zero")
-    private double price;
+    private BigDecimal price;
 
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;

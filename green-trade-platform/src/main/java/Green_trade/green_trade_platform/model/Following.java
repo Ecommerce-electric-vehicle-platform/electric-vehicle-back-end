@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 @Builder
-@Table(name = "buyer")
+@Table(name = "following")
 public class Following {
     @EmbeddedId
     private FollowingId id;
