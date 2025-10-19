@@ -81,6 +81,9 @@ public class Buyer {
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders;
 
+    @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Conversation> conversations;
+
     @PrePersist
     public void onCreate() {
         this.isActive = true;

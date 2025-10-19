@@ -7,6 +7,7 @@ import Green_trade.green_trade_platform.model.WalletTransaction;
 import Green_trade.green_trade_platform.repository.WalletRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +18,19 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-@AllArgsConstructor
 public class WalletServiceImpl {
     private final WalletRepository walletRepository;
     private final BuyerServiceImpl buyerService;
     private final WalletTransactionServiceImpl walletTransactionService;
+
+    public WalletServiceImpl(
+            WalletRepository walletRepository,
+            @Lazy BuyerServiceImpl buyerService, // tránh vòng lặp dependency
+            WalletTransactionServiceImpl walletTransactionService) {
+        this.walletRepository = walletRepository;
+        this.buyerService = buyerService;
+        this.walletTransactionService = walletTransactionService;
+    }
 
     public Wallet createLocalWalletForBuyer(Buyer buyer) {
         Wallet wallet = Wallet.builder().buyer(buyer).build();

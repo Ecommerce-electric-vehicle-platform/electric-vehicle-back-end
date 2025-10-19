@@ -1,17 +1,20 @@
 package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.mapper.BuyerMapper;
+import Green_trade.green_trade_platform.mapper.OrderMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.mapper.WalletMapper;
-import Green_trade.green_trade_platform.model.Buyer;
-import Green_trade.green_trade_platform.model.Seller;
+import Green_trade.green_trade_platform.model.*;
+import Green_trade.green_trade_platform.repository.PaymentRepository;
 import Green_trade.green_trade_platform.request.PlaceOrderRequest;
-import Green_trade.green_trade_platform.model.Wallet;
 import Green_trade.green_trade_platform.request.ProfileRequest;
 import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.response.BuyerResponse;
+import Green_trade.green_trade_platform.response.OrderResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
+import Green_trade.green_trade_platform.service.TransactionService;
 import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
+import Green_trade.green_trade_platform.service.implement.TransactionServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
@@ -27,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -38,6 +42,9 @@ public class BuyerController {
     private final ResponseMapper responseMapper;
     private final BuyerMapper buyerMapper;
     private final WalletMapper walletMapper;
+    private final PaymentRepository paymentRepository;
+    private final TransactionServiceImpl transactionService;
+    private final OrderMapper orderMapper;
 
     @Operation(
             summary = "Upload buyer profile",
@@ -113,6 +120,7 @@ public class BuyerController {
             description = "Front-end put access token in the header request. " +
                     "Back-end will give user's wallet information."
     )
+
     @GetMapping("/wallet")
     public ResponseEntity<?> getWallet() {
         try {
@@ -127,11 +135,49 @@ public class BuyerController {
         }
     }
 
+    @PostMapping("/place-order")
+    public ResponseEntity<?> placeOrder(@Valid PlaceOrderRequest request) throws Exception {
+        Order newOrder = null;
+        RestResponse response = null;
+        OrderResponse responseData = null;
+        Payment payment = paymentRepository.findById(request.getPaymentId()).orElseThrow(
+                () -> new Exception("Payment method is not existed")
+        );
 
+        newOrder = buyerService.placeOrder(request);
 
+        if(payment.getGatewayName().equals("COD")) {
+            //đây là luồng xử lý cho thanh toán COD
+            Transaction transaction = transactionService.checkoutCODPayment(
+                    request.getUsername(),
+                    request.getPostProductId(),
+                    request.getPaymentId(),
+                    newOrder
+            );
+            List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
+            newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
+            responseData = orderMapper.toDto(newOrder);
+        } else {
+            //tạo transaction cho việc thanh toán
+            Transaction transaction = transactionService.checkoutWalletPayment(
+                    request.getUsername(),
+                    request.getPostProductId(),
+                    request.getPaymentId(),
+                    newOrder
+            );
+            List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
+            newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
+            newOrder = buyerService.updateOrderStatus(newOrder, "PAID");
+            responseData = orderMapper.toDto(newOrder);
+        }
 
-    public ResponseEntity<?> placeOrder(@Valid PlaceOrderRequest request) {
-        buyerService.placeOrder(request);
-        return ResponseEntity.status(HttpStatus.OK.value()).body(null);
+        response = responseMapper.toDto(
+                true,
+                "PLACE ORDERED SUCCESS",
+                responseData,
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 }

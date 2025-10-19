@@ -39,7 +39,6 @@ public class BuyerServiceImpl {
     private final FileUtils fileUtils;
     private final WalletRepository walletRepository;
     private final OrderRepository orderRepository;
-    private final TransactionServiceImpl transactionService;
     private final PaymentRepository paymentRepository;
     private final TransactionRepository transactionRepository;
     private WalletServiceImpl walletService;
@@ -173,6 +172,58 @@ public class BuyerServiceImpl {
         return result;
     }
 
+    public Order placeOrderCOD(PlaceOrderRequest request) throws Exception {
+        Optional<Buyer> buyerOpt = buyerRepository.findByUsername(request.getUsername());
+        Optional<PostProduct> postProductOpt = postProductRepository.findById(request.getPostProductId());
+
+        //kiểm tra các thứ
+        if (!isBuyerExisted(request.getUsername())) {
+            throw new ProfileNotFoundException("User is not existed");
+        }
+
+        if (postProductOpt.isEmpty()) {
+            throw new Exception("Post is not existed");
+        }
+
+        if (postProductOpt.get().isSold()) {
+            throw new Exception("The product has been sold");
+        }
+
+        //tạo mới một đơn hàng
+        Order newOrder = Order.builder()
+                .admin(null)
+                .buyer(buyerOpt.get())
+                .orderCode(String.format("%09d", new Random().nextInt(1_000_000_000)))
+                .shippingAddress(
+                        request.getShippingAddress().isBlank() ?
+                                buyerOpt.get().getDefaultShippingAddress() :
+                                request.getShippingAddress()
+                )
+                .phoneNumber(
+                        request.getPhoneNumber().isBlank() ?
+                                buyerOpt.get().getPhoneNumber() :
+                                request.getPhoneNumber()
+                )
+                .transactions(null)
+                .price(postProductOpt.get().getPrice())
+                .status("PENDING")
+                .cancelReason("Not Canceled Yet")
+                .canceledAt(null)
+                .build();
+
+        return orderRepository.save(newOrder);
+    }
+
+    public Order updateOrderStatus(Order order, String status) {
+        order.setStatus(status);
+        return orderRepository.save(order);
+    }
+
+    public Order updateOrderTransactions(Order order, List<Transaction> transactions) {
+        order.setTransactions(transactions);
+        return orderRepository.save(order);
+    }
+
     public Order placeOrder(PlaceOrderRequest request) throws Exception {
         //kiểm tra các thứ
         if (!isBuyerExisted(request.getUsername())) {
@@ -214,50 +265,12 @@ public class BuyerServiceImpl {
                 .cancelReason("Not Canceled Yet")
                 .canceledAt(null)
                 .build();
-        //lưu đơn hàng mới
-        //để lấy order gán cho transaction
         newOrder = orderRepository.save(newOrder);
 
-        //kiểm tra phương thức thanh toán
-        Payment payment = paymentRepository.findById(
-                request.getPaymentId()).orElseThrow(() -> new Exception("Payment method is not supported")
-        );
-
-        //phân chia cách xử lý dựa trên phương thức thanh toán
-        if(!payment.getGatewayName().equals("COD")) {
-            //tạo transaction cho việc thanh toán
-            Transaction transaction = transactionService.checkoutWalletPayment(
-                    request.getUsername(),
-                    request.getPostProductId(),
-                    request.getPaymentId(),
-                    newOrder
-            );
-            //luôn luôn success vì nếu failed thì đã kiểm tra bên trong với ném lỗi rồi
-            if(transaction.getStatus().equals("SUCCESS")) {
-                //lấy các lần giao dịch trước nếu có
-                //nếu thành công ở lần thanh toán đầu thì danh sách transaction chỉ có một
-                List<Transaction> transactions = transactionRepository.findAllByOrder(newOrder);
-                //set transactions cho order
-                newOrder.setTransactions(transactions);
-                //cập nhật trạng thái
-                newOrder.setStatus("PAID");
-            }
-        } else {
-            //đây là luồng xử lý cho thanh toán COD
-            Transaction transaction = transactionService.checkoutCODPayment(
-                    request.getUsername(),
-                    request.getPostProductId(),
-                    request.getPaymentId(),
-                    newOrder
-            );
-            //luôn luôn success vì nếu failed thì đã kiểm tra bên trong với ném lỗi rồi
-            if(transaction.getStatus().equals("SUCCESS")) {
-                List<Transaction> transactions = transactionRepository.findAllByOrder(newOrder);
-                newOrder.setTransactions(transactions);
-            }
-        }
-        return null;
+        return orderRepository.save(newOrder);
     }
+
+
 
     public Wallet getWallet() {
         Buyer buyer = getCurrentUser();

@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -40,6 +41,11 @@ public class TransactionServiceImpl implements TransactionService {
         this.walletRepository = walletRepository;
         this.paymentRepository = paymentRepository;
         this.transactionRepository = transactionRepository;
+    }
+
+    public List<Transaction> getTransactionsOfOrder(Order order) {
+        List<Transaction> transactions = transactionRepository.findAllByOrder(order);
+        return transactions;
     }
 
     public Transaction checkoutWalletPayment (String username, Long postProductId, Long paymentId, Order order) throws Exception {
@@ -117,18 +123,17 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
             Transaction newTransaction = Transaction.builder()
-                    .order(null)
+                    .order(order)
                     .payment(paymentOpt.get())
                     .amount(postProductOpt.get().getPrice())
                     .currency("VND")
                     .paymentMethod(paymentOpt.get().getGatewayName())
-                    .status("FAILED")
+                    .status("PENDING")
                     .build();
-            transactionRepository.save(newTransaction);
 
             return transactionRepository.save(newTransaction);
         } catch (Exception e) {
-            log.info(">>> Error at checkoutWalletPayment: {}", e.getMessage());
+            log.info(">>> Error at checkoutCODPayment: {}", e.getMessage());
             throw e;
         }
     }
