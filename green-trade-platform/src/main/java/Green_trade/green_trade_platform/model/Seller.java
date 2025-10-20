@@ -81,6 +81,10 @@ public class Seller {
     @JsonBackReference
     private List<Subscription> subscriptions;
 
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
+    private List<Following> followings;
+
     @ManyToOne
     @JoinColumn(name = "admin_id")
     @JsonManagedReference
