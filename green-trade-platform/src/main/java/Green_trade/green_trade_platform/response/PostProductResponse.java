@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 @Data
@@ -27,4 +28,6 @@ public class PostProductResponse {
     private boolean active;
     private boolean verified;
     private String categoryName;
+    private BigDecimal price;
+    private String locationTrading;
 }
