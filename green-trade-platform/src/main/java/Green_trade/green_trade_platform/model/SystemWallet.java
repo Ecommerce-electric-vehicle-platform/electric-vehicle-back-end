@@ -32,13 +32,13 @@ public class SystemWallet {
     @Column(name = "concurrency", nullable = false, unique = true)
     private String concurrency;
 
-    @Column(name = "balance", nullable = false, unique = true)
-    private BigDecimal balannce;
+    @Column(name = "balance", nullable = false, unique = false)
+    private BigDecimal balance;
 
-    @Column(name = "status", nullable = false, unique = true)
+    @Column(name = "status", nullable = false, unique = false)
     private String status;
 
-    @Column(name = "createdAt", nullable = false, unique = true)
+    @Column(name = "created_at", nullable = false, unique = false)
     private LocalDateTime createdAt;
 
     @PrePersist

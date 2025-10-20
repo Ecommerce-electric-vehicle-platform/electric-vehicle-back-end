@@ -19,18 +19,25 @@ public class ShippingPartner {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    @Column(name = "partner_name", nullable = false, unique = true)
     private String partnerName;
 
+    @Column(name = "address", nullable = false, unique = true)
     private String address;
 
+    @Column(name = "website_url", nullable = false, unique = true)
     private String websiteUrl;
 
+    @Column(name = "hotline", nullable = false, unique = true)
     private String hotline;
 
+    @Column(name = "created_at", nullable = false, unique = true)
     private LocalDateTime createdAt;
 
+    @Column(name = "updatedat", nullable = false, unique = true)
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "shippingPartner", cascade = CascadeType.ALL, orphanRemoval = true)

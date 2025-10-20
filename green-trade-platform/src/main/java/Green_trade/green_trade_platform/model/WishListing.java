@@ -26,10 +26,10 @@ public class WishListing {
     @Column(name = "note", nullable = false, unique = false)
     private String note;
 
-    @Column(name = "createdAt", nullable = false, unique = false)
+    @Column(name = "created_at", nullable = false, unique = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "deleteAt", nullable = false, unique = false)
+    @Column(name = "deleted_at", nullable = false, unique = false)
     private LocalDateTime deletedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)

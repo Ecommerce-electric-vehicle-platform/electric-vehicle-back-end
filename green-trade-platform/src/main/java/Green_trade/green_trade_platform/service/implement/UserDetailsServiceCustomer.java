@@ -20,7 +20,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UserDetailsServiceCustomer implements UserDetailsService {
-    private final BuyerRepository buyerRepo;
+    private final BuyerRepository buyerRepository;
     private final SellerRepository sellerRepository;
     private final AdminRepository adminRepository;
     private final String regex = "^\\d{10}$";
@@ -40,7 +40,7 @@ public class UserDetailsServiceCustomer implements UserDetailsService {
         }
 
         // Check buyer table
-        Optional<Buyer> buyer = buyerRepo.findByUsername(username);
+        Optional<Buyer> buyer = buyerRepository.findByUsername(username);
         if (buyer.isPresent()) {
             Optional<Seller> seller = sellerRepository.findByBuyer(buyer.get());
             if(seller.isPresent()) {
