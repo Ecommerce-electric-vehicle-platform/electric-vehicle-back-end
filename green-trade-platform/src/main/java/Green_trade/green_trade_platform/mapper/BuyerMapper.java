@@ -18,6 +18,7 @@ public class  BuyerMapper {
     public BuyerResponse toDto(Buyer buyer) {
         return BuyerResponse.builder().
                 buyerId(buyer.getBuyerId())
+                .avatarUrl(buyer.getAvatarUrl())
                 .username(buyer.getUsername())
                 .fullName(buyer.getFullName())
                 .defaultShippingAddress(buyer.getDefaultShippingAddress())

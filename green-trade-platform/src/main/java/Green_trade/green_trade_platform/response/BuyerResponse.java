@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class BuyerResponse {
     private Long buyerId;
+    private String avatarUrl;
     private String username;
     private String fullName;
     private String defaultShippingAddress;

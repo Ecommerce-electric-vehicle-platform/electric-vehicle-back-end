@@ -20,8 +20,8 @@ public class Following {
     private FollowingId id;
 
     @ManyToOne
-    @JoinColumn(name = "buyer_id")
     @MapsId("buyerId")
+    @JoinColumn(name = "buyer_id")
     @JsonManagedReference
     private Buyer buyer;
 
@@ -31,9 +31,9 @@ public class Following {
     @JsonManagedReference
     private Seller seller;
 
-    @Column(name = "followed_at", nullable = false, unique = false)
+    @Column(name = "followed_at", nullable = false)
     private LocalDateTime followedAt;
 
-    @Column(name = "unfollowed_at", nullable = false, unique = false)
+    @Column(name = "unfollowed_at")
     private LocalDateTime unfollowedAt;
 }

@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Table(name = "wish_listing")
 public class WishListing {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "wish_list_id")
     private Long id;
 
