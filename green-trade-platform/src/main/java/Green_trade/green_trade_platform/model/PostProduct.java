@@ -75,6 +75,9 @@ public class PostProduct {
     @Column(name = "deleted_at", nullable = true, unique = false)
     private LocalDateTime deletedAt;
 
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Conversation> conversations;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
