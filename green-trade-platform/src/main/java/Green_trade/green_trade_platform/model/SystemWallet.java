@@ -26,19 +26,19 @@ public class SystemWallet {
     @Column(name = "buyer_wallet_id", nullable = false, unique = true)
     private Long buyerWalletId;
 
-    @Column(name = "buyer_wallet_id", nullable = false, unique = true)
+    @Column(name = "seller_wallet_id", nullable = false, unique = true)
     private Long sellerWalletId;
 
-    @Column(name = "buyer_wallet_id", nullable = false, unique = true)
+    @Column(name = "concurrency", nullable = false, unique = true)
     private String concurrency;
 
-    @Column(name = "buyer_wallet_id", nullable = false, unique = true)
-    private BigDecimal balannce;
+    @Column(name = "balance", nullable = false, unique = false)
+    private BigDecimal balance;
 
-    @Column(name = "buyer_wallet_id", nullable = false, unique = true)
+    @Column(name = "status", nullable = false, unique = false)
     private String status;
 
-    @Column(name = "buyer_wallet_id", nullable = false, unique = true)
+    @Column(name = "created_at", nullable = false, unique = false)
     private LocalDateTime createdAt;
 
     @PrePersist

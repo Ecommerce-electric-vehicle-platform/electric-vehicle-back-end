@@ -27,7 +27,7 @@ public class Following {
 
     @ManyToOne
     @JoinColumn(name = "seller_id")
-    @JoinColumn(name = "seller_id")
+    @MapsId("sellerId")
     @JsonManagedReference
     private Seller seller;
 

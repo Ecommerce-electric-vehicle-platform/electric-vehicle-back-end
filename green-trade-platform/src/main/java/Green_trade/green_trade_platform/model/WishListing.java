@@ -23,13 +23,13 @@ public class WishListing {
     @Column(name = "priority", nullable = false, unique = false)
     private String priority;
 
-    @Column(name = "priority", nullable = false, unique = false)
+    @Column(name = "note", nullable = false, unique = false)
     private String note;
 
-    @Column(name = "priority", nullable = false, unique = false)
+    @Column(name = "created_at", nullable = false, unique = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "priority", nullable = false, unique = false)
+    @Column(name = "deleted_at", nullable = false, unique = false)
     private LocalDateTime deletedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
