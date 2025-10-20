@@ -75,7 +75,7 @@ public class PostProduct {
     @Column(name = "deleted_at", nullable = true, unique = false)
     private LocalDateTime deletedAt;
 
-    @OneToMany(mappedBy = "postProduct", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "postProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Conversation> conversations;
 
     @ManyToOne(fetch = FetchType.LAZY)
