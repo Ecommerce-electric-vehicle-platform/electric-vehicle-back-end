@@ -13,6 +13,8 @@ DELETE FROM admin;
 DELETE FROM subscription_packages;
 DELETE FROM package_price;
 DELETE FROM category;
+DELETE FROM system_policy;
+DELETE FROM subscription;
 
 ALTER TABLE product_image AUTO_INCREMENT = 1;
 ALTER TABLE post_product AUTO_INCREMENT = 1;
@@ -236,6 +238,41 @@ VALUES
 ('https://cdn.example.com/images/id_front_20.jpg', 'https://cdn.example.com/images/id_back_20.jpg', 'https://cdn.example.com/images/business_license_20.jpg', 'https://cdn.example.com/images/selfie_20.jpg', 'PENDING', 'Neko Store 20', 'https://cdn.example.com/policies/policy_20.pdf', 'TAX123456800', 'ID987654340', NOW(), NULL, NULL, 20, 1);
 
 -- =========================================================
+-- 🧾 SUBSCRIPTION - GÁN GÓI CHO SELLER
+-- =========================================================
+-- Seller 1–5: Gói Basic (30 ngày)
+-- Seller 6–10: Gói Pro (90 ngày)
+-- Seller 11–15: Gói Premium (180 ngày)
+-- Seller 16–20: Gói Legacy (30 ngày, không còn hoạt động)
+
+INSERT INTO subscription (seller_id, subscription_package_id, is_active, start_day, end_day)
+VALUES
+(1, 1, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(2, 1, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(3, 1, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(4, 1, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(5, 1, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+
+(6, 2, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
+(7, 2, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
+(8, 2, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
+(9, 2, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
+(10, 2, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
+
+(11, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
+(12, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
+(13, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
+(14, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
+(15, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
+
+(16, 4, FALSE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(17, 4, FALSE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(18, 4, FALSE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(19, 4, FALSE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(20, 4, FALSE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))
+ON DUPLICATE KEY UPDATE seller_id = seller_id;
+
+-- =========================================================
 -- 🗂 CATEGORY
 -- =========================================================
 INSERT INTO category (name, description)
@@ -340,6 +377,36 @@ VALUES
 (1, 'https://cdn.example.com/images/lithium_battery_60v_front.jpg', 3),
 (1, 'https://cdn.example.com/images/charger_60v5a.jpg', 4),
 (1, 'https://cdn.example.com/images/brake_disc_vf.jpg', 5);
+
+-- =========================================================
+-- 🖼 SYSTEM_POLICY
+-- =========================================================
+
+INSERT INTO system_policy
+(title, content, version, effective_date, expired_date, created_at, updated_at, status, admin_id)
+VALUES
+(
+  'User Registration Policy',
+  'When registering for an account on Green Trade Platform, users must provide accurate personal information, agree to the Terms of Service, Privacy Policy, and comply with the community rules. The system reserves the right to suspend or terminate any account that violates these terms.',
+  1.0,
+  NOW(),
+  NULL,
+  NOW(),
+  NOW(),
+  'ACTIVE',
+  1
+),
+(
+  'Account Upgrade Policy (Buyer to Seller)',
+  'Users who upgrade their accounts from Buyer to Seller must verify identity, provide business-related information, and comply with seller obligations. Any violation may lead to temporary suspension or permanent deactivation of the seller account as determined by the platform administrators.',
+  1.0,
+  NOW(),
+  NULL,
+  NOW(),
+  NOW(),
+  'ACTIVE',
+  1
+);
 
 -- =========================================================
 -- ✅ KẾT THÚC FILE DATA.SQL

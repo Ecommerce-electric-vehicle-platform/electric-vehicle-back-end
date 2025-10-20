@@ -78,6 +78,12 @@ public class Admin {
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Announcement> announcements;
 
+    @OneToMany(mappedBy = "admin")
+    private List<SystemWallet> systemWallets;
+
+    @OneToMany(mappedBy = "admin")
+    private List<SystemPolicy> systemPolicies;
+
     @PrePersist
     public void onCreate() {
         this.isSuperAdmin = false;
