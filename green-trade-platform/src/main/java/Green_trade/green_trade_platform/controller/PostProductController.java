@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 @RestController
@@ -32,8 +33,10 @@ public class PostProductController {
                     "Size can be default 10 or more."
     )
     @GetMapping("")
-    public ResponseEntity<RestResponse<?, ?>> getAllProduct(@RequestParam(name = "page", defaultValue = "0") int page,
-                                                            @RequestParam(name = "size", defaultValue = "10") int size) {
+    public ResponseEntity<RestResponse<PostProductListResponse, Object>> getAllProduct(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
         try {
             Page<PostProduct> postProductPage = postProductService.getAllProductPaging(page, size);
             Map<String, Object> meta = Map.of(
@@ -52,10 +55,11 @@ public class PostProductController {
             );
             return ResponseEntity.status(HttpStatus.OK.value()).body(response);
         } catch (Exception e) {
-            RestResponse<Object, Object> response = responseMapper.toDto(
+            PostProductListResponse responseData = postProductListMapper.toDto(new ArrayList<PostProduct>(), Map.of());
+            RestResponse<PostProductListResponse, Object> response = responseMapper.toDto(
                     false,
                     "Get post product failed.",
-                    null,
+                    responseData,
                     null
             );
             return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(response);
