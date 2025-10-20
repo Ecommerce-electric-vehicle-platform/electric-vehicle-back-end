@@ -16,20 +16,20 @@ import java.time.LocalDateTime;
 @Table(name = "wish_listing")
 public class WishListing {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "wish_list_id")
     private Long id;
 
     @Column(name = "priority", nullable = false, unique = false)
     private String priority;
 
-    @Column(name = "priority", nullable = false, unique = false)
+    @Column(name = "note", nullable = false, unique = false)
     private String note;
 
-    @Column(name = "priority", nullable = false, unique = false)
+    @Column(name = "createdAt", nullable = false, unique = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "priority", nullable = false, unique = false)
+    @Column(name = "deleteAt", nullable = false, unique = false)
     private LocalDateTime deletedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)

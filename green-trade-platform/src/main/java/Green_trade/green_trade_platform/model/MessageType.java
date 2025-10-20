@@ -14,6 +14,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "message_type")
 public class MessageType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
