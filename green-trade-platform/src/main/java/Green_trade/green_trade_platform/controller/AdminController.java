@@ -99,8 +99,8 @@ public class AdminController {
             description = "Return a post product list")
     @GetMapping("/review-post-seller-list")
     public ResponseEntity<RestResponse<PostProductListResponse, Object>> getAllPostProductForReview(
-            @RequestPart(name = "size",value = "10") int size,
-            @RequestPart(name = "page",value = "0") int page
+            @RequestParam(name = "size",value = "10") int size,
+            @RequestParam(name = "page",value = "0") int page
     ) throws Exception {
         log.info(">>> Server came getAllPostProductForReview API");
         Page<PostProduct> postProducts = postProductServiceImpl.getAllPostProductForVerifiedReview(size, page);
