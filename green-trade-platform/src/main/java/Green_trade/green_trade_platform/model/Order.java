@@ -1,5 +1,7 @@
 package Green_trade.green_trade_platform.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -55,6 +57,7 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id")
+    @JsonManagedReference
     private Buyer buyer;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -64,8 +67,17 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne()
+    @JoinColumn(name = "post_id", nullable = false, unique = false)
+    @JsonManagedReference
+    private PostProduct postProduct;
+
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "order")
+    @JsonBackReference
     private Invoice invoice;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Dispute> disputes;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions;

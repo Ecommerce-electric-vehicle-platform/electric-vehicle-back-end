@@ -45,5 +45,6 @@ public class Notification {
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
+        this.sendAt = LocalDateTime.now();
     }
 }

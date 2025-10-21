@@ -53,7 +53,8 @@ public class BuyerServiceImpl {
             throw new DuplicateProfileException("Profile already exits.");
         }
         // Check date and parse into LocalDate
-        LocalDate dob = dateUtils.parseAndValidateDob(request.getDob());
+//        LocalDate dob = dateUtils.parseAndValidateDob(request.getDob());
+        LocalDate dob = LocalDate.parse(request.getDob());
         log.info(">>> Profile request: {}", request.toString());
 
         try {
@@ -91,7 +92,7 @@ public class BuyerServiceImpl {
             buyer.setFullName(request.getFullName() == null ? "" : request.getFullName());
             buyer.setEmail(request.getEmail() == null ? "" : request.getEmail());
             buyer.setGender(request.getGender());
-            buyer.setDob(request.getBirthDay());
+            buyer.setDob(request.getDob());
             buyer.setPhoneNumber(request.getPhoneNumber() == null ? "" : request.getPhoneNumber());
             buyer.setDefaultShippingAddress(request.getDefaultShippingAddress());
             log.info(">>> Passed buyer update text information");

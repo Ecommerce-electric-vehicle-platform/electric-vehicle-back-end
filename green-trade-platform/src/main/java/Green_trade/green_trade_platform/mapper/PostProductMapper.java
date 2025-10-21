@@ -22,6 +22,8 @@ public class PostProductMapper {
                 .verifiedDecisionStatus(postProduct.getVerifiedDecisionstatus())
                 .verified(postProduct.isVerified())
                 .active(postProduct.isActive())
+                .price(postProduct.getPrice())
+                .locationTrading(postProduct.getLocationTrading())
                 .categoryName(postProduct.getCategory().getName())
                 .build();
     }

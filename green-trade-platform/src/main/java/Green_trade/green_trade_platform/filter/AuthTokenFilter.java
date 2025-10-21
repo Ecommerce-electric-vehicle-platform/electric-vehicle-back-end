@@ -38,7 +38,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 || path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs")
                 || path.startsWith("/verify-otp") || path.startsWith("/api/test/redis")
                 || path.startsWith("/forgot-password") || path.startsWith("/verify-otp-forgot-password")
-                || path.startsWith("/verify-username-forgot-password") || path.startsWith("/signin-google")) {
+                || path.startsWith("/verify-username-forgot-password") || path.startsWith("/signin-google")
+                || path.startsWith("/api/v1/post-product")) {
             filterChain.doFilter(request, response);
             return;
         }

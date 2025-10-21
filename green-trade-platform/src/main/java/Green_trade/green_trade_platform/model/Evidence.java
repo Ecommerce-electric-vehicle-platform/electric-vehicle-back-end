@@ -19,7 +19,7 @@ public class Evidence {
     private Long id;
 
     @Column(name = "order_image", nullable = false, unique = false)
-    private int orderImage;
+    private Long orderImage;
 
     @Column(name = "image_url", nullable = false, unique = false)
     private String imageUrl;
