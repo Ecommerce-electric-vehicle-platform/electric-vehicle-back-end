@@ -39,7 +39,7 @@ public class WalletTransaction {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "external_transaction_reference", unique = true)
+    @Column(name = "external_transaction_reference")
     private String externalTransactionReference;
 
     @Column(name = "created_at")
