@@ -53,7 +53,8 @@ public class BuyerServiceImpl {
             throw new DuplicateProfileException("Profile already exits.");
         }
         // Check date and parse into LocalDate
-        LocalDate dob = dateUtils.parseAndValidateDob(request.getDob());
+//        LocalDate dob = dateUtils.parseAndValidateDob(request.getDob());
+        LocalDate dob = LocalDate.parse(request.getDob());
         log.info(">>> Profile request: {}", request.toString());
 
         try {
