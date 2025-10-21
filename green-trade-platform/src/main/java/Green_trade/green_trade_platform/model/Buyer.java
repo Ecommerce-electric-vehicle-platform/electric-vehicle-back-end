@@ -79,15 +79,19 @@ public class Buyer {
     private Wallet wallet;
 
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<Order> orders;
 
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<Conversation> conversations;
 
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<WishListing> wishListings;
 
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<Following> followings;
 
     @PrePersist
