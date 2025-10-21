@@ -30,7 +30,7 @@ public class WalletTransactionServiceImpl {
                     .amount(BigDecimal.valueOf(amount))
                     .balanceBefore(wallet.getBalance())
                     .status(TransactionStatus.SUCCESS)
-                    .description("Nạp tiền vào ví người dùng")
+                    .description("Deposit money into user's wallet.")
                     .externalTransactionReference(params.get("vnp_TxnRef"))
                     .wallet(wallet)
                     .build();

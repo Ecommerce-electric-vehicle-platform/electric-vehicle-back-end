@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.enumerate.SellerStatus;
 import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
 import Green_trade.green_trade_platform.mapper.SellerMapper;
 import Green_trade.green_trade_platform.model.Buyer;
@@ -13,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -165,6 +167,47 @@ public class KycService {
         String idNumber = (String) data.get("id");
 
         return Map.of("name", name, "id_number", idNumber);
+    }
+
+
+    public KycResponse update(
+            String storeName,
+            MultipartFile businessLicense,
+            MultipartFile storePolicy
+    ) throws IOException {
+        Buyer buyer = buyerService.getCurrentUser();
+        log.info(">>> [UPDATE KYC] Buyer ID: {}, username: {}", buyer.getBuyerId(), buyer.getUsername());
+
+        // Lấy seller đã tồn tại (đã KYC trước đó)
+        Seller seller = sellerRepository.findByBuyer(buyer)
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy hồ sơ KYC để cập nhật."));
+
+        if (businessLicense != null && !businessLicense.isEmpty()) {
+            Map<String, String> upload = cloudinaryService.upload(
+                    businessLicense,
+                    "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/business_license_image"
+            );
+            seller.setBusinessLicenseUrl(upload.get("fileUrl"));
+        }
+
+        if (storePolicy != null && !storePolicy.isEmpty()) {
+            Map<String, String> upload = cloudinaryService.upload(
+                    storePolicy,
+                    "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/store_policy_image"
+            );
+            seller.setStorePolicyUrl(upload.get("fileUrl"));
+        }
+
+        // Cập nhật tên cửa hàng nếu có
+        if (storeName != null && !storeName.isBlank()) {
+            seller.setStoreName(storeName);
+        }
+
+        // Lưu lại vào DB
+        sellerRepository.save(seller);
+        log.info(">>> [UPDATE KYC] Seller profile updated successfully for buyerId {}", buyer.getBuyerId());
+
+        return new KycResponse(true, "Cập nhật KYC thành công", "UPDATED", null);
     }
 
 

@@ -17,7 +17,7 @@ public interface PostProductService {
 
     Page<PostProduct> getAllProductPaging(int page, int size);
 
-    Page<PostProduct> getAllPostProductForVerifiedReview(NeedVerifyPostRequest request) throws Exception;
+    Page<PostProduct> getAllPostProductForVerifiedReview(int size, int page) throws Exception;
 
     PostProduct getPostProductById(Long postProductId) throws Exception;
 
