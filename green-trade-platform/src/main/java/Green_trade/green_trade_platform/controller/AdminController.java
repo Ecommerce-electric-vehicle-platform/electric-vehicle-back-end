@@ -99,10 +99,11 @@ public class AdminController {
             description = "Return a post product list")
     @GetMapping("/review-post-seller-list")
     public ResponseEntity<RestResponse<PostProductListResponse, Object>> getAllPostProductForReview(
-            @Valid @RequestBody NeedVerifyPostRequest request
+            @RequestPart(name = "size",value = "10") int size,
+            @RequestPart(name = "page",value = "0") int page
     ) throws Exception {
         log.info(">>> Server came getAllPostProductForReview API");
-        Page<PostProduct> postProducts = postProductServiceImpl.getAllPostProductForVerifiedReview(request);
+        Page<PostProduct> postProducts = postProductServiceImpl.getAllPostProductForVerifiedReview(size, page);
         log.info(">>> Server ran postProductServiceImpl.getAllPostProduct()");
 
         Map<String, Object> meta = Map.of(

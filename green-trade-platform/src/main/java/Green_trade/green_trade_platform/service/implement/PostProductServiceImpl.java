@@ -144,9 +144,9 @@ public class PostProductServiceImpl implements PostProductService {
         );
     }
 
-    public Page<PostProduct> getAllPostProductForVerifiedReview(NeedVerifyPostRequest request) throws Exception {
+    public Page<PostProduct> getAllPostProductForVerifiedReview(int size, int page) throws Exception {
         try {
-            Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), Sort.by("id").ascending());
+            Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
             Page<PostProduct> postProductsPaging = postProductRepository.findAll(pageable);
             List<PostProduct> postProducts = postProductsPaging.getContent();
             List<PostProduct> result = new ArrayList<>();
