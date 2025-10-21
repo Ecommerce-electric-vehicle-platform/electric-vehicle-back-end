@@ -76,7 +76,7 @@ public class BuyerController {
     )
     public ResponseEntity<RestResponse<BuyerResponse, Object>> updateProfile(
             @Valid @ModelAttribute UpdateBuyerProfileRequest updateProfileRequest,
-            @RequestPart(value = "avatarImage") MultipartFile avatarFile
+            @RequestPart(value = "avatar_url", required = false) MultipartFile avatarFile
     ) throws Exception {
         log.info(">>> Passed came updateProfile API");
         log.info(">>> updateProfileRequest: {}", updateProfileRequest);
