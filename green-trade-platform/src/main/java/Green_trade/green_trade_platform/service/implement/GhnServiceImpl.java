@@ -118,7 +118,7 @@ public class GhnServiceImpl {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Token", "637170d5-942b-11ea-9821-0281a26fb5d4");
+        headers.set("Token", "4433d6f4-ae5f-11f0-b040-4e257d8388b4");
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("district_id", districtId);
@@ -145,7 +145,7 @@ public class GhnServiceImpl {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Token", "637170d5-942b-11ea-9821-0281a26fb5d4");
+        headers.set("Token", "4433d6f4-ae5f-11f0-b040-4e257d8388b4");
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("province_id", provinceId);
