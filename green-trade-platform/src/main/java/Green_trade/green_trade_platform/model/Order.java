@@ -67,9 +67,17 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
 
+    @OneToOne()
+    @JoinColumn(name = "post_id", nullable = false, unique = false)
+    @JsonManagedReference
+    private PostProduct postProduct;
+
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "order")
     @JsonBackReference
     private Invoice invoice;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Dispute> disputes;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions;
