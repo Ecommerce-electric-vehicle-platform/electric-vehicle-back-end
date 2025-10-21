@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.model;
 
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -74,6 +75,10 @@ public class PostProduct {
 
     @Column(name = "deleted_at", nullable = true, unique = false)
     private LocalDateTime deletedAt;
+
+    @OneToOne(mappedBy = "postProduct", cascade = CascadeType.REMOVE)
+    @JsonBackReference
+    private Order order;
 
     @OneToMany(mappedBy = "postProduct", fetch = FetchType.LAZY)
     private List<Conversation> conversations;
