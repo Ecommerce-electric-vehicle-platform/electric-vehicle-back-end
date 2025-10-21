@@ -13,6 +13,8 @@ DELETE FROM admin;
 DELETE FROM subscription_packages;
 DELETE FROM package_price;
 DELETE FROM category;
+DELETE FROM system_policy;
+DELETE FROM subscription;
 
 ALTER TABLE product_image AUTO_INCREMENT = 1;
 ALTER TABLE post_product AUTO_INCREMENT = 1;
@@ -126,36 +128,36 @@ INSERT INTO buyer (
     deleted_at
 )
 VALUES
-('buyer1','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 1','123 Nguyen Van Cu, HCM',TRUE,'0900000001','https://cdn.example.com/avatars/buyer1.jpg','buyer1_public_id','buyer1@example.com','MALE','2000-01-01',NOW(),NULL,NULL),
-('buyer2','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 2','124 Nguyen Van Cu, HCM',TRUE,'0900000002','https://cdn.example.com/avatars/buyer2.jpg','buyer2_public_id','buyer2@example.com','FEMALE','2000-02-02',NOW(),NULL,NULL),
-('buyer3','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 3','125 Nguyen Van Cu, HCM',TRUE,'0900000003','https://cdn.example.com/avatars/buyer3.jpg','buyer3_public_id','buyer3@example.com','MALE','2000-03-03',NOW(),NULL,NULL),
-('buyer4','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 4','126 Nguyen Van Cu, HCM',TRUE,'0900000004','https://cdn.example.com/avatars/buyer4.jpg','buyer4_public_id','buyer4@example.com','FEMALE','2000-04-04',NOW(),NULL,NULL),
-('buyer5','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 5','127 Nguyen Van Cu, HCM',TRUE,'0900000005','https://cdn.example.com/avatars/buyer5.jpg','buyer5_public_id','buyer5@example.com','MALE','2000-05-05',NOW(),NULL,NULL),
-('buyer6','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 6','128 Nguyen Van Cu, HCM',TRUE,'0900000006','https://cdn.example.com/avatars/buyer6.jpg','buyer6_public_id','buyer6@example.com','FEMALE','2000-06-06',NOW(),NULL,NULL),
-('buyer7','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 7','129 Nguyen Van Cu, HCM',TRUE,'0900000007','https://cdn.example.com/avatars/buyer7.jpg','buyer7_public_id','buyer7@example.com','MALE','2000-07-07',NOW(),NULL,NULL),
-('buyer8','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 8','130 Nguyen Van Cu, HCM',TRUE,'0900000008','https://cdn.example.com/avatars/buyer8.jpg','buyer8_public_id','buyer8@example.com','FEMALE','2000-08-08',NOW(),NULL,NULL),
-('buyer9','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 9','131 Nguyen Van Cu, HCM',TRUE,'0900000009','https://cdn.example.com/avatars/buyer9.jpg','buyer9_public_id','buyer9@example.com','MALE','2000-09-09',NOW(),NULL,NULL),
-('buyer10','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 10','132 Nguyen Van Cu, HCM',TRUE,'0900000010','https://cdn.example.com/avatars/buyer10.jpg','buyer10_public_id','buyer10@example.com','FEMALE','2000-10-10',NOW(),NULL,NULL),
-('buyer11','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 11','133 Nguyen Van Cu, HCM',TRUE,'0900000011','https://cdn.example.com/avatars/buyer11.jpg','buyer11_public_id','buyer11@example.com','MALE','2000-11-11',NOW(),NULL,NULL),
-('buyer12','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 12','134 Nguyen Van Cu, HCM',TRUE,'0900000012','https://cdn.example.com/avatars/buyer12.jpg','buyer12_public_id','buyer12@example.com','FEMALE','2000-12-12',NOW(),NULL,NULL),
-('buyer13','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 13','135 Nguyen Van Cu, HCM',TRUE,'0900000013','https://cdn.example.com/avatars/buyer13.jpg','buyer13_public_id','buyer13@example.com','MALE','2001-01-13',NOW(),NULL,NULL),
-('buyer14','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 14','136 Nguyen Van Cu, HCM',TRUE,'0900000014','https://cdn.example.com/avatars/buyer14.jpg','buyer14_public_id','buyer14@example.com','FEMALE','2001-02-14',NOW(),NULL,NULL),
-('buyer15','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 15','137 Nguyen Van Cu, HCM',TRUE,'0900000015','https://cdn.example.com/avatars/buyer15.jpg','buyer15_public_id','buyer15@example.com','MALE','2001-03-15',NOW(),NULL,NULL),
-('buyer16','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 16','138 Nguyen Van Cu, HCM',TRUE,'0900000016','https://cdn.example.com/avatars/buyer16.jpg','buyer16_public_id','buyer16@example.com','FEMALE','2001-04-16',NOW(),NULL,NULL),
-('buyer17','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 17','139 Nguyen Van Cu, HCM',TRUE,'0900000017','https://cdn.example.com/avatars/buyer17.jpg','buyer17_public_id','buyer17@example.com','MALE','2001-05-17',NOW(),NULL,NULL),
-('buyer18','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 18','140 Nguyen Van Cu, HCM',TRUE,'0900000018','https://cdn.example.com/avatars/buyer18.jpg','buyer18_public_id','buyer18@example.com','FEMALE','2001-06-18',NOW(),NULL,NULL),
-('buyer19','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 19','141 Nguyen Van Cu, HCM',TRUE,'0900000019','https://cdn.example.com/avatars/buyer19.jpg','buyer19_public_id','buyer19@example.com','MALE','2001-07-19',NOW(),NULL,NULL),
-('buyer20','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 20','142 Nguyen Van Cu, HCM',TRUE,'0900000020','https://cdn.example.com/avatars/buyer20.jpg','buyer20_public_id','buyer20@example.com','FEMALE','2001-08-20',NOW(),NULL,NULL),
-('buyer21','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 21','143 Nguyen Van Cu, HCM',TRUE,'0900000021','https://cdn.example.com/avatars/buyer21.jpg','buyer21_public_id','buyer21@example.com','MALE','2001-09-21',NOW(),NULL,NULL),
-('buyer22','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 22','144 Nguyen Van Cu, HCM',TRUE,'0900000022','https://cdn.example.com/avatars/buyer22.jpg','buyer22_public_id','buyer22@example.com','FEMALE','2001-10-22',NOW(),NULL,NULL),
-('buyer23','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 23','145 Nguyen Van Cu, HCM',TRUE,'0900000023','https://cdn.example.com/avatars/buyer23.jpg','buyer23_public_id','buyer23@example.com','MALE','2001-11-23',NOW(),NULL,NULL),
-('buyer24','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 24','146 Nguyen Van Cu, HCM',TRUE,'0900000024','https://cdn.example.com/avatars/buyer24.jpg','buyer24_public_id','buyer24@example.com','FEMALE','2001-12-24',NOW(),NULL,NULL),
-('buyer25','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 25','147 Nguyen Van Cu, HCM',TRUE,'0900000025','https://cdn.example.com/avatars/buyer25.jpg','buyer25_public_id','buyer25@example.com','MALE','2002-01-25',NOW(),NULL,NULL),
-('buyer26','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 26','148 Nguyen Van Cu, HCM',TRUE,'0900000026','https://cdn.example.com/avatars/buyer26.jpg','buyer26_public_id','buyer26@example.com','FEMALE','2002-02-26',NOW(),NULL,NULL),
-('buyer27','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 27','149 Nguyen Van Cu, HCM',TRUE,'0900000027','https://cdn.example.com/avatars/buyer27.jpg','buyer27_public_id','buyer27@example.com','MALE','2002-03-27',NOW(),NULL,NULL),
-('buyer28','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 28','150 Nguyen Van Cu, HCM',TRUE,'0900000028','https://cdn.example.com/avatars/buyer28.jpg','buyer28_public_id','buyer28@example.com','FEMALE','2002-04-28',NOW(),NULL,NULL),
-('buyer29','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 29','151 Nguyen Van Cu, HCM',TRUE,'0900000029','https://cdn.example.com/avatars/buyer29.jpg','buyer29_public_id','buyer29@example.com','MALE','2002-05-29',NOW(),NULL,NULL),
-('buyer30','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 30','152 Nguyen Van Cu, HCM',TRUE,'0900000030','https://cdn.example.com/avatars/buyer30.jpg','buyer30_public_id','buyer30@example.com','FEMALE','2002-06-30',NOW(),NULL,NULL);
+('buyerdeptrai','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 1','123 Nguyen Van Cu, HCM',TRUE,'0900000001',NULL,'buyer1_public_id','buyer1@example.com','MALE','2000-01-01',NOW(),NULL,NULL),
+('buyerxautrai','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 2','124 Nguyen Van Cu, HCM',TRUE,'0900000002',NULL,'buyer2_public_id','buyer2@example.com','FEMALE','2000-02-02',NOW(),NULL,NULL),
+('truongdoanvien','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 3','125 Nguyen Van Cu, HCM',TRUE,'0900000003',NULL,'buyer3_public_id','buyer3@example.com','MALE','2000-03-03',NOW(),NULL,NULL),
+('tranthihanh','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 4','126 Nguyen Van Cu, HCM',TRUE,'0900000004',NULL,'buyer4_public_id','buyer4@example.com','FEMALE','2000-04-04',NOW(),NULL,NULL),
+('phanthithaovy','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 5','127 Nguyen Van Cu, HCM',TRUE,'0900000005',NULL,'buyer5_public_id','buyer5@example.com','MALE','2000-05-05',NOW(),NULL,NULL),
+('doanthikimthuy','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 6','128 Nguyen Van Cu, HCM',TRUE,'0900000006',NULL,'buyer6_public_id','buyer6@example.com','FEMALE','2000-06-06',NOW(),NULL,NULL),
+('nguyenphuongduy','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 7','129 Nguyen Van Cu, HCM',TRUE,'0900000007',NULL,'buyer7_public_id','buyer7@example.com','MALE','2000-07-07',NOW(),NULL,NULL),
+('doanvienne','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 8','130 Nguyen Van Cu, HCM',TRUE,'0900000008',NULL,'buyer8_public_id','buyer8@example.com','FEMALE','2000-08-08',NOW(),NULL,NULL),
+('truongviendoan','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 9','131 Nguyen Van Cu, HCM',TRUE,'0900000009',NULL,'buyer9_public_id','buyer9@example.com','MALE','2000-09-09',NOW(),NULL,NULL),
+('anhvienne','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 10','132 Nguyen Van Cu, HCM',TRUE,'0900000010',NULL,'buyer10_public_id','buyer10@example.com','FEMALE','2000-10-10',NOW(),NULL,NULL),
+('viennehaha','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 11','133 Nguyen Van Cu, HCM',TRUE,'0900000011',NULL,'buyer11_public_id','buyer11@example.com','MALE','2000-11-11',NOW(),NULL,NULL),
+('homnaytroidepqua','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 12','134 Nguyen Van Cu, HCM',TRUE,'0900000012',NULL,'buyer12_public_id','buyer12@example.com','FEMALE','2000-12-12',NOW(),NULL,NULL),
+('troiquadepluon','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 13','135 Nguyen Van Cu, HCM',TRUE,'0900000013',NULL,'buyer13_public_id','buyer13@example.com','MALE','2001-01-13',NOW(),NULL,NULL),
+('anhyeunhieuem','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 14','136 Nguyen Van Cu, HCM',TRUE,'0900000014',NULL,'buyer14_public_id','buyer14@example.com','FEMALE','2001-02-14',NOW(),NULL,NULL),
+('anhyeuem','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 15','137 Nguyen Van Cu, HCM',TRUE,'0900000015',NULL,'buyer15_public_id','buyer15@example.com','MALE','2001-03-15',NOW(),NULL,NULL),
+('beiucuaanhoi','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 16','138 Nguyen Van Cu, HCM',TRUE,'0900000016',NULL,'buyer16_public_id','buyer16@example.com','FEMALE','2001-04-16',NOW(),NULL,NULL),
+('homnayemsaoroi','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 17','139 Nguyen Van Cu, HCM',TRUE,'0900000017',NULL,'buyer17_public_id','buyer17@example.com','MALE','2001-05-17',NOW(),NULL,NULL),
+('anhoiemdoi','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 18','140 Nguyen Van Cu, HCM',TRUE,'0900000018',NULL,'buyer18_public_id','buyer18@example.com','FEMALE','2001-06-18',NOW(),NULL,NULL),
+('doiquaemoi','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 19','141 Nguyen Van Cu, HCM',TRUE,'0900000019',NULL,'buyer19_public_id','buyer19@example.com','MALE','2001-07-19',NOW(),NULL,NULL),
+('minhbuocquadoinhau','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 20','142 Nguyen Van Cu, HCM',TRUE,'0900000020',NULL,'buyer20_public_id','buyer20@example.com','FEMALE','2001-08-20',NOW(),NULL,NULL),
+('delamnhaudau','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 21','143 Nguyen Van Cu, HCM',TRUE,'0900000021',NULL,'buyer21_public_id','buyer21@example.com','MALE','2001-09-21',NOW(),NULL,NULL),
+('homnayminhdidauvaycobe','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 22','144 Nguyen Van Cu, HCM',TRUE,'0900000022',NULL,'buyer22_public_id','buyer22@example.com','FEMALE','2001-10-22',NOW(),NULL,NULL),
+('sapinsertxongroi','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 23','145 Nguyen Van Cu, HCM',TRUE,'0900000023',NULL,'buyer23_public_id','buyer23@example.com','MALE','2001-11-23',NOW(),NULL,NULL),
+('toiuserhaimuoitu','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 24','146 Nguyen Van Cu, HCM',TRUE,'0900000024',NULL,'buyer24_public_id','buyer24@example.com','FEMALE','2001-12-24',NOW(),NULL,NULL),
+('toiyeufpt','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 25','147 Nguyen Van Cu, HCM',TRUE,'0900000025',NULL,'buyer25_public_id','buyer25@example.com','MALE','2002-01-25',NOW(),NULL,NULL),
+('fptcoyeutoikhong','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 26','148 Nguyen Van Cu, HCM',TRUE,'0900000026',NULL,'buyer26_public_id','buyer26@example.com','FEMALE','2002-02-26',NOW(),NULL,NULL),
+('coyeukhongthibao','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 27','149 Nguyen Van Cu, HCM',TRUE,'0900000027',NULL,'buyer27_public_id','buyer27@example.com','MALE','2002-03-27',NOW(),NULL,NULL),
+('cobecuaanhoi','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 28','150 Nguyen Van Cu, HCM',TRUE,'0900000028',NULL,'buyer28_public_id','buyer28@example.com','FEMALE','2002-04-28',NOW(),NULL,NULL),
+('homnaydihoctre','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 29','151 Nguyen Van Cu, HCM',TRUE,'0900000029',NULL,'buyer29_public_id','buyer29@example.com','MALE','2002-05-29',NOW(),NULL,NULL),
+('FEcoganglennha','{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2','Buyer 30','152 Nguyen Van Cu, HCM',TRUE,'0900000030',NULL,'buyer30_public_id','buyer30@example.com','FEMALE','2002-06-30',NOW(),NULL,NULL);
 
 -- =========================================================
 -- 🏪 WALLET
@@ -236,6 +238,41 @@ VALUES
 ('https://cdn.example.com/images/id_front_20.jpg', 'https://cdn.example.com/images/id_back_20.jpg', 'https://cdn.example.com/images/business_license_20.jpg', 'https://cdn.example.com/images/selfie_20.jpg', 'PENDING', 'Neko Store 20', 'https://cdn.example.com/policies/policy_20.pdf', 'TAX123456800', 'ID987654340', NOW(), NULL, NULL, 20, 1);
 
 -- =========================================================
+-- 🧾 SUBSCRIPTION - GÁN GÓI CHO SELLER
+-- =========================================================
+-- Seller 1–5: Gói Basic (30 ngày)
+-- Seller 6–10: Gói Pro (90 ngày)
+-- Seller 11–15: Gói Premium (180 ngày)
+-- Seller 16–20: Gói Legacy (30 ngày, không còn hoạt động)
+
+INSERT INTO subscription (seller_id, subscription_package_id, is_active, start_day, end_day)
+VALUES
+(1, 1, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(2, 1, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(3, 1, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(4, 1, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(5, 1, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+
+(6, 2, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
+(7, 2, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
+(8, 2, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
+(9, 2, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
+(10, 2, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
+
+(11, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
+(12, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
+(13, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
+(14, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
+(15, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
+
+(16, 4, FALSE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(17, 4, FALSE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(18, 4, FALSE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(19, 4, FALSE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+(20, 4, FALSE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))
+ON DUPLICATE KEY UPDATE seller_id = seller_id;
+
+-- =========================================================
 -- 🗂 CATEGORY
 -- =========================================================
 INSERT INTO category (name, description)
@@ -289,46 +326,46 @@ VALUES
 ('Xe điện MBI V', 'MBI', 'V 2023', 2023, '3 tháng', NULL, 'Rất tốt', 1500.00, 'Xe MBI V thiết kế thể thao.', 'Hà Nội', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 1, 1, 1, FALSE),
 
 -- ================= Pin điện (Category 2)
-('Pin Lithium 60V-30Ah', 'LG Chem', 'LG60V30A', 2022, '1 năm', NULL, 'Tốt', 350.00, 'Pin lithium cao cấp.', 'TP.HCM', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
-('Pin LFP 72V-25Ah', 'CATL', 'CATL72V25A', 2023, '6 tháng', NULL, 'Rất tốt', 410.00, 'Pin LFP mới, hiệu năng cao.', 'Đà Nẵng', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
-('Pin 48V-20Ah', 'Samsung SDI', 'SM48V20A', 2022, '1 năm', NULL, 'Tốt', 240.00, 'Pin Samsung chất lượng cao.', 'Hải Phòng', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
-('Pin 60V-35Ah', 'BYD', 'BYD60V35A', 2023, '5 tháng', NULL, 'Rất tốt', 380.00, 'Pin BYD bền, tuổi thọ cao.', 'Huế', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
-('Pin Panasonic 72V-40Ah', 'Panasonic', 'PN72V40A', 2023, '4 tháng', NULL, 'Rất tốt', 450.00, 'Pin Panasonic cao cấp.', 'Cần Thơ', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
-('Pin 48V-15Ah', 'LG Chem', 'LG48V15A', 2022, '10 tháng', NULL, 'Tốt', 220.00, 'Pin LG nhỏ gọn, hiệu suất cao.', 'Bình Dương', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
-('Pin CATL 60V-25Ah', 'CATL', 'CATL60V25A', 2022, '1 năm', NULL, 'Tốt', 300.00, 'Pin CATL an toàn, bền.', 'Đà Lạt', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
-('Pin 72V-30Ah', 'Samsung SDI', 'SM72V30A', 2023, '5 tháng', NULL, 'Rất tốt', 430.00, 'Pin SDI dung lượng lớn.', 'TP.HCM', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
-('Pin 48V-12Ah', 'Toshiba', 'TB48V12A', 2021, '2 năm', NULL, 'Khá tốt', 180.00, 'Pin Toshiba bền.', 'Hà Nội', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
-('Pin 60V-20Ah', 'VinFast', 'VF60V20A', 2023, '3 tháng', NULL, 'Xuất sắc', 330.00, 'Pin VinFast chính hãng.', 'Huế', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
-('Pin LFP 48V-30Ah', 'CATL', 'CATL48V30A', 2023, '2 tháng', NULL, 'Rất tốt', 310.00, 'Pin LFP an toàn.', 'Đà Nẵng', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
-('Pin Li-ion 36V-10Ah', 'Samsung', 'SM36V10A', 2022, '1 năm', NULL, 'Tốt', 190.00, 'Pin Li-ion cho xe đạp điện.', 'Cần Thơ', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
-('Pin Lithium Titanate 60V-40Ah', 'LG Chem', 'LTO60V40A', 2023, '6 tháng', NULL, 'Rất tốt', 480.00, 'Pin Titanate sạc nhanh.', 'Bình Dương', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
+('Pin Lithium 60V-30Ah', 'LG Chem', 'LG60V30A', 2022, '1 năm', NULL, 'Tốt', 3500000.00, 'Pin lithium cao cấp.', 'TP.HCM', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
+('Pin LFP 72V-25Ah', 'CATL', 'CATL72V25A', 2023, '6 tháng', NULL, 'Rất tốt', 4100000.00, 'Pin LFP mới, hiệu năng cao.', 'Đà Nẵng', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
+('Pin 48V-20Ah', 'Samsung SDI', 'SM48V20A', 2022, '1 năm', NULL, 'Tốt', 2400000.00, 'Pin Samsung chất lượng cao.', 'Hải Phòng', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
+('Pin 60V-35Ah', 'BYD', 'BYD60V35A', 2023, '5 tháng', NULL, 'Rất tốt', 380000.00, 'Pin BYD bền, tuổi thọ cao.', 'Huế', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
+('Pin Panasonic 72V-40Ah', 'Panasonic', 'PN72V40A', 2023, '4 tháng', NULL, 'Rất tốt', 4500000.00, 'Pin Panasonic cao cấp.', 'Cần Thơ', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
+('Pin 48V-15Ah', 'LG Chem', 'LG48V15A', 2022, '10 tháng', NULL, 'Tốt', 2200000.00, 'Pin LG nhỏ gọn, hiệu suất cao.', 'Bình Dương', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
+('Pin CATL 60V-25Ah', 'CATL', 'CATL60V25A', 2022, '1 năm', NULL, 'Tốt', 300000.00, 'Pin CATL an toàn, bền.', 'Đà Lạt', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
+('Pin 72V-30Ah', 'Samsung SDI', 'SM72V30A', 2023, '5 tháng', NULL, 'Rất tốt', 4300000.00, 'Pin SDI dung lượng lớn.', 'TP.HCM', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
+('Pin 48V-12Ah', 'Toshiba', 'TB48V12A', 2021, '2 năm', NULL, 'Khá tốt', 180000.00, 'Pin Toshiba bền.', 'Hà Nội', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
+('Pin 60V-20Ah', 'VinFast', 'VF60V20A', 2023, '3 tháng', NULL, 'Xuất sắc', 330000.00, 'Pin VinFast chính hãng.', 'Huế', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
+('Pin LFP 48V-30Ah', 'CATL', 'CATL48V30A', 2023, '2 tháng', NULL, 'Rất tốt', 31000000.00, 'Pin LFP an toàn.', 'Đà Nẵng', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
+('Pin Li-ion 36V-10Ah', 'Samsung', 'SM36V10A', 2022, '1 năm', NULL, 'Tốt', 190000000.00, 'Pin Li-ion cho xe đạp điện.', 'Cần Thơ', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
+('Pin Lithium Titanate 60V-40Ah', 'LG Chem', 'LTO60V40A', 2023, '6 tháng', NULL, 'Rất tốt', 480000.00, 'Pin Titanate sạc nhanh.', 'Bình Dương', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 2, 1, 1, FALSE),
 
 -- ================= Bộ sạc & phụ kiện (Category 3)
-('Bộ sạc nhanh 60V-5A', 'VinFast', 'VF60V5A', 2023, '3 tháng', NULL, 'Rất tốt', 120.00, 'Sạc nhanh chính hãng 60V-5A.', 'Đà Nẵng', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
-('Cáp sạc 48V tiêu chuẩn', 'Panasonic', 'PN48Cable', 2022, '1 năm', NULL, 'Tốt', 40.00, 'Cáp sạc 48V tiêu chuẩn.', 'Huế', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
-('Bộ sạc 72V-10A', 'Samsung', 'SM72V10A', 2023, '5 tháng', NULL, 'Rất tốt', 160.00, 'Sạc 72V công suất lớn.', 'TP.HCM', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
-('Adapter chuyển đổi 60V-48V', 'LG', 'LGAdapter', 2021, '2 năm', NULL, 'Khá tốt', 30.00, 'Adapter giảm điện áp an toàn.', 'Đà Lạt', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
-('Dock sạc đôi 60V', 'BYD', 'BYD60Dock', 2023, '4 tháng', NULL, 'Rất tốt', 180.00, 'Dock sạc đôi hiệu suất cao.', 'Hà Nội', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
-('Sạc đa năng 48-72V', 'CATL', 'CATLMulti', 2023, '5 tháng', NULL, 'Rất tốt', 150.00, 'Sạc đa năng cho nhiều dòng.', 'Cần Thơ', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
-('Cáp chống cháy 60V', 'VinFast', 'VFCableSafe', 2023, '4 tháng', NULL, 'Rất tốt', 90.00, 'Cáp chống cháy.', 'Huế', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
-('Adapter đổi phích 220V', 'Samsung', 'SM220Plug', 2022, '1 năm', NULL, 'Tốt', 25.00, 'Adapter đổi phích 220V.', 'Bình Dương', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
-('Củ sạc nhanh 48V-5A', 'Pega', 'PG48V5A', 2023, '6 tháng', NULL, 'Rất tốt', 110.00, 'Sạc nhanh 48V-5A.', 'Hà Nội', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
-('Sạc không dây mini', 'Universal', 'UNIWireless', 2024, '1 tháng', NULL, 'Xuất sắc', 200.00, 'Sạc không dây cho xe điện.', 'TP.HCM', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
+('Bộ sạc nhanh 60V-5A', 'VinFast', 'VF60V5A', 2023, '3 tháng', NULL, 'Rất tốt', 120000.00, 'Sạc nhanh chính hãng 60V-5A.', 'Đà Nẵng', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
+('Cáp sạc 48V tiêu chuẩn', 'Panasonic', 'PN48Cable', 2022, '1 năm', NULL, 'Tốt', 4000000.00, 'Cáp sạc 48V tiêu chuẩn.', 'Huế', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
+('Bộ sạc 72V-10A', 'Samsung', 'SM72V10A', 2023, '5 tháng', NULL, 'Rất tốt', 160000.00, 'Sạc 72V công suất lớn.', 'TP.HCM', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
+('Adapter chuyển đổi 60V-48V', 'LG', 'LGAdapter', 2021, '2 năm', NULL, 'Khá tốt', 300000.00, 'Adapter giảm điện áp an toàn.', 'Đà Lạt', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
+('Dock sạc đôi 60V', 'BYD', 'BYD60Dock', 2023, '4 tháng', NULL, 'Rất tốt', 180000.00, 'Dock sạc đôi hiệu suất cao.', 'Hà Nội', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
+('Sạc đa năng 48-72V', 'CATL', 'CATLMulti', 2023, '5 tháng', NULL, 'Rất tốt', 1005000.00, 'Sạc đa năng cho nhiều dòng.', 'Cần Thơ', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
+('Cáp chống cháy 60V', 'VinFast', 'VFCableSafe', 2023, '4 tháng', NULL, 'Rất tốt', 900000.00, 'Cáp chống cháy.', 'Huế', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
+('Adapter đổi phích 220V', 'Samsung', 'SM220Plug', 2022, '1 năm', NULL, 'Tốt', 2500000.00, 'Adapter đổi phích 220V.', 'Bình Dương', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
+('Củ sạc nhanh 48V-5A', 'Pega', 'PG48V5A', 2023, '6 tháng', NULL, 'Rất tốt', 100010.00, 'Sạc nhanh 48V-5A.', 'Hà Nội', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
+('Sạc không dây mini', 'Universal', 'UNIWireless', 2024, '1 tháng', NULL, 'Xuất sắc', 2000500.00, 'Sạc không dây cho xe điện.', 'TP.HCM', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 3, 1, 1, FALSE),
 
 -- ================= Phụ tùng xe điện (Category 4)
-('Bộ phanh đĩa xe điện', 'VinFast', 'VFBrake2023', 2023, '5 tháng', NULL, 'Rất tốt', 75.00, 'Phanh đĩa chính hãng.', 'Hà Nội', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
-('Bánh xe điện 14 inch', 'Yadea', 'YD14Wheel', 2023, '6 tháng', NULL, 'Tốt', 60.00, 'Bánh xe điện 14 inch.', 'Huế', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
-('Tay ga điện tử', 'LG', 'LGThrottle', 2023, '3 tháng', NULL, 'Rất tốt', 35.00, 'Tay ga điện tử mượt.', 'Đà Nẵng', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
-('Đèn pha LED xe điện', 'Pega', 'PGLEDLight', 2022, '9 tháng', NULL, 'Tốt', 45.00, 'Đèn LED tiết kiệm điện.', 'TP.HCM', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
-('Mâm xe hợp kim 16 inch', 'VinFast', 'VFWheel16', 2023, '6 tháng', NULL, 'Rất tốt', 70.00, 'Mâm xe hợp kim.', 'Cần Thơ', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
-('Yên xe thể thao', 'Yadea', 'YDSaddle', 2023, '7 tháng', NULL, 'Rất tốt', 55.00, 'Yên xe thể thao êm.', 'Hải Phòng', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
-('Tay cầm lái', 'Pega', 'PGHandle', 2022, '1 năm', NULL, 'Tốt', 25.00, 'Tay cầm lái bền.', 'Huế', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
-('Gác chân xe điện', 'VinFast', 'VFFootRest', 2023, '4 tháng', NULL, 'Rất tốt', 20.00, 'Gác chân xe điện chính hãng.', 'Đà Nẵng', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
-('Chắn bùn xe điện', 'Yadea', 'YDMudGuard', 2023, '5 tháng', NULL, 'Rất tốt', 30.00, 'Bộ chắn bùn chống nước.', 'TP.HCM', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
-('Tem trang trí xe điện', 'Universal', 'UNISticker', 2024, '1 tháng', NULL, 'Xuất sắc', 10.00, 'Tem dán phong cách.', 'Hà Nội', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
+('Bộ phanh đĩa xe điện', 'VinFast', 'VFBrake2023', 2023, '5 tháng', NULL, 'Rất tốt', 7500000.00, 'Phanh đĩa chính hãng.', 'Hà Nội', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
+('Bánh xe điện 14 inch', 'Yadea', 'YD14Wheel', 2023, '6 tháng', NULL, 'Tốt', 605012.00, 'Bánh xe điện 14 inch.', 'Huế', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
+('Tay ga điện tử', 'LG', 'LGThrottle', 2023, '3 tháng', NULL, 'Rất tốt', 3500041.00, 'Tay ga điện tử mượt.', 'Đà Nẵng', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
+('Đèn pha LED xe điện', 'Pega', 'PGLEDLight', 2022, '9 tháng', NULL, 'Tốt', 45000025.00, 'Đèn LED tiết kiệm điện.', 'TP.HCM', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
+('Mâm xe hợp kim 16 inch', 'VinFast', 'VFWheel16', 2023, '6 tháng', NULL, 'Rất tốt', 7000074.00, 'Mâm xe hợp kim.', 'Cần Thơ', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
+('Yên xe thể thao', 'Yadea', 'YDSaddle', 2023, '7 tháng', NULL, 'Rất tốt', 5500025.00, 'Yên xe thể thao êm.', 'Hải Phòng', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
+('Tay cầm lái', 'Pega', 'PGHandle', 2022, '1 năm', NULL, 'Tốt', 257892.00, 'Tay cầm lái bền.', 'Huế', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
+('Gác chân xe điện', 'VinFast', 'VFFootRest', 2023, '4 tháng', NULL, 'Rất tốt', 2000000.00, 'Gác chân xe điện chính hãng.', 'Đà Nẵng', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
+('Chắn bùn xe điện', 'Yadea', 'YDMudGuard', 2023, '5 tháng', NULL, 'Rất tốt', 3000000.00, 'Bộ chắn bùn chống nước.', 'TP.HCM', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
+('Tem trang trí xe điện', 'Universal', 'UNISticker', 2024, '1 tháng', NULL, 'Xuất sắc', 1000000.00, 'Tem dán phong cách.', 'Hà Nội', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 4, 1, 1, FALSE),
 
 -- ================= Khác (Category 5)
-('Kính chiếu hậu xe điện', 'Pega', 'PGMirror', 2023, '8 tháng', NULL, 'Tốt', 15.00, 'Kính chiếu hậu chống mờ.', 'Huế', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 5, 1, 1, FALSE);
+('Kính chiếu hậu xe điện', 'Pega', 'PGMirror', 2023, '8 tháng', NULL, 'Tốt', 150000.00, 'Kính chiếu hậu chống mờ.', 'Huế', 'APPROVED', TRUE, TRUE, NOW(), NOW(), NULL, 5, 1, 1, FALSE);
 -- =========================================================
 -- 🖼 PRODUCT_IMAGE
 -- =========================================================
@@ -340,6 +377,36 @@ VALUES
 (1, 'https://cdn.example.com/images/lithium_battery_60v_front.jpg', 3),
 (1, 'https://cdn.example.com/images/charger_60v5a.jpg', 4),
 (1, 'https://cdn.example.com/images/brake_disc_vf.jpg', 5);
+
+-- =========================================================
+-- 🖼 SYSTEM_POLICY
+-- =========================================================
+
+INSERT INTO system_policy
+(title, content, version, effective_date, expired_date, created_at, updated_at, status, admin_id)
+VALUES
+(
+  'User Registration Policy',
+  'When registering for an account on Green Trade Platform, users must provide accurate personal information, agree to the Terms of Service, Privacy Policy, and comply with the community rules. The system reserves the right to suspend or terminate any account that violates these terms.',
+  1.0,
+  NOW(),
+  NULL,
+  NOW(),
+  NOW(),
+  'ACTIVE',
+  1
+),
+(
+  'Account Upgrade Policy (Buyer to Seller)',
+  'Users who upgrade their accounts from Buyer to Seller must verify identity, provide business-related information, and comply with seller obligations. Any violation may lead to temporary suspension or permanent deactivation of the seller account as determined by the platform administrators.',
+  1.0,
+  NOW(),
+  NULL,
+  NOW(),
+  NOW(),
+  'ACTIVE',
+  1
+);
 
 -- =========================================================
 -- ✅ KẾT THÚC FILE DATA.SQL

@@ -57,6 +57,7 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id")
+    @JsonManagedReference
     private Buyer buyer;
 
     @ManyToOne(fetch = FetchType.LAZY)

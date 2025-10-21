@@ -2,6 +2,7 @@ package Green_trade.green_trade_platform.model;
 
 import Green_trade.green_trade_platform.enumerate.AccountStatus;
 import Green_trade.green_trade_platform.enumerate.Gender;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,8 +42,16 @@ public class SystemWallet {
     @Column(name = "created_at", nullable = false, unique = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "end_at")
+    private LocalDateTime endAt;
+
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    @ManyToOne()
+    @JoinColumn(name = "admin_id")
+    @JsonManagedReference
+    private Admin admin;
 }

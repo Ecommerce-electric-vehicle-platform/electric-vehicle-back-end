@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,6 +51,11 @@ public class Message {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "message_type_id")
     private MessageType messageType;
+
+    @ManyToOne
+    @JoinColumn(name = "conservation")
+    @JsonManagedReference
+    private Conversation conversation;
 
     @PrePersist
     public void onCreate() {
