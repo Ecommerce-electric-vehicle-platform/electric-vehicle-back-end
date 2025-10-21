@@ -32,7 +32,7 @@ public class UpdateBuyerProfileRequest {
 
     private Gender gender;
 
-    private LocalDate birthDay;
+    private LocalDate dob;
 
     @NotBlank(message = "Phone number is required.")
     @Pattern(
