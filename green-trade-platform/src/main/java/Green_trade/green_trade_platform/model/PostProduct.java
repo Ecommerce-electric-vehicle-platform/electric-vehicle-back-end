@@ -80,7 +80,7 @@ public class PostProduct {
     @JsonBackReference
     private Order order;
 
-    @OneToMany(mappedBy = "postProduct", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "postProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Conversation> conversations;
 
     @ManyToOne(fetch = FetchType.LAZY)
