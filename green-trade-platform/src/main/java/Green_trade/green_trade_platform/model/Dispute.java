@@ -24,16 +24,16 @@ public class Dispute {
     @Column(name = "created_at", nullable = false, unique = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false, unique = false)
+    @Column(name = "updated_at", nullable = true, unique = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "decision", nullable = false, unique = false)
+    @Column(name = "decision", nullable = true, unique = false)
     private String decision;
 
-    @Column(name = "resolution_type", nullable = false, unique = false)
+    @Column(name = "resolution_type", nullable = true, unique = false)
     private String resolutionType;
 
-    @Column(name = "resolution", nullable = false, unique = false)
+    @Column(name = "resolution", nullable = true, unique = false)
     private String resolution;
 
     @Column(name = "status", nullable = false, unique = false)
@@ -51,7 +51,7 @@ public class Dispute {
     private DisputeCategory disputeCategory;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id", nullable = false)
+    @JoinColumn(name = "admin_id", nullable = true)
     private Admin admin;
 
     @PrePersist
