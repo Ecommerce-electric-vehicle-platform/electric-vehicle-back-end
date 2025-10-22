@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -46,13 +47,13 @@ public class Order {
     @Column(name = "created_at", nullable = false, unique = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false, unique = false)
+    @Column(name = "updated_at", nullable = true, unique = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "canceled_at", nullable = false, unique = false)
+    @Column(name = "canceled_at", nullable = true, unique = false)
     private LocalDateTime canceledAt;
 
-    @Column(name = "cancel_reason", nullable = false, unique = false)
+    @Column(name = "cancel_reason", nullable = true, unique = false)
     private String cancelReason;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -84,6 +85,7 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipping_partner_id")
+    @JsonIgnore
     private ShippingPartner shippingPartner;
 
     @PrePersist
