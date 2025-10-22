@@ -13,9 +13,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostProductDecisionRequest {
-    @NotBlank(message = "Employee number is required")
-    private String employeeNumber;
-
     @NotNull(message = "Post product ID cannot be null")
     private Long postProductId;
 
