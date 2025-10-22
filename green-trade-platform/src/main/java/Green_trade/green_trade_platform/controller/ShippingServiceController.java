@@ -74,7 +74,7 @@ public class ShippingServiceController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
-    @GetMapping("/provinces/{orderId}")
+    @GetMapping("/shipping-fee/{orderId}")
     public ResponseEntity<?> getShippingFee(
             @PathVariable Long orderId
     ) throws Exception {

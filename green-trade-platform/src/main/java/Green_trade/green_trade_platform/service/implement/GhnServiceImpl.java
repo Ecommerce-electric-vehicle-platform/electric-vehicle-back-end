@@ -1,6 +1,5 @@
 package Green_trade.green_trade_platform.service.implement;
 
-import Green_trade.green_trade_platform.mapper.GetShippingFeeServiceMapper;
 import Green_trade.green_trade_platform.model.Order;
 import Green_trade.green_trade_platform.request.CancelOrderRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,11 +17,6 @@ public class GhnServiceImpl {
 
     private static final String TOKEN = "4433d6f4-ae5f-11f0-b040-4e257d8388b4";
     private static final String SHOP_ID = "885";
-    private final GetShippingFeeServiceMapper getShippingFeeServiceMapper;
-
-    public GhnServiceImpl(GetShippingFeeServiceMapper getShippingFeeServiceMapper) {
-        this.getShippingFeeServiceMapper = getShippingFeeServiceMapper;
-    }
 
     public String createOrder(Map<String, Object> requestBody, String shopId) {
         RestTemplate restTemplate = new RestTemplate();
@@ -259,7 +253,7 @@ public class GhnServiceImpl {
     }
 
     public Map<String, String> getShippingFeeDto(Order order) throws JsonProcessingException {
-        Map<String, Object> bodyData = getShippingFeeServiceMapper.toDto(order);
+        Map<String, Object> bodyData = getShippingFeeServiceBodyRequest(order);
 
         String resultString = getShippingFee(bodyData, order.getPostProduct().getSeller().getGhnShopId());
 
@@ -293,6 +287,39 @@ public class GhnServiceImpl {
 
         log.info("GHN shipping fee response mapped: {}", result);
 
+        return result;
+    }
+
+    public Map<String, Object> getShippingFeeServiceBodyRequest(Order order) throws JsonProcessingException {
+        String sellerProvinceId = findProvinceCodeByProvinceName(order.getPostProduct().getSeller().getBuyer().getProvinceName());
+        String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId), order.getPostProduct().getSeller().getBuyer().getDistrictName());
+        String sellerWardId = findWardCodeByWardName(Integer.parseInt(sellerDistrictId), order.getPostProduct().getSeller().getBuyer().getWardName());
+
+        String buyerProvinceId = findProvinceCodeByProvinceName(order.getBuyer().getProvinceName());
+        String buyerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(buyerProvinceId), order.getBuyer().getDistrictName());
+        String buyerWardId = findWardCodeByWardName(Integer.parseInt(buyerDistrictId), order.getBuyer().getWardName());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("service_type_id", 5);
+        result.put("from_district_id", Integer.parseInt(sellerDistrictId));
+        result.put("from_ward_code", sellerWardId);
+        result.put("to_district_id", Integer.parseInt(buyerDistrictId));
+        result.put("to_ward_code", buyerWardId);
+        result.put("length", order.getPostProduct().getLength());
+        result.put("width", order.getPostProduct().getWidth());
+        result.put("height", order.getPostProduct().getHeight());
+        result.put("weight", order.getPostProduct().getWeight());
+        result.put("insurance_value", 0);
+        result.put("coupon", null);
+        Map<String, Object> item = Map.of(
+                "name", order.getPostProduct().getTitle(),
+                "quantity", 1,
+                "length", order.getPostProduct().getLength(),
+                "width", order.getPostProduct().getWidth(),
+                "height", order.getPostProduct().getHeight(),
+                "weight", order.getPostProduct().getWeight()
+        );
+        result.put("items", List.of(item));
         return result;
     }
 
