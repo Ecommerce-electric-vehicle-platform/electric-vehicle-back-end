@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,6 +63,8 @@ public class VnPayController {
 
     @GetMapping("/return")
     public ResponseEntity<?> handleVnPayReturn(HttpServletRequest request) {
+        log.info(">>> [VNPay Return] New request received at {}", new Date());
+        log.info(">>> [VNPay param]: {}", request.toString());
         Map<String, Object> result = vnPayService.processReturn(request);
         if(result.get("response_code").equals("00")) {
             Map<String, String> inputData = new HashMap<>();
