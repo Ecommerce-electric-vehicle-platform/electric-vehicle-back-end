@@ -25,4 +25,13 @@ public class AuthMapper {
                 .refreshToken(refreshToken)
                 .build();
     }
+
+    public AuthResponse toDto(String username, String email, String accessToken, String refreshToken) {
+        return AuthResponse.builder()
+                .username(username)
+                .email(email)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
 }

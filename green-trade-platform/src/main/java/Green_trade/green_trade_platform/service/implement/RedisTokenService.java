@@ -19,6 +19,11 @@ public class RedisTokenService {
         log.info("Refresh token was save in Redis with key: {}", key);
     }
 
+    public boolean verifyRefreshToken(String email) {
+        String refreshToken = getRefreshToken(email);
+        return refreshToken != null;
+    }
+
     public String getRefreshToken(String email) {
         String key = "refresh_token:" + email;
         return redisTemplate.opsForValue().get(key);
