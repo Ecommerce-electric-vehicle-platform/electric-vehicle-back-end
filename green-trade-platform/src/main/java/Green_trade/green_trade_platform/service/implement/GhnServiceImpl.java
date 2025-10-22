@@ -117,28 +117,27 @@ public class GhnServiceImpl {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Token", "4433d6f4-ae5f-11f0-b040-4e257d8388b4");
 
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("district_id", districtId);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+        String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id=" + districtId;
 
         try {
             ResponseEntity<String> response =
-                    restTemplate.postForEntity(
-                            "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward",
+                    restTemplate.exchange(
+                            url,
+                            HttpMethod.GET,   // GET là chuẩn nhất ở đây
                             entity,
                             String.class
                     );
-
             return response.getBody();
         } catch (Exception e) {
             e.printStackTrace();
             return "{\"error\": \"" + e.getMessage() + "\"}";
         }
     }
+
 
     public String getDistricts(int provinceId) {
         RestTemplate restTemplate = new RestTemplate();

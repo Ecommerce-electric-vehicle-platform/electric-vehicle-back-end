@@ -77,23 +77,23 @@ public class ShippingServiceController {
 
     @GetMapping("/wards")
     public ResponseEntity<?> getWards(
-            @RequestParam int districId
+            @RequestParam int districtId
     ) throws JsonProcessingException {
         Map<String, String> wardsMap = new HashMap<>();
-        String provincesInString = ghnService.getWards(districId);
+        String districtsInString = ghnService.getWards(districtId);
 
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(provincesInString);
+        JsonNode root = mapper.readTree(districtsInString);
         JsonNode data = root.path("data");
 
         for (JsonNode province : data) {
-            int id = province.path("wardsID").asInt();
-            String name = province.path("wardsName").asText();
+            int id = province.path("WardCode").asInt();
+            String name = province.path("WardName").asText();
             wardsMap.put(id + "", name);
         }
         RestResponse response = responseMapper.toDto(
                 true,
-                "FETCH PROVINCES SUCCESSFULLY",
+                "FETCH WARDS SUCCESSFULLY",
                 wardsMap,
                 null
         );
