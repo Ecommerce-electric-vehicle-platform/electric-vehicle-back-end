@@ -30,17 +30,7 @@ public class ShippingServiceController {
     @GetMapping("/provinces")
     public ResponseEntity<?> getProvinces() throws JsonProcessingException {
         Map<String, String> provincesMap = new HashMap<>();
-        String provincesInString = ghnService.getProvinces();
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(provincesInString);
-        JsonNode data = root.path("data");
-
-        for (JsonNode province : data) {
-            int id = province.path("ProvinceID").asInt();
-            String name = province.path("ProvinceName").asText();
-            provincesMap.put(id + "", name);
-        }
+        provincesMap = ghnService.getProvinceList();
         RestResponse response = responseMapper.toDto(
                 true,
                 "FETCH PROVINCES SUCCESSFULLY",
@@ -55,17 +45,7 @@ public class ShippingServiceController {
             @RequestParam int provinceId
     ) throws JsonProcessingException {
         Map<String, String> districtsMap = new HashMap<>();
-        String districtsInString = ghnService.getDistricts(provinceId);
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(districtsInString);
-        JsonNode data = root.path("data");
-
-        for (JsonNode province : data) {
-            int id = province.path("DistrictID").asInt();
-            String name = province.path("DistrictName").asText();
-            districtsMap.put(id + "", name);
-        }
+        districtsMap = ghnService.getDistrictListByProvinceId(provinceId);
         RestResponse response = responseMapper.toDto(
                 true,
                 "FETCH DISTRICTS SUCCESSFULLY",
@@ -80,17 +60,7 @@ public class ShippingServiceController {
             @RequestParam int districtId
     ) throws JsonProcessingException {
         Map<String, String> wardsMap = new HashMap<>();
-        String districtsInString = ghnService.getWards(districtId);
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(districtsInString);
-        JsonNode data = root.path("data");
-
-        for (JsonNode province : data) {
-            int id = province.path("WardCode").asInt();
-            String name = province.path("WardName").asText();
-            wardsMap.put(id + "", name);
-        }
+        wardsMap = ghnService.getWardListByDistrictId(districtId);
         RestResponse response = responseMapper.toDto(
                 true,
                 "FETCH WARDS SUCCESSFULLY",

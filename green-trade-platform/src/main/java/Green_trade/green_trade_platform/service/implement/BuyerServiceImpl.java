@@ -66,6 +66,9 @@ public class BuyerServiceImpl {
             }
             buyer.setAvatarUrl(avatarUrl);
             buyer.setDefaultShippingAddress(request.getDefaultShippingAddress());
+            buyer.setWardName(request.getWardName());
+            buyer.setDistrictName(request.getDistrictName());
+            buyer.setProvinceName(request.getProvinceName());
             buyer.setFullName(request.getFullName());
             buyer.setPhoneNumber(request.getPhoneNumber());
             buyer.setDob(dob);
@@ -95,6 +98,9 @@ public class BuyerServiceImpl {
             buyer.setDob(request.getDob());
             buyer.setPhoneNumber(request.getPhoneNumber() == null ? "" : request.getPhoneNumber());
             buyer.setDefaultShippingAddress(request.getDefaultShippingAddress());
+            buyer.setWardName(request.getWardName());
+            buyer.setDistrictName(request.getDistrictName());
+            buyer.setProvinceName(request.getProvinceName());
             log.info(">>> Passed buyer update text information");
 
             //delete old avatar on cloudinary

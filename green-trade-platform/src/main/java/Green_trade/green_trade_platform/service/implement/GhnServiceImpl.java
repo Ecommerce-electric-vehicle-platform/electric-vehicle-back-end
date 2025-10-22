@@ -1,6 +1,9 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.request.CancelOrderRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -165,6 +168,89 @@ public class GhnServiceImpl {
             return "{\"error\": \"" + e.getMessage() + "\"}";
         }
     }
+
+    public Map<String, String> getProvinceList() throws JsonProcessingException {
+        Map<String, String> result = new HashMap<>();
+        String provincesInString = getProvinces();
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(provincesInString);
+        JsonNode data = root.path("data");
+
+        for (JsonNode province : data) {
+            int id = province.path("ProvinceID").asInt();
+            String name = province.path("ProvinceName").asText();
+            result.put(id + "", name);
+        }
+        return result;
+    }
+
+    public Map<String, String> getDistrictListByProvinceId(int provinceId) throws JsonProcessingException {
+        Map<String, String> result = new HashMap<>();
+        String districtsInString = getDistricts(provinceId);
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(districtsInString);
+        JsonNode data = root.path("data");
+
+        for (JsonNode province : data) {
+            int id = province.path("DistrictID").asInt();
+            String name = province.path("DistrictName").asText();
+            result.put(id + "", name);
+        }
+        return result;
+    }
+
+    public Map<String, String> getWardListByDistrictId(int districtId) throws JsonProcessingException {
+        Map<String, String> result = new HashMap<>();
+        String districtsInString = getWards(districtId);
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(districtsInString);
+        JsonNode data = root.path("data");
+
+        for (JsonNode province : data) {
+            int id = province.path("WardCode").asInt();
+            String name = province.path("WardName").asText();
+            result.put(id + "", name);
+        }
+        return result;
+    }
+
+    public String findProvinceCodeByProvinceName(String provinceName) throws JsonProcessingException {
+        Map<String, String> provinceList = getProvinceList();
+
+        // Duyệt qua danh sách để tìm tỉnh có tên khớp
+        for (Map.Entry<String, String> entry : provinceList.entrySet()) {
+            if (entry.getValue().equalsIgnoreCase(provinceName.trim())) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    public String findDistrictCodeByDistrictName(int provinceId, String districtName) throws JsonProcessingException {
+        Map<String, String> districtList = getDistrictListByProvinceId(provinceId);
+
+        for (Map.Entry<String, String> entry : districtList.entrySet()) {
+            if (entry.getValue().equalsIgnoreCase(districtName.trim())) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    public String findWardCodeByWardName(int districtId, String wardName) throws JsonProcessingException {
+        Map<String, String> wardList = getWardListByDistrictId(districtId);
+
+        for (Map.Entry<String, String> entry : wardList.entrySet()) {
+            if (entry.getValue().equalsIgnoreCase(wardName.trim())) {
+                return entry.getKey(); // WardCode là String, không cần parse sang Long
+            }
+        }
+        return null;
+    }
+
 
 }
 

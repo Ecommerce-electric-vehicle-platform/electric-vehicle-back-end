@@ -39,6 +39,15 @@ public class Buyer {
     @Column(name = "default_shipping_address")
     private String defaultShippingAddress;
 
+    @Column(name = "ward_name")
+    private String wardName;
+
+    @Column(name = "district_name")
+    private String districtName;
+
+    @Column(name = "province_name")
+    private String provinceName;
+
     @Column(name = "is_active")
     private boolean isActive;
 

@@ -19,6 +19,7 @@ import Green_trade.green_trade_platform.response.SellerResponse;
 import Green_trade.green_trade_platform.service.implement.AdminServiceImpl;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -65,7 +66,7 @@ public class AdminController {
     }
 
     @PostMapping("/approve-seller")
-    public ResponseEntity<RestResponse<?, ?>> handlePendingSeller(@RequestBody ApproveSellerRequest request) {
+    public ResponseEntity<RestResponse<?, ?>> handlePendingSeller(@RequestBody ApproveSellerRequest request) throws JsonProcessingException {
         Notification sellerNotification = sellerService.handlePendingSeller(request);
         sellerNotification.setSendAt(LocalDateTime.now());
         socketController.sendNotificationToUser(sellerNotification);
