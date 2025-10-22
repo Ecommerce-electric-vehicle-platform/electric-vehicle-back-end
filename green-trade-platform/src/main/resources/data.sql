@@ -15,6 +15,9 @@ DELETE FROM package_price;
 DELETE FROM category;
 DELETE FROM system_policy;
 DELETE FROM subscription;
+DELETE FROM shipping_partner;
+DELETE FROM dispute_category;
+DELETE FROM orders;
 
 ALTER TABLE product_image AUTO_INCREMENT = 1;
 ALTER TABLE post_product AUTO_INCREMENT = 1;
@@ -25,6 +28,10 @@ ALTER TABLE admin AUTO_INCREMENT = 1;
 ALTER TABLE subscription_packages AUTO_INCREMENT = 1;
 ALTER TABLE package_price AUTO_INCREMENT = 1;
 ALTER TABLE category AUTO_INCREMENT = 1;
+ALTER TABLE orders AUTO_INCREMENT = 1;
+ALTER TABLE shipping_partner AUTO_INCREMENT = 1;
+ALTER TABLE dispute_category AUTO_INCREMENT = 1;
+ALTER TABLE subscription AUTO_INCREMENT = 1;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -213,29 +220,30 @@ INSERT INTO seller (
     updated_at,
     deleted_at,
     buyer_id,
-    admin_id
+    admin_id,
+    ghn_shop_id
 )
 VALUES
-('https://cdn.example.com/images/id_front_1.jpg', 'https://cdn.example.com/images/id_back_1.jpg', 'https://cdn.example.com/images/business_license_1.jpg', 'https://cdn.example.com/images/selfie_1.jpg', 'PENDING', 'Neko Store 1', 'https://cdn.example.com/policies/policy_1.pdf', 'TAX123456781', 'ID987654321', NOW(), NULL, NULL, 1, 1),
-('https://cdn.example.com/images/id_front_2.jpg', 'https://cdn.example.com/images/id_back_2.jpg', 'https://cdn.example.com/images/business_license_2.jpg', 'https://cdn.example.com/images/selfie_2.jpg', 'ACCEPTED', 'Neko Store 2', 'https://cdn.example.com/policies/policy_2.pdf', 'TAX123456782', 'ID987654322', NOW(), NULL, NULL, 2, 1),
-('https://cdn.example.com/images/id_front_3.jpg', 'https://cdn.example.com/images/id_back_3.jpg', 'https://cdn.example.com/images/business_license_3.jpg', 'https://cdn.example.com/images/selfie_3.jpg', 'ACCEPTED', 'Neko Store 3', 'https://cdn.example.com/policies/policy_3.pdf', 'TAX123456783', 'ID987654323', NOW(), NULL, NULL, 3, 1),
-('https://cdn.example.com/images/id_front_4.jpg', 'https://cdn.example.com/images/id_back_4.jpg', 'https://cdn.example.com/images/business_license_4.jpg', 'https://cdn.example.com/images/selfie_4.jpg', 'PENDING', 'Neko Store 4', 'https://cdn.example.com/policies/policy_4.pdf', 'TAX123456784', 'ID987654324', NOW(), NULL, NULL, 4, 1),
-('https://cdn.example.com/images/id_front_5.jpg', 'https://cdn.example.com/images/id_back_5.jpg', 'https://cdn.example.com/images/business_license_5.jpg', 'https://cdn.example.com/images/selfie_5.jpg', 'ACCEPTED', 'Neko Store 5', 'https://cdn.example.com/policies/policy_5.pdf', 'TAX123456785', 'ID987654325', NOW(), NULL, NULL, 5, 1),
-('https://cdn.example.com/images/id_front_6.jpg', 'https://cdn.example.com/images/id_back_6.jpg', 'https://cdn.example.com/images/business_license_6.jpg', 'https://cdn.example.com/images/selfie_6.jpg', 'ACCEPTED', 'Neko Store 6', 'https://cdn.example.com/policies/policy_6.pdf', 'TAX123456786', 'ID987654326', NOW(), NULL, NULL, 6, 1),
-('https://cdn.example.com/images/id_front_7.jpg', 'https://cdn.example.com/images/id_back_7.jpg', 'https://cdn.example.com/images/business_license_7.jpg', 'https://cdn.example.com/images/selfie_7.jpg', 'PENDING', 'Neko Store 7', 'https://cdn.example.com/policies/policy_7.pdf', 'TAX123456787', 'ID987654327', NOW(), NULL, NULL, 7, 1),
-('https://cdn.example.com/images/id_front_8.jpg', 'https://cdn.example.com/images/id_back_8.jpg', 'https://cdn.example.com/images/business_license_8.jpg', 'https://cdn.example.com/images/selfie_8.jpg', 'ACCEPTED', 'Neko Store 8', 'https://cdn.example.com/policies/policy_8.pdf', 'TAX123456788', 'ID987654328', NOW(), NULL, NULL, 8, 1),
-('https://cdn.example.com/images/id_front_9.jpg', 'https://cdn.example.com/images/id_back_9.jpg', 'https://cdn.example.com/images/business_license_9.jpg', 'https://cdn.example.com/images/selfie_9.jpg', 'ACCEPTED', 'Neko Store 9', 'https://cdn.example.com/policies/policy_9.pdf', 'TAX123456789', 'ID987654329', NOW(), NULL, NULL, 9, 1),
-('https://cdn.example.com/images/id_front_10.jpg', 'https://cdn.example.com/images/id_back_10.jpg', 'https://cdn.example.com/images/business_license_10.jpg', 'https://cdn.example.com/images/selfie_10.jpg', 'PENDING', 'Neko Store 10', 'https://cdn.example.com/policies/policy_10.pdf', 'TAX123456790', 'ID987654330', NOW(), NULL, NULL, 10, 1),
-('https://cdn.example.com/images/id_front_11.jpg', 'https://cdn.example.com/images/id_back_11.jpg', 'https://cdn.example.com/images/business_license_11.jpg', 'https://cdn.example.com/images/selfie_11.jpg', 'ACCEPTED', 'Neko Store 11', 'https://cdn.example.com/policies/policy_11.pdf', 'TAX123456791', 'ID987654331', NOW(), NULL, NULL, 11, 1),
-('https://cdn.example.com/images/id_front_12.jpg', 'https://cdn.example.com/images/id_back_12.jpg', 'https://cdn.example.com/images/business_license_12.jpg', 'https://cdn.example.com/images/selfie_12.jpg', 'ACCEPTED', 'Neko Store 12', 'https://cdn.example.com/policies/policy_12.pdf', 'TAX123456792', 'ID987654332', NOW(), NULL, NULL, 12, 1),
-('https://cdn.example.com/images/id_front_13.jpg', 'https://cdn.example.com/images/id_back_13.jpg', 'https://cdn.example.com/images/business_license_13.jpg', 'https://cdn.example.com/images/selfie_13.jpg', 'PENDING', 'Neko Store 13', 'https://cdn.example.com/policies/policy_13.pdf', 'TAX123456793', 'ID987654333', NOW(), NULL, NULL, 13, 1),
-('https://cdn.example.com/images/id_front_14.jpg', 'https://cdn.example.com/images/id_back_14.jpg', 'https://cdn.example.com/images/business_license_14.jpg', 'https://cdn.example.com/images/selfie_14.jpg', 'ACCEPTED', 'Neko Store 14', 'https://cdn.example.com/policies/policy_14.pdf', 'TAX123456794', 'ID987654334', NOW(), NULL, NULL, 14, 1),
-('https://cdn.example.com/images/id_front_15.jpg', 'https://cdn.example.com/images/id_back_15.jpg', 'https://cdn.example.com/images/business_license_15.jpg', 'https://cdn.example.com/images/selfie_15.jpg', 'ACCEPTED', 'Neko Store 15', 'https://cdn.example.com/policies/policy_15.pdf', 'TAX123456795', 'ID987654335', NOW(), NULL, NULL, 15, 1),
-('https://cdn.example.com/images/id_front_16.jpg', 'https://cdn.example.com/images/id_back_16.jpg', 'https://cdn.example.com/images/business_license_16.jpg', 'https://cdn.example.com/images/selfie_16.jpg', 'PENDING', 'Neko Store 16', 'https://cdn.example.com/policies/policy_16.pdf', 'TAX123456796', 'ID987654336', NOW(), NULL, NULL, 16, 1),
-('https://cdn.example.com/images/id_front_17.jpg', 'https://cdn.example.com/images/id_back_17.jpg', 'https://cdn.example.com/images/business_license_17.jpg', 'https://cdn.example.com/images/selfie_17.jpg', 'ACCEPTED', 'Neko Store 17', 'https://cdn.example.com/policies/policy_17.pdf', 'TAX123456797', 'ID987654337', NOW(), NULL, NULL, 17, 1),
-('https://cdn.example.com/images/id_front_18.jpg', 'https://cdn.example.com/images/id_back_18.jpg', 'https://cdn.example.com/images/business_license_18.jpg', 'https://cdn.example.com/images/selfie_18.jpg', 'PENDING', 'Neko Store 18', 'https://cdn.example.com/policies/policy_18.pdf', 'TAX123456798', 'ID987654338', NOW(), NULL, NULL, 18, 1),
-('https://cdn.example.com/images/id_front_19.jpg', 'https://cdn.example.com/images/id_back_19.jpg', 'https://cdn.example.com/images/business_license_19.jpg', 'https://cdn.example.com/images/selfie_19.jpg', 'ACCEPTED', 'Neko Store 19', 'https://cdn.example.com/policies/policy_19.pdf', 'TAX123456799', 'ID987654339', NOW(), NULL, NULL, 19, 1),
-('https://cdn.example.com/images/id_front_20.jpg', 'https://cdn.example.com/images/id_back_20.jpg', 'https://cdn.example.com/images/business_license_20.jpg', 'https://cdn.example.com/images/selfie_20.jpg', 'PENDING', 'Neko Store 20', 'https://cdn.example.com/policies/policy_20.pdf', 'TAX123456800', 'ID987654340', NOW(), NULL, NULL, 20, 1);
+('https://cdn.example.com/images/id_front_1.jpg', 'https://cdn.example.com/images/id_back_1.jpg', 'https://cdn.example.com/images/business_license_1.jpg', 'https://cdn.example.com/images/selfie_1.jpg', 'PENDING', 'Neko Store 1', 'https://cdn.example.com/policies/policy_1.pdf', 'TAX123456781', 'ID987654321', NOW(), NULL, NULL, 1, 1, 197654),
+('https://cdn.example.com/images/id_front_2.jpg', 'https://cdn.example.com/images/id_back_2.jpg', 'https://cdn.example.com/images/business_license_2.jpg', 'https://cdn.example.com/images/selfie_2.jpg', 'ACCEPTED', 'Neko Store 2', 'https://cdn.example.com/policies/policy_2.pdf', 'TAX123456782', 'ID987654322', NOW(), NULL, NULL, 2, 1, 197654),
+('https://cdn.example.com/images/id_front_3.jpg', 'https://cdn.example.com/images/id_back_3.jpg', 'https://cdn.example.com/images/business_license_3.jpg', 'https://cdn.example.com/images/selfie_3.jpg', 'ACCEPTED', 'Neko Store 3', 'https://cdn.example.com/policies/policy_3.pdf', 'TAX123456783', 'ID987654323', NOW(), NULL, NULL, 3, 1, 197654),
+('https://cdn.example.com/images/id_front_4.jpg', 'https://cdn.example.com/images/id_back_4.jpg', 'https://cdn.example.com/images/business_license_4.jpg', 'https://cdn.example.com/images/selfie_4.jpg', 'PENDING', 'Neko Store 4', 'https://cdn.example.com/policies/policy_4.pdf', 'TAX123456784', 'ID987654324', NOW(), NULL, NULL, 4, 1, 197654),
+('https://cdn.example.com/images/id_front_5.jpg', 'https://cdn.example.com/images/id_back_5.jpg', 'https://cdn.example.com/images/business_license_5.jpg', 'https://cdn.example.com/images/selfie_5.jpg', 'ACCEPTED', 'Neko Store 5', 'https://cdn.example.com/policies/policy_5.pdf', 'TAX123456785', 'ID987654325', NOW(), NULL, NULL, 5, 1, 197654),
+('https://cdn.example.com/images/id_front_6.jpg', 'https://cdn.example.com/images/id_back_6.jpg', 'https://cdn.example.com/images/business_license_6.jpg', 'https://cdn.example.com/images/selfie_6.jpg', 'ACCEPTED', 'Neko Store 6', 'https://cdn.example.com/policies/policy_6.pdf', 'TAX123456786', 'ID987654326', NOW(), NULL, NULL, 6, 1, 197654),
+('https://cdn.example.com/images/id_front_7.jpg', 'https://cdn.example.com/images/id_back_7.jpg', 'https://cdn.example.com/images/business_license_7.jpg', 'https://cdn.example.com/images/selfie_7.jpg', 'PENDING', 'Neko Store 7', 'https://cdn.example.com/policies/policy_7.pdf', 'TAX123456787', 'ID987654327', NOW(), NULL, NULL, 7, 1, 197654),
+('https://cdn.example.com/images/id_front_8.jpg', 'https://cdn.example.com/images/id_back_8.jpg', 'https://cdn.example.com/images/business_license_8.jpg', 'https://cdn.example.com/images/selfie_8.jpg', 'ACCEPTED', 'Neko Store 8', 'https://cdn.example.com/policies/policy_8.pdf', 'TAX123456788', 'ID987654328', NOW(), NULL, NULL, 8, 1, 197654),
+('https://cdn.example.com/images/id_front_9.jpg', 'https://cdn.example.com/images/id_back_9.jpg', 'https://cdn.example.com/images/business_license_9.jpg', 'https://cdn.example.com/images/selfie_9.jpg', 'ACCEPTED', 'Neko Store 9', 'https://cdn.example.com/policies/policy_9.pdf', 'TAX123456789', 'ID987654329', NOW(), NULL, NULL, 9, 1, 197654),
+('https://cdn.example.com/images/id_front_10.jpg', 'https://cdn.example.com/images/id_back_10.jpg', 'https://cdn.example.com/images/business_license_10.jpg', 'https://cdn.example.com/images/selfie_10.jpg', 'PENDING', 'Neko Store 10', 'https://cdn.example.com/policies/policy_10.pdf', 'TAX123456790', 'ID987654330', NOW(), NULL, NULL, 10, 1, 197654),
+('https://cdn.example.com/images/id_front_11.jpg', 'https://cdn.example.com/images/id_back_11.jpg', 'https://cdn.example.com/images/business_license_11.jpg', 'https://cdn.example.com/images/selfie_11.jpg', 'ACCEPTED', 'Neko Store 11', 'https://cdn.example.com/policies/policy_11.pdf', 'TAX123456791', 'ID987654331', NOW(), NULL, NULL, 11, 1, 197654),
+('https://cdn.example.com/images/id_front_12.jpg', 'https://cdn.example.com/images/id_back_12.jpg', 'https://cdn.example.com/images/business_license_12.jpg', 'https://cdn.example.com/images/selfie_12.jpg', 'ACCEPTED', 'Neko Store 12', 'https://cdn.example.com/policies/policy_12.pdf', 'TAX123456792', 'ID987654332', NOW(), NULL, NULL, 12, 1, 197654),
+('https://cdn.example.com/images/id_front_13.jpg', 'https://cdn.example.com/images/id_back_13.jpg', 'https://cdn.example.com/images/business_license_13.jpg', 'https://cdn.example.com/images/selfie_13.jpg', 'PENDING', 'Neko Store 13', 'https://cdn.example.com/policies/policy_13.pdf', 'TAX123456793', 'ID987654333', NOW(), NULL, NULL, 13, 1, 197654),
+('https://cdn.example.com/images/id_front_14.jpg', 'https://cdn.example.com/images/id_back_14.jpg', 'https://cdn.example.com/images/business_license_14.jpg', 'https://cdn.example.com/images/selfie_14.jpg', 'ACCEPTED', 'Neko Store 14', 'https://cdn.example.com/policies/policy_14.pdf', 'TAX123456794', 'ID987654334', NOW(), NULL, NULL, 14, 1, 197654),
+('https://cdn.example.com/images/id_front_15.jpg', 'https://cdn.example.com/images/id_back_15.jpg', 'https://cdn.example.com/images/business_license_15.jpg', 'https://cdn.example.com/images/selfie_15.jpg', 'ACCEPTED', 'Neko Store 15', 'https://cdn.example.com/policies/policy_15.pdf', 'TAX123456795', 'ID987654335', NOW(), NULL, NULL, 15, 1, 197654),
+('https://cdn.example.com/images/id_front_16.jpg', 'https://cdn.example.com/images/id_back_16.jpg', 'https://cdn.example.com/images/business_license_16.jpg', 'https://cdn.example.com/images/selfie_16.jpg', 'PENDING', 'Neko Store 16', 'https://cdn.example.com/policies/policy_16.pdf', 'TAX123456796', 'ID987654336', NOW(), NULL, NULL, 16, 1, 197654),
+('https://cdn.example.com/images/id_front_17.jpg', 'https://cdn.example.com/images/id_back_17.jpg', 'https://cdn.example.com/images/business_license_17.jpg', 'https://cdn.example.com/images/selfie_17.jpg', 'ACCEPTED', 'Neko Store 17', 'https://cdn.example.com/policies/policy_17.pdf', 'TAX123456797', 'ID987654337', NOW(), NULL, NULL, 17, 1, 197654),
+('https://cdn.example.com/images/id_front_18.jpg', 'https://cdn.example.com/images/id_back_18.jpg', 'https://cdn.example.com/images/business_license_18.jpg', 'https://cdn.example.com/images/selfie_18.jpg', 'PENDING', 'Neko Store 18', 'https://cdn.example.com/policies/policy_18.pdf', 'TAX123456798', 'ID987654338', NOW(), NULL, NULL, 18, 1, 197654),
+('https://cdn.example.com/images/id_front_19.jpg', 'https://cdn.example.com/images/id_back_19.jpg', 'https://cdn.example.com/images/business_license_19.jpg', 'https://cdn.example.com/images/selfie_19.jpg', 'ACCEPTED', 'Neko Store 19', 'https://cdn.example.com/policies/policy_19.pdf', 'TAX123456799', 'ID987654339', NOW(), NULL, NULL, 19, 1, 197654),
+('https://cdn.example.com/images/id_front_20.jpg', 'https://cdn.example.com/images/id_back_20.jpg', 'https://cdn.example.com/images/business_license_20.jpg', 'https://cdn.example.com/images/selfie_20.jpg', 'PENDING', 'Neko Store 20', 'https://cdn.example.com/policies/policy_20.pdf', 'TAX123456800', 'ID987654340', NOW(), NULL, NULL, 20, 1, 197654);
 
 -- =========================================================
 -- 🧾 SUBSCRIPTION - GÁN GÓI CHO SELLER
@@ -407,6 +415,64 @@ VALUES
   'ACTIVE',
   1
 );
+
+-- =========================================================
+-- 🚚 SHIPPING_PARTNER (ĐỐI TÁC VẬN CHUYỂN)
+-- =========================================================
+
+INSERT INTO shipping_partner (
+    email, partner_name, address, website_url, hotline, created_at, updated_at
+)
+VALUES
+    ('support@ghn.vn', 'GHN Express', '20 Đường Tân Sơn, P.15, Q.Tân Bình, TP.HCM', 'https://ghn.vn', '1900636681', NOW(), NOW()),
+    ('contact@ghtk.vn', 'Giao Hàng Tiết Kiệm', '435 Hoàng Văn Thụ, P.4, Q.Tân Bình, TP.HCM', 'https://ghtk.vn', '19008092', NOW(), NOW()),
+    ('cs@viettelpost.vn', 'Viettel Post', '01 Giang Văn Minh, Q.Ba Đình, Hà Nội', 'https://viettelpost.com.vn', '19008095', NOW(), NOW()),
+    ('info@jtexpress.vn', 'J&T Express', '19 Nguyễn Trãi, Q.Thanh Xuân, Hà Nội', 'https://jtexpress.vn', '19001088', NOW(), NOW()),
+    ('admin@beelogistics.com.vn', 'Bee Logistics', '12 Trần Hưng Đạo, Q.1, TP.HCM', 'https://beelogistics.com.vn', '02838222266', NOW(), NOW())
+    ON DUPLICATE KEY UPDATE partner_name = VALUES(partner_name);
+
+
+-- =========================================================
+-- ORDERS
+-- =========================================================
+
+INSERT INTO orders (
+    order_code, shipping_address, phone_number, price, shipping_fee,
+    status, created_at, updated_at, canceled_at, cancel_reason,
+    buyer_id, admin_id, post_id, shipping_partner_id
+)
+VALUES
+    ('ORD-20231001-001','123 Nguyễn Văn Cừ, TP.HCM','0900000001',1650000.00,35000.00,'COMPLETED',NOW(),NOW(),NULL,NULL,1,1,1,1),
+    ('ORD-20231001-002','124 Nguyễn Văn Cừ, Hà Nội','0900000002',1200000.00,30000.00,'SHIPPING',NOW(),NOW(),NULL,NULL,2,1,2,1),
+    ('ORD-20231001-003','125 Nguyễn Văn Cừ, Đà Nẵng','0900000003',990000.00,25000.00,'PENDING',NOW(),NOW(),NULL,NULL,3,1,3,1),
+    ('ORD-20231001-004','126 Nguyễn Văn Cừ, Huế','0900000004',850000.00,25000.00,'CANCELED',NOW(),NOW(),NOW(),'Người mua hủy do thay đổi ý định',4,1,4,1),
+    ('ORD-20231001-005','127 Nguyễn Văn Cừ, Bình Dương','0900000005',1700000.00,40000.00,'COMPLETED',NOW(),NOW(),NULL,NULL,5,1,5,1),
+    ('ORD-20231001-006','128 Nguyễn Văn Cừ, Cần Thơ','0900000006',1050000.00,30000.00,'PROCESSING',NOW(),NOW(),NULL,NULL,6,1,6,1),
+    ('ORD-20231001-007','129 Nguyễn Văn Cừ, Hải Phòng','0900000007',1120000.00,35000.00,'COMPLETED',NOW(),NOW(),NULL,NULL,7,1,7,1),
+    ('ORD-20231001-008','130 Nguyễn Văn Cừ, Đà Lạt','0900000008',1800000.00,40000.00,'SHIPPING',NOW(),NOW(),NULL,NULL,8,1,8,1),
+    ('ORD-20231001-009','131 Nguyễn Văn Cừ, Nha Trang','0900000009',1500000.00,30000.00,'CANCELED',NOW(),NOW(),NOW(),'Admin phát hiện gian lận',9,1,9,1),
+    ('ORD-20231001-010','132 Nguyễn Văn Cừ, Hà Nội','0900000010',1700000.00,35000.00,'AWAITING_PAYMENT',NOW(),NOW(),NULL,NULL,10,1,10,1);
+
+-- =========================================================
+-- ⚖️ DISPUTE_CATEGORY (DANH MỤC KHIẾU NẠI / TRANH CHẤP)
+-- =========================================================
+
+INSERT INTO dispute_category (title, reason, description)
+VALUES
+    ('Khiếu nại đơn hàng','Người mua không nhận được hàng','Đơn hàng thất lạc hoặc chưa được giao.'),
+    ('Khiếu nại chất lượng sản phẩm','Sản phẩm không đúng mô tả','Sản phẩm không giống mô tả hoặc hư hại.'),
+    ('Khiếu nại thanh toán','Thanh toán thất bại nhưng bị trừ tiền','Giao dịch bị lỗi nhưng đã bị trừ tiền.'),
+    ('Khiếu nại hoàn tiền','Chậm xử lý hoàn tiền','Yêu cầu hoàn tiền chưa được xử lý.'),
+    ('Khiếu nại người bán','Người bán không phản hồi','Người bán không xác nhận hoặc phản hồi.'),
+    ('Khiếu nại vận chuyển','Giao hàng chậm hoặc thất lạc','Đối tác giao hàng chậm hoặc thất lạc.'),
+    ('Khiếu nại chính sách','Chính sách hoàn tiền / đổi trả không rõ ràng','Người dùng khiếu nại chính sách.'),
+    ('Khiếu nại khác','Khác (yêu cầu đặc biệt)','Các loại khiếu nại khác.')
+    ON DUPLICATE KEY UPDATE title = VALUES(title);
+
+-- =========================================================
+-- 🧾 ORDER DATA (MẪU)
+-- =========================================================
+
 
 -- =========================================================
 -- ✅ KẾT THÚC FILE DATA.SQL

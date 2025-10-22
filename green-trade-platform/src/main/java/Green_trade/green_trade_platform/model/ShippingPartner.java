@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.model;
 
 import Green_trade.green_trade_platform.enumerate.SellerStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,25 +23,26 @@ public class ShippingPartner {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "partner_name", nullable = false, unique = true)
+    @Column(name = "partner_name", nullable = false, unique = false)
     private String partnerName;
 
-    @Column(name = "address", nullable = false, unique = true)
+    @Column(name = "address", nullable = false, unique = false)
     private String address;
 
-    @Column(name = "website_url", nullable = false, unique = true)
+    @Column(name = "website_url", nullable = false, unique = false)
     private String websiteUrl;
 
-    @Column(name = "hotline", nullable = false, unique = true)
+    @Column(name = "hotline", nullable = false, unique = false)
     private String hotline;
 
-    @Column(name = "created_at", nullable = false, unique = true)
+    @Column(name = "created_at", nullable = false, unique = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updatedat", nullable = false, unique = true)
+    @Column(name = "updated_at", nullable = false, unique = false)
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "shippingPartner", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Order> orders;
 
     @PrePersist

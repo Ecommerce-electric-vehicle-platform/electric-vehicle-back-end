@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RaiseDisputeRequest {
-    private String username;
-    private Long OrderId;
+    private Long orderId;
     private Long disputeCategoryId;
 }

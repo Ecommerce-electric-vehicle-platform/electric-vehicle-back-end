@@ -53,7 +53,7 @@ public class DisputeController {
     )
     @PostMapping("/raise-dispute")
     public ResponseEntity<RestResponse<?, ?>> raiseDispute(
-            @Valid @RequestBody RaiseDisputeRequest request,
+            @ModelAttribute RaiseDisputeRequest request,
             @RequestPart("pictures") List<MultipartFile> files
     ) throws Exception {
         try {
@@ -61,10 +61,12 @@ public class DisputeController {
             List<Evidence> evidences = evidenceService.saveEvidence(files, newDispute);
 
             newDispute = disputeService.updateEvidencesForDispute(evidences, newDispute);
-            Notification notification = notificationService.createNotificationForSeller(
-                    newDispute.getOrder().getPostProduct().getSeller(),
-                    "DISPUTE PRODUCT ALERT",
-                    "Your product has been disputed");
+            log.info(">>> Passed update evidences for dispute");
+//            Notification notification = notificationService.createNotificationForSeller(
+//                    newDispute.getOrder().getPostProduct().getSeller(),
+//                    "DISPUTE PRODUCT ALERT",
+//                    "Your product has been disputed");
+//            log.info(">>> Passed add notification");
             DisputeResponse responseData = disputeMapper.toDto(newDispute);
             RestResponse<DisputeResponse, Object> response = responseMapper.toDto(
                     true,
@@ -72,6 +74,7 @@ public class DisputeController {
                     responseData,
                     null
             );
+            log.info(">>> Passed create response");
             return ResponseEntity.status(HttpStatus.OK.value()).body(response);
         } catch (Exception e) {
             log.info(">>> Error at raiseDisput: {}", e.getMessage());
