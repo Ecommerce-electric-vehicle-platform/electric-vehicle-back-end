@@ -15,8 +15,10 @@ import Green_trade.green_trade_platform.service.implement.SignInServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SignUpServiceImpl;
 import Green_trade.green_trade_platform.util.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -209,5 +211,63 @@ public class AuthController {
                         null
                 )
         );
+    }
+
+    @PostMapping("/refresh-token")
+    @Operation(
+            summary = "Issues new access token when old access token is expired.",
+            description = "When access token is expired, Front end send refresh token to this endpoint and receive new access token"
+    )
+    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+        log.info(">>> [Refresh token controller]: {}", request.getHeader("Authorization"));
+        try {
+            Map<String, Object> data = authService.refreshToken(request);
+            String email, username;
+            Admin admin = null;
+            Buyer buyer = null;
+
+            if(data.get("admin") != null) {
+                admin = (Admin) data.get("admin");
+                email = admin.getEmail();
+                username = admin.getEmployeeNumber();
+            } else {
+                buyer = (Buyer) data.get("buyer");
+                email =  buyer.getEmail();
+                username = buyer.getUsername();
+            }
+
+            log.info(">>> [User email]: {}", email);
+            log.info(">>> [Username]: {}", username);
+            String savedToken = redisTokenService.getRefreshToken(email);
+            String token = (String) data.get("refresh_token");
+
+            if(redisTokenService.verifyRefreshToken(email) &&
+                    savedToken.equalsIgnoreCase(token)) {
+
+                String newAccessToken = jwtUtils.generateTokenFromUsername(username, ACCESS_EXPIRE_TIME);
+                String newRefreshToken = jwtUtils.generateTokenFromUsername(username, REFRESH_EXPIRE_TIME);
+                redisTokenService.deleteRefreshToken(email);
+                redisTokenService.saveTokenToRedis(email, newRefreshToken, REFRESH_EXPIRE_TIME);
+
+                return ResponseEntity.ok(responseMapper.toDto(
+                        true,
+                        "GET NEW TOKEN SUCCESSFULLY.",
+                        authMapper.toDto(username, email, newAccessToken, newRefreshToken),
+                        null
+                ));
+            }else {
+                return ResponseEntity.badRequest().body(responseMapper.toDto(
+                        false,
+                        "INVALID REFRESH TOKEN",
+                        null, null
+                ));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(responseMapper.toDto(
+                    false,
+                    "ERROR OCCUR WHEN GET NEW TOKENS.",
+                    null, e
+            ));
+        }
     }
 }
