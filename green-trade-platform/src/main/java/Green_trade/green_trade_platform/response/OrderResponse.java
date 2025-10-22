@@ -24,7 +24,7 @@ public class OrderResponse {
 
     private BigDecimal price;
 
-    private double shippingFee;
+    private BigDecimal shippingFee;
 
     private String status;
 

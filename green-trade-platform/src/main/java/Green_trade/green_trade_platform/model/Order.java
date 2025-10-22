@@ -39,7 +39,7 @@ public class Order {
     private BigDecimal price;
 
     @Column(name = "shipping_fee", nullable = false, unique = false)
-    private double shippingFee;
+    private BigDecimal shippingFee;
 
     @Column(name = "status", nullable = false, unique = false)
     private String status;

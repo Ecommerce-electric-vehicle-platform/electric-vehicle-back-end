@@ -1,6 +1,9 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Order;
+import Green_trade.green_trade_platform.model.PostProduct;
+import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.request.CancelOrderRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -252,8 +255,8 @@ public class GhnServiceImpl {
         return null;
     }
 
-    public Map<String, String> getShippingFeeDto(Order order) throws JsonProcessingException {
-        Map<String, Object> bodyData = getShippingFeeServiceBodyRequest(order);
+    public Map<String, String> getShippingFeeDto(Order order, int codValue) throws JsonProcessingException {
+        Map<String, Object> bodyData = getShippingFeeServiceBodyRequest(order, codValue);
 
         String resultString = getShippingFee(bodyData, order.getPostProduct().getSeller().getGhnShopId());
 
@@ -290,7 +293,45 @@ public class GhnServiceImpl {
         return result;
     }
 
-    public Map<String, Object> getShippingFeeServiceBodyRequest(Order order) throws JsonProcessingException {
+    public Map<String, String> getShippingFeeDto(Buyer buyer, Seller seller, PostProduct postProduct, int codValue) throws JsonProcessingException {
+        Map<String, Object> bodyData = getShippingFeeServiceBodyRequest(buyer, seller, postProduct, codValue);
+
+        String resultString = getShippingFee(bodyData, seller.getGhnShopId());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode root = objectMapper.readTree(resultString);
+
+        if (root == null || !root.has("code")) {
+            throw new RuntimeException("Phản hồi không hợp lệ từ GHN: " + resultString);
+        }
+
+        int code = root.path("code").asInt();
+        if (code != 200) {
+            String message = root.path("message").asText("Unknown error");
+            throw new RuntimeException("GHN API trả về lỗi: " + message);
+        }
+
+        JsonNode data = root.path("data");
+
+        Map<String, String> result = new LinkedHashMap<>();
+        result.put("message", root.path("message").asText());
+        result.put("total", data.path("total").asText());
+        result.put("service_fee", data.path("service_fee").asText());
+        result.put("insurance_fee", data.path("insurance_fee").asText());
+        result.put("pick_station_fee", data.path("pick_station_fee").asText());
+        result.put("coupon_value", data.path("coupon_value").asText());
+        result.put("r2s_fee", data.path("r2s_fee").asText());
+        result.put("cod_fee", data.path("cod_fee").asText());
+        result.put("pick_remote_areas_fee", data.path("pick_remote_areas_fee").asText());
+        result.put("deliver_remote_areas_fee", data.path("deliver_remote_areas_fee").asText());
+        result.put("cod_failed_fee", data.path("cod_failed_fee").asText());
+
+        log.info("GHN shipping fee response mapped: {}", result);
+
+        return result;
+    }
+
+    public Map<String, Object> getShippingFeeServiceBodyRequest(Order order, int codValue) throws JsonProcessingException {
         String sellerProvinceId = findProvinceCodeByProvinceName(order.getPostProduct().getSeller().getBuyer().getProvinceName());
         String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId), order.getPostProduct().getSeller().getBuyer().getDistrictName());
         String sellerWardId = findWardCodeByWardName(Integer.parseInt(sellerDistrictId), order.getPostProduct().getSeller().getBuyer().getWardName());
@@ -309,6 +350,7 @@ public class GhnServiceImpl {
         result.put("width", order.getPostProduct().getWidth());
         result.put("height", order.getPostProduct().getHeight());
         result.put("weight", order.getPostProduct().getWeight());
+        result.put("cod_value", codValue);
         result.put("insurance_value", 0);
         result.put("coupon", null);
         Map<String, Object> item = Map.of(
@@ -318,6 +360,40 @@ public class GhnServiceImpl {
                 "width", order.getPostProduct().getWidth(),
                 "height", order.getPostProduct().getHeight(),
                 "weight", order.getPostProduct().getWeight()
+        );
+        result.put("items", List.of(item));
+        return result;
+    }
+
+    public Map<String, Object> getShippingFeeServiceBodyRequest(Buyer buyer, Seller seller, PostProduct postProduct, int codValue) throws JsonProcessingException {
+        String sellerProvinceId = findProvinceCodeByProvinceName(seller.getBuyer().getProvinceName());
+        String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId), seller.getBuyer().getDistrictName());
+        String sellerWardId = findWardCodeByWardName(Integer.parseInt(sellerDistrictId), seller.getBuyer().getWardName());
+
+        String buyerProvinceId = findProvinceCodeByProvinceName(buyer.getProvinceName());
+        String buyerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(buyerProvinceId), buyer.getDistrictName());
+        String buyerWardId = findWardCodeByWardName(Integer.parseInt(buyerDistrictId), buyer.getWardName());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("service_type_id", 5);
+        result.put("from_district_id", Integer.parseInt(sellerDistrictId));
+        result.put("from_ward_code", sellerWardId);
+        result.put("to_district_id", Integer.parseInt(buyerDistrictId));
+        result.put("to_ward_code", buyerWardId);
+        result.put("length", Integer.parseInt(postProduct.getLength()));
+        result.put("width", Integer.parseInt(postProduct.getWidth()));
+        result.put("height", Integer.parseInt(postProduct.getHeight()));
+        result.put("weight", Integer.parseInt(postProduct.getWeight()));
+        result.put("cod_value", codValue);
+        result.put("insurance_value", 0);
+        result.put("coupon", null);
+        Map<String, Object> item = Map.of(
+                "name", postProduct.getTitle(),
+                "quantity", 1,
+                "length", Integer.parseInt(postProduct.getLength()),
+                "width", Integer.parseInt(postProduct.getWidth()),
+                "height", Integer.parseInt(postProduct.getHeight()),
+                "weight", Integer.parseInt(postProduct.getWeight())
         );
         result.put("items", List.of(item));
         return result;

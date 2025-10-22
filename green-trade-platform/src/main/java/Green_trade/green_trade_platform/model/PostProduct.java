@@ -48,7 +48,7 @@ public class PostProduct {
     @Column(name = "price", nullable = false, unique = false)
     private BigDecimal price;
 
-    @Column(name = "price", nullable = true, unique = false)
+    @Column(name = "width", nullable = true, unique = false)
     private String width;
 
     @Column(name = "height", nullable = true, unique = false)

@@ -231,7 +231,7 @@ public class BuyerServiceImpl {
         return orderRepository.save(order);
     }
 
-    public Order placeOrder(PlaceOrderRequest request) throws Exception {
+    public Order placeOrder(PlaceOrderRequest request, String shippingFee) throws Exception {
         //kiểm tra các thứ
         if (!isBuyerExisted(request.getUsername())) {
             throw new ProfileNotFoundException("User is not existed");
@@ -254,6 +254,7 @@ public class BuyerServiceImpl {
         //tạo mới một đơn hàng
         Order newOrder = Order.builder()
                 .admin(null)
+                .postProduct(postProductOpt.get())
                 .buyer(buyerOpt.get())
                 .orderCode(String.format("%09d", new Random().nextInt(1_000_000_000)))
                 .shippingAddress(
@@ -266,13 +267,13 @@ public class BuyerServiceImpl {
                                 buyerOpt.get().getPhoneNumber() :
                                 request.getPhoneNumber()
                 )
+                .shippingFee(new BigDecimal(shippingFee))
                 .transactions(null)
-                .price(postProductOpt.get().getPrice())
+                .price(postProductOpt.get().getPrice().add(new BigDecimal(shippingFee)))
                 .status("PENDING")
                 .cancelReason("Not Canceled Yet")
                 .canceledAt(null)
                 .build();
-        newOrder = orderRepository.save(newOrder);
 
         return orderRepository.save(newOrder);
     }

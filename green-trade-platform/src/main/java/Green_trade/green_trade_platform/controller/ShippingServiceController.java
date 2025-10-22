@@ -78,8 +78,9 @@ public class ShippingServiceController {
     public ResponseEntity<?> getShippingFee(
             @PathVariable Long orderId
     ) throws Exception {
+        int codValue = 0;
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new Exception("Order is not Existed"));
-        Map<String, String> shippingFeeData = ghnService.getShippingFeeDto(order);
+        Map<String, String> shippingFeeData = ghnService.getShippingFeeDto(order, codValue);
         RestResponse response = responseMapper.toDto(
                 true,
                 "FETCH SHIPPING FEE SUCCESSFULLY",
