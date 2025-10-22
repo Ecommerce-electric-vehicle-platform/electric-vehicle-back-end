@@ -1,14 +1,21 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.exception.AuthException;
 import Green_trade.green_trade_platform.exception.PasswordMismatchException;
 import Green_trade.green_trade_platform.exception.UsernameException;
+import Green_trade.green_trade_platform.model.Admin;
 import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.repository.AdminRepository;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
 import Green_trade.green_trade_platform.request.ChangePasswordRequest;
 import Green_trade.green_trade_platform.request.ForgotPasswordRequest;
 import Green_trade.green_trade_platform.request.VerifyOtpForgotPasswordRequest;
 import Green_trade.green_trade_platform.service.AuthService;
+import Green_trade.green_trade_platform.util.JwtUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,25 +25,15 @@ import java.util.Optional;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
-    private BuyerRepository buyerRepository;
-
-    private OtpServiceImpl otpService;
-
-    private RedisOtpService redisOtpService;
-
-    private DelegatingPasswordEncoder passwordEncoder;
-
-    public AuthServiceImpl(
-            BuyerRepository buyerRepository,
-                           RedisOtpService redisOtpService,
-                           OtpServiceImpl otpService,
-            DelegatingPasswordEncoder passwordEncoder) {
-        this.buyerRepository = buyerRepository;
-        this.redisOtpService = redisOtpService;
-        this.otpService = otpService;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final BuyerRepository buyerRepository;
+    private final OtpServiceImpl otpService;
+    private final RedisOtpService redisOtpService;
+    private final DelegatingPasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
+    private final AdminRepository adminRepository;
+    private final RedisTokenService redisTokenService;
 
     @Override
     public Map<String, Object> verifyUsernameForgotPassword(String username) throws Exception {
@@ -139,5 +136,34 @@ public class AuthServiceImpl implements AuthService {
         }
 
 
+    }
+
+    public Map<String, Object> refreshToken(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<>();
+        String authHeader = request.getHeader("Authorization");
+        if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new AuthException("Unauthorized account.");
+        }
+
+        String refreshToken = authHeader.substring(7);
+        result.put("refresh_token", refreshToken);
+
+        if(!jwtUtils.verifyToken(refreshToken)) {
+            throw new AuthException("Invalid refresh token, sign in to get new one");
+        }
+
+        String username = jwtUtils.getUsernameFromToken(refreshToken);
+        if(username.matches("^\\d{10}$")) {
+            Admin admin = adminRepository.findByEmployeeNumber(username).orElseThrow(
+                    () -> new UsernameNotFoundException("Can not find user with this refresh token.")
+            );
+            result.put("admin", admin);
+        } else {
+            Buyer buyer = buyerRepository.findByUsername(username).orElseThrow(
+                    () -> new UsernameNotFoundException("Can not find user with this refresh token.")
+            );
+            result.put("buyer", buyer);
+        }
+        return result;
     }
 }
