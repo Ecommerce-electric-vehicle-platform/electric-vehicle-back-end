@@ -5,6 +5,7 @@ import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Wallet;
 import Green_trade.green_trade_platform.model.WalletTransaction;
 import Green_trade.green_trade_platform.repository.WalletRepository;
+import Green_trade.green_trade_platform.repository.WalletTransactionRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -22,14 +23,17 @@ public class WalletServiceImpl {
     private final WalletRepository walletRepository;
     private final BuyerServiceImpl buyerService;
     private final WalletTransactionServiceImpl walletTransactionService;
+    private final WalletTransactionRepository walletTransactionRepository;
 
     public WalletServiceImpl(
             WalletRepository walletRepository,
             @Lazy BuyerServiceImpl buyerService, // tránh vòng lặp dependency
-            WalletTransactionServiceImpl walletTransactionService) {
+            WalletTransactionServiceImpl walletTransactionService,
+            WalletTransactionRepository walletTransactionRepository) {
         this.walletRepository = walletRepository;
         this.buyerService = buyerService;
         this.walletTransactionService = walletTransactionService;
+        this.walletTransactionRepository = walletTransactionRepository;
     }
 
     public Wallet createLocalWalletForBuyer(Buyer buyer) {
@@ -38,6 +42,14 @@ public class WalletServiceImpl {
     }
 
     public Wallet processDepositMoneyIntoWallet(Map<String, String> params) {
+        String txnRef = params.get("vnp_TxnRef");
+
+        if (walletTransactionRepository.existsByExternalTransactionReference(txnRef)) {
+            log.warn(">>> [Duplicate Transaction] TxnRef {} already processed", txnRef);
+            return walletTransactionRepository.findByExternalTransactionReference(txnRef)
+                    .map(WalletTransaction::getWallet)
+                    .orElse(null);
+        }
         Wallet wallet = getWalletWithVnPayRequest(params.get("vnp_OrderInfo"));
         WalletTransaction walletTransaction = walletTransactionService.handleDepositIntoMoney(wallet, params);
         wallet.setBalance(wallet.getBalance().add(walletTransaction.getAmount()));

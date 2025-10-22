@@ -15,6 +15,7 @@ DELETE FROM package_price;
 DELETE FROM category;
 DELETE FROM system_policy;
 DELETE FROM subscription;
+DELETE FROM wallet_transaction;
 
 ALTER TABLE product_image AUTO_INCREMENT = 1;
 ALTER TABLE post_product AUTO_INCREMENT = 1;
