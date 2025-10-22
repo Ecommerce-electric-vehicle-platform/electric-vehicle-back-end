@@ -27,7 +27,7 @@ public class PostProductServiceImpl implements PostProductService {
     private final PostProductRepository postProductRepository;
 
     private final CategoryRepository categoryRepository;
-
+    private final AdminServiceImpl adminService;
     private final FileUtils fileUtils;
     private final CloudinaryService cloudinaryService;
     private final SellerRepository sellerRepository;
@@ -47,7 +47,8 @@ public class PostProductServiceImpl implements PostProductService {
             SubscriptionRepository subscriptionRepository,
             BuyerRepository buyerRepository,
             AdminRepository adminRepository,
-            SubscriptionServiceImpl subscriptionService) {
+            SubscriptionServiceImpl subscriptionService,
+            AdminServiceImpl adminService) {
         this.postProductRepository = postProductRepository;
         this.categoryRepository = categoryRepository;
         this.fileUtils = fileUtils;
@@ -58,6 +59,7 @@ public class PostProductServiceImpl implements PostProductService {
         this.buyerRepository = buyerRepository;
         this.adminRepository = adminRepository;
         this.subscriptionService = subscriptionService;
+        this.adminService = adminService;
     }
 
     public PostProduct createNewPostProduct(
@@ -182,7 +184,7 @@ public class PostProductServiceImpl implements PostProductService {
         try {
             log.info(">>> request: {}", request);
             log.info(">>> admin list: {}", adminRepository.findByEmployeeNumber("EMP002").get());
-            Admin admin = adminRepository.findByEmployeeNumber(request.getEmployeeNumber()).orElseThrow(() -> new Exception("Admin is not existed"));
+            Admin admin = adminService.getCurrentUser();
             PostProduct postProduct = postProductRepository.findById(
                     request.getPostProductId()).orElseThrow(() -> new Exception("Post Product is not existed")
             );
