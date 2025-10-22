@@ -39,13 +39,13 @@ public class Buyer {
     @Column(name = "default_shipping_address")
     private String defaultShippingAddress;
 
-    @Column(name = "ward_name")
+    @Column(name = "ward_name", nullable = true, unique = false)
     private String wardName;
 
-    @Column(name = "district_name")
+    @Column(name = "district_name", nullable = true, unique = false)
     private String districtName;
 
-    @Column(name = "province_name")
+    @Column(name = "province_name", nullable = true, unique = false)
     private String provinceName;
 
     @Column(name = "is_active")

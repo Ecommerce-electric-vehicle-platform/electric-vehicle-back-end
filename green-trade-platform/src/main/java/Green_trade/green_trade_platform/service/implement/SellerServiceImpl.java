@@ -4,6 +4,7 @@ import Green_trade.green_trade_platform.enumerate.AccountType;
 import Green_trade.green_trade_platform.enumerate.SellerStatus;
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
 import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
+import Green_trade.green_trade_platform.mapper.RegisterShopShippingServiceMapper;
 import Green_trade.green_trade_platform.mapper.SellerMapper;
 import Green_trade.green_trade_platform.mapper.SubscriptionMapper;
 import Green_trade.green_trade_platform.model.*;
@@ -43,6 +44,7 @@ public class SellerServiceImpl implements SellerService {
     private final BuyerServiceImpl buyerService;
     private final NotificationRepository notificationRepository;
     private final GhnServiceImpl ghnService;
+    private final RegisterShopShippingServiceMapper registerShopShippingServiceMapper;
 
     public Seller createShippingShop(String dataRaw, Seller seller) throws JsonProcessingException {
         try {
@@ -103,13 +105,7 @@ public class SellerServiceImpl implements SellerService {
             seller.setAdmin(admin);
             seller.setStatus(SellerStatus.ACCEPTED);
             Seller tempSeller = sellerRepository.save(seller);
-            Map<String, Object> ghnBody = Map.of(
-                    "district_id", 0,
-                    "ward_code", "420112",
-                    "name", seller.getStoreName(),
-                    "phone", seller.getBuyer().getPhoneNumber(),
-                    "address", seller.getBuyer().getDefaultShippingAddress()
-            );
+            Map<String, Object> ghnBody = registerShopShippingServiceMapper.toDto(seller);
             tempSeller = createShippingShop(ghnService.registerShop(ghnBody), seller);
             tempSeller = sellerRepository.save(seller);
 

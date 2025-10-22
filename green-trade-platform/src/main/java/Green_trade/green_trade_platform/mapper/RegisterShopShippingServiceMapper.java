@@ -19,12 +19,12 @@ public class RegisterShopShippingServiceMapper {
         String provinceId = ghnService.findProvinceCodeByProvinceName(seller.getBuyer().getProvinceName());
         String districtId = ghnService.findDistrictCodeByDistrictName(Integer.parseInt(provinceId), seller.getBuyer().getDistrictName());
         Map<String, Object> result = Map.of(
-                "district_id", 0,
+                "district_id", Integer.parseInt(districtId),
                 "ward_code", ghnService.findWardCodeByWardName(Integer.parseInt(districtId), seller.getBuyer().getWardName()),
                 "name", seller.getStoreName(),
                 "phone", seller.getBuyer().getPhoneNumber(),
                 "address", seller.getBuyer().getDefaultShippingAddress()
         );
-        return
+        return result;
     }
 }

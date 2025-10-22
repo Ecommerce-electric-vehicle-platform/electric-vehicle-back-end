@@ -1,6 +1,8 @@
 package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
+import Green_trade.green_trade_platform.model.Order;
+import Green_trade.green_trade_platform.repository.OrderRepository;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.service.implement.GhnServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,10 +23,12 @@ public class ShippingServiceController {
 
     private final GhnServiceImpl ghnService;
     private final ResponseMapper responseMapper;
+    private final OrderRepository orderRepository;
 
-    public ShippingServiceController(GhnServiceImpl ghnService, ResponseMapper responseMapper) {
+    public ShippingServiceController(GhnServiceImpl ghnService, ResponseMapper responseMapper, OrderRepository orderRepository) {
         this.ghnService = ghnService;
         this.responseMapper = responseMapper;
+        this.orderRepository = orderRepository;
     }
 
     @GetMapping("/provinces")
@@ -65,6 +69,21 @@ public class ShippingServiceController {
                 true,
                 "FETCH WARDS SUCCESSFULLY",
                 wardsMap,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+    }
+
+    @GetMapping("/provinces/{orderId}")
+    public ResponseEntity<?> getShippingFee(
+            @PathVariable Long orderId
+    ) throws Exception {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new Exception("Order is not Existed"));
+        Map<String, String> shippingFeeData = ghnService.getShippingFeeDto(order);
+        RestResponse response = responseMapper.toDto(
+                true,
+                "FETCH SHIPPING FEE SUCCESSFULLY",
+                shippingFeeData,
                 null
         );
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);

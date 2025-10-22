@@ -1,5 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.mapper.GetShippingFeeServiceMapper;
+import Green_trade.green_trade_platform.model.Order;
 import Green_trade.green_trade_platform.request.CancelOrderRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -14,8 +16,13 @@ import java.util.*;
 @Slf4j
 public class GhnServiceImpl {
 
-    private static final String TOKEN = "285518-c4bb-11ea-be3a-f636b1deefb9";
+    private static final String TOKEN = "4433d6f4-ae5f-11f0-b040-4e257d8388b4";
     private static final String SHOP_ID = "885";
+    private final GetShippingFeeServiceMapper getShippingFeeServiceMapper;
+
+    public GhnServiceImpl(GetShippingFeeServiceMapper getShippingFeeServiceMapper) {
+        this.getShippingFeeServiceMapper = getShippingFeeServiceMapper;
+    }
 
     public String createOrder(Map<String, Object> requestBody, String shopId) {
         RestTemplate restTemplate = new RestTemplate();
@@ -250,6 +257,45 @@ public class GhnServiceImpl {
         }
         return null;
     }
+
+    public Map<String, String> getShippingFeeDto(Order order) throws JsonProcessingException {
+        Map<String, Object> bodyData = getShippingFeeServiceMapper.toDto(order);
+
+        String resultString = getShippingFee(bodyData, order.getPostProduct().getSeller().getGhnShopId());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode root = objectMapper.readTree(resultString);
+
+        if (root == null || !root.has("code")) {
+            throw new RuntimeException("Phản hồi không hợp lệ từ GHN: " + resultString);
+        }
+
+        int code = root.path("code").asInt();
+        if (code != 200) {
+            String message = root.path("message").asText("Unknown error");
+            throw new RuntimeException("GHN API trả về lỗi: " + message);
+        }
+
+        JsonNode data = root.path("data");
+
+        Map<String, String> result = new LinkedHashMap<>();
+        result.put("message", root.path("message").asText());
+        result.put("total", data.path("total").asText());
+        result.put("service_fee", data.path("service_fee").asText());
+        result.put("insurance_fee", data.path("insurance_fee").asText());
+        result.put("pick_station_fee", data.path("pick_station_fee").asText());
+        result.put("coupon_value", data.path("coupon_value").asText());
+        result.put("r2s_fee", data.path("r2s_fee").asText());
+        result.put("cod_fee", data.path("cod_fee").asText());
+        result.put("pick_remote_areas_fee", data.path("pick_remote_areas_fee").asText());
+        result.put("deliver_remote_areas_fee", data.path("deliver_remote_areas_fee").asText());
+        result.put("cod_failed_fee", data.path("cod_failed_fee").asText());
+
+        log.info("GHN shipping fee response mapped: {}", result);
+
+        return result;
+    }
+
 
 
 }
