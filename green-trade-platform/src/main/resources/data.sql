@@ -1,7 +1,7 @@
 -- =========================================================
 -- 🚀 RESET DATABASE DỮ LIỆU DEMO
 -- =========================================================
-
+SET GLOBAL time_zone = 'Asia/Ho_Chi_Minh';
 SET FOREIGN_KEY_CHECKS = 0;
 
 DELETE FROM product_image;
@@ -21,6 +21,7 @@ DELETE FROM orders;
 DELETE FROM payment;
 DELETE FROM dispute;
 DELETE FROM evidence;
+DELETE FROM notification;
 
 ALTER TABLE product_image AUTO_INCREMENT = 1;
 ALTER TABLE post_product AUTO_INCREMENT = 1;
@@ -38,6 +39,7 @@ ALTER TABLE subscription AUTO_INCREMENT = 1;
 ALTER TABLE payment AUTO_INCREMENT = 1;
 ALTER TABLE dispute AUTO_INCREMENT = 1;
 ALTER TABLE evidence AUTO_INCREMENT = 1;
+ALTER TABLE notification AUTO_INCREMENT = 1;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
