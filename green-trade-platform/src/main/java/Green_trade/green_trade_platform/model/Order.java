@@ -89,6 +89,10 @@ public class Order {
     @JsonIgnore
     private ShippingPartner shippingPartner;
 
+    @OneToOne(mappedBy = "order")
+    @JsonBackReference
+    private SystemWallet systemWallet;
+
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
