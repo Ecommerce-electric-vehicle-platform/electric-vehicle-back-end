@@ -3,6 +3,8 @@ package Green_trade.green_trade_platform.model;
 import Green_trade.green_trade_platform.enumerate.AccountStatus;
 import Green_trade.green_trade_platform.enumerate.Gender;
 import Green_trade.green_trade_platform.request.ApproveSellerRequest;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -67,6 +69,7 @@ public class Admin {
     private List<PostProduct> postProducts;
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Dispute> disputes;
 
     @OneToMany(mappedBy = "admin", fetch = FetchType.LAZY)
