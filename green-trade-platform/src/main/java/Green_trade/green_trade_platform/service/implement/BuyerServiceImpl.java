@@ -256,7 +256,7 @@ public class BuyerServiceImpl {
                 .admin(null)
                 .postProduct(postProductOpt.get())
                 .buyer(buyerOpt.get())
-                .orderCode(String.format("%09d", new Random().nextInt(1_000_000_000)))
+                .orderCode(null)
                 .shippingAddress(
                         request.getShippingAddress().isBlank() ?
                                 buyerOpt.get().getDefaultShippingAddress() :
@@ -275,6 +275,11 @@ public class BuyerServiceImpl {
                 .canceledAt(null)
                 .build();
 
+        return orderRepository.save(newOrder);
+    }
+
+    public Order updateOrderCode(Order newOrder, String shippingCode) {
+        newOrder.setOrderCode(shippingCode);
         return orderRepository.save(newOrder);
     }
 

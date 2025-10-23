@@ -26,7 +26,7 @@ public class Order {
     @Column(name = "order_id")
     private Long id;
 
-    @Column(name = "order_code", nullable = false, unique = true)
+    @Column(name = "order_code", nullable = true, unique = true)
     private String orderCode;
 
     @Column(name = "shipping_address", nullable = false, unique = false)

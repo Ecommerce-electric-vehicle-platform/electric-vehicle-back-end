@@ -1,9 +1,6 @@
 package Green_trade.green_trade_platform.service.implement;
 
-import Green_trade.green_trade_platform.model.Buyer;
-import Green_trade.green_trade_platform.model.Order;
-import Green_trade.green_trade_platform.model.PostProduct;
-import Green_trade.green_trade_platform.model.Seller;
+import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.request.CancelOrderRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,7 +16,6 @@ import java.util.*;
 public class GhnServiceImpl {
 
     private static final String TOKEN = "4433d6f4-ae5f-11f0-b040-4e257d8388b4";
-    private static final String SHOP_ID = "885";
 
     public String createOrder(Map<String, Object> requestBody, String shopId) {
         RestTemplate restTemplate = new RestTemplate();
@@ -397,6 +393,131 @@ public class GhnServiceImpl {
         );
         result.put("items", List.of(item));
         return result;
+    }
+
+    public Map<String, Object> createOrderShippingServiceBodyRequest(Order order, Payment paymentMethod) throws JsonProcessingException {
+        Map<String, Object> data = new HashMap<>();
+        Seller seller = order.getPostProduct().getSeller();
+        Buyer buyer = order.getBuyer();
+        PostProduct postProduct = order.getPostProduct();
+        String sellerProvinceId = findProvinceCodeByProvinceName(seller.getBuyer().getProvinceName());
+        String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId), seller.getBuyer().getDistrictName());
+        log.info(">>> Passed 1");
+        String sellerWardId = findWardCodeByWardName(Integer.parseInt(sellerDistrictId), seller.getBuyer().getWardName());
+        log.info(">>> Passed 2");
+        String buyerProvinceId = findProvinceCodeByProvinceName(buyer.getProvinceName());
+        String buyerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(buyerProvinceId), buyer.getDistrictName());
+        log.info(">>> Passed 3");
+        String buyerWardId = findWardCodeByWardName(Integer.parseInt(buyerDistrictId), buyer.getWardName());
+        log.info(">>> Passed 4");
+        int codValue = 0;
+        if("COD".equalsIgnoreCase(paymentMethod.getGatewayName())) {
+            codValue = order.getPrice().intValue();
+        }
+
+
+        data.put("payment_type_id", 2);
+        data.put("note", "Not have"); //lưu ý vì chưa có tham số truyền vào
+        data.put("required_note", "KHONGCHOXEMHANG");
+        data.put("return_phone", seller.getBuyer().getPhoneNumber());
+        data.put("return_address", seller.getBuyer().getDefaultShippingAddress());
+        data.put("return_district_id", "");
+        data.put("return_ward_code", null);
+        data.put("client_order_code", "");
+        data.put("from_name", seller.getBuyer().getFullName());
+        data.put("from_phone", seller.getBuyer().getPhoneNumber());
+        data.put("from_address", seller.getBuyer().getDefaultShippingAddress());
+        data.put("from_ward_name", seller.getBuyer().getWardName());
+        data.put("from_district_name", seller.getBuyer().getDistrictName());
+        data.put("from_province_name", seller.getBuyer().getProvinceName());
+        data.put("to_name", buyer.getFullName());
+        data.put("to_phone", buyer.getPhoneNumber());
+        data.put("to_address", buyer.getDefaultShippingAddress());
+        data.put("to_ward_name", buyer.getWardName());
+        data.put("to_district_name", buyer.getDistrictName());
+        data.put("to_province_name", buyer.getProvinceName());
+        data.put("cod_amount", codValue);
+        data.put("content", order.getPostProduct().getTitle());
+        data.put("length", Integer.parseInt(postProduct.getLength()));
+        data.put("width", Integer.parseInt(postProduct.getWidth()));
+        data.put("height", Integer.parseInt(postProduct.getHeight()));
+        data.put("weight", Integer.parseInt(postProduct.getWeight()));
+        data.put("cod_failed_amount", 2000);
+        data.put("pick_station_id", 1444);
+        data.put("deliver_station_id", null);
+        data.put("insurance_value", 0);
+        data.put("service_type_id", 5);
+        data.put("coupon", null);
+        data.put("pickup_time", 1692840132);
+        data.put("pick_shift", List.of(2));
+
+        // Items
+        Map<String, Object> item = new HashMap<>();
+        item.put("name", order.getPostProduct().getTitle());
+        item.put("code", "");
+        log.info(">>> Passed 5");
+        item.put("quantity", 1);
+        item.put("price", postProduct.getPrice());
+        item.put("length", postProduct.getLength());
+        item.put("width", postProduct.getWidth());
+        item.put("height", postProduct.getHeight());
+        item.put("weight", postProduct.getWeight());
+
+        Map<String, Object> category = new HashMap<>();
+        category.put("level1", order.getPostProduct().getTitle());
+        item.put("category", category);
+
+        data.put("items", List.of(item));
+
+        return data;
+    }
+
+    public Map<String, String> createOrderShippingResponseToDto(Order order, Payment paymentMethod)
+            throws JsonProcessingException {
+
+        Map<String, Object> bodyData = createOrderShippingServiceBodyRequest(order, paymentMethod);
+
+        String resultInString = createOrder(bodyData, order.getPostProduct().getSeller().getGhnShopId());
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(resultInString);
+
+        Map<String, String> response = new HashMap<>();
+
+        int code = root.path("code").asInt();
+        String message = root.path("message").asText();
+        String messageDisplay = root.path("message_display").asText();
+
+        if (code == 200) {
+            JsonNode data = root.path("data");
+
+            String orderCode = data.path("order_code").asText("");
+            String sortCode = data.path("sort_code").asText("");
+            String transType = data.path("trans_type").asText("");
+            String expectedDeliveryTime = data.path("expected_delivery_time").asText("");
+
+            JsonNode fee = data.path("fee");
+            String mainService = fee.path("main_service").asText("0");
+            String insurance = fee.path("insurance").asText("0");
+            String totalFee = data.path("total_fee").asText("0");
+
+            response.put("success", "true");
+            response.put("orderCode", orderCode);
+            response.put("sortCode", sortCode);
+            response.put("transType", transType);
+            response.put("expectedDeliveryTime", expectedDeliveryTime);
+            response.put("mainServiceFee", mainService);
+            response.put("insuranceFee", insurance);
+            response.put("totalFee", totalFee);
+            response.put("messageDisplay", messageDisplay);
+
+        } else {
+            response.put("success", "false");
+            response.put("message", message);
+            response.put("messageDisplay", messageDisplay);
+        }
+
+        return response;
     }
 
 

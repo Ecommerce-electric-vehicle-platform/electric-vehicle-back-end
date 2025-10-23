@@ -6,9 +6,7 @@ import Green_trade.green_trade_platform.mapper.OrderMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.mapper.WalletMapper;
 import Green_trade.green_trade_platform.model.*;
-import Green_trade.green_trade_platform.repository.BuyerRepository;
-import Green_trade.green_trade_platform.repository.PaymentRepository;
-import Green_trade.green_trade_platform.repository.PostProductRepository;
+import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.request.PlaceOrderRequest;
 import Green_trade.green_trade_platform.request.ProfileRequest;
 import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
@@ -52,6 +50,8 @@ public class BuyerController {
     private final GhnServiceImpl ghnService;
     private final BuyerRepository buyerRepository;
     private final PostProductRepository postProductRepository;
+    private final TransactionRepository transactionRepository;
+    private final OrderRepository orderRepository;
 
     @Operation(
             summary = "Upload buyer profile",
@@ -240,6 +240,10 @@ public class BuyerController {
             );
             List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
             newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
+            String orderShippingCode = ghnService.createOrderShippingResponseToDto(
+                    newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()).get("order_code");
+            newOrder.setOrderCode(orderShippingCode);
+            newOrder = orderRepository.save(newOrder);
             responseData = orderMapper.toDto(newOrder);
         } else {
             log.info(">>> Wallet payment flow");
@@ -252,6 +256,10 @@ public class BuyerController {
             List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
             newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
             newOrder = buyerService.updateOrderStatus(newOrder, "PAID");
+            String orderShippingCode = ghnService.createOrderShippingResponseToDto(
+                    newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()).get("order_code");
+            newOrder.setOrderCode(orderShippingCode);
+            newOrder = orderRepository.save(newOrder);
             responseData = orderMapper.toDto(newOrder);
         }
 
