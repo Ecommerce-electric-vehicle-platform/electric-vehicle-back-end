@@ -43,6 +43,14 @@ public class UploadPostProductRequest {
     @Positive(message = "Price must be greater than zero")
     private BigDecimal price;
 
+    private String length;
+
+    private String width;
+
+    private String height;
+
+    private String weight;
+
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
 

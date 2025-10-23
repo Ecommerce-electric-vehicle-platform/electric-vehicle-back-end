@@ -47,4 +47,10 @@ public class UpdateBuyerProfileRequest {
             message = "Shipping address contains invalid characters."
     )
     private String defaultShippingAddress;
+
+    private String wardName;
+
+    private String districtName;
+
+    private String provinceName;
 }

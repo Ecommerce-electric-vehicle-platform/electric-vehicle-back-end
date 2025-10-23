@@ -1,27 +1,27 @@
 package Green_trade.green_trade_platform.controller;
 
+import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
 import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.mapper.OrderMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.mapper.WalletMapper;
 import Green_trade.green_trade_platform.model.*;
-import Green_trade.green_trade_platform.repository.PaymentRepository;
+import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.request.PlaceOrderRequest;
 import Green_trade.green_trade_platform.request.ProfileRequest;
 import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.response.BuyerResponse;
 import Green_trade.green_trade_platform.response.OrderResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
-import Green_trade.green_trade_platform.service.TransactionService;
 import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
+import Green_trade.green_trade_platform.service.implement.GhnServiceImpl;
+import Green_trade.green_trade_platform.service.implement.OrderServiceImpl;
 import Green_trade.green_trade_platform.service.implement.TransactionServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +45,12 @@ public class BuyerController {
     private final PaymentRepository paymentRepository;
     private final TransactionServiceImpl transactionService;
     private final OrderMapper orderMapper;
+    private final GhnServiceImpl ghnService;
+    private final BuyerRepository buyerRepository;
+    private final PostProductRepository postProductRepository;
+    private final TransactionRepository transactionRepository;
+    private final OrderRepository orderRepository;
+    private final OrderServiceImpl orderService;
 
     @Operation(
             summary = "Upload buyer profile",
@@ -135,19 +141,96 @@ public class BuyerController {
         }
     }
 
+//    @PostMapping("/place-order")
+//    public ResponseEntity<?> placeOrder(@Valid @RequestBody PlaceOrderRequest request) throws Exception {
+//        Order newOrder = null;
+//        RestResponse response = null;
+//        OrderResponse responseData = null;
+//        String shippingFee = "0";
+//        Payment payment = paymentRepository.findById(request.getPaymentId()).orElseThrow(
+//                () -> new Exception("Payment method is not existed")
+//        );
+//
+//        Buyer buyer = buyerRepository.findByUsername(request.getUsername()).orElseThrow(() -> new ProfileNotFoundException("Buyer is not existed"));
+//        PostProduct postProduct = postProductRepository.findById(request.getPostProductId()).orElseThrow(() -> new Exception("Post Product is not existed"));
+//        if(payment.getGatewayName().equals("COD")) {
+//            shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, postProduct.getPrice().intValue()).get("total");
+//        } else {
+//            shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, 0).get("total");
+//        }
+//        newOrder = buyerService.placeOrder(request, shippingFee);
+//
+//        if(payment.getGatewayName().equals("COD")) {
+//            //đây là luồng xử lý cho thanh toán COD
+//            Transaction transaction = transactionService.checkoutCODPayment(
+//                    request.getUsername(),
+//                    request.getPostProductId(),
+//                    request.getPaymentId(),
+//                    newOrder
+//            );
+//            List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
+//            newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
+//            responseData = orderMapper.toDto(newOrder);
+//        } else {
+//            //tạo transaction cho việc thanh toán
+//            Transaction transaction = transactionService.checkoutWalletPayment(
+//                    request.getUsername(),
+//                    request.getPostProductId(),
+//                    request.getPaymentId(),
+//                    newOrder
+//            );
+//            List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
+//            newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
+//            newOrder = buyerService.updateOrderStatus(newOrder, "PAID");
+//            responseData = orderMapper.toDto(newOrder);
+//        }
+//
+//        response = responseMapper.toDto(
+//                true,
+//                "PLACE ORDERED SUCCESS",
+//                responseData,
+//                null
+//        );
+//
+//        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+//    }
+
     @PostMapping("/place-order")
-    public ResponseEntity<?> placeOrder(@Valid PlaceOrderRequest request) throws Exception {
+    public ResponseEntity<?> placeOrder(@Valid @RequestBody PlaceOrderRequest request) throws Exception {
+        log.info(">>> [START] placeOrder");
+
         Order newOrder = null;
         RestResponse response = null;
         OrderResponse responseData = null;
+        String shippingFee = "0";
+
+        log.info(">>> Fetch payment");
         Payment payment = paymentRepository.findById(request.getPaymentId()).orElseThrow(
                 () -> new Exception("Payment method is not existed")
         );
 
-        newOrder = buyerService.placeOrder(request);
+        log.info(">>> Fetch buyer");
+        Buyer buyer = buyerRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new ProfileNotFoundException("Buyer is not existed"));
 
-        if(payment.getGatewayName().equals("COD")) {
-            //đây là luồng xử lý cho thanh toán COD
+        log.info(">>> Fetch post product");
+        PostProduct postProduct = postProductRepository.findById(request.getPostProductId())
+                .orElseThrow(() -> new Exception("Post Product is not existed"));
+
+        log.info(">>> Calculate shipping fee");
+        if (payment.getGatewayName().equals("COD")) {
+            log.info(">>> Calculate shipping fee COD");
+            shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, postProduct.getPrice().intValue()).get("total");
+        } else {
+            log.info(">>> Calculate shipping fee Online");
+            shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, 0).get("total");
+        }
+
+        log.info(">>> Place new order");
+        newOrder = buyerService.placeOrder(request, shippingFee);
+
+        if (payment.getGatewayName().equals("COD")) {
+            log.info(">>> COD payment flow");
             Transaction transaction = transactionService.checkoutCODPayment(
                     request.getUsername(),
                     request.getPostProductId(),
@@ -155,10 +238,21 @@ public class BuyerController {
                     newOrder
             );
             List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
+            log.info(">>> Passed get transactions");
             newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
+            log.info(">>> Passed update transactions");
+            String orderShippingCode = ghnService.createOrderShippingResponseToDto(
+                    newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()).get("orderCode");
+            log.info(">>> Passed get orderShippingCode");
+            log.info(">>> orderShippingCode: {}", orderShippingCode);
+            newOrder.setOrderCode(orderShippingCode);
+            log.info(">>> Passed set Order Code");
+            newOrder = orderRepository.save(newOrder);
+            log.info(">>> Passed saved newOrder");
             responseData = orderMapper.toDto(newOrder);
+            log.info(">>> Passed created response");
         } else {
-            //tạo transaction cho việc thanh toán
+            log.info(">>> Wallet payment flow");
             Transaction transaction = transactionService.checkoutWalletPayment(
                     request.getUsername(),
                     request.getPostProductId(),
@@ -166,11 +260,25 @@ public class BuyerController {
                     newOrder
             );
             List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
+            log.info(">>> Passed get transactions");
             newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
             newOrder = buyerService.updateOrderStatus(newOrder, "PAID");
+            // Nghi ngo loi
+            String orderShippingCode = ghnService.createOrderShippingResponseToDto(
+                    newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()).get("orderCode");
+            Map<String, String> test = ghnService.createOrderShippingResponseToDto(
+                    newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment());
+            log.info(">>> test: {}", test);
+            log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
+            newOrder.setOrderCode(orderShippingCode);
+            log.info(">>> Passed set Order Code");
+            newOrder = orderRepository.save(newOrder);
+            log.info(">>> Passed saved newOrder");
             responseData = orderMapper.toDto(newOrder);
+            log.info(">>> Passed created response");
         }
 
+        log.info(">>> Build response");
         response = responseMapper.toDto(
                 true,
                 "PLACE ORDERED SUCCESS",
@@ -178,6 +286,8 @@ public class BuyerController {
                 null
         );
 
+        log.info(">>> [END] placeOrder success");
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
+
 }

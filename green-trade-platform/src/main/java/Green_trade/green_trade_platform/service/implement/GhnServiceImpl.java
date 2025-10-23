@@ -1,6 +1,10 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.request.CancelOrderRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -11,8 +15,7 @@ import java.util.*;
 @Slf4j
 public class GhnServiceImpl {
 
-    private static final String TOKEN = "285518-c4bb-11ea-be3a-f636b1deefb9";
-    private static final String SHOP_ID = "885";
+    private static final String TOKEN = "4433d6f4-ae5f-11f0-b040-4e257d8388b4";
 
     public String createOrder(Map<String, Object> requestBody, String shopId) {
         RestTemplate restTemplate = new RestTemplate();
@@ -165,6 +168,356 @@ public class GhnServiceImpl {
             return "{\"error\": \"" + e.getMessage() + "\"}";
         }
     }
+
+    public Map<String, String> getProvinceList() throws JsonProcessingException {
+        Map<String, String> result = new HashMap<>();
+        String provincesInString = getProvinces();
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(provincesInString);
+        JsonNode data = root.path("data");
+
+        for (JsonNode province : data) {
+            int id = province.path("ProvinceID").asInt();
+            String name = province.path("ProvinceName").asText();
+            result.put(id + "", name);
+        }
+        return result;
+    }
+
+    public Map<String, String> getDistrictListByProvinceId(int provinceId) throws JsonProcessingException {
+        Map<String, String> result = new HashMap<>();
+        String districtsInString = getDistricts(provinceId);
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(districtsInString);
+        JsonNode data = root.path("data");
+
+        for (JsonNode province : data) {
+            int id = province.path("DistrictID").asInt();
+            String name = province.path("DistrictName").asText();
+            result.put(id + "", name);
+        }
+        return result;
+    }
+
+    public Map<String, String> getWardListByDistrictId(int districtId) throws JsonProcessingException {
+        Map<String, String> result = new HashMap<>();
+        String districtsInString = getWards(districtId);
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(districtsInString);
+        JsonNode data = root.path("data");
+
+        for (JsonNode province : data) {
+            int id = province.path("WardCode").asInt();
+            String name = province.path("WardName").asText();
+            result.put(id + "", name);
+        }
+        return result;
+    }
+
+    public String findProvinceCodeByProvinceName(String provinceName) throws JsonProcessingException {
+        Map<String, String> provinceList = getProvinceList();
+
+        // Duyệt qua danh sách để tìm tỉnh có tên khớp
+        for (Map.Entry<String, String> entry : provinceList.entrySet()) {
+            if (entry.getValue().equalsIgnoreCase(provinceName.trim())) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    public String findDistrictCodeByDistrictName(int provinceId, String districtName) throws JsonProcessingException {
+        Map<String, String> districtList = getDistrictListByProvinceId(provinceId);
+
+        for (Map.Entry<String, String> entry : districtList.entrySet()) {
+            if (entry.getValue().equalsIgnoreCase(districtName.trim())) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    public String findWardCodeByWardName(int districtId, String wardName) throws JsonProcessingException {
+        Map<String, String> wardList = getWardListByDistrictId(districtId);
+
+        for (Map.Entry<String, String> entry : wardList.entrySet()) {
+            if (entry.getValue().equalsIgnoreCase(wardName.trim())) {
+                return entry.getKey(); // WardCode là String, không cần parse sang Long
+            }
+        }
+        return null;
+    }
+
+    public Map<String, String> getShippingFeeDto(Order order, int codValue) throws JsonProcessingException {
+        Map<String, Object> bodyData = getShippingFeeServiceBodyRequest(order, codValue);
+
+        String resultString = getShippingFee(bodyData, order.getPostProduct().getSeller().getGhnShopId());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode root = objectMapper.readTree(resultString);
+
+        if (root == null || !root.has("code")) {
+            throw new RuntimeException("Phản hồi không hợp lệ từ GHN: " + resultString);
+        }
+
+        int code = root.path("code").asInt();
+        if (code != 200) {
+            String message = root.path("message").asText("Unknown error");
+            throw new RuntimeException("GHN API trả về lỗi: " + message);
+        }
+
+        JsonNode data = root.path("data");
+
+        Map<String, String> result = new LinkedHashMap<>();
+        result.put("message", root.path("message").asText());
+        result.put("total", data.path("total").asText());
+        result.put("service_fee", data.path("service_fee").asText());
+        result.put("insurance_fee", data.path("insurance_fee").asText());
+        result.put("pick_station_fee", data.path("pick_station_fee").asText());
+        result.put("coupon_value", data.path("coupon_value").asText());
+        result.put("r2s_fee", data.path("r2s_fee").asText());
+        result.put("cod_fee", data.path("cod_fee").asText());
+        result.put("pick_remote_areas_fee", data.path("pick_remote_areas_fee").asText());
+        result.put("deliver_remote_areas_fee", data.path("deliver_remote_areas_fee").asText());
+        result.put("cod_failed_fee", data.path("cod_failed_fee").asText());
+
+        log.info("GHN shipping fee response mapped: {}", result);
+
+        return result;
+    }
+
+    public Map<String, String> getShippingFeeDto(Buyer buyer, Seller seller, PostProduct postProduct, int codValue) throws JsonProcessingException {
+        Map<String, Object> bodyData = getShippingFeeServiceBodyRequest(buyer, seller, postProduct, codValue);
+
+        String resultString = getShippingFee(bodyData, seller.getGhnShopId());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode root = objectMapper.readTree(resultString);
+
+        if (root == null || !root.has("code")) {
+            throw new RuntimeException("Phản hồi không hợp lệ từ GHN: " + resultString);
+        }
+
+        int code = root.path("code").asInt();
+        if (code != 200) {
+            String message = root.path("message").asText("Unknown error");
+            throw new RuntimeException("GHN API trả về lỗi: " + message);
+        }
+
+        JsonNode data = root.path("data");
+
+        Map<String, String> result = new LinkedHashMap<>();
+        result.put("message", root.path("message").asText());
+        result.put("total", data.path("total").asText());
+        result.put("service_fee", data.path("service_fee").asText());
+        result.put("insurance_fee", data.path("insurance_fee").asText());
+        result.put("pick_station_fee", data.path("pick_station_fee").asText());
+        result.put("coupon_value", data.path("coupon_value").asText());
+        result.put("r2s_fee", data.path("r2s_fee").asText());
+        result.put("cod_fee", data.path("cod_fee").asText());
+        result.put("pick_remote_areas_fee", data.path("pick_remote_areas_fee").asText());
+        result.put("deliver_remote_areas_fee", data.path("deliver_remote_areas_fee").asText());
+        result.put("cod_failed_fee", data.path("cod_failed_fee").asText());
+
+        log.info("GHN shipping fee response mapped: {}", result);
+
+        return result;
+    }
+
+    public Map<String, Object> getShippingFeeServiceBodyRequest(Order order, int codValue) throws JsonProcessingException {
+        String sellerProvinceId = findProvinceCodeByProvinceName(order.getPostProduct().getSeller().getBuyer().getProvinceName());
+        String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId), order.getPostProduct().getSeller().getBuyer().getDistrictName());
+        String sellerWardId = findWardCodeByWardName(Integer.parseInt(sellerDistrictId), order.getPostProduct().getSeller().getBuyer().getWardName());
+
+        String buyerProvinceId = findProvinceCodeByProvinceName(order.getBuyer().getProvinceName());
+        String buyerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(buyerProvinceId), order.getBuyer().getDistrictName());
+        String buyerWardId = findWardCodeByWardName(Integer.parseInt(buyerDistrictId), order.getBuyer().getWardName());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("service_type_id", 5);
+        result.put("from_district_id", Integer.parseInt(sellerDistrictId));
+        result.put("from_ward_code", sellerWardId);
+        result.put("to_district_id", Integer.parseInt(buyerDistrictId));
+        result.put("to_ward_code", buyerWardId);
+        result.put("length", order.getPostProduct().getLength());
+        result.put("width", order.getPostProduct().getWidth());
+        result.put("height", order.getPostProduct().getHeight());
+        result.put("weight", order.getPostProduct().getWeight());
+        result.put("cod_value", codValue);
+        result.put("insurance_value", 0);
+        result.put("coupon", null);
+        Map<String, Object> item = Map.of(
+                "name", order.getPostProduct().getTitle(),
+                "quantity", 1,
+                "length", order.getPostProduct().getLength(),
+                "width", order.getPostProduct().getWidth(),
+                "height", order.getPostProduct().getHeight(),
+                "weight", order.getPostProduct().getWeight()
+        );
+        result.put("items", List.of(item));
+        return result;
+    }
+
+    public Map<String, Object> getShippingFeeServiceBodyRequest(Buyer buyer, Seller seller, PostProduct postProduct, int codValue) throws JsonProcessingException {
+        String sellerProvinceId = findProvinceCodeByProvinceName(seller.getBuyer().getProvinceName());
+        String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId), seller.getBuyer().getDistrictName());
+        String sellerWardId = findWardCodeByWardName(Integer.parseInt(sellerDistrictId), seller.getBuyer().getWardName());
+
+        String buyerProvinceId = findProvinceCodeByProvinceName(buyer.getProvinceName());
+        String buyerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(buyerProvinceId), buyer.getDistrictName());
+        String buyerWardId = findWardCodeByWardName(Integer.parseInt(buyerDistrictId), buyer.getWardName());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("service_type_id", 5);
+        result.put("from_district_id", Integer.parseInt(sellerDistrictId));
+        result.put("from_ward_code", sellerWardId);
+        result.put("to_district_id", Integer.parseInt(buyerDistrictId));
+        result.put("to_ward_code", buyerWardId);
+        result.put("length", Integer.parseInt(postProduct.getLength()));
+        result.put("width", Integer.parseInt(postProduct.getWidth()));
+        result.put("height", Integer.parseInt(postProduct.getHeight()));
+        result.put("weight", Integer.parseInt(postProduct.getWeight()));
+        result.put("cod_value", codValue);
+        result.put("insurance_value", 0);
+        result.put("coupon", null);
+        Map<String, Object> item = Map.of(
+                "name", postProduct.getTitle(),
+                "quantity", 1,
+                "length", Integer.parseInt(postProduct.getLength()),
+                "width", Integer.parseInt(postProduct.getWidth()),
+                "height", Integer.parseInt(postProduct.getHeight()),
+                "weight", Integer.parseInt(postProduct.getWeight())
+        );
+        result.put("items", List.of(item));
+        return result;
+    }
+
+    public Map<String, Object> createOrderShippingServiceBodyRequest(Order order, Payment paymentMethod) throws JsonProcessingException {
+        Map<String, Object> data = new HashMap<>();
+        Seller seller = order.getPostProduct().getSeller();
+        Buyer buyer = order.getBuyer();
+        PostProduct postProduct = order.getPostProduct();
+        String sellerProvinceId = findProvinceCodeByProvinceName(seller.getBuyer().getProvinceName());
+        String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId), seller.getBuyer().getDistrictName());
+        String sellerWardId = findWardCodeByWardName(Integer.parseInt(sellerDistrictId), seller.getBuyer().getWardName());
+        String buyerProvinceId = findProvinceCodeByProvinceName(buyer.getProvinceName());
+        String buyerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(buyerProvinceId), buyer.getDistrictName());
+        String buyerWardId = findWardCodeByWardName(Integer.parseInt(buyerDistrictId), buyer.getWardName());
+        int codValue = 0;
+        if("COD".equalsIgnoreCase(paymentMethod.getGatewayName())) {
+            codValue = order.getPrice().intValue();
+        }
+
+
+        data.put("payment_type_id", 2);
+        data.put("note", "Not have"); //lưu ý vì chưa có tham số truyền vào
+        data.put("required_note", "KHONGCHOXEMHANG");
+        data.put("return_phone", seller.getBuyer().getPhoneNumber());
+        data.put("return_address", seller.getBuyer().getDefaultShippingAddress());
+        data.put("return_district_id", "");
+        data.put("return_ward_code", null);
+        data.put("client_order_code", "");
+        data.put("from_name", seller.getBuyer().getFullName());
+        data.put("from_phone", seller.getBuyer().getPhoneNumber());
+        data.put("from_address", seller.getBuyer().getDefaultShippingAddress());
+        data.put("from_ward_name", seller.getBuyer().getWardName());
+        data.put("from_district_name", seller.getBuyer().getDistrictName());
+        data.put("from_province_name", seller.getBuyer().getProvinceName());
+        data.put("to_name", buyer.getFullName());
+        data.put("to_phone", buyer.getPhoneNumber());
+        data.put("to_address", buyer.getDefaultShippingAddress());
+        data.put("to_ward_name", buyer.getWardName());
+        data.put("to_district_name", buyer.getDistrictName());
+        data.put("to_province_name", buyer.getProvinceName());
+        data.put("cod_amount", codValue);
+        data.put("content", order.getPostProduct().getTitle());
+        data.put("length", Integer.parseInt(postProduct.getLength()));
+        data.put("width", Integer.parseInt(postProduct.getWidth()));
+        data.put("height", Integer.parseInt(postProduct.getHeight()));
+        data.put("weight", Integer.parseInt(postProduct.getWeight()));
+        data.put("cod_failed_amount", 2000);
+        data.put("pick_station_id", 1444);
+        data.put("deliver_station_id", null);
+        data.put("insurance_value", 0);
+        data.put("service_type_id", 5);
+        data.put("coupon", null);
+        data.put("pickup_time", 1692840132);
+        data.put("pick_shift", List.of(2));
+
+        // Items
+        Map<String, Object> item = new HashMap<>();
+        item.put("name", order.getPostProduct().getTitle());
+        item.put("code", "");
+        item.put("quantity", 1);
+        item.put("price", postProduct.getPrice().intValue());
+        item.put("length", Integer.parseInt(postProduct.getLength()));
+        item.put("width", Integer.parseInt(postProduct.getWidth()));
+        item.put("height", Integer.parseInt(postProduct.getHeight()));
+        item.put("weight", Integer.parseInt(postProduct.getWeight()));
+
+        Map<String, Object> category = new HashMap<>();
+        category.put("level1", order.getPostProduct().getTitle());
+        item.put("category", category);
+
+        data.put("items", List.of(item));
+
+        return data;
+    }
+
+    public Map<String, String> createOrderShippingResponseToDto(Order order, Payment paymentMethod)
+            throws JsonProcessingException {
+
+        Map<String, Object> bodyData = createOrderShippingServiceBodyRequest(order, paymentMethod);
+
+        String resultInString = createOrder(bodyData, order.getPostProduct().getSeller().getGhnShopId());
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(resultInString);
+
+        Map<String, String> response = new HashMap<>();
+
+        int code = root.path("code").asInt();
+        String message = root.path("message").asText();
+        String messageDisplay = root.path("message_display").asText();
+
+        if (code == 200) {
+            JsonNode data = root.path("data");
+
+            String orderCode = data.path("order_code").asText("");
+            String sortCode = data.path("sort_code").asText("");
+            String transType = data.path("trans_type").asText("");
+            String expectedDeliveryTime = data.path("expected_delivery_time").asText("");
+
+            JsonNode fee = data.path("fee");
+            String mainService = fee.path("main_service").asText("0");
+            String insurance = fee.path("insurance").asText("0");
+            String totalFee = data.path("total_fee").asText("0");
+
+            response.put("success", "true");
+            response.put("orderCode", orderCode);
+            response.put("sortCode", sortCode);
+            response.put("transType", transType);
+            response.put("expectedDeliveryTime", expectedDeliveryTime);
+            response.put("mainServiceFee", mainService);
+            response.put("insuranceFee", insurance);
+            response.put("totalFee", totalFee);
+            response.put("messageDisplay", messageDisplay);
+
+        } else {
+            response.put("success", "false");
+            response.put("message", message);
+            response.put("messageDisplay", messageDisplay);
+        }
+
+        log.info(">>> TEst: {}", response);
+
+        return response;
+    }
+
+
 
 }
 

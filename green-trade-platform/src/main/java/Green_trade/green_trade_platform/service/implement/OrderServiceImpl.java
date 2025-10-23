@@ -8,6 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 @Slf4j
 public class OrderServiceImpl implements OrderService {
@@ -27,5 +30,21 @@ public class OrderServiceImpl implements OrderService {
             log.info(">>> Error at getOrdersOfCurrentUserPaging: {}", e.getMessage());
             throw e;
         }
+    }
+
+    public Map<String, Object> saveOrder(Order newOrder) {
+        log.info(">>> start save order service");
+        Map<String, Object> data = new HashMap<>();
+        try {
+            Order order = orderRepository.save(newOrder);
+            data.put("success", true);
+            data.put("message", "save order successfully.");
+            data.put("data", order);
+        } catch (Exception e) {
+            data.put("success", false);
+            data.put("message", e.getMessage());
+        }
+        log.info(">>> save order service: {}", data.toString());
+        return data;
     }
 }
