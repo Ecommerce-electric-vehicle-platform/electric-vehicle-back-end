@@ -54,4 +54,9 @@ public class SystemWallet {
     @JoinColumn(name = "admin_id")
     @JsonManagedReference
     private Admin admin;
+
+    @OneToOne()
+    @JoinColumn(name = "order_id")
+    @JsonManagedReference
+    private Order order;
 }

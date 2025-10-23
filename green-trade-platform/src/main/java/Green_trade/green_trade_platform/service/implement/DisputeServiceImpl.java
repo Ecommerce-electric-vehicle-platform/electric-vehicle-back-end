@@ -83,32 +83,46 @@ public class DisputeServiceImpl implements DisputeService {
         return new PageImpl<>(responses, pageable, disputes.getTotalElements());
     }
 
-    public Notification handlePendingDispute(long adminId, ResolveDisputeRequest request) {
-        if(request.getDecision() == DisputeDecision.REJECTED) {
-            Map<String, Object> disputeOrder = getOrderByDisputeId(request.getDisputeId());
-            Dispute dispute = (Dispute) disputeOrder.get("dispute");
-            Order order = (Order) disputeOrder.get("order");
-            log.info(">>> [handlePendingDispute Service] dispute infor: {}", dispute.getId());
-            log.info(">>> [handlePendingDispute Service] order infor: {}", order.getId());
-            log.info(">>> user id: {}", order.getBuyer().getBuyerId());
+    public Notification handlePendingDispute(Admin admin, ResolveDisputeRequest request) {
+        Map<String, Object> disputeOrder = getOrderByDisputeId(request.getDisputeId());
+        Dispute dispute = (Dispute) disputeOrder.get("dispute");
+        Order order = (Order) disputeOrder.get("order");
+        log.info(">>> [handlePendingDispute Service] dispute infor: {}", dispute.getId());
+        log.info(">>> [handlePendingDispute Service] order infor: {}", order.getId());
+        log.info(">>> user id: {}", order.getBuyer().getBuyerId());
+        Notification notification = null;
 
+        if(request.getDecision() == DisputeDecision.REJECTED) {
             dispute.setStatus(DisputeStatus.REJECTED);
             dispute.setResolutionType(ResolutionType.REJECTED);
             dispute.setResolution(request.getResolution());
+            dispute.setAdmin(admin);
             disputeRepository.save(dispute);
 
-            Notification notification = Notification.builder()
+            notification = Notification.builder()
                     .receiverId(order.getBuyer().getBuyerId())
                     .type(AccountType.BUYER)
                     .title("REJECT YOUR ORDER DISPUTE")
                     .content(request.getResolution())
                     .createdAt(LocalDateTime.now())
                     .build();
-            return notificationRepository.save(notification);
+        } else if(request.getDecision() == DisputeDecision.ACCEPTED) {
+            dispute.setStatus(DisputeStatus.ACCEPTED);
+            dispute.setResolutionType(ResolutionType.REFUND);
+            dispute.setResolution(request.getResolution());
+            dispute.setAdmin(admin);
+            disputeRepository.save(dispute);
 
+            notification = Notification.builder()
+                    .receiverId(order.getBuyer().getBuyerId())
+                    .type(AccountType.BUYER)
+                    .title("REJECT YOUR ORDER DISPUTE")
+                    .content(request.getResolution())
+                    .createdAt(LocalDateTime.now())
+                    .build();
         }
 
-        return null;
+        return notificationRepository.save(notification);
     }
 
     private Map<String, Object> getOrderByDisputeId(long disputeId) {
