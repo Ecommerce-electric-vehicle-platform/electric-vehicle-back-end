@@ -25,4 +25,7 @@ public class BuyerResponse {
     private LocalDate dob;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String provinceName;
+    private String districtName;
+    private String wardName;
 }

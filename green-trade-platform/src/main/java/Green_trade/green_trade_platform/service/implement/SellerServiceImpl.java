@@ -12,6 +12,7 @@ import Green_trade.green_trade_platform.repository.NotificationRepository;
 import Green_trade.green_trade_platform.repository.SellerRepository;
 import Green_trade.green_trade_platform.repository.SubscriptionRepository;
 import Green_trade.green_trade_platform.request.ApproveSellerRequest;
+import Green_trade.green_trade_platform.response.ApproveSellerResponse;
 import Green_trade.green_trade_platform.response.SellerResponse;
 import Green_trade.green_trade_platform.response.SubscriptionResponse;
 import Green_trade.green_trade_platform.service.SellerService;
@@ -93,13 +94,19 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Transactional
-    public Notification handlePendingSeller(ApproveSellerRequest request) throws JsonProcessingException {
+    public ApproveSellerResponse handlePendingSeller(ApproveSellerRequest request) throws JsonProcessingException {
         Seller seller = sellerRepository.findById(request.getSellerId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ seller này: " + request.getSellerId())
                 );
 
         Admin admin = adminService.getCurrentUser();
         Notification notice = null;
+        ApproveSellerResponse response = ApproveSellerResponse.builder()
+                .sellerId(seller.getSellerId())
+                .reason(request.getMessage())
+                .decision(request.getDecision())
+                .decidedAt(LocalDateTime.now())
+                .build();
 
         if(request.getDecision().equals(VerifiedDecisionStatus.APPROVED)) {
             seller.setAdmin(admin);
@@ -127,7 +134,9 @@ public class SellerServiceImpl implements SellerService {
                     .createdAt(LocalDateTime.now())
                     .build();
         }
-        return notificationRepository.save(notice);
+
+        response.setNotification(notice);
+        return response;
     }
 
     public Seller getCurrentUser() {

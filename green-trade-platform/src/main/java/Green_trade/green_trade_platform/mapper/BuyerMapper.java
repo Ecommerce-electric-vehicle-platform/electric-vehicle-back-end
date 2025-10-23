@@ -26,6 +26,9 @@ public class  BuyerMapper {
                 .email(buyer.getEmail())
                 .gender(buyer.getGender())
                 .dob(buyer.getDob())
+                .provinceName(buyer.getProvinceName())
+                .districtName(buyer.getDistrictName())
+                .wardName(buyer.getWardName())
                 .createdAt(buyer.getCreatedAt())
                 .updatedAt(buyer.getUpdatedAt())
                 .build();
