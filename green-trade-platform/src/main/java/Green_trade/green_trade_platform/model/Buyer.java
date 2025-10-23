@@ -2,6 +2,7 @@ package Green_trade.green_trade_platform.model;
 
 import Green_trade.green_trade_platform.enumerate.Gender;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -88,7 +89,7 @@ public class Buyer {
     private Wallet wallet;
 
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonBackReference
+    @JsonManagedReference
     private List<Order> orders;
 
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, orphanRemoval = true)

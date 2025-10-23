@@ -1,5 +1,9 @@
 package Green_trade.green_trade_platform.model;
 
+import Green_trade.green_trade_platform.enumerate.DisputeDecision;
+import Green_trade.green_trade_platform.enumerate.DisputeStatus;
+import Green_trade.green_trade_platform.enumerate.ResolutionType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,31 +33,37 @@ public class Dispute {
     private LocalDateTime updatedAt;
 
     @Column(name = "decision", nullable = true, unique = false)
-    private String decision;
+    @Enumerated(EnumType.STRING)
+    private DisputeDecision decision;
 
     @Column(name = "resolution_type", nullable = true, unique = false)
-    private String resolutionType;
+    @Enumerated(EnumType.STRING)
+    private ResolutionType resolutionType;
 
     @Column(name = "resolution", nullable = true, unique = false)
     private String resolution;
 
     @Column(name = "status", nullable = false, unique = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private DisputeStatus status;
 
     @OneToMany(mappedBy = "dispute", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Evidence> evidences;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
-    @JsonManagedReference
+    @JsonBackReference
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dispute_category_id", nullable = false)
+    @JsonBackReference
     private DisputeCategory disputeCategory;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id", nullable = true)
+    @JsonBackReference
     private Admin admin;
 
     @PrePersist

@@ -187,8 +187,8 @@ public class PostProductServiceImpl implements PostProductService {
     public PostProduct checkPostProductVerification(PostProductDecisionRequest request) throws Exception {
         try {
             log.info(">>> request: {}", request);
-            log.info(">>> admin list: {}", adminRepository.findByEmployeeNumber("EMP002").get());
             Admin admin = adminService.getCurrentUser();
+            log.info(">>> admin id: {}", admin.getId());
             PostProduct postProduct = postProductRepository.findById(
                     request.getPostProductId()).orElseThrow(() -> new Exception("Post Product is not existed")
             );
@@ -208,7 +208,7 @@ public class PostProductServiceImpl implements PostProductService {
 
             return postProductRepository.save(postProduct);
         } catch(Exception e) {
-            log.info(">>> Error at decidePostContentValidation: {}" + e.getMessage());
+            log.info(">>> Error at decidePostContentValidation: {}", e.getMessage());
             throw e;
         }
     }
