@@ -1,9 +1,14 @@
 package Green_trade.green_trade_platform.response;
 
+import Green_trade.green_trade_platform.enumerate.DisputeDecision;
+import Green_trade.green_trade_platform.enumerate.DisputeStatus;
+import Green_trade.green_trade_platform.model.Evidence;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -14,7 +19,8 @@ public class DisputeResponse {
     private Long disputeCategoryId;
     private String disputeCategoryName;
     private String description;
-    private String decision;
+    private DisputeDecision decision;
     private String resolution;
-    private String status;
+    private DisputeStatus status;
+    private List<Evidence> evidences;
 }

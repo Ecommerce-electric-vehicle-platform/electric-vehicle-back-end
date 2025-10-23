@@ -58,7 +58,7 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id")
-    @JsonManagedReference
+    @JsonBackReference
     private Buyer buyer;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -78,6 +78,7 @@ public class Order {
     private Invoice invoice;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Dispute> disputes;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

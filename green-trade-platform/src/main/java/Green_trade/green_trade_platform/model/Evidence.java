@@ -1,5 +1,7 @@
 package Green_trade.green_trade_platform.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,5 +28,6 @@ public class Evidence {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dispute_id")
+    @JsonBackReference
     private Dispute dispute;
 }

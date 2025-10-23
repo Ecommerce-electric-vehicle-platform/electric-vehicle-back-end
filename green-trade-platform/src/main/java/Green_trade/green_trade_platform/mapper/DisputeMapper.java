@@ -11,10 +11,11 @@ public class DisputeMapper {
                 .disputeId(dispute.getId())
                 .disputeCategoryId(dispute.getDisputeCategory().getId())
                 .disputeCategoryName(dispute.getDisputeCategory().getTitle())
-                .description(dispute.getDecision())
+                .description(dispute.getResolution())
                 .resolution(dispute.getResolution())
                 .decision(dispute.getDecision())
                 .status(dispute.getStatus())
+                .evidences(dispute.getEvidences())
                 .build();
     }
 }

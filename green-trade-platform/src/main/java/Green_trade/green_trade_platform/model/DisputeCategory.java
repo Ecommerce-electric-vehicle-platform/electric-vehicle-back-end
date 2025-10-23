@@ -1,5 +1,7 @@
 package Green_trade.green_trade_platform.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,5 +32,6 @@ public class DisputeCategory {
     private String description;
 
     @OneToMany(mappedBy = "disputeCategory", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Dispute> disputes;
 }
