@@ -37,6 +37,12 @@ public class ProfileRequest {
     )
     private String defaultShippingAddress;
 
+    private String wardName;
+
+    private String districtName;
+
+    private String provinceName;
+
     private Gender gender;
 
     private String dob;

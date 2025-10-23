@@ -74,12 +74,15 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
             Wallet wallet = buyerService.getWallet();
-            BigDecimal moneyHandler = wallet.getBalance().subtract(postProductOpt.get().getPrice());
+            log.info(">>> wallet balance: {}", wallet.getBalance());
+            log.info(">>> order total price: {}", order.getPrice());
+            BigDecimal moneyHandler = wallet.getBalance().subtract(order.getPrice());
+            log.info(">>> moneyHandler: {}", moneyHandler);
             if(moneyHandler.compareTo(new BigDecimal("0")) < 0) {
                 Transaction newTransaction = Transaction.builder()
                         .order(order)
                         .payment(paymentOpt.get())
-                        .amount(postProductOpt.get().getPrice())
+                        .amount(order.getPrice())
                         .currency("VND")
                         .paymentMethod(paymentOpt.get().getGatewayName())
                         .status("FAILED")
@@ -125,7 +128,7 @@ public class TransactionServiceImpl implements TransactionService {
             Transaction newTransaction = Transaction.builder()
                     .order(order)
                     .payment(paymentOpt.get())
-                    .amount(postProductOpt.get().getPrice())
+                    .amount(order.getPrice())
                     .currency("VND")
                     .paymentMethod(paymentOpt.get().getGatewayName())
                     .status("PENDING")

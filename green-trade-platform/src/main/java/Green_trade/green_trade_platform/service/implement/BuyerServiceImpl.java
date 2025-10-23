@@ -41,6 +41,7 @@ public class BuyerServiceImpl {
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
     private final TransactionRepository transactionRepository;
+    private final ShippingPartnerRepository shippingPartnerRepository;
     private WalletServiceImpl walletService;
     private PostProductRepository postProductRepository;
 
@@ -66,6 +67,9 @@ public class BuyerServiceImpl {
             }
             buyer.setAvatarUrl(avatarUrl);
             buyer.setDefaultShippingAddress(request.getDefaultShippingAddress());
+            buyer.setWardName(request.getWardName());
+            buyer.setDistrictName(request.getDistrictName());
+            buyer.setProvinceName(request.getProvinceName());
             buyer.setFullName(request.getFullName());
             buyer.setPhoneNumber(request.getPhoneNumber());
             buyer.setDob(dob);
@@ -95,6 +99,9 @@ public class BuyerServiceImpl {
             buyer.setDob(request.getDob());
             buyer.setPhoneNumber(request.getPhoneNumber() == null ? "" : request.getPhoneNumber());
             buyer.setDefaultShippingAddress(request.getDefaultShippingAddress());
+            buyer.setWardName(request.getWardName());
+            buyer.setDistrictName(request.getDistrictName());
+            buyer.setProvinceName(request.getProvinceName());
             log.info(">>> Passed buyer update text information");
 
             //delete old avatar on cloudinary
@@ -225,7 +232,7 @@ public class BuyerServiceImpl {
         return orderRepository.save(order);
     }
 
-    public Order placeOrder(PlaceOrderRequest request) throws Exception {
+    public Order placeOrder(PlaceOrderRequest request, String shippingFee) throws Exception {
         //kiểm tra các thứ
         if (!isBuyerExisted(request.getUsername())) {
             throw new ProfileNotFoundException("User is not existed");
@@ -245,11 +252,17 @@ public class BuyerServiceImpl {
             throw new Exception("The product has been sold");
         }
 
+        ShippingPartner shippingPartner = shippingPartnerRepository.findById(request.getShippingPartnerId())
+                .orElseThrow(
+                        () -> new Exception("Shipping Partner is not existed")
+                );
+
         //tạo mới một đơn hàng
         Order newOrder = Order.builder()
                 .admin(null)
+                .postProduct(postProductOpt.get())
                 .buyer(buyerOpt.get())
-                .orderCode(String.format("%09d", new Random().nextInt(1_000_000_000)))
+                .orderCode(null)
                 .shippingAddress(
                         request.getShippingAddress().isBlank() ?
                                 buyerOpt.get().getDefaultShippingAddress() :
@@ -260,14 +273,20 @@ public class BuyerServiceImpl {
                                 buyerOpt.get().getPhoneNumber() :
                                 request.getPhoneNumber()
                 )
+                .shippingPartner(shippingPartner)
+                .shippingFee(new BigDecimal(shippingFee))
                 .transactions(null)
-                .price(postProductOpt.get().getPrice())
+                .price(postProductOpt.get().getPrice().add(new BigDecimal(shippingFee)))
                 .status("PENDING")
                 .cancelReason("Not Canceled Yet")
                 .canceledAt(null)
                 .build();
-        newOrder = orderRepository.save(newOrder);
 
+        return orderRepository.save(newOrder);
+    }
+
+    public Order updateOrderCode(Order newOrder, String shippingCode) {
+        newOrder.setOrderCode(shippingCode);
         return orderRepository.save(newOrder);
     }
 

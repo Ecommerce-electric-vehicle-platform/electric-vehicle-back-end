@@ -4,20 +4,20 @@ import Green_trade.green_trade_platform.enumerate.Gender;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-@Data
+@AllArgsConstructor
 @Builder
+@Entity
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(
         name = "buyer",
         uniqueConstraints = {
@@ -39,6 +39,15 @@ public class Buyer {
 
     @Column(name = "default_shipping_address")
     private String defaultShippingAddress;
+
+    @Column(name = "ward_name", nullable = true, unique = false)
+    private String wardName;
+
+    @Column(name = "district_name", nullable = true, unique = false)
+    private String districtName;
+
+    @Column(name = "province_name", nullable = true, unique = false)
+    private String provinceName;
 
     @Column(name = "is_active")
     private boolean isActive;

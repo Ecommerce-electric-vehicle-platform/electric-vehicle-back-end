@@ -1,7 +1,9 @@
 package Green_trade.green_trade_platform.model;
 
 import Green_trade.green_trade_platform.enumerate.SellerStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -43,6 +45,7 @@ public class ShippingPartner {
 
     @OneToMany(mappedBy = "shippingPartner", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
+    @JsonManagedReference
     private List<Order> orders;
 
     @PrePersist

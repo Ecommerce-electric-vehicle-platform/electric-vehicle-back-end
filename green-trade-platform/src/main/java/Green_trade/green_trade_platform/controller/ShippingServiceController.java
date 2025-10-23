@@ -1,6 +1,8 @@
 package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
+import Green_trade.green_trade_platform.model.Order;
+import Green_trade.green_trade_platform.repository.OrderRepository;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.service.implement.GhnServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,26 +23,18 @@ public class ShippingServiceController {
 
     private final GhnServiceImpl ghnService;
     private final ResponseMapper responseMapper;
+    private final OrderRepository orderRepository;
 
-    public ShippingServiceController(GhnServiceImpl ghnService, ResponseMapper responseMapper) {
+    public ShippingServiceController(GhnServiceImpl ghnService, ResponseMapper responseMapper, OrderRepository orderRepository) {
         this.ghnService = ghnService;
         this.responseMapper = responseMapper;
+        this.orderRepository = orderRepository;
     }
 
     @GetMapping("/provinces")
     public ResponseEntity<?> getProvinces() throws JsonProcessingException {
         Map<String, String> provincesMap = new HashMap<>();
-        String provincesInString = ghnService.getProvinces();
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(provincesInString);
-        JsonNode data = root.path("data");
-
-        for (JsonNode province : data) {
-            int id = province.path("ProvinceID").asInt();
-            String name = province.path("ProvinceName").asText();
-            provincesMap.put(id + "", name);
-        }
+        provincesMap = ghnService.getProvinceList();
         RestResponse response = responseMapper.toDto(
                 true,
                 "FETCH PROVINCES SUCCESSFULLY",
@@ -55,17 +49,7 @@ public class ShippingServiceController {
             @RequestParam int provinceId
     ) throws JsonProcessingException {
         Map<String, String> districtsMap = new HashMap<>();
-        String districtsInString = ghnService.getDistricts(provinceId);
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(districtsInString);
-        JsonNode data = root.path("data");
-
-        for (JsonNode province : data) {
-            int id = province.path("DistrictID").asInt();
-            String name = province.path("DistrictName").asText();
-            districtsMap.put(id + "", name);
-        }
+        districtsMap = ghnService.getDistrictListByProvinceId(provinceId);
         RestResponse response = responseMapper.toDto(
                 true,
                 "FETCH DISTRICTS SUCCESSFULLY",
@@ -80,21 +64,27 @@ public class ShippingServiceController {
             @RequestParam int districtId
     ) throws JsonProcessingException {
         Map<String, String> wardsMap = new HashMap<>();
-        String districtsInString = ghnService.getWards(districtId);
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(districtsInString);
-        JsonNode data = root.path("data");
-
-        for (JsonNode province : data) {
-            int id = province.path("WardCode").asInt();
-            String name = province.path("WardName").asText();
-            wardsMap.put(id + "", name);
-        }
+        wardsMap = ghnService.getWardListByDistrictId(districtId);
         RestResponse response = responseMapper.toDto(
                 true,
                 "FETCH WARDS SUCCESSFULLY",
                 wardsMap,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+    }
+
+    @GetMapping("/shipping-fee/{orderId}")
+    public ResponseEntity<?> getShippingFee(
+            @PathVariable Long orderId
+    ) throws Exception {
+        int codValue = 0;
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new Exception("Order is not Existed"));
+        Map<String, String> shippingFeeData = ghnService.getShippingFeeDto(order, codValue);
+        RestResponse response = responseMapper.toDto(
+                true,
+                "FETCH SHIPPING FEE SUCCESSFULLY",
+                shippingFeeData,
                 null
         );
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
