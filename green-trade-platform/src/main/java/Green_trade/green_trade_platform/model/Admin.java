@@ -4,6 +4,7 @@ import Green_trade.green_trade_platform.enumerate.AccountStatus;
 import Green_trade.green_trade_platform.enumerate.Gender;
 import Green_trade.green_trade_platform.request.ApproveSellerRequest;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.cglib.core.Local;
@@ -71,6 +72,7 @@ public class Admin {
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
+    @JsonManagedReference
     private List<Dispute> disputes;
 
     @OneToMany(mappedBy = "admin", fetch = FetchType.LAZY)

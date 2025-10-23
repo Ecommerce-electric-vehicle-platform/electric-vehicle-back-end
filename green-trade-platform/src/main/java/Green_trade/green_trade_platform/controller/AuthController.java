@@ -63,6 +63,7 @@ public class AuthController {
 
     private final long REFRESH_EXPIRE_TIME = 7L * 24 * 60 * 60 * 1000; // 7 days
     private final long ACCESS_EXPIRE_TIME = 15 * 60 * 1000; // 15 minutes
+//    private final long ACCESS_EXPIRE_TIME = 30 * 1000; // 30 seconds
 
     @Operation(
             summary = "Register for new customer",

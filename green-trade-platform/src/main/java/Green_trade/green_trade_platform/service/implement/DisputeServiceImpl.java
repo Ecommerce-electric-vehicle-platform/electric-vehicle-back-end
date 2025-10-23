@@ -1,33 +1,40 @@
 package Green_trade.green_trade_platform.service.implement;
 
-import Green_trade.green_trade_platform.model.Dispute;
-import Green_trade.green_trade_platform.model.DisputeCategory;
-import Green_trade.green_trade_platform.model.Evidence;
-import Green_trade.green_trade_platform.model.Order;
+import Green_trade.green_trade_platform.controller.NotificationSocketController;
+import Green_trade.green_trade_platform.enumerate.AccountType;
+import Green_trade.green_trade_platform.enumerate.DisputeDecision;
+import Green_trade.green_trade_platform.enumerate.DisputeStatus;
+import Green_trade.green_trade_platform.enumerate.ResolutionType;
+import Green_trade.green_trade_platform.mapper.DisputeMapper;
+import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.DisputeCategoryRepository;
 import Green_trade.green_trade_platform.repository.DisputeRepository;
+import Green_trade.green_trade_platform.repository.NotificationRepository;
 import Green_trade.green_trade_platform.repository.OrderRepository;
 import Green_trade.green_trade_platform.request.RaiseDisputeRequest;
+import Green_trade.green_trade_platform.request.ResolveDisputeRequest;
+import Green_trade.green_trade_platform.response.DisputeResponse;
 import Green_trade.green_trade_platform.service.DisputeService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class DisputeServiceImpl implements DisputeService {
     private final DisputeCategoryRepository disputeCategoryRepository;
     private final DisputeRepository disputeRepository;
     private final OrderRepository orderRepository;
+    private final DisputeMapper disputeMapper;
+    private final NotificationRepository notificationRepository;
 
-    public DisputeServiceImpl(
-            DisputeCategoryRepository disputeCategoryRepository,
-            DisputeRepository disputeRepository, OrderRepository orderRepository) {
-        this.disputeCategoryRepository = disputeCategoryRepository;
-        this.disputeRepository = disputeRepository;
-        this.orderRepository = orderRepository;
-    }
 
     public Dispute updateEvidencesForDispute(List<Evidence> evidences, Dispute dispute) {
         dispute.setEvidences(evidences);
@@ -53,14 +60,70 @@ public class DisputeServiceImpl implements DisputeService {
                     .disputeCategory(disputeCategory)
                     .admin(null)
                     .evidences(null)
-                    .decision("No Decision Yet")
+                    .decision(DisputeDecision.NOT_HAVE_YET)
                     .resolution("No Resolution Yet")
-                    .resolutionType("Not Have Yet")
-                    .status("PENDING")
+                    .resolutionType(ResolutionType.NOT_HAVE_YET)
+                    .status(DisputeStatus.PENDING)
                     .build();
             return disputeRepository.save(newDispute);
         } catch (Exception e) {
             throw e;
         }
+    }
+
+    public Page<DisputeResponse> getAllDispute(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+
+        Page<Dispute> disputes = disputeRepository.findAllByStatus(DisputeStatus.PENDING, pageable);
+
+        List<DisputeResponse> responses = disputes.getContent()
+                .stream().map(disputeMapper::toDto)
+                .toList();
+
+        return new PageImpl<>(responses, pageable, disputes.getTotalElements());
+    }
+
+    public Notification handlePendingDispute(long adminId, ResolveDisputeRequest request) {
+        if(request.getDecision() == DisputeDecision.REJECTED) {
+            Map<String, Object> disputeOrder = getOrderByDisputeId(request.getDisputeId());
+            Dispute dispute = (Dispute) disputeOrder.get("dispute");
+            Order order = (Order) disputeOrder.get("order");
+            log.info(">>> [handlePendingDispute Service] dispute infor: {}", dispute.getId());
+            log.info(">>> [handlePendingDispute Service] order infor: {}", order.getId());
+            log.info(">>> user id: {}", order.getBuyer().getBuyerId());
+
+            dispute.setStatus(DisputeStatus.REJECTED);
+            dispute.setResolutionType(ResolutionType.REJECTED);
+            dispute.setResolution(request.getResolution());
+            disputeRepository.save(dispute);
+
+            Notification notification = Notification.builder()
+                    .receiverId(order.getBuyer().getBuyerId())
+                    .type(AccountType.BUYER)
+                    .title("REJECT YOUR ORDER DISPUTE")
+                    .content(request.getResolution())
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            return notificationRepository.save(notification);
+
+        }
+
+        return null;
+    }
+
+    private Map<String, Object> getOrderByDisputeId(long disputeId) {
+        Map<String, Object> data = new HashMap<>();
+        Dispute dispute = disputeRepository.findById(disputeId).orElseThrow(
+                () -> new IllegalArgumentException("Can not find dispute with this dispute id.")
+        );
+        data.put("dispute", dispute);
+        data.put("order", dispute.getOrder());
+        return data;
+    }
+
+    public Dispute getDisputeInfo(long disputeId) {
+        return disputeRepository.findById(disputeId).orElseThrow(
+                () -> new IllegalArgumentException("Can not find dispute infor with this id: " + disputeId)
+        );
     }
 }

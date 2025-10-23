@@ -19,6 +19,8 @@ DELETE FROM shipping_partner;
 DELETE FROM dispute_category;
 DELETE FROM orders;
 DELETE FROM payment;
+DELETE FROM dispute;
+DELETE FROM evidence;
 
 ALTER TABLE product_image AUTO_INCREMENT = 1;
 ALTER TABLE post_product AUTO_INCREMENT = 1;
@@ -34,6 +36,8 @@ ALTER TABLE shipping_partner AUTO_INCREMENT = 1;
 ALTER TABLE dispute_category AUTO_INCREMENT = 1;
 ALTER TABLE subscription AUTO_INCREMENT = 1;
 ALTER TABLE payment AUTO_INCREMENT = 1;
+ALTER TABLE dispute AUTO_INCREMENT = 1;
+ALTER TABLE evidence AUTO_INCREMENT = 1;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -485,7 +489,184 @@ VALUES
 -- =========================================================
 -- 🧾 ORDER DATA (MẪU)
 -- =========================================================
+-- =========================================================
+-- ⚖️ DISPUTE - MẪU TRANH CHẤP / KHIẾU NẠI
+-- =========================================================
 
+-- =========================================================
+-- ⚖️ DISPUTE DEMO DATA (30 RECORDS)
+-- =========================================================
+INSERT INTO dispute (
+    created_at,
+    updated_at,
+    decision,
+    resolution_type,
+    resolution,
+    status,
+    order_id,
+    dispute_category_id,
+    admin_id
+)
+VALUES
+-- 1️⃣ Mua hàng không nhận được đơn (OPEN)
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 2, 1, NULL),
+
+-- 2️⃣ Sản phẩm không đúng mô tả, đang xem xét
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 3, 2, 1),
+
+-- 3️⃣ Thanh toán lỗi nhưng đã bị trừ tiền → hoàn tiền
+(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Hoàn lại toàn bộ số tiền đơn hàng', 'ACCEPTED', 4, 3, 1),
+
+-- 4️⃣ Người bán không phản hồi → cảnh cáo
+(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Gửi cảnh báo hệ thống tới người bán', 'ACCEPTED', 5, 5, 1),
+
+-- 5️⃣ Vận chuyển thất lạc → yêu cầu hoàn tiền
+(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Hoàn tiền cho người mua vì đơn hàng thất lạc', 'ACCEPTED', 6, 6, 1),
+
+-- 6️⃣ Chính sách không rõ ràng → đang xử lý
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 7, 7, 1),
+
+-- 7️⃣ Khiếu nại khác → từ chối
+(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Không có hành động thêm', 'REJECTED', 8, 8, 1),
+
+-- 8️⃣ Người mua hủy đơn nhưng vẫn khiếu nại → đóng
+(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Đơn hàng đã bị người mua tự hủy', 'REJECTED', 4, 1, 1),
+
+-- 9️⃣ Đơn hoàn thành nhưng khiếu nại chất lượng → đang xem xét
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 1, 2, 1),
+
+-- 🔟 Lỗi thanh toán, đang xử lý
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 10, 3, 1),
+
+-- 11️⃣ Người mua không nhận được hàng lần 2
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 2, 1, 1),
+
+-- 12️⃣ Sản phẩm bị móp méo
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 3, 2, 1),
+
+-- 13️⃣ Thanh toán bị treo
+(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Hoàn tiền thủ công', 'ACCEPTED', 4, 3, 1),
+
+-- 14️⃣ Giao hàng chậm 2 ngày
+(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Thông báo đến đơn vị vận chuyển GHN', 'ACCEPTED', 5, 6, 1),
+
+-- 15️⃣ Chính sách bảo hành chưa rõ
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 6, 7, 1),
+
+-- 16️⃣ Người bán không phản hồi yêu cầu đổi trả
+(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Không cần hành động thêm', 'REJECTED', 7, 5, 1),
+
+-- 17️⃣ Hàng giao sai màu
+(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Đổi sang sản phẩm đúng màu', 'ACCEPTED', 8, 2, 1),
+
+-- 18️⃣ Giao hàng bị vỡ pin
+(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Hoàn 50% giá trị do hư hại nhẹ', 'ACCEPTED', 9, 6, 1),
+
+-- 19️⃣ Khiếu nại chính sách hoàn tiền
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 10, 7, 1),
+
+-- 20️⃣ Khiếu nại khác (người bán cư xử thô lỗ)
+(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Gửi thư cảnh cáo chính thức', 'ACCEPTED', 1, 5, 1),
+
+-- 21️⃣ Đơn 2 - Giao sai sản phẩm
+(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Người bán gửi lại hàng đúng mẫu', 'ACCEPTED', 2, 2, 1),
+
+-- 22️⃣ Đơn 3 - Khiếu nại hoàn tiền lần 2
+(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Không xử lý trùng lặp', 'REJECTED', 3, 3, 1),
+
+-- 23️⃣ Đơn 4 - Khiếu nại vận chuyển trễ
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 4, 6, 1),
+
+-- 24️⃣ Đơn 5 - Khiếu nại chất lượng pin
+(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Đổi linh kiện lỗi', 'ACCEPTED', 5, 2, 1),
+
+-- 25️⃣ Đơn 6 - Khiếu nại về chính sách giao hàng
+(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Đơn hàng đã hoàn tất đúng quy trình', 'REJECTED', 6, 7, 1),
+
+-- 26️⃣ Đơn 7 - Khiếu nại người bán không phản hồi (lần 2)
+(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Ghi chú vi phạm trong hồ sơ', 'ACCEPTED', 7, 5, 1),
+
+-- 27️⃣ Đơn 8 - Hàng bị thiếu phụ kiện
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 8, 2, 1),
+
+-- 28️⃣ Đơn 9 - Khiếu nại thanh toán không đúng
+(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Hoàn lại phần bị trừ thừa', 'ACCEPTED', 9, 3, 1),
+
+-- 29️⃣ Đơn 10 - Khiếu nại vận chuyển chậm
+(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Gửi cảnh báo chính thức', 'ACCEPTED', 10, 6, 1),
+
+-- 30️⃣ Đơn 1 - Khiếu nại khác (không chính đáng)
+(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Không có bằng chứng xác thực', 'REJECTED', 1, 8, 1),
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 1, 6, 1),
+
+-- 32️⃣ Sản phẩm giao thiếu phụ kiện
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 2, 2, 1),
+
+-- 33️⃣ Thanh toán bị trừ hai lần
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 3, 3, 1),
+
+-- 34️⃣ Chính sách bảo hành chưa được giải thích rõ
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 4, 7, 1),
+
+-- 35️⃣ Người bán không cập nhật trạng thái đơn hàng
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 5, 5, 1),
+
+-- 36️⃣ Hàng đến muộn hơn dự kiến
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 6, 6, 1),
+
+-- 37️⃣ Sản phẩm khác màu
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 7, 2, 1),
+
+-- 38️⃣ Người mua yêu cầu hoàn tiền (chưa xét duyệt)
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 8, 4, 1),
+
+-- 39️⃣ Khiếu nại chất lượng pin
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 9, 2, 1),
+
+-- 40️⃣ Khiếu nại vận chuyển chậm trễ
+(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 10, 6, 1);
+
+-- =========================================================
+-- 🖼 EVIDENCE - ẢNH MINH CHỨNG CHO TRANH CHẤP
+-- =========================================================
+
+INSERT INTO evidence (order_image, image_url, dispute_id)
+VALUES
+-- Dispute 1 - Không nhận được hàng
+(1, 'https://cdn.example.com/evidence/dispute1_img1.jpg', 1),
+(2, 'https://cdn.example.com/evidence/dispute1_img2.jpg', 1),
+
+-- Dispute 2 - Sản phẩm không đúng mô tả
+(1, 'https://cdn.example.com/evidence/dispute2_img1.jpg', 2),
+(2, 'https://cdn.example.com/evidence/dispute2_img2.jpg', 2),
+(3, 'https://cdn.example.com/evidence/dispute2_img3.jpg', 2),
+
+-- Dispute 3 - Thanh toán lỗi
+(1, 'https://cdn.example.com/evidence/dispute3_img1.jpg', 3),
+(2, 'https://cdn.example.com/evidence/dispute3_img2.jpg', 3),
+
+-- Dispute 4 - Người bán không phản hồi
+(1, 'https://cdn.example.com/evidence/dispute4_img1.jpg', 4),
+
+-- Dispute 5 - Giao hàng thất lạc
+(1, 'https://cdn.example.com/evidence/dispute5_img1.jpg', 5),
+(2, 'https://cdn.example.com/evidence/dispute5_img2.jpg', 5),
+
+-- Dispute 6 - Chính sách không rõ ràng
+(1, 'https://cdn.example.com/evidence/dispute6_img1.jpg', 6),
+
+-- Dispute 7 - Khiếu nại khác
+(1, 'https://cdn.example.com/evidence/dispute7_img1.jpg', 7),
+
+-- Dispute 8 - Người mua hủy đơn nhưng vẫn khiếu nại
+(1, 'https://cdn.example.com/evidence/dispute8_img1.jpg', 8),
+
+-- Dispute 9 - Khiếu nại chất lượng sản phẩm
+(1, 'https://cdn.example.com/evidence/dispute9_img1.jpg', 9),
+(2, 'https://cdn.example.com/evidence/dispute9_img2.jpg', 9),
+
+-- Dispute 10 - Lỗi thanh toán
+(1, 'https://cdn.example.com/evidence/dispute10_img1.jpg', 10);
 
 -- =========================================================
 -- ✅ KẾT THÚC FILE DATA.SQL
