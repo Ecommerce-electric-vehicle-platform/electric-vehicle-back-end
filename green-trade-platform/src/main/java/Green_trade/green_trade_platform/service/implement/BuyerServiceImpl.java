@@ -41,6 +41,7 @@ public class BuyerServiceImpl {
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
     private final TransactionRepository transactionRepository;
+    private final ShippingPartnerRepository shippingPartnerRepository;
     private WalletServiceImpl walletService;
     private PostProductRepository postProductRepository;
 
@@ -251,6 +252,11 @@ public class BuyerServiceImpl {
             throw new Exception("The product has been sold");
         }
 
+        ShippingPartner shippingPartner = shippingPartnerRepository.findById(request.getShippingPartnerId())
+                .orElseThrow(
+                        () -> new Exception("Shipping Partner is not existed")
+                );
+
         //tạo mới một đơn hàng
         Order newOrder = Order.builder()
                 .admin(null)
@@ -267,6 +273,7 @@ public class BuyerServiceImpl {
                                 buyerOpt.get().getPhoneNumber() :
                                 request.getPhoneNumber()
                 )
+                .shippingPartner(shippingPartner)
                 .shippingFee(new BigDecimal(shippingFee))
                 .transactions(null)
                 .price(postProductOpt.get().getPrice().add(new BigDecimal(shippingFee)))

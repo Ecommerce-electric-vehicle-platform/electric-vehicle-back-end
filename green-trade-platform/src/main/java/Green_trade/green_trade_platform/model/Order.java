@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.cglib.core.Local;
 
 import java.math.BigDecimal;
@@ -15,15 +12,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(name = "order_code", nullable = true, unique = true)
@@ -59,33 +60,46 @@ public class Order {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id")
     @JsonManagedReference
+    @ToString.Exclude
     private Buyer buyer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id")
+    @JsonManagedReference
+    @ToString.Exclude
     private Admin admin;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
+    @ToString.Exclude
     private List<Review> reviews;
 
     @OneToOne()
     @JoinColumn(name = "post_id", nullable = false, unique = false)
-    @JsonManagedReference
+    @JsonBackReference
+    @ToString.Exclude
     private PostProduct postProduct;
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "order")
     @JsonBackReference
+    @ToString.Exclude
     private Invoice invoice;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
+    @ToString.Exclude
     private List<Dispute> disputes;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
+    @ToString.Exclude
     private List<Transaction> transactions;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipping_partner_id")
     @JsonIgnore
+    @JsonBackReference
+    @ToString.Exclude
     private ShippingPartner shippingPartner;
 
     @PrePersist

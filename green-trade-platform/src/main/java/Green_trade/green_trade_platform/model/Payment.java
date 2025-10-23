@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,5 +27,6 @@ public class Payment {
     private String gatewayName;
 
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<Transaction> transactions;
 }

@@ -74,7 +74,10 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
             Wallet wallet = buyerService.getWallet();
+            log.info(">>> wallet balance: {}", wallet.getBalance());
+            log.info(">>> order total price: {}", order.getPrice());
             BigDecimal moneyHandler = wallet.getBalance().subtract(order.getPrice());
+            log.info(">>> moneyHandler: {}", moneyHandler);
             if(moneyHandler.compareTo(new BigDecimal("0")) < 0) {
                 Transaction newTransaction = Transaction.builder()
                         .order(order)

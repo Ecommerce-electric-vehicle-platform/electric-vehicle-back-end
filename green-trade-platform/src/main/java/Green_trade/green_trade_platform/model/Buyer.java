@@ -3,20 +3,20 @@ package Green_trade.green_trade_platform.model;
 import Green_trade.green_trade_platform.enumerate.Gender;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-@Data
+@AllArgsConstructor
 @Builder
+@Entity
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(
         name = "buyer",
         uniqueConstraints = {

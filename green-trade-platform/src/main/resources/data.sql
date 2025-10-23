@@ -334,7 +334,7 @@ VALUES
 ('Xe điện Yadea BuyE 2021', 'Yadea', 'BuyE 2021', 2021, '2 năm', NULL, 'Khá tốt', 850.00, 'Xe Yadea tiết kiệm năng lượng.', 'Huế', 'PENDING', TRUE, TRUE, NOW(), NOW(), NULL, 1, 1, 1, FALSE, '180', '67', '110', '90000'),
 ('Xe điện VinFast Feliz S', 'VinFast', 'Feliz S 2023', 2023, '5 tháng', NULL, 'Rất tốt', 1700.00, 'Feliz S pin khỏe, chạy 90km/lần sạc.', 'Bình Dương', 'PENDING', TRUE, TRUE, NOW(), NOW(), NULL, 1, 1, 1, FALSE, '190', '70', '118', '100000'),
 ('Xe điện Detech Espero', 'Detech', 'Espero 2022', 2022, '1 năm', NULL, 'Tốt', 1050.00, 'Xe Detech Espero bền bỉ.', 'Hải Phòng', 'PENDING', TRUE, TRUE, NOW(), NOW(), NULL, 1, 1, 1, FALSE, '183', '68', '112', '94000'),
-('Xe điện JVC Xmen', 'JVC', 'Xmen 2023', 2023, '4 tháng', NULL, 'Rất tốt', 980.00, 'Xe Xmen mạnh mẽ, kiểu dáng thể thao.', 'Đà Lạt', 'PENDING', TRUE, TRUE, NOW(), NOW(), NULL, 1, 1, 1, FALSE, '180', '68', '110', '96000'),
+('Xe điện JVC Xmen', 'JVC', 'Xmen 2023', 2023, '4 tháng', NULL, 'Rất tốt', 980.00, 'Xe Xmen mạnh mẽ, kiểu dáng thể thao.', 'Đà Lạt', 'PENDING', TRUE, TRUE, NOW(), NOW(), NULL, 1, 1, 7, FALSE, '150', '68', '110', '47000'),
 ('Xe điện YADEA Xmen Neo', 'Yadea', 'Xmen Neo 2022', 2022, '1 năm', NULL, 'Tốt', 1100.00, 'Xmen Neo bản mới, pin khỏe.', 'Cần Thơ', 'PENDING', TRUE, TRUE, NOW(), NOW(), NULL, 1, 1, 1, FALSE, '182', '68', '110', '95000'),
 ('Xe điện Detech Pansy', 'Detech', 'Pansy 2021', 2021, '2 năm', NULL, 'Khá tốt', 780.00, 'Xe điện Pansy nhỏ gọn, phù hợp học sinh.', 'Nha Trang', 'PENDING', TRUE, TRUE, NOW(), NOW(), NULL, 1, 1, 1, FALSE, '165', '60', '105', '80000'),
 ('Xe điện Anbico AP1508', 'Anbico', 'AP1508', 2023, '3 tháng', NULL, 'Xuất sắc', 1050.00, 'Anbico AP1508 pin khỏe, tốc độ ổn.', 'Hà Nội', 'PENDING', TRUE, TRUE, NOW(), NOW(), NULL, 1, 1, 1, FALSE, '185', '68', '112', '90000'),
@@ -454,7 +454,7 @@ VALUES
     ('ORD-20231001-004','126 Nguyễn Văn Cừ, Huế','0900000004',850000.00,25000.00,'CANCELED',NOW(),NOW(),NOW(),'Người mua hủy do thay đổi ý định',4,1,4,1),
     ('ORD-20231001-005','127 Nguyễn Văn Cừ, Bình Dương','0900000005',1700000.00,40000.00,'COMPLETED',NOW(),NOW(),NULL,NULL,5,1,5,1),
     ('ORD-20231001-006','128 Nguyễn Văn Cừ, Cần Thơ','0900000006',1050000.00,30000.00,'PROCESSING',NOW(),NOW(),NULL,NULL,6,1,6,1),
-    ('ORD-20231001-007','129 Nguyễn Văn Cừ, Hải Phòng','0900000007',1120000.00,35000.00,'COMPLETED',NOW(),NOW(),NULL,NULL,7,1,7,1),
+    ('ORD-20231001-007','129 Nguyễn Văn Cừ, Hải Phòng','0900000007',1120000.00,35000.00,'COMPLETED',NOW(),NOW(),NULL,NULL,6,1,39,1),
     ('ORD-20231001-008','130 Nguyễn Văn Cừ, Đà Lạt','0900000008',1800000.00,40000.00,'SHIPPING',NOW(),NOW(),NULL,NULL,8,1,8,1),
     ('ORD-20231001-009','131 Nguyễn Văn Cừ, Nha Trang','0900000009',1500000.00,30000.00,'CANCELED',NOW(),NOW(),NOW(),'Admin phát hiện gian lận',9,1,9,1),
     ('ORD-20231001-010','132 Nguyễn Văn Cừ, Hà Nội','0900000010',1700000.00,35000.00,'AWAITING_PAYMENT',NOW(),NOW(),NULL,NULL,10,1,10,1);

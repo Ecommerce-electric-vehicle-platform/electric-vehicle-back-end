@@ -13,17 +13,15 @@ import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.response.BuyerResponse;
 import Green_trade.green_trade_platform.response.OrderResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
-import Green_trade.green_trade_platform.service.TransactionService;
 import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
 import Green_trade.green_trade_platform.service.implement.GhnServiceImpl;
+import Green_trade.green_trade_platform.service.implement.OrderServiceImpl;
 import Green_trade.green_trade_platform.service.implement.TransactionServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +50,7 @@ public class BuyerController {
     private final PostProductRepository postProductRepository;
     private final TransactionRepository transactionRepository;
     private final OrderRepository orderRepository;
+    private final OrderServiceImpl orderService;
 
     @Operation(
             summary = "Upload buyer profile",
@@ -239,12 +238,19 @@ public class BuyerController {
                     newOrder
             );
             List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
+            log.info(">>> Passed get transactions");
             newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
+            log.info(">>> Passed update transactions");
             String orderShippingCode = ghnService.createOrderShippingResponseToDto(
-                    newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()).get("order_code");
+                    newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()).get("orderCode");
+            log.info(">>> Passed get orderShippingCode");
+            log.info(">>> orderShippingCode: {}", orderShippingCode);
             newOrder.setOrderCode(orderShippingCode);
+            log.info(">>> Passed set Order Code");
             newOrder = orderRepository.save(newOrder);
+            log.info(">>> Passed saved newOrder");
             responseData = orderMapper.toDto(newOrder);
+            log.info(">>> Passed created response");
         } else {
             log.info(">>> Wallet payment flow");
             Transaction transaction = transactionService.checkoutWalletPayment(
@@ -254,13 +260,22 @@ public class BuyerController {
                     newOrder
             );
             List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
+            log.info(">>> Passed get transactions");
             newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
             newOrder = buyerService.updateOrderStatus(newOrder, "PAID");
+            // Nghi ngo loi
             String orderShippingCode = ghnService.createOrderShippingResponseToDto(
-                    newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()).get("order_code");
+                    newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()).get("orderCode");
+            Map<String, String> test = ghnService.createOrderShippingResponseToDto(
+                    newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment());
+            log.info(">>> test: {}", test);
+            log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
             newOrder.setOrderCode(orderShippingCode);
+            log.info(">>> Passed set Order Code");
             newOrder = orderRepository.save(newOrder);
+            log.info(">>> Passed saved newOrder");
             responseData = orderMapper.toDto(newOrder);
+            log.info(">>> Passed created response");
         }
 
         log.info(">>> Build response");

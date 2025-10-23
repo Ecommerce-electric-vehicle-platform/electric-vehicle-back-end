@@ -3,26 +3,28 @@ package Green_trade.green_trade_platform.model;
 import Green_trade.green_trade_platform.enumerate.AccountStatus;
 import Green_trade.green_trade_platform.enumerate.Gender;
 import Green_trade.green_trade_platform.request.ApproveSellerRequest;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(name = "admin")
 public class Admin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "admin_id")
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(name = "avatar_url")
@@ -64,24 +66,32 @@ public class Admin {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<PostProduct> postProducts;
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<Dispute> disputes;
 
     @OneToMany(mappedBy = "admin", fetch = FetchType.LAZY)
+    @ToString.Exclude
     private List<Seller> sellers;
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
+    @ToString.Exclude
     private List<Order> orders;
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<Announcement> announcements;
 
     @OneToMany(mappedBy = "admin")
+    @ToString.Exclude
     private List<SystemWallet> systemWallets;
 
     @OneToMany(mappedBy = "admin")
+    @ToString.Exclude
     private List<SystemPolicy> systemPolicies;
 
     @PrePersist

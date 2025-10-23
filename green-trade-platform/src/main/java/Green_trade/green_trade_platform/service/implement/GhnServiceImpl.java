@@ -402,14 +402,10 @@ public class GhnServiceImpl {
         PostProduct postProduct = order.getPostProduct();
         String sellerProvinceId = findProvinceCodeByProvinceName(seller.getBuyer().getProvinceName());
         String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId), seller.getBuyer().getDistrictName());
-        log.info(">>> Passed 1");
         String sellerWardId = findWardCodeByWardName(Integer.parseInt(sellerDistrictId), seller.getBuyer().getWardName());
-        log.info(">>> Passed 2");
         String buyerProvinceId = findProvinceCodeByProvinceName(buyer.getProvinceName());
         String buyerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(buyerProvinceId), buyer.getDistrictName());
-        log.info(">>> Passed 3");
         String buyerWardId = findWardCodeByWardName(Integer.parseInt(buyerDistrictId), buyer.getWardName());
-        log.info(">>> Passed 4");
         int codValue = 0;
         if("COD".equalsIgnoreCase(paymentMethod.getGatewayName())) {
             codValue = order.getPrice().intValue();
@@ -455,13 +451,12 @@ public class GhnServiceImpl {
         Map<String, Object> item = new HashMap<>();
         item.put("name", order.getPostProduct().getTitle());
         item.put("code", "");
-        log.info(">>> Passed 5");
         item.put("quantity", 1);
-        item.put("price", postProduct.getPrice());
-        item.put("length", postProduct.getLength());
-        item.put("width", postProduct.getWidth());
-        item.put("height", postProduct.getHeight());
-        item.put("weight", postProduct.getWeight());
+        item.put("price", postProduct.getPrice().intValue());
+        item.put("length", Integer.parseInt(postProduct.getLength()));
+        item.put("width", Integer.parseInt(postProduct.getWidth()));
+        item.put("height", Integer.parseInt(postProduct.getHeight()));
+        item.put("weight", Integer.parseInt(postProduct.getWeight()));
 
         Map<String, Object> category = new HashMap<>();
         category.put("level1", order.getPostProduct().getTitle());
@@ -516,6 +511,8 @@ public class GhnServiceImpl {
             response.put("message", message);
             response.put("messageDisplay", messageDisplay);
         }
+
+        log.info(">>> TEst: {}", response);
 
         return response;
     }
