@@ -102,7 +102,7 @@ public class SellerController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(responseMapper.toDto(false,
                     "Error occured during get seller profile,",
-                    null, e));
+                    null, e.getMessage()));
         }
     }
 

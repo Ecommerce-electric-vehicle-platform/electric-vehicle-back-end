@@ -3,7 +3,7 @@ package Green_trade.green_trade_platform.service.implement;
 import Green_trade.green_trade_platform.enumerate.AccountType;
 import Green_trade.green_trade_platform.enumerate.SellerStatus;
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
-import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
+import Green_trade.green_trade_platform.exception.AuthException;
 import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
 import Green_trade.green_trade_platform.mapper.RegisterShopShippingServiceMapper;
 import Green_trade.green_trade_platform.mapper.SellerMapper;
@@ -146,6 +146,6 @@ public class SellerServiceImpl implements SellerService {
     public Seller getCurrentUser() {
         Buyer buyer = buyerService.getCurrentUser();
         return sellerRepository.findByBuyer(buyer).orElseThrow(
-                () -> new UsernameNotFoundException("User not existsed."));
+                () -> new AuthException("User not existsed."));
     }
 }
