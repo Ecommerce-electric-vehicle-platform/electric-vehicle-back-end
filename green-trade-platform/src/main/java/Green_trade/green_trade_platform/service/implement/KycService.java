@@ -23,6 +23,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.Normalizer;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -168,6 +169,75 @@ public class KycService {
         return Map.of("name", name, "id_number", idNumber);
     }
 
+    public Map<String, String> callOcrApi(MultipartFile file) throws IOException {
+        log.info(">>> [KYC service] Calling FPT AI OCR API with multipart file...");
+
+        // Create a temporary file from the uploaded multipart file
+        File tempFile = File.createTempFile("ocr_", "_" + file.getOriginalFilename());
+        file.transferTo(tempFile);
+
+        String boundary = "----WebKitFormBoundary" + System.currentTimeMillis();
+        URL url = new URL("https://api.fpt.ai/vision/idr/vnm");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("api_key", fptApiKey);
+        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+        conn.setDoOutput(true);
+
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(("--" + boundary + "\r\n").getBytes());
+            os.write(("Content-Disposition: form-data; name=\"image\"; filename=\""
+                    + tempFile.getName() + "\"\r\n").getBytes());
+            os.write(("Content-Type: " + file.getContentType() + "\r\n\r\n").getBytes());
+            Files.copy(tempFile.toPath(), os);
+            os.write(("\r\n--" + boundary + "--\r\n").getBytes());
+        }
+
+        // Read the API response
+        InputStream responseStream = conn.getResponseCode() == 200
+                ? conn.getInputStream()
+                : conn.getErrorStream();
+
+        String response = new String(responseStream.readAllBytes(), StandardCharsets.UTF_8);
+        log.info(">>> [KYC service] FPT OCR Response: {}", response);
+
+        if (!response.trim().startsWith("{")) {
+            throw new IOException("Invalid response from OCR: " + response);
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> result = mapper.readValue(response, Map.class);
+
+        List<Map<String, Object>> dataList = (List<Map<String, Object>>) result.get("data");
+        if (dataList == null || dataList.isEmpty()) {
+            throw new IOException("FPT OCR returned empty data: " + response);
+        }
+
+        Map<String, Object> data = dataList.getFirst();
+
+        // Extract key fields safely
+        String idNumber = safeGet(data, "id");
+        String name = safeGet(data, "name");
+        String nationality = safeGet(data, "nationality");
+        String home = safeGet(data, "home"); // sometimes called "place_of_origin" or "address" depending on OCR version
+
+        // Delete temp file
+        tempFile.delete();
+
+        Map<String, String> extracted = new HashMap<>();
+        extracted.put("id", idNumber);
+        extracted.put("name", name);
+        extracted.put("nationality", nationality);
+        extracted.put("home", home);
+
+        log.info(">>> [KYC service] Extracted data: {}", extracted);
+        return extracted;
+    }
+
+    private String safeGet(Map<String, Object> data, String key) {
+        Object value = data.get(key);
+        return value != null ? value.toString().trim() : "";
+    }
 
     public KycResponse update(
             String storeName,

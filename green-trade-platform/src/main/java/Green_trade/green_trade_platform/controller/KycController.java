@@ -5,6 +5,12 @@ import Green_trade.green_trade_platform.request.UpgradeRequest;
 import Green_trade.green_trade_platform.response.KycResponse;
 import Green_trade.green_trade_platform.service.implement.KycService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.SchemaProperties;
+import io.swagger.v3.oas.annotations.media.SchemaProperty;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,6 +18,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Map;
 
 import static com.fasterxml.jackson.databind.type.LogicalType.Map;
 
@@ -63,6 +72,44 @@ public class KycController {
             );
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("KYC verification failed: " + e.getMessage());
+        }
+    }
+
+    @Operation(
+            summary = "Extract fields from the FRONT side of a national identity card (ID card)",
+            description = "Accepts a multipart image (photo or scan) of the FRONT side of a national identity card. "
+                    + "The endpoint sends the image to FPT AI OCR and returns structured fields "
+                    + "extracted from the card (name, date of birth, ID number, gender, issuing authority, etc.).\\n"
+                    + "Notes:\\n"
+                    + " - Provide the image as `multipart/form-data` with field name `file`.\\n"
+                    + " - Supported image types: image/jpeg, image/png. Keep file size within server limits.\\n"
+                    + " - This endpoint requires Bearer token authentication (JWT)."
+    )
+    @PostMapping(
+            value = "/identity-information",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<?> getIdentityCardInfo(
+            @Parameter(
+                    name = "front_of_identity",
+                    description = "Front-side ID image (JPEG/PNG)",
+                    required = true,
+                    schema = @Schema(type = "string", format = "binary")
+            )
+            @RequestPart("front_of_identity") MultipartFile file) {
+        try {
+            Map<String, String> data = kycService.callOcrApi(file);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET IDENTITY CARD INFORMATION SUCCESSFULLY.",
+                    data, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET IDENTITY CARD INFORMATION FAILED.",
+                    null, e.getMessage()
+            ));
         }
     }
 
