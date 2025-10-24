@@ -1,7 +1,7 @@
 package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.exception.PostProductNotFound;
-import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
+import Green_trade.green_trade_platform.exception.ProfileException;
 import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.mapper.OrderMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
@@ -85,9 +85,9 @@ public class BuyerController {
             @Valid @ModelAttribute UpdateBuyerProfileRequest updateProfileRequest,
             @RequestPart(value = "avatar_url", required = false) MultipartFile avatarFile
     ) throws Exception {
-        log.info(">>> Passed came updateProfile API");
-        log.info(">>> updateProfileRequest: {}", updateProfileRequest);
-        log.info(">>> avatarFile: {}", avatarFile);
+        log.info(">>> [Buyer Controller] Starting update user profile");
+        log.info(">>> [Buyer Controller] Update profile request: {}", updateProfileRequest);
+        log.info(">>> [Buyer Controller] Avatar file: {}", avatarFile);
 
         Buyer buyer = buyerService.updateProfile(updateProfileRequest, avatarFile);
         BuyerResponse responseData = buyerMapper.toDto(buyer);
@@ -212,7 +212,7 @@ public class BuyerController {
 
         log.info(">>> Fetch buyer");
         Buyer buyer = buyerRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new ProfileNotFoundException("Buyer is not existed"));
+                .orElseThrow(() -> new ProfileException("Buyer is not existed"));
 
         log.info(">>> Fetch post product");
         PostProduct postProduct = postProductRepository.findById(request.getPostProductId())

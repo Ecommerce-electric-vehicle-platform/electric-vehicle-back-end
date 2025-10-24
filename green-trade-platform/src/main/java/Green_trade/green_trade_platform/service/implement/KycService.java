@@ -1,7 +1,6 @@
 package Green_trade.green_trade_platform.service.implement;
 
-import Green_trade.green_trade_platform.enumerate.SellerStatus;
-import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
+import Green_trade.green_trade_platform.exception.ProfileException;
 import Green_trade.green_trade_platform.mapper.SellerMapper;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Seller;
@@ -63,7 +62,7 @@ public class KycService {
 
         // Check buyer profile
         if("Not have yet".equalsIgnoreCase(buyer.getFullName())) {
-            throw new ProfileNotFoundException("Hoàn tất hồ sơ người dùng trước khi nâng cáp tài khoản");
+            throw new ProfileException("Hoàn tất hồ sơ người dùng trước khi nâng cáp tài khoản");
         }
 
         // Upload file into Cloudinary

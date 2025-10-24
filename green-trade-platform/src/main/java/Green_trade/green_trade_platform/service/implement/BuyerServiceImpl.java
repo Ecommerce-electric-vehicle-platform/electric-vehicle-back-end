@@ -1,7 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.exception.DuplicateProfileException;
-import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
+import Green_trade.green_trade_platform.exception.ProfileException;
 import Green_trade.green_trade_platform.exception.WalletNotFoundException;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
@@ -14,9 +14,7 @@ import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.util.DateUtils;
 import Green_trade.green_trade_platform.util.FileUtils;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -53,8 +50,8 @@ public class BuyerServiceImpl {
         if(!avatarUrl.isEmpty()) {
             throw new DuplicateProfileException("Profile already exits.");
         }
-        // Check date and parse into LocalDate
-//        LocalDate dob = dateUtils.parseAndValidateDob(request.getDob());
+//        // Check date and parse into LocalDate
+////        LocalDate dob = dateUtils.parseAndValidateDob(request.getDob());
         LocalDate dob = LocalDate.parse(request.getDob());
         log.info(">>> Profile request: {}", request.toString());
 
@@ -85,14 +82,11 @@ public class BuyerServiceImpl {
 
     public Buyer updateProfile(UpdateBuyerProfileRequest request, MultipartFile avatarFile) throws Exception {
         try {
+            log.info(">>> [Update user profile service] Starting update profile service");
             Buyer buyer = getCurrentUser();
             Long id = buyer.getBuyerId();
-            if (avatarFile != null && !avatarFile.isEmpty()) {
-                fileUtils.validateFile(avatarFile);
-                log.info(">>> Passed validate file");
-            }
 
-            log.info(">>> Passed buyer existed");
+            log.info(">>> [Update profile services] profile request: {}.", request);
             buyer.setFullName(request.getFullName() == null ? "" : request.getFullName());
             buyer.setEmail(request.getEmail() == null ? "" : request.getEmail());
             buyer.setGender(request.getGender());
@@ -102,44 +96,45 @@ public class BuyerServiceImpl {
             buyer.setWardName(request.getWardName());
             buyer.setDistrictName(request.getDistrictName());
             buyer.setProvinceName(request.getProvinceName());
-            log.info(">>> Passed buyer update text information");
+            log.info(">>> [Update profile services] set text data into buyer profile.");
 
             //delete old avatar on cloudinary
             if(avatarFile != null && !avatarFile.isEmpty()) {
-                log.info(">>> Passed avatarFile existed to update Avatar");
-                if (buyer.getAvatarUrl() != null && !buyer.getAvatarUrl().equals("")) {
-                    log.info(">>> Passed avatar existed before but update new");
+                log.info(">>> [Update profile services] Starting delete old avatar on Cloudinary.");
+                if (buyer.getAvatarUrl() != null) {
                     boolean isDeleted = cloudinaryService.delete(
                             buyer.getAvatarPublicId(),
                             "buyers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/avatar"
                     );
-                    log.info(">>> Passed avatar cloudinary delete working");
 
                     if(!isDeleted) {
-                        throw new Exception("Avatar Profile is deleted failed");
+                        log.info(">>> [Update profile services] Error occur when deleting old avatar.");
+                        throw new ProfileException("Avatar Profile is deleted failed");
                     }
-                    log.info(">>> Passed avatar cloudinary delete successfully");
+                    log.info(">>> [Update profile services] Delete old avatar successfully.");
                 }
 
                 //upload new avatar on cloudinary
+                log.info(">>> [Update profile services] Starting upload new avatar into Cloudinary");
                 Map<String, String> uploadResult = cloudinaryService.upload(
                         avatarFile,
                         "buyers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/avatar"
                 );
-                log.info(">>> Passed avatar cloudinary update working");
 
                 if(uploadResult == null) {
+                    log.info(">>> [Update profile services] Error occur when uploading new avatar into Cloudinary.");
                     throw new Exception("Avatar Profile is saved failed");
                 }
-                log.info(">>> Passed avatar cloudinary update successfully");
+
+                log.info(">>> [Update profile services] Avatar is uploaded into Cloudinary.");
 
                 buyer.setAvatarUrl(uploadResult.get("fileUrl"));
                 buyer.setAvatarPublicId(uploadResult.get("publicId"));
             }
-            log.info(">>> Passed Save Buyer Profile New Information");
+            log.info(">>> [Update profile services] Update buyer profile successfully.");
             return buyerRepository.save(buyer);
         } catch (Exception e) {
-             log.info(">>> Error at buyerServiceImpl: {}", e.getMessage());
+             log.info(">>> [Update profile services] Error at buyerServiceImpl: {}", e.getMessage());
              throw e;
         }
     }
@@ -186,7 +181,7 @@ public class BuyerServiceImpl {
 
         //kiểm tra các thứ
         if (!isBuyerExisted(request.getUsername())) {
-            throw new ProfileNotFoundException("User is not existed");
+            throw new ProfileException("User is not existed");
         }
 
         if (postProductOpt.isEmpty()) {
@@ -235,7 +230,7 @@ public class BuyerServiceImpl {
     public Order placeOrder(PlaceOrderRequest request, String shippingFee) throws Exception {
         //kiểm tra các thứ
         if (!isBuyerExisted(request.getUsername())) {
-            throw new ProfileNotFoundException("User is not existed");
+            throw new ProfileException("User is not existed");
         }
 
         Optional<Buyer> buyerOpt = buyerRepository.findByUsername(request.getUsername());
