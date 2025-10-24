@@ -43,7 +43,7 @@ public class Seller {
     @Column(name = "store_name", nullable = false)
     private String storeName;
 
-    @Column(name = "ghn_shop_id", nullable = false, unique = false)
+    @Column(name = "ghn_shop_id", nullable = true, unique = false)
     private String ghnShopId;
 
     @Column(name = "store_policy_url", nullable = false, unique = true)
