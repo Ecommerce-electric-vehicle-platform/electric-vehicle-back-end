@@ -7,6 +7,7 @@ import Green_trade.green_trade_platform.model.ShippingPartner;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.response.ShippingPartnerResponse;
 import Green_trade.green_trade_platform.service.implement.ShippingPartnerServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +31,8 @@ public class ShippingPartnerController {
         this.responseMapper = responseMapper;
     }
 
+    @Operation(summary = "Fetch Shipping Partner API",
+                description = "Return a list of shipping partners")
     @GetMapping("/partners")
     public ResponseEntity<RestResponse<List<ShippingPartnerResponse>, Object>> getShippingPartners()  {
         List<ShippingPartnerResponse> responseData = new ArrayList<>();
