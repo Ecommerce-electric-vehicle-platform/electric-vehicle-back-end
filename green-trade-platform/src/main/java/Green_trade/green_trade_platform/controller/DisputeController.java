@@ -7,13 +7,11 @@ import Green_trade.green_trade_platform.model.Dispute;
 import Green_trade.green_trade_platform.model.Evidence;
 import Green_trade.green_trade_platform.model.Notification;
 import Green_trade.green_trade_platform.request.RaiseDisputeRequest;
+import Green_trade.green_trade_platform.request.RefundResolveRequest;
 import Green_trade.green_trade_platform.request.ResolveDisputeRequest;
 import Green_trade.green_trade_platform.response.DisputeResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
-import Green_trade.green_trade_platform.service.implement.AdminServiceImpl;
-import Green_trade.green_trade_platform.service.implement.DisputeServiceImpl;
-import Green_trade.green_trade_platform.service.implement.EvidenceServiceImpl;
-import Green_trade.green_trade_platform.service.implement.NotificationServiceImpl;
+import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -42,6 +40,7 @@ public class DisputeController {
     private final NotificationServiceImpl notificationService;
     private final AdminServiceImpl adminService;
     private final NotificationSocketController notificationSocketController;
+    private final SystemWalletServiceImpl systemWalletService;
 
     @Operation(
             summary = "Raise a dispute for an order",
@@ -114,7 +113,7 @@ public class DisputeController {
     public ResponseEntity<?> handleDispute(@RequestBody ResolveDisputeRequest request) {
         try {
             Admin admin = adminService.getCurrentUser();
-            Notification notification = disputeService.handlePendingDispute(admin.getId(), request);
+            Notification notification = disputeService.handlePendingDispute(admin, request);
             notificationSocketController.sendNotificationToUser(notification);
             return ResponseEntity.ok(notification);
         } catch (Exception e) {
@@ -129,6 +128,13 @@ public class DisputeController {
                 "GET DISPUTE INFOR SUCCESSFULLY.",
                 disputeMapper.toDto(dispute),
                 null));
+    }
+
+    @PostMapping("/refund/{return-percentage}")
+    public ResponseEntity<?> handleRefund(@PathVariable(name = "return-percentage") double percent,
+                                          @RequestBody RefundResolveRequest request) {
+        systemWalletService.handleRefund(percent, request);
+        return null;
     }
 
 }

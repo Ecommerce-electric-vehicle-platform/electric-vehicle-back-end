@@ -12,10 +12,7 @@ import Green_trade.green_trade_platform.request.ApproveSellerRequest;
 import Green_trade.green_trade_platform.request.CreateAdminRequest;
 import Green_trade.green_trade_platform.request.NeedVerifyPostRequest;
 import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
-import Green_trade.green_trade_platform.response.PostProductListResponse;
-import Green_trade.green_trade_platform.response.PostProductResponse;
-import Green_trade.green_trade_platform.response.RestResponse;
-import Green_trade.green_trade_platform.response.SellerResponse;
+import Green_trade.green_trade_platform.response.*;
 import Green_trade.green_trade_platform.service.implement.AdminServiceImpl;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
@@ -67,9 +64,9 @@ public class AdminController {
 
     @PostMapping("/approve-seller")
     public ResponseEntity<RestResponse<?, ?>> handlePendingSeller(@RequestBody ApproveSellerRequest request) throws JsonProcessingException {
-        Notification sellerNotification = sellerService.handlePendingSeller(request);
-        sellerNotification.setSendAt(LocalDateTime.now());
-        socketController.sendNotificationToUser(sellerNotification);
+        ApproveSellerResponse sellerNotification = sellerService.handlePendingSeller(request);
+        sellerNotification.getNotification().setSendAt(LocalDateTime.now());
+        socketController.sendUpgradeNotificationToUser(sellerNotification);
         return ResponseEntity.ok(responseMapper.toDto(true,
                 "Approve request was be solved.",
                 sellerNotification, null));
