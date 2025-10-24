@@ -3,11 +3,13 @@ package Green_trade.green_trade_platform.service.implement;
 import Green_trade.green_trade_platform.enumerate.AccountType;
 import Green_trade.green_trade_platform.enumerate.SellerStatus;
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
+import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
 import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
 import Green_trade.green_trade_platform.mapper.RegisterShopShippingServiceMapper;
 import Green_trade.green_trade_platform.mapper.SellerMapper;
 import Green_trade.green_trade_platform.mapper.SubscriptionMapper;
 import Green_trade.green_trade_platform.model.*;
+import Green_trade.green_trade_platform.repository.BuyerRepository;
 import Green_trade.green_trade_platform.repository.NotificationRepository;
 import Green_trade.green_trade_platform.repository.SellerRepository;
 import Green_trade.green_trade_platform.repository.SubscriptionRepository;
@@ -46,6 +48,7 @@ public class SellerServiceImpl implements SellerService {
     private final NotificationRepository notificationRepository;
     private final GhnServiceImpl ghnService;
     private final RegisterShopShippingServiceMapper registerShopShippingServiceMapper;
+    private final BuyerRepository buyerRepository;
 
     public Seller createShippingShop(String dataRaw, Seller seller) throws JsonProcessingException {
         try {
@@ -61,9 +64,10 @@ public class SellerServiceImpl implements SellerService {
     }
 
 
-    public SubscriptionResponse checkServicePackageValidity(Long id) throws Exception {
+    public SubscriptionResponse checkServicePackageValidity(String username) throws Exception {
         try {
-            Optional<Seller> sellerOpt = sellerRepository.findById(id);
+            Buyer buyer = buyerRepository.findByUsername(username).orElseThrow(() -> new ProfileNotFoundException("Profile is not existed"));
+            Optional<Seller> sellerOpt = sellerRepository.findByBuyer(buyer);
             if(sellerOpt.isEmpty()) {
                 throw new Exception("Seller is not existed");
             }
