@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.controller;
 
+import Green_trade.green_trade_platform.exception.PostProductNotFound;
 import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
 import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.mapper.OrderMapper;
@@ -215,7 +216,11 @@ public class BuyerController {
 
         log.info(">>> Fetch post product");
         PostProduct postProduct = postProductRepository.findById(request.getPostProductId())
-                .orElseThrow(() -> new Exception("Post Product is not existed"));
+                .orElseThrow(() -> new PostProductNotFound());
+
+        if (buyer.getBuyerId() == postProduct.getSeller().getBuyer().getBuyerId()) {
+            throw new Exception("You can not buy your own products");
+        }
 
         log.info(">>> Calculate shipping fee");
         if (payment.getGatewayName().equals("COD")) {

@@ -40,8 +40,8 @@ public class SellerController {
     @Operation(summary = "Verify Service Package Validity",
                 description = "Return a result to verify that service package is valid")
     @PostMapping("/{username}/check-service-package-validity")
-    public ResponseEntity<RestResponse<SubscriptionResponse, Object>> checkServicePackageValidity(@PathVariable Long id) throws Exception {
-        SubscriptionResponse result = sellerService.checkServicePackageValidity(id);
+    public ResponseEntity<RestResponse<SubscriptionResponse, Object>> checkServicePackageValidity(@PathVariable String username) throws Exception {
+        SubscriptionResponse result = sellerService.checkServicePackageValidity(username);
         RestResponse<SubscriptionResponse, Object> response = responseMapper.toDto(
                 true,
                 "Service Package is valid",
