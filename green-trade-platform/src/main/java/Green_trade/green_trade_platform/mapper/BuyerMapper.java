@@ -6,7 +6,7 @@ import Green_trade.green_trade_platform.response.BuyerResponse;
 import org.springframework.stereotype.Component;
 
 @Component
-public class  BuyerMapper {
+public class BuyerMapper {
     public Buyer toEntity(SignUpRequest request) {
         return Buyer.builder()
                 .username(request.getUsername())
@@ -16,12 +16,11 @@ public class  BuyerMapper {
     }
 
     public BuyerResponse toDto(Buyer buyer) {
-        return BuyerResponse.builder().
-                buyerId(buyer.getBuyerId())
+        return BuyerResponse.builder().buyerId(buyer.getBuyerId())
                 .avatarUrl(buyer.getAvatarUrl())
                 .username(buyer.getUsername())
                 .fullName(buyer.getFullName())
-                .defaultShippingAddress(buyer.getDefaultShippingAddress())
+                .street(buyer.getStreet())
                 .phoneNumber(buyer.getPhoneNumber())
                 .email(buyer.getEmail())
                 .gender(buyer.getGender())
