@@ -24,8 +24,8 @@ public class ProfileRequest {
         @Pattern(regexp = "^0\\d{9}$", message = "Phone number must start with 0 and contain 10 digits.")
         private String phoneNumber;
 
-        @NotBlank(message = "Shipping address is required.")
-        @Pattern(regexp = "^[\\p{L}0-9\\s,./-]+$", message = "Shipping address contains invalid characters.")
+        @NotBlank(message = "Street is required.")
+        @Pattern(regexp = "^[\\p{L}0-9\\s,./-]+$", message = "Street contains invalid characters.")
         private String street;
 
         private String wardName;
