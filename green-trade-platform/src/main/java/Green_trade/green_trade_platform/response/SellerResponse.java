@@ -27,4 +27,7 @@ public class SellerResponse {
     private String identityBackImageUrl;
     private String businessLicenseUrl;
     private String selfieUrl;
+    private String sellerName;
+    private String nationality;
+    private String home;
 }

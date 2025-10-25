@@ -6,7 +6,6 @@ import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
 import Green_trade.green_trade_platform.exception.WalletNotFoundException;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
-import Green_trade.green_trade_platform.request.WalletPaymentRequest;
 import Green_trade.green_trade_platform.service.TransactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -57,11 +56,11 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new PaymentMethodNotSupportedException();
             }
             if(!buyerService.isBuyerExisted(username)) {
-                throw new ProfileNotFoundException("Buyer is not existed");
+                throw new ProfileException("Buyer is not existed");
             }
 
             Buyer buyer = buyerRepository.findByUsername(username)
-                    .orElseThrow(() -> new ProfileNotFoundException("Buyer is not existed"));
+                    .orElseThrow(() -> new ProfileException("Buyer is not existed"));
             if(!walletService.isBuyerHasWallet(buyer)) {
                 throw new WalletNotFoundException("The wallet of Buyer is not existed");
             }
@@ -116,11 +115,11 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new PaymentMethodNotSupportedException();
             }
             if(!buyerService.isBuyerExisted(username)) {
-                throw new ProfileNotFoundException("Buyer is not existed");
+                throw new ProfileException("Buyer is not existed");
             }
 
             Buyer buyer = buyerRepository.findByUsername(username)
-                    .orElseThrow(() -> new ProfileNotFoundException("Buyer is not existed"));
+                    .orElseThrow(() -> new ProfileException("Buyer is not existed"));
 
             Optional<PostProduct> postProductOpt = postProductRepository.findById(paymentId);
             if(postProductOpt.isEmpty()) {

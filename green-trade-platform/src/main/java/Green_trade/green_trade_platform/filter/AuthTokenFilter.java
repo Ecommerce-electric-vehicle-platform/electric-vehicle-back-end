@@ -45,7 +45,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         }
 
 
-        log.info("Authentication in request : {}", request.getRequestURI());
+        log.info(">>> [Auth filter] Authentication in request : {}", request.getRequestURI());
 
         try {
             String token = getTokenFromRequest(request);
@@ -53,19 +53,19 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 String username = jwtUtils.getUsernameFromToken(token);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                log.info("User detail loafing: {}", userDetails.getUsername());
+                log.info(">>> [Auth filter] User detail loading: {}", userDetails.getUsername());
 
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
 
-                log.info("Role from JWT: {}", userDetails.getAuthorities());
+                log.info(">>> [Auth filter] Role from JWT: {}", userDetails.getAuthorities());
 
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         } catch (Exception e) {
             // Ném ra AuthenticationException để EntryPoint xử lý (trả về 401 JSON)
-            throw new AuthException("Authentication failed: " + e.getMessage());
+            throw new AuthException(">>> [Auth filter] Authentication failed: " + e.getMessage());
         }
         filterChain.doFilter(request, response);
     }
