@@ -1,16 +1,12 @@
 package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
-import Green_trade.green_trade_platform.request.UpgradeRequest;
+import Green_trade.green_trade_platform.request.UpgradeAccountRequest;
 import Green_trade.green_trade_platform.response.KycResponse;
 import Green_trade.green_trade_platform.service.implement.KycService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.SchemaProperties;
-import io.swagger.v3.oas.annotations.media.SchemaProperty;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,10 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.Map;
-
-import static com.fasterxml.jackson.databind.type.LogicalType.Map;
 
 @RestController
 @RequestMapping("/api/v1/kyc")
@@ -47,7 +40,7 @@ public class KycController {
     )
     @PreAuthorize("hasRole('ROLE_BUYER')")
     public ResponseEntity<?> verifyKyc(
-            @ModelAttribute UpgradeRequest request,
+            @ModelAttribute UpgradeAccountRequest request,
             @RequestPart("front of identity")MultipartFile fronOfIdentity,
             @RequestPart("back of identity")MultipartFile backOfIdentity,
             @RequestPart("business license")MultipartFile license,
@@ -62,16 +55,17 @@ public class KycController {
                     backOfIdentity,
                     policy,
                     request);
-            return ResponseEntity.status(HttpStatus.OK.value()).body(
-                    responseMapper.toDto(
-                            true,
-                            "VERIFIED KYC SUCCESSFULLY",
-                            response,
-                            null
-                    )
-            );
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "KYC INFORMATION SUCCESSFULLY.",
+                    response, null
+            ));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("KYC verification failed: " + e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "KYC INFORMATION FAILED.",
+                    null, e.getMessage()
+            ));
         }
     }
 
@@ -85,7 +79,7 @@ public class KycController {
                     + " - Supported image types: image/jpeg, image/png. Keep file size within server limits.\\n"
                     + " - This endpoint requires Bearer token authentication (JWT)."
     )
-    @PostMapping(
+    @GetMapping(
             value = "/identity-information",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )

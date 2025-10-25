@@ -6,7 +6,7 @@ import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.repository.BuyerRepository;
 import Green_trade.green_trade_platform.repository.SellerRepository;
-import Green_trade.green_trade_platform.request.UpgradeRequest;
+import Green_trade.green_trade_platform.request.UpgradeAccountRequest;
 import Green_trade.green_trade_platform.response.KycResponse;
 import Green_trade.green_trade_platform.util.FileUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,7 +55,7 @@ public class KycService {
             MultipartFile selfieImageUrl,
             MultipartFile identityBackImageUrl,
             MultipartFile storePolicyUrl,
-            UpgradeRequest request
+            UpgradeAccountRequest request
     ) throws IOException {
         Buyer buyer = buyerService.getCurrentUser();
 
@@ -91,19 +91,6 @@ public class KycService {
                 identityFrontImageUrl, "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/policy_image"
         );
         String policyUrl = uploadResult.get("fileUrl");
-
-        // Check data validation
-        Map<String, String> identityData = callOcrApi(frontImageUrl);
-        String name = identityData.get("name");
-        String idNumber = identityData.get("id_number");
-
-        if(!idNumber.equalsIgnoreCase(request.getIdentityNumber())) {
-            return new KycResponse(false, "CCCD không trùng khớp.", "REJECTED", "ID number not match");
-        }
-        if(equalsIgnoreAccentAndCase(name, buyer.getUsername())) {
-            return new KycResponse(false, "Tên không trùng khớp", "REJECTED", "ID number not match");
-        }
-
 
         // Check face
         boolean isMatchFace = callFaceCompareApi(frontImageUrl, selfieUrl);

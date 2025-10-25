@@ -147,7 +147,7 @@ INSERT INTO buyer (
    ward_name
 )
 VALUES
-(NULL, NULL, NOW(), NULL, NULL, NULL, NULL, 'vientruongdoan@gmail.com', NULL, 'MALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', NULL, NULL, NULL, 'doanvien', NULL),
+(NULL, NULL, NOW(), NULL, NULL, 'Huyện Thống Nhất', NULL, 'vientruongdoan@gmail.com', NULL, 'MALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', NULL, 'Đồng Nai', NULL, 'doanvien', 'Xã Bàu Hàm 2'),
 (NULL, NULL, NOW(), NULL, NULL, NULL, NULL, 'kimthuydoan22082005@gmail.com', NULL, 'FEMALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', NULL, NULL, NULL, 'kimthuydoan', NULL),
 (NULL, NULL, NOW(), NULL, NULL, NULL, NULL, 'hanhtransdr@gmail.com', NULL, 'FEMALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', NULL, NULL, NULL, 'tranthihanh', NULL);
 

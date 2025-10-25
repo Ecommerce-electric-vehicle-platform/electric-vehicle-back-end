@@ -17,7 +17,7 @@ import java.util.*;
 public class GhnServiceImpl {
 
     @Value("${ghn.token}")
-    private static String TOKEN;
+    private String TOKEN;
 
     public String createOrder(Map<String, Object> requestBody, String shopId) {
         RestTemplate restTemplate = new RestTemplate();
@@ -221,6 +221,7 @@ public class GhnServiceImpl {
 
     public String findProvinceCodeByProvinceName(String provinceName) throws JsonProcessingException {
         Map<String, String> provinceList = getProvinceList();
+
 
         // Duyệt qua danh sách để tìm tỉnh có tên khớp
         for (Map.Entry<String, String> entry : provinceList.entrySet()) {
