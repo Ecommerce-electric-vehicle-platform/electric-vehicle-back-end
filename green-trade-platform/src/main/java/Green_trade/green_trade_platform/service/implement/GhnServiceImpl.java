@@ -32,7 +32,8 @@ public class GhnServiceImpl {
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
-        ResponseEntity<String> response = restTemplate.postForEntity("https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create", entity, String.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create", entity, String.class);
 
         return response.getBody();
     }
@@ -48,8 +49,8 @@ public class GhnServiceImpl {
         HttpEntity<CancelOrderRequest> entity = new HttpEntity<>(request, headers);
 
         try {
-            ResponseEntity<String> response =
-                    restTemplate.postForEntity("https://dev-online-gateway.ghn.vn/shiip/public-api/v2/switch-status/cancel", entity, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/switch-status/cancel", entity, String.class);
             return response.getBody();
         } catch (Exception e) {
             e.printStackTrace();
@@ -68,8 +69,8 @@ public class GhnServiceImpl {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
         try {
-            ResponseEntity<String> response =
-                    restTemplate.postForEntity("https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee", entity, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee", entity, String.class);
             return response.getBody();
         } catch (Exception e) {
             e.printStackTrace();
@@ -87,8 +88,8 @@ public class GhnServiceImpl {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
         try {
-            ResponseEntity<String> response =
-                    restTemplate.postForEntity("https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shop/register", entity, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shop/register", entity, String.class);
             return response.getBody();
         } catch (Exception e) {
             e.printStackTrace();
@@ -106,13 +107,11 @@ public class GhnServiceImpl {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<String> response =
-                    restTemplate.exchange(
-                            "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province",
-                            HttpMethod.GET,
-                            entity,
-                            String.class
-                    );
+            ResponseEntity<String> response = restTemplate.exchange(
+                    "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province",
+                    HttpMethod.GET,
+                    entity,
+                    String.class);
 
             return response.getBody();
         } catch (Exception e) {
@@ -132,20 +131,17 @@ public class GhnServiceImpl {
         String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id=" + districtId;
 
         try {
-            ResponseEntity<String> response =
-                    restTemplate.exchange(
-                            url,
-                            HttpMethod.GET,   // GET là chuẩn nhất ở đây
-                            entity,
-                            String.class
-                    );
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET, // GET là chuẩn nhất ở đây
+                    entity,
+                    String.class);
             return response.getBody();
         } catch (Exception e) {
             e.printStackTrace();
             return "{\"error\": \"" + e.getMessage() + "\"}";
         }
     }
-
 
     public String getDistricts(int provinceId) {
         RestTemplate restTemplate = new RestTemplate();
@@ -162,10 +158,9 @@ public class GhnServiceImpl {
         try {
             ResponseEntity<String> response = restTemplate.exchange(
                     "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district",
-                    HttpMethod.POST,  // Dù curl ghi GET, GHN yêu cầu POST khi có body
+                    HttpMethod.POST, // Dù curl ghi GET, GHN yêu cầu POST khi có body
                     entity,
-                    String.class
-            );
+                    String.class);
 
             return response.getBody();
         } catch (Exception e) {
@@ -224,7 +219,6 @@ public class GhnServiceImpl {
 
     public String findProvinceCodeByProvinceName(String provinceName) throws JsonProcessingException {
         Map<String, String> provinceList = getProvinceList();
-
 
         // Duyệt qua danh sách để tìm tỉnh có tên khớp
         for (Map.Entry<String, String> entry : provinceList.entrySet()) {
@@ -295,7 +289,8 @@ public class GhnServiceImpl {
         return result;
     }
 
-    public Map<String, String> getShippingFeeDto(Buyer buyer, Seller seller, PostProduct postProduct, int codValue) throws JsonProcessingException {
+    public Map<String, String> getShippingFeeDto(Buyer buyer, Seller seller, PostProduct postProduct, int codValue)
+            throws JsonProcessingException {
         Map<String, Object> bodyData = getShippingFeeServiceBodyRequest(buyer, seller, postProduct, codValue);
 
         String resultString = getShippingFee(bodyData, seller.getGhnShopId());
@@ -334,13 +329,18 @@ public class GhnServiceImpl {
         return result;
     }
 
-    public Map<String, Object> getShippingFeeServiceBodyRequest(Order order, int codValue) throws JsonProcessingException {
-        String sellerProvinceId = findProvinceCodeByProvinceName(order.getPostProduct().getSeller().getBuyer().getProvinceName());
-        String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId), order.getPostProduct().getSeller().getBuyer().getDistrictName());
-        String sellerWardId = findWardCodeByWardName(Integer.parseInt(sellerDistrictId), order.getPostProduct().getSeller().getBuyer().getWardName());
+    public Map<String, Object> getShippingFeeServiceBodyRequest(Order order, int codValue)
+            throws JsonProcessingException {
+        String sellerProvinceId = findProvinceCodeByProvinceName(
+                order.getPostProduct().getSeller().getBuyer().getProvinceName());
+        String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId),
+                order.getPostProduct().getSeller().getBuyer().getDistrictName());
+        String sellerWardId = findWardCodeByWardName(Integer.parseInt(sellerDistrictId),
+                order.getPostProduct().getSeller().getBuyer().getWardName());
 
         String buyerProvinceId = findProvinceCodeByProvinceName(order.getBuyer().getProvinceName());
-        String buyerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(buyerProvinceId), order.getBuyer().getDistrictName());
+        String buyerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(buyerProvinceId),
+                order.getBuyer().getDistrictName());
         String buyerWardId = findWardCodeByWardName(Integer.parseInt(buyerDistrictId), order.getBuyer().getWardName());
 
         Map<String, Object> result = new HashMap<>();
@@ -362,19 +362,22 @@ public class GhnServiceImpl {
                 "length", order.getPostProduct().getLength(),
                 "width", order.getPostProduct().getWidth(),
                 "height", order.getPostProduct().getHeight(),
-                "weight", order.getPostProduct().getWeight()
-        );
+                "weight", order.getPostProduct().getWeight());
         result.put("items", List.of(item));
         return result;
     }
 
-    public Map<String, Object> getShippingFeeServiceBodyRequest(Buyer buyer, Seller seller, PostProduct postProduct, int codValue) throws JsonProcessingException {
+    public Map<String, Object> getShippingFeeServiceBodyRequest(Buyer buyer, Seller seller, PostProduct postProduct,
+            int codValue) throws JsonProcessingException {
         String sellerProvinceId = findProvinceCodeByProvinceName(seller.getBuyer().getProvinceName());
-        String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId), seller.getBuyer().getDistrictName());
-        String sellerWardId = findWardCodeByWardName(Integer.parseInt(sellerDistrictId), seller.getBuyer().getWardName());
+        String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId),
+                seller.getBuyer().getDistrictName());
+        String sellerWardId = findWardCodeByWardName(Integer.parseInt(sellerDistrictId),
+                seller.getBuyer().getWardName());
 
         String buyerProvinceId = findProvinceCodeByProvinceName(buyer.getProvinceName());
-        String buyerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(buyerProvinceId), buyer.getDistrictName());
+        String buyerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(buyerProvinceId),
+                buyer.getDistrictName());
         String buyerWardId = findWardCodeByWardName(Integer.parseInt(buyerDistrictId), buyer.getWardName());
 
         Map<String, Object> result = new HashMap<>();
@@ -396,46 +399,48 @@ public class GhnServiceImpl {
                 "length", Integer.parseInt(postProduct.getLength()),
                 "width", Integer.parseInt(postProduct.getWidth()),
                 "height", Integer.parseInt(postProduct.getHeight()),
-                "weight", Integer.parseInt(postProduct.getWeight())
-        );
+                "weight", Integer.parseInt(postProduct.getWeight()));
         result.put("items", List.of(item));
         return result;
     }
 
-    public Map<String, Object> createOrderShippingServiceBodyRequest(Order order, Payment paymentMethod) throws JsonProcessingException {
+    public Map<String, Object> createOrderShippingServiceBodyRequest(Order order, Payment paymentMethod)
+            throws JsonProcessingException {
         Map<String, Object> data = new HashMap<>();
         Seller seller = order.getPostProduct().getSeller();
         Buyer buyer = order.getBuyer();
         PostProduct postProduct = order.getPostProduct();
         String sellerProvinceId = findProvinceCodeByProvinceName(seller.getBuyer().getProvinceName());
-        String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId), seller.getBuyer().getDistrictName());
-        String sellerWardId = findWardCodeByWardName(Integer.parseInt(sellerDistrictId), seller.getBuyer().getWardName());
+        String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId),
+                seller.getBuyer().getDistrictName());
+        String sellerWardId = findWardCodeByWardName(Integer.parseInt(sellerDistrictId),
+                seller.getBuyer().getWardName());
         String buyerProvinceId = findProvinceCodeByProvinceName(buyer.getProvinceName());
-        String buyerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(buyerProvinceId), buyer.getDistrictName());
+        String buyerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(buyerProvinceId),
+                buyer.getDistrictName());
         String buyerWardId = findWardCodeByWardName(Integer.parseInt(buyerDistrictId), buyer.getWardName());
         int codValue = 0;
-        if("COD".equalsIgnoreCase(paymentMethod.getGatewayName())) {
+        if ("COD".equalsIgnoreCase(paymentMethod.getGatewayName())) {
             codValue = order.getPrice().intValue();
         }
 
-
         data.put("payment_type_id", 2);
-        data.put("note", "Not have"); //lưu ý vì chưa có tham số truyền vào
+        data.put("note", "Not have"); // lưu ý vì chưa có tham số truyền vào
         data.put("required_note", "KHONGCHOXEMHANG");
         data.put("return_phone", seller.getBuyer().getPhoneNumber());
-        data.put("return_address", seller.getBuyer().getDefaultShippingAddress());
+        data.put("return_address", seller.getBuyer().getStreet());
         data.put("return_district_id", "");
         data.put("return_ward_code", null);
         data.put("client_order_code", "");
         data.put("from_name", seller.getBuyer().getFullName());
         data.put("from_phone", seller.getBuyer().getPhoneNumber());
-        data.put("from_address", seller.getBuyer().getDefaultShippingAddress());
+        data.put("from_address", seller.getBuyer().getStreet());
         data.put("from_ward_name", seller.getBuyer().getWardName());
         data.put("from_district_name", seller.getBuyer().getDistrictName());
         data.put("from_province_name", seller.getBuyer().getProvinceName());
         data.put("to_name", buyer.getFullName());
         data.put("to_phone", buyer.getPhoneNumber());
-        data.put("to_address", buyer.getDefaultShippingAddress());
+        data.put("to_address", buyer.getStreet());
         data.put("to_ward_name", buyer.getWardName());
         data.put("to_district_name", buyer.getDistrictName());
         data.put("to_province_name", buyer.getProvinceName());
@@ -524,7 +529,4 @@ public class GhnServiceImpl {
         return response;
     }
 
-
-
 }
-

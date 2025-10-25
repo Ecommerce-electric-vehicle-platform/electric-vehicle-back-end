@@ -18,7 +18,7 @@ public class BuyerResponse {
     private String avatarUrl;
     private String username;
     private String fullName;
-    private String defaultShippingAddress;
+    private String street;
     private String phoneNumber;
     private String email;
     private Gender gender;

@@ -38,7 +38,7 @@ public class Buyer {
     private String fullName;
 
     @Column(name = "street")
-    private String defaultShippingAddress;
+    private String street;
 
     @Column(name = "ward_name")
     private String wardName;
