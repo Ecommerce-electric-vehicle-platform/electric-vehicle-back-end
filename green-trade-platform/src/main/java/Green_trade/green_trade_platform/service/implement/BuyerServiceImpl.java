@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.enumerate.OrderStatus;
 import Green_trade.green_trade_platform.exception.DuplicateProfileException;
 import Green_trade.green_trade_platform.exception.ProfileException;
 import Green_trade.green_trade_platform.exception.WalletNotFoundException;
@@ -209,7 +210,7 @@ public class BuyerServiceImpl {
                 )
                 .transactions(null)
                 .price(postProductOpt.get().getPrice())
-                .status("PENDING")
+                .status(OrderStatus.PENDING)
                 .cancelReason("Not Canceled Yet")
                 .canceledAt(null)
                 .build();
@@ -217,7 +218,7 @@ public class BuyerServiceImpl {
         return orderRepository.save(newOrder);
     }
 
-    public Order updateOrderStatus(Order order, String status) {
+    public Order updateOrderStatus(Order order, OrderStatus status) {
         order.setStatus(status);
         return orderRepository.save(order);
     }
@@ -272,7 +273,7 @@ public class BuyerServiceImpl {
                 .shippingFee(new BigDecimal(shippingFee))
                 .transactions(null)
                 .price(postProductOpt.get().getPrice().add(new BigDecimal(shippingFee)))
-                .status("PENDING")
+                .status(OrderStatus.PENDING)
                 .cancelReason("Not Canceled Yet")
                 .canceledAt(null)
                 .build();

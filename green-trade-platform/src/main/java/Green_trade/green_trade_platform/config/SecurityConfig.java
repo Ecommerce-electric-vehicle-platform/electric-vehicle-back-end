@@ -20,8 +20,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
-@EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+//@EnableWebSecurity
+//@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
     private final List<String> WHITE_LIST = List.of(
             "/api/v1/auth/**",
@@ -55,7 +55,7 @@ public class SecurityConfig {
                                 "/api/v1/vnpay/return",
                                 "/api/v1/vnpay/ipn",
                                 "/api/v1/post-product/**").permitAll()
-                        .anyRequest().authenticated())
+                        .anyRequest().permitAll())
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authEntryPoint))//  Add AuthTokenFilter to SecurityFilterChain
                 .formLogin(AbstractHttpConfigurer::disable) // Turn off basic authentication form from Spring Security
