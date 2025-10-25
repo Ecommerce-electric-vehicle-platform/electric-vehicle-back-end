@@ -3,7 +3,7 @@ package Green_trade.green_trade_platform.service.implement;
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
 import Green_trade.green_trade_platform.exception.ImageUploadLimitExceededException;
 import Green_trade.green_trade_platform.exception.PostProductNotFound;
-import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
+import Green_trade.green_trade_platform.exception.ProfileException;
 import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
@@ -86,7 +86,7 @@ public class PostProductServiceImpl implements PostProductService {
 
             Seller seller = sellerRepository.findById(request.getSellerId())
                     .orElseThrow(
-                            () -> new ProfileNotFoundException("Seller is not existed")
+                            () -> new ProfileException("Seller is not existed")
                     );
 
             PostProduct newPost = PostProduct.builder()
