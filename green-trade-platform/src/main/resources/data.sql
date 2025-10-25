@@ -169,7 +169,7 @@ INSERT INTO buyer (
    avatar_public_id,
    avatar_url,
    created_at,
-   default_shipping_address,
+   street,
    deleted_at,
    district_name,
    date_of_birth,
