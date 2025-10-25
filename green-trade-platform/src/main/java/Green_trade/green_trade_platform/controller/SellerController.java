@@ -59,7 +59,7 @@ public class SellerController {
                             name = "username",
                             description = "Username of the seller whose service package needs to be verified",
                             required = true,
-                            example = "eco_seller01"
+                            example = "viennehaha"
                     )
             },
             responses = {
@@ -134,7 +134,7 @@ public class SellerController {
                                           "length": "150",
                                           "width": "60",
                                           "height": "110",
-                                          "weight": "25",
+                                          "weight": "25000",
                                           "description": "Lightly used electric bike in perfect condition.",
                                           "locationTrading": "Ho Chi Minh City",
                                           "categoryId": 3

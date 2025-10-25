@@ -1,6 +1,9 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
+import Green_trade.green_trade_platform.exception.ImageUploadLimitExceededException;
+import Green_trade.green_trade_platform.exception.PostProductNotFound;
+import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
 import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
@@ -70,10 +73,10 @@ public class PostProductServiceImpl implements PostProductService {
             Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(request.getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
             Long maxImg = subscription.getSubscriptionPackage().getMaxImgPerPost();
             if (subscription.getEndDay().isBefore(LocalDateTime.now())) {
-                throw new Exception("Seller subsrciption is expired");
+                throw new SubscriptionExpiredException();
             }
             if(files.size() > maxImg) {
-                throw new Exception("Your subscription only allowed " + maxImg + "per post");
+                throw new ImageUploadLimitExceededException("Your subscription only allowed " + maxImg + "per post");
             }
 
             Category category = categoryRepository.findById(request.getCategoryId())
@@ -83,7 +86,7 @@ public class PostProductServiceImpl implements PostProductService {
 
             Seller seller = sellerRepository.findById(request.getSellerId())
                     .orElseThrow(
-                            () -> new RuntimeException("Seller is not existed")
+                            () -> new ProfileNotFoundException("Seller is not existed")
                     );
 
             PostProduct newPost = PostProduct.builder()
@@ -134,7 +137,7 @@ public class PostProductServiceImpl implements PostProductService {
 
             return newPost;
         } catch (Exception e) {
-            log.info("Error at createNewPostProduct: {}", e.getMessage());
+            log.info(">>> Error at createNewPostProduct: {}", e.getMessage());
             throw e;
         }
     }
@@ -176,7 +179,7 @@ public class PostProductServiceImpl implements PostProductService {
     public PostProduct getPostProductById(Long postProductId) throws Exception {
         try {
             PostProduct foundPostProduct = postProductRepository.findById(postProductId).orElseThrow(
-                    () -> new Exception("Post is not existed")
+                    () -> new PostProductNotFound()
             );
             return foundPostProduct;
         } catch (Exception e) {
@@ -190,7 +193,7 @@ public class PostProductServiceImpl implements PostProductService {
             Admin admin = adminService.getCurrentUser();
             log.info(">>> admin id: {}", admin.getId());
             PostProduct postProduct = postProductRepository.findById(
-                    request.getPostProductId()).orElseThrow(() -> new Exception("Post Product is not existed")
+                    request.getPostProductId()).orElseThrow(() -> new PostProductNotFound()
             );
 
             if(!request.getPassed()) {
