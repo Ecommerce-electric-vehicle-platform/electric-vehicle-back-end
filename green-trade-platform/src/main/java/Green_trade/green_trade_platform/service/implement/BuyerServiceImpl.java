@@ -143,7 +143,7 @@ public class BuyerServiceImpl {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         return buyerRepository.findByUsername(username)
-                .orElseThrow(() -> new ProfileNotFoundException("User is not existed: " + username));
+                .orElseThrow(() -> new ProfileException("User is not existed: " + username));
     }
 
     public Buyer getBuyerFromVnPayRequest(String vnpOtherType) {
