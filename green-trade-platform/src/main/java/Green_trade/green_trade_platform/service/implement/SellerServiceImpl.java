@@ -4,7 +4,7 @@ import Green_trade.green_trade_platform.enumerate.AccountType;
 import Green_trade.green_trade_platform.enumerate.SellerStatus;
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
 import Green_trade.green_trade_platform.exception.AuthException;
-import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
+import Green_trade.green_trade_platform.exception.ProfileException;
 import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
 import Green_trade.green_trade_platform.mapper.RegisterShopShippingServiceMapper;
 import Green_trade.green_trade_platform.mapper.SellerMapper;
@@ -25,9 +25,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,7 +64,7 @@ public class SellerServiceImpl implements SellerService {
 
     public SubscriptionResponse checkServicePackageValidity(String username) throws Exception {
         try {
-            Buyer buyer = buyerRepository.findByUsername(username).orElseThrow(() -> new ProfileNotFoundException("Profile is not existed"));
+            Buyer buyer = buyerRepository.findByUsername(username).orElseThrow(() -> new ProfileException("Profile is not existed"));
             Optional<Seller> sellerOpt = sellerRepository.findByBuyer(buyer);
             if(sellerOpt.isEmpty()) {
                 throw new ProfileNotFoundException("Seller is not existed");

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpgradeRequest {
+public class UpgradeAccountRequest {
     @NotBlank(message = "Store name is required.")
     @Pattern(
             regexp = "^[A-Za-z0-9\\s\\p{L}]{2,50}$",
@@ -32,4 +32,25 @@ public class UpgradeRequest {
             message = "Identity number must contain only digits and be 9–12 digits long."
     )
     private String identityNumber;
+
+    @NotBlank(message = "Seller name is required.")
+    @Pattern(
+            message = "Seller name just contains only characters.",
+            regexp = "^[A-Za-z]+$"
+    )
+    private String sellerName;
+
+    @NotBlank(message = "Nationality is required.")
+    @Pattern(
+            message = "Nationality just contains only characters.",
+            regexp = "^[A-Za-z]+$"
+    )
+    private String nationality;
+
+    @NotBlank(message = "Home(country) is required.")
+    @Pattern(
+            message = "Home just contains only characters.",
+            regexp = "^[A-Za-z0-9]+$"
+    )
+    private String home;
 }

@@ -3,7 +3,8 @@ package Green_trade.green_trade_platform.controller;
 import Green_trade.green_trade_platform.enumerate.OrderStatus;
 import Green_trade.green_trade_platform.exception.PaymentMethodNotSupportedException;
 import Green_trade.green_trade_platform.exception.PostProductNotFound;
-import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
+import Green_trade.green_trade_platform.exception.ProfileException;
+import Green_trade.green_trade_platform.exception.ProfileException;
 import Green_trade.green_trade_platform.exception.SelfPurchaseNotAllowedException;
 import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.mapper.OrderMapper;
@@ -255,14 +256,14 @@ public class BuyerController {
 
         log.info(">>> Fetch buyer");
         Buyer buyer = buyerRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new ProfileNotFoundException("Buyer is not existed"));
+                .orElseThrow(() -> new ProfileException("Buyer is not existed"));
 
         log.info(">>> Fetch post product");
         PostProduct postProduct = postProductRepository.findById(request.getPostProductId())
                 .orElseThrow(() -> new PostProductNotFound());
 
         if (buyer.getBuyerId() == postProduct.getSeller().getBuyer().getBuyerId()) {
-            throw new SelfPurchaseNotAllowedException();
+            throw new Exception("You can not buy your own products");
         }
 
         log.info(">>> Calculate shipping fee");

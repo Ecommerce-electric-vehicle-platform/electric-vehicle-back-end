@@ -2,15 +2,13 @@ package Green_trade.green_trade_platform.mapper;
 
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Seller;
-import Green_trade.green_trade_platform.request.UpgradeRequest;
+import Green_trade.green_trade_platform.request.UpgradeAccountRequest;
 import Green_trade.green_trade_platform.response.SellerResponse;
-import lombok.Builder;
-import lombok.Data;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SellerMapper {
-    public Seller toEntity(UpgradeRequest request, Buyer buyer, String frontIdentity,
+    public Seller toEntity(UpgradeAccountRequest request, Buyer buyer, String frontIdentity,
                            String license, String backIdentity, String selfie, String policy) {
         return Seller.builder().buyer(buyer)
                 .identityFrontImageUrl(frontIdentity)
@@ -20,6 +18,9 @@ public class SellerMapper {
                 .storeName(request.getStoreName())
                 .taxNumber(request.getTaxNumber())
                 .identityNumber(request.getIdentityNumber())
+                .sellerName(request.getSellerName())
+                .nationality(request.getNationality())
+                .home(request.getHome())
                 .storePolicyUrl(policy)
                 .build();
     }
@@ -41,6 +42,9 @@ public class SellerMapper {
                 .identityBackImageUrl(seller.getIdentityBackImageUrl())
                 .businessLicenseUrl(seller.getBusinessLicenseUrl())
                 .selfieUrl(seller.getSelfieUrl())
+                .sellerName(seller.getSellerName())
+                .nationality(seller.getNationality())
+                .home(seller.getHome())
                 .build();
     }
 }
