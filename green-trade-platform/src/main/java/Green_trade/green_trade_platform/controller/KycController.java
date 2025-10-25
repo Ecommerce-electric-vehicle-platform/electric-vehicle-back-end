@@ -79,7 +79,7 @@ public class KycController {
                     + " - Supported image types: image/jpeg, image/png. Keep file size within server limits.\\n"
                     + " - This endpoint requires Bearer token authentication (JWT)."
     )
-    @GetMapping(
+    @PostMapping(
             value = "/identity-information",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
