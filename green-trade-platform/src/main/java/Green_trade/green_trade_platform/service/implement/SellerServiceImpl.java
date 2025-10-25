@@ -67,7 +67,7 @@ public class SellerServiceImpl implements SellerService {
             Buyer buyer = buyerRepository.findByUsername(username).orElseThrow(() -> new ProfileException("Profile is not existed"));
             Optional<Seller> sellerOpt = sellerRepository.findByBuyer(buyer);
             if(sellerOpt.isEmpty()) {
-                throw new Exception("Seller is not existed");
+                throw new ProfileNotFoundException("Seller is not existed");
             }
 
             Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(sellerOpt.get().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
@@ -98,7 +98,7 @@ public class SellerServiceImpl implements SellerService {
     @Transactional
     public ApproveSellerResponse handlePendingSeller(ApproveSellerRequest request) throws JsonProcessingException {
         Seller seller = sellerRepository.findById(request.getSellerId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ seller này: " + request.getSellerId())
+                .orElseThrow(() -> new ProfileNotFoundException("Không tìm thấy hồ sơ seller này: " + request.getSellerId())
                 );
 
         Admin admin = adminService.getCurrentUser();

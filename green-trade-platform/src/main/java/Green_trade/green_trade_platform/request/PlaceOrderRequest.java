@@ -24,6 +24,12 @@ public class PlaceOrderRequest {
     @Size(max = 255, message = "Shipping address must not exceed 255 characters")
     private String shippingAddress;
 
+    private String wardName;
+
+    private String districtName;
+
+    private String provinceName;
+
     @NotBlank(message = "Phone number cannot be blank")
     @Pattern(
             regexp = "^(0|\\+84)[0-9]{9,10}$",

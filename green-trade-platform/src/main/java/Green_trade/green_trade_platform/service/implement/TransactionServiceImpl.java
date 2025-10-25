@@ -1,6 +1,8 @@
 package Green_trade.green_trade_platform.service.implement;
 
-import Green_trade.green_trade_platform.exception.ProfileException;
+import Green_trade.green_trade_platform.exception.PaymentMethodNotSupportedException;
+import Green_trade.green_trade_platform.exception.PostProductNotFound;
+import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
 import Green_trade.green_trade_platform.exception.WalletNotFoundException;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
@@ -51,7 +53,7 @@ public class TransactionServiceImpl implements TransactionService {
         try {
             Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
             if(paymentOpt.isEmpty()) {
-                throw new Exception("Payment method is not existed");
+                throw new PaymentMethodNotSupportedException();
             }
             if(!buyerService.isBuyerExisted(username)) {
                 throw new ProfileException("Buyer is not existed");
@@ -65,7 +67,7 @@ public class TransactionServiceImpl implements TransactionService {
 
             Optional<PostProduct> postProductOpt = postProductRepository.findById(postProductId);
             if(postProductOpt.isEmpty()) {
-                throw new Exception("Post is not existed");
+                throw new PostProductNotFound();
             }
 
             if(postProductOpt.get().isSold()) {
@@ -110,7 +112,7 @@ public class TransactionServiceImpl implements TransactionService {
         try {
             Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
             if(paymentOpt.isEmpty()) {
-                throw new Exception("Payment method is not existed");
+                throw new PaymentMethodNotSupportedException();
             }
             if(!buyerService.isBuyerExisted(username)) {
                 throw new ProfileException("Buyer is not existed");
@@ -121,7 +123,7 @@ public class TransactionServiceImpl implements TransactionService {
 
             Optional<PostProduct> postProductOpt = postProductRepository.findById(paymentId);
             if(postProductOpt.isEmpty()) {
-                throw new Exception("Post is not existed");
+                throw new PostProductNotFound();
             }
 
             Transaction newTransaction = Transaction.builder()

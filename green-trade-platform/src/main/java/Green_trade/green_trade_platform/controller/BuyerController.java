@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.enumerate.OrderStatus;
+import Green_trade.green_trade_platform.exception.PaymentMethodNotSupportedException;
 import Green_trade.green_trade_platform.exception.PostProductNotFound;
 import Green_trade.green_trade_platform.exception.ProfileException;
 import Green_trade.green_trade_platform.exception.ProfileException;
@@ -17,12 +18,12 @@ import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.response.BuyerResponse;
 import Green_trade.green_trade_platform.response.OrderResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
-import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
-import Green_trade.green_trade_platform.service.implement.GhnServiceImpl;
-import Green_trade.green_trade_platform.service.implement.OrderServiceImpl;
-import Green_trade.green_trade_platform.service.implement.TransactionServiceImpl;
+import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,7 @@ public class BuyerController {
     private final TransactionRepository transactionRepository;
     private final OrderRepository orderRepository;
     private final OrderServiceImpl orderService;
+    private final PostProductServiceImpl postProductService;
 
     @Operation(
             summary = "Upload buyer profile",
@@ -111,7 +113,7 @@ public class BuyerController {
                     " then system will return profile based on token passed."
     )
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile() {
+    public ResponseEntity<RestResponse<Object, Object>> getProfile() {
         try {
             Buyer buyer = buyerService.getCurrentUser();
             return ResponseEntity.ok(responseMapper.toDto(true,
@@ -132,7 +134,7 @@ public class BuyerController {
     )
 
     @GetMapping("/wallet")
-    public ResponseEntity<?> getWallet() {
+    public ResponseEntity<RestResponse<Object, Object>> getWallet() {
         try {
             Wallet wallet = buyerService.getWallet();
             return ResponseEntity.ok(responseMapper.toDto(true,
@@ -199,18 +201,57 @@ public class BuyerController {
 //        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
 //    }
 
+    @Operation(
+            summary = "Place a new order",
+            description = """
+                This endpoint allows a buyer to place a new order in the Green Trade platform.
+                <br><br>
+                Workflow:
+                <ul>
+                    <li>Validate the payment method and buyer information.</li>
+                    <li>Fetch the product and verify its availability.</li>
+                    <li>Reject the request if the buyer attempts to purchase their own product.</li>
+                    <li>Calculate the shipping fee through the GHN API (depending on COD or online payment).</li>
+                    <li>Create a new order, transaction, and GHN shipping order.</li>
+                    <li>Return a response containing the new order details and GHN order code.</li>
+                </ul>
+                """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "The request body containing buyer, product, and payment information to place an order.",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = PlaceOrderRequest.class),
+                            examples = @ExampleObject(
+                                    name = "Example Request",
+                                    value = """
+                                        {
+                                          "postProductId": 12,
+                                          "username": "duyphuong123",
+                                          "shippingAddress": "123 Le Loi Street, District 1, Ho Chi Minh City",
+                                          "wardName": "Phường Bến Thành",
+                                          "districtName": "Quận 1",
+                                          "provinceName": "Hồ Chí Minh",
+                                          "phoneNumber": "0905123456",
+                                          "shippingPartnerId": 1,
+                                          "paymentId": 1
+                                        }
+                                        """
+                            )
+                    )
+            )
+    )
     @PostMapping("/place-order")
-    public ResponseEntity<?> placeOrder(@Valid @RequestBody PlaceOrderRequest request) throws Exception {
+    public ResponseEntity<RestResponse<OrderResponse, Object>> placeOrder(@Valid @RequestBody PlaceOrderRequest request) throws Exception {
         log.info(">>> [START] placeOrder");
 
         Order newOrder = null;
-        RestResponse response = null;
+        RestResponse<OrderResponse, Object> response = null;
         OrderResponse responseData = null;
         String shippingFee = "0";
 
         log.info(">>> Fetch payment");
         Payment payment = paymentRepository.findById(request.getPaymentId()).orElseThrow(
-                () -> new Exception("Payment method is not existed")
+                () -> new PaymentMethodNotSupportedException()
         );
 
         log.info(">>> Fetch buyer");
@@ -285,6 +326,7 @@ public class BuyerController {
             responseData = orderMapper.toDto(newOrder);
             log.info(">>> Passed created response");
         }
+        postProductService.updateSoldStatus(true, postProduct);
 
         log.info(">>> Build response");
         response = responseMapper.toDto(
