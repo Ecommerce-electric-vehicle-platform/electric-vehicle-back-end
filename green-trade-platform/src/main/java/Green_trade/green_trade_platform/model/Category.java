@@ -23,7 +23,7 @@ public class Category {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @Column(name = "description", nullable = false, unique = false)
+    @Column(name = "description", nullable = false, unique = false, columnDefinition = "TEXT")
     private String description;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -57,11 +57,48 @@ INSERT INTO subscription_packages (
     updated_at
 )
 VALUES
-(1, 'Basic Plan', 'Gói cơ bản cho người mới bắt đầu', TRUE, 10, 3, NOW(), NOW()),
-(2, 'Pro Plan', 'Gói chuyên nghiệp cho doanh nghiệp nhỏ', TRUE, 50, 6, NOW(), NOW()),
-(3, 'Premium Plan', 'Gói cao cấp cho doanh nghiệp lớn', TRUE, 200, 10, NOW(), NOW()),
-(4, 'Legacy Plan', 'Gói cũ, không còn được hỗ trợ', FALSE, 20, 5, NOW(), NOW())
+-- BASIC PLAN
+(1, 'Basic Plan',
+CONCAT(
+    'Gói Cơ Bản – Dành cho cá nhân trải nghiệm', CHAR(10),
+    'Thời hạn: 30 ngày.', CHAR(10),
+    'Quản lý & Sản phẩm: đăng tối đa 10 sản phẩm, mỗi sản phẩm tối đa 5 hình ảnh.', CHAR(10),
+    'Hiển thị & Thương hiệu: hiển thị cơ bản trong danh mục và kết quả tìm kiếm.', CHAR(10),
+    'Hỗ trợ & Phí: hỗ trợ qua email hoặc chat với thời gian phản hồi tiêu chuẩn.', CHAR(10),
+    'Phí hoa hồng doanh thu khoảng 7%.'
+),
+TRUE, 10, 5, NOW(), NOW()),
+
+-- PRO PLAN
+(2, 'Pro Plan',
+CONCAT(
+    'Gói Pro – Dành cho doanh nghiệp nhỏ', CHAR(10),
+    'Thời hạn: 30 ngày.', CHAR(10),
+    'Quản lý & Sản phẩm: đăng tối đa 30 sản phẩm, mỗi sản phẩm tối đa 7 hình ảnh.', CHAR(10),
+    'Hiển thị & Thương hiệu: sản phẩm được ưu tiên hiển thị cao hơn trong danh mục sản phẩm.', CHAR(10),
+    'Hỗ trợ & Phí: phản hồi nhanh hơn qua email/chat, có hotline trong giờ hành chính.', CHAR(10),
+    'Phí hoa hồng doanh thu khoảng 5%.'
+),
+TRUE, 30, 7, NOW(), NOW()),
+
+-- VIP PLAN
+(3, 'VIP Plan',
+CONCAT(
+    'Gói VIP – Dành cho doanh nghiệp lớn', CHAR(10),
+    'Thời hạn: 30 ngày.', CHAR(10),
+    'Quản lý & Sản phẩm: đăng tối đa 100 sản phẩm, mỗi sản phẩm tối đa 10 hình ảnh.', CHAR(10),
+    'Hiển thị & Thương hiệu: sản phẩm được ưu tiên cao nhất trong kết quả tìm kiếm và có thể hiển thị logo thương hiệu.', CHAR(10),
+    'Hỗ trợ & Phí: hỗ trợ 24/7 với thời gian phản hồi nhanh nhất.', CHAR(10),
+    'Phí hoa hồng doanh thu khoảng 3%.'
+),
+TRUE, 100, 10, NOW(), NOW()),
+
+-- LEGACY PLAN
+(4, 'Legacy Plan',
+'Gói cũ, không còn được hỗ trợ hoặc cập nhật. Dành cho người dùng đã đăng ký trước khi hệ thống nâng cấp.',
+FALSE, 20, 5, NOW(), NOW())
 ON DUPLICATE KEY UPDATE subscription_package_id = subscription_package_id;
+
 
 -- =========================================================
 -- 💰 INSERT GIÁ CÁC GÓI
@@ -77,16 +114,17 @@ INSERT INTO package_price (
     package_id
 )
 VALUES
-(49000, TRUE, 30, 'VND', 0, NOW(), NOW(), 1),
-(129000, TRUE, 90, 'VND', 10, NOW(), NOW(), 1),
+(200000, TRUE, 30, 'VND', 0, NOW(), NOW(), 1),
+(540000, TRUE, 90, 'VND', 7, NOW(), NOW(), 1),
+(900000, TRUE, 90, 'VND', 10, NOW(), NOW(), 1),
 
-(199000, TRUE, 30, 'VND', 0, NOW(), NOW(), 2),
-(549000, TRUE, 90, 'VND', 8, NOW(), NOW(), 2),
-(999000, TRUE, 180, 'VND', 15, NOW(), NOW(), 2),
+(400000, TRUE, 30, 'VND', 0, NOW(), NOW(), 2),
+(1080000, TRUE, 90, 'VND', 8, NOW(), NOW(), 2),
+(1800000, TRUE, 180, 'VND', 15, NOW(), NOW(), 2),
 
-(499000, TRUE, 30, 'VND', 0, NOW(), NOW(), 3),
-(1299000, TRUE, 90, 'VND', 10, NOW(), NOW(), 3),
-(2499000, TRUE, 180, 'VND', 20, NOW(), NOW(), 3),
+(1200000, TRUE, 30, 'VND', 0, NOW(), NOW(), 3),
+(3240000, TRUE, 90, 'VND', 10, NOW(), NOW(), 3),
+(5400000, TRUE, 180, 'VND', 20, NOW(), NOW(), 3),
 
 (99000, FALSE, 30, 'VND', 0, NOW(), NOW(), 4)
 ON DUPLICATE KEY UPDATE package_id = package_id;
@@ -147,10 +185,9 @@ INSERT INTO buyer (
    ward_name
 )
 VALUES
-(NULL, NULL, NOW(), NULL, NULL, 'Huyện Thống Nhất', NULL, 'vientruongdoan@gmail.com', NULL, 'MALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', NULL, 'Đồng Nai', NULL, 'doanvien', 'Xã Bàu Hàm 2'),
+('ae8ed05a-6eef-4f3c-ae27-63b6c8c04314', 'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761368550/buyers/1:doanvien/avatar/ed4086f1-9cf3-48ae-8cac-3f493f07f9e7.jpg', NOW(), '123 Nguyễn Trải, Quận 1, thành phố Hồ Chí Minh', NULL, 'Huyện Thống Nhất', '2005-11-19', 'vientruongdoan@gmail.com', 'Truong Doan Vien', 'MALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', '0792043114', 'Đồng Nai', NULL, 'doanvien', 'Xã Bàu Hàm 2'),
 (NULL, NULL, NOW(), NULL, NULL, NULL, NULL, 'kimthuydoan22082005@gmail.com', NULL, 'FEMALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', NULL, NULL, NULL, 'kimthuydoan', NULL),
 (NULL, NULL, NOW(), NULL, NULL, NULL, NULL, 'hanhtransdr@gmail.com', NULL, 'FEMALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', NULL, NULL, NULL, 'tranthihanh', NULL);
-
 
 -- =========================================================
 -- 🏪 WALLET
@@ -161,95 +198,74 @@ VALUES
 (10000000.00, 'VND', 'VNPay', NOW(), 1),
 (1100000.00, 'VND', 'VNPay', NOW(), 2),
 (1200000.00, 'VND', 'VNPay', NOW(), 3);
---(1300000.00, 'VND', 'VNPay', NOW(), 4);
 
 -- =========================================================
 -- 🏪 SELLER
 -- =========================================================
---INSERT INTO seller (
---    identity_front_image_url,
---    identity_back_image_url,
---    business_license_url,
---    selfie_url,
---    status,
---    store_name,
---    store_policy_url,
---    tax_number,
---    identity_number,
---    created_at,
---    updated_at,
---    deleted_at,
---    buyer_id,
---    admin_id,
---    ghn_shop_id
---)
---VALUES
---('https://cdn.example.com/images/id_front_1.jpg', 'https://cdn.example.com/images/id_back_1.jpg', 'https://cdn.example.com/images/business_license_1.jpg', 'https://cdn.example.com/images/selfie_1.jpg', 'PENDING', 'Neko Store 1', 'https://cdn.example.com/policies/policy_1.pdf', 'TAX123456781', 'ID987654321', NOW(), NULL, NULL, 1, 1, 197654),
---('https://cdn.example.com/images/id_front_2.jpg', 'https://cdn.example.com/images/id_back_2.jpg', 'https://cdn.example.com/images/business_license_2.jpg', 'https://cdn.example.com/images/selfie_2.jpg', 'ACCEPTED', 'Neko Store 2', 'https://cdn.example.com/policies/policy_2.pdf', 'TAX123456782', 'ID987654322', NOW(), NULL, NULL, 2, 1, 197654),
---('https://cdn.example.com/images/id_front_3.jpg', 'https://cdn.example.com/images/id_back_3.jpg', 'https://cdn.example.com/images/business_license_3.jpg', 'https://cdn.example.com/images/selfie_3.jpg', 'ACCEPTED', 'Neko Store 3', 'https://cdn.example.com/policies/policy_3.pdf', 'TAX123456783', 'ID987654323', NOW(), NULL, NULL, 3, 1, 197654),
---('https://cdn.example.com/images/id_front_4.jpg', 'https://cdn.example.com/images/id_back_4.jpg', 'https://cdn.example.com/images/business_license_4.jpg', 'https://cdn.example.com/images/selfie_4.jpg', 'PENDING', 'Neko Store 4', 'https://cdn.example.com/policies/policy_4.pdf', 'TAX123456784', 'ID987654324', NOW(), NULL, NULL, 4, 1, 197654),
---('https://cdn.example.com/images/id_front_5.jpg', 'https://cdn.example.com/images/id_back_5.jpg', 'https://cdn.example.com/images/business_license_5.jpg', 'https://cdn.example.com/images/selfie_5.jpg', 'ACCEPTED', 'Neko Store 5', 'https://cdn.example.com/policies/policy_5.pdf', 'TAX123456785', 'ID987654325', NOW(), NULL, NULL, 5, 1, 197654),
---('https://cdn.example.com/images/id_front_6.jpg', 'https://cdn.example.com/images/id_back_6.jpg', 'https://cdn.example.com/images/business_license_6.jpg', 'https://cdn.example.com/images/selfie_6.jpg', 'ACCEPTED', 'Neko Store 6', 'https://cdn.example.com/policies/policy_6.pdf', 'TAX123456786', 'ID987654326', NOW(), NULL, NULL, 6, 1, 197654),
---('https://cdn.example.com/images/id_front_7.jpg', 'https://cdn.example.com/images/id_back_7.jpg', 'https://cdn.example.com/images/business_license_7.jpg', 'https://cdn.example.com/images/selfie_7.jpg', 'PENDING', 'Neko Store 7', 'https://cdn.example.com/policies/policy_7.pdf', 'TAX123456787', 'ID987654327', NOW(), NULL, NULL, 7, 1, 197654),
---('https://cdn.example.com/images/id_front_8.jpg', 'https://cdn.example.com/images/id_back_8.jpg', 'https://cdn.example.com/images/business_license_8.jpg', 'https://cdn.example.com/images/selfie_8.jpg', 'ACCEPTED', 'Neko Store 8', 'https://cdn.example.com/policies/policy_8.pdf', 'TAX123456788', 'ID987654328', NOW(), NULL, NULL, 8, 1, 197654),
---('https://cdn.example.com/images/id_front_9.jpg', 'https://cdn.example.com/images/id_back_9.jpg', 'https://cdn.example.com/images/business_license_9.jpg', 'https://cdn.example.com/images/selfie_9.jpg', 'ACCEPTED', 'Neko Store 9', 'https://cdn.example.com/policies/policy_9.pdf', 'TAX123456789', 'ID987654329', NOW(), NULL, NULL, 9, 1, 197654),
---('https://cdn.example.com/images/id_front_10.jpg', 'https://cdn.example.com/images/id_back_10.jpg', 'https://cdn.example.com/images/business_license_10.jpg', 'https://cdn.example.com/images/selfie_10.jpg', 'PENDING', 'Neko Store 10', 'https://cdn.example.com/policies/policy_10.pdf', 'TAX123456790', 'ID987654330', NOW(), NULL, NULL, 10, 1, 197654),
---('https://cdn.example.com/images/id_front_11.jpg', 'https://cdn.example.com/images/id_back_11.jpg', 'https://cdn.example.com/images/business_license_11.jpg', 'https://cdn.example.com/images/selfie_11.jpg', 'ACCEPTED', 'Neko Store 11', 'https://cdn.example.com/policies/policy_11.pdf', 'TAX123456791', 'ID987654331', NOW(), NULL, NULL, 11, 1, 197654),
---('https://cdn.example.com/images/id_front_12.jpg', 'https://cdn.example.com/images/id_back_12.jpg', 'https://cdn.example.com/images/business_license_12.jpg', 'https://cdn.example.com/images/selfie_12.jpg', 'ACCEPTED', 'Neko Store 12', 'https://cdn.example.com/policies/policy_12.pdf', 'TAX123456792', 'ID987654332', NOW(), NULL, NULL, 12, 1, 197654),
---('https://cdn.example.com/images/id_front_13.jpg', 'https://cdn.example.com/images/id_back_13.jpg', 'https://cdn.example.com/images/business_license_13.jpg', 'https://cdn.example.com/images/selfie_13.jpg', 'PENDING', 'Neko Store 13', 'https://cdn.example.com/policies/policy_13.pdf', 'TAX123456793', 'ID987654333', NOW(), NULL, NULL, 13, 1, 197654),
---('https://cdn.example.com/images/id_front_14.jpg', 'https://cdn.example.com/images/id_back_14.jpg', 'https://cdn.example.com/images/business_license_14.jpg', 'https://cdn.example.com/images/selfie_14.jpg', 'ACCEPTED', 'Neko Store 14', 'https://cdn.example.com/policies/policy_14.pdf', 'TAX123456794', 'ID987654334', NOW(), NULL, NULL, 14, 1, 197654),
---('https://cdn.example.com/images/id_front_15.jpg', 'https://cdn.example.com/images/id_back_15.jpg', 'https://cdn.example.com/images/business_license_15.jpg', 'https://cdn.example.com/images/selfie_15.jpg', 'ACCEPTED', 'Neko Store 15', 'https://cdn.example.com/policies/policy_15.pdf', 'TAX123456795', 'ID987654335', NOW(), NULL, NULL, 15, 1, 197654),
---('https://cdn.example.com/images/id_front_16.jpg', 'https://cdn.example.com/images/id_back_16.jpg', 'https://cdn.example.com/images/business_license_16.jpg', 'https://cdn.example.com/images/selfie_16.jpg', 'PENDING', 'Neko Store 16', 'https://cdn.example.com/policies/policy_16.pdf', 'TAX123456796', 'ID987654336', NOW(), NULL, NULL, 16, 1, 197654),
---('https://cdn.example.com/images/id_front_17.jpg', 'https://cdn.example.com/images/id_back_17.jpg', 'https://cdn.example.com/images/business_license_17.jpg', 'https://cdn.example.com/images/selfie_17.jpg', 'ACCEPTED', 'Neko Store 17', 'https://cdn.example.com/policies/policy_17.pdf', 'TAX123456797', 'ID987654337', NOW(), NULL, NULL, 17, 1, 197654),
---('https://cdn.example.com/images/id_front_18.jpg', 'https://cdn.example.com/images/id_back_18.jpg', 'https://cdn.example.com/images/business_license_18.jpg', 'https://cdn.example.com/images/selfie_18.jpg', 'PENDING', 'Neko Store 18', 'https://cdn.example.com/policies/policy_18.pdf', 'TAX123456798', 'ID987654338', NOW(), NULL, NULL, 18, 1, 197654),
---('https://cdn.example.com/images/id_front_19.jpg', 'https://cdn.example.com/images/id_back_19.jpg', 'https://cdn.example.com/images/business_license_19.jpg', 'https://cdn.example.com/images/selfie_19.jpg', 'ACCEPTED', 'Neko Store 19', 'https://cdn.example.com/policies/policy_19.pdf', 'TAX123456799', 'ID987654339', NOW(), NULL, NULL, 19, 1, 197654),
---('https://cdn.example.com/images/id_front_20.jpg', 'https://cdn.example.com/images/id_back_20.jpg', 'https://cdn.example.com/images/business_license_20.jpg', 'https://cdn.example.com/images/selfie_20.jpg', 'PENDING', 'Neko Store 20', 'https://cdn.example.com/policies/policy_20.pdf', 'TAX123456800', 'ID987654340', NOW(), NULL, NULL, 20, 1, 197654);
-
+INSERT INTO seller(
+    identity_front_image_url,
+    identity_back_image_url,
+    business_license_url,
+    created_at,
+    selfie_url,
+    status,
+    store_name,
+    ghn_shop_id,
+    store_policy_url,
+    tax_number,
+    identity_number,
+    seller_name,
+    nationality,
+    home,
+    admin_id,
+    buyer_id,
+    updated_at,
+    deleted_at
+) VALUES (
+    'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369239/sellers/1:doanvien/identity_front_image/8141997c-cf68-43ff-bfbd-c54534be6372.jpg',
+    'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369244/sellers/1:doanvien/identity_back_image/551938c5-7612-464e-94b8-1eaf453085e9.jpg',
+    'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369242/sellers/1:doanvien/business_license_image/521e8ddf-e05a-41a8-af94-fbb4b89a0655.jpg',
+    NOW(), 'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369246/sellers/1:doanvien/selfie_image/d3953b0b-8423-47c0-864c-2e4bd4f2d2d9.jpg',
+    'ACCEPTED', 'Electrical vehicle store', 197764, 'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369249/sellers/1:doanvien/policy_image/96443852-fe1c-419b-bf60-8197d48f29ea.jpg',
+    '0751487961', '075205014623', 'TRƯƠNG ĐOÀN VIÊN', 'VIỆT NAM', 'MỸ LỢI, PHÙ MỸ, BÌNH ĐỊNH',
+    1, 1, NULL, NULL
+);
 -- =========================================================
 -- 🧾 SUBSCRIPTION - GÁN GÓI CHO SELLER
 -- =========================================================
--- Seller 1–5: Gói Basic (30 ngày)
--- Seller 6–10: Gói Pro (90 ngày)
--- Seller 11–15: Gói Premium (180 ngày)
--- Seller 16–20: Gói Legacy (30 ngày, không còn hoạt động)
+INSERT INTO subscription (seller_id, subscription_package_id, is_active, start_day, end_day)
+VALUES
+(1, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY));
 
---INSERT INTO subscription (seller_id, subscription_package_id, is_active, start_day, end_day)
---VALUES
---(1, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
---(2, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
---(3, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
---(4, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
---(5, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
---
---(6, 2, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
---(7, 2, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
---(8, 2, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
---(9, 2, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
---(10, 2, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
---
---(11, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
---(12, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
---(13, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
---(14, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
---(15, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
---
---(16, 4, FALSE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
---(17, 4, FALSE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
---(18, 4, FALSE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
---(19, 4, FALSE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
---(20, 4, FALSE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))
---ON DUPLICATE KEY UPDATE seller_id = seller_id;
 
 -- =========================================================
 -- 🗂 CATEGORY
 -- =========================================================
---INSERT INTO category (name, description)
---VALUES
---('Xe điện', 'Các loại xe điện như xe máy điện, xe đạp điện, ô tô điện.'),
---('Pin điện', 'Các loại pin, ắc quy, pin sạc và linh kiện điện liên quan.'),
---('Phụ kiện & Bộ sạc', 'Các loại sạc, cáp, adapter và phụ kiện cho xe điện.'),
---('Phụ tùng xe điện', 'Các linh kiện thay thế và bảo dưỡng xe điện.'),
---('Khác', 'Các sản phẩm điện khác.');
+INSERT INTO category (name, description)
+VALUES
+-- 🛵 Danh mục 1: Xe điện
+(
+    N'Xe điện',
+    CONCAT(
+        'Danh mục bao gồm các loại xe điện hiện đại như xe máy điện, xe đạp điện và ô tô điện.', CHAR(10),
+        'Xe điện mang đến trải nghiệm di chuyển thân thiện với môi trường, tiết kiệm năng lượng và chi phí vận hành thấp.', CHAR(10),
+        'Các sản phẩm trong nhóm này phù hợp cho học sinh, sinh viên, người đi làm và cả gia đình có nhu cầu di chuyển hàng ngày.', CHAR(10),
+        'Ngoài ra, còn có nhiều mẫu xe với thiết kế thời trang, động cơ mạnh mẽ và công nghệ pin tiên tiến.', CHAR(10),
+        'Khách hàng có thể lựa chọn giữa nhiều thương hiệu và mức giá khác nhau tùy theo nhu cầu sử dụng.'
+    )
+),
+
+-- 🔋 Danh mục 2: Pin điện
+(
+    N'Pin điện',
+    CONCAT(
+        'Danh mục pin điện bao gồm pin sạc, pin lithium, ắc quy và các bộ lưu trữ năng lượng cho xe điện hoặc thiết bị gia dụng.', CHAR(10),
+        'Các sản phẩm được chọn lọc từ nhiều thương hiệu uy tín, đảm bảo an toàn, độ bền cao và dung lượng ổn định.', CHAR(10),
+        'Phù hợp cho nhu cầu thay thế pin xe điện, pin lưu trữ năng lượng mặt trời hoặc các thiết bị điện khác.', CHAR(10),
+        'Người dùng có thể lựa chọn theo dung lượng, điện áp và kích thước phù hợp với thiết bị của mình.', CHAR(10),
+        'Tất cả sản phẩm đều được kiểm tra chất lượng và bảo hành theo tiêu chuẩn nhà sản xuất.'
+    )
+);
 
 -- =========================================================
 -- 🚗 POST_PRODUCT (chỉ 5 mẫu ban đầu)
@@ -350,31 +366,49 @@ VALUES
 -- 🖼 SYSTEM_POLICY
 -- =========================================================
 
---INSERT INTO system_policy
---(title, content, version, effective_date, expired_date, created_at, updated_at, status, admin_id)
---VALUES
---(
---  'User Registration Policy',
---  'When registering for an account on Green Trade Platform, users must provide accurate personal information, agree to the Terms of Service, Privacy Policy, and comply with the community rules. The system reserves the right to suspend or terminate any account that violates these terms.',
---  1.0,
---  NOW(),
---  NULL,
---  NOW(),
---  NOW(),
---  'ACTIVE',
---  1
---),
---(
---  'Account Upgrade Policy (Buyer to Seller)',
---  'Users who upgrade their accounts from Buyer to Seller must verify identity, provide business-related information, and comply with seller obligations. Any violation may lead to temporary suspension or permanent deactivation of the seller account as determined by the platform administrators.',
---  1.0,
---  NOW(),
---  NULL,
---  NOW(),
---  NOW(),
---  'ACTIVE',
---  1
---);
+INSERT INTO system_policy
+(title, content, version, effective_date, expired_date, created_at, updated_at, status, admin_id)
+VALUES
+-- 🧾 Chính sách 1: Đăng ký tài khoản
+(
+  'User Registration Policy',
+  CONCAT(
+    'Khi người dùng đăng ký tài khoản trên nền tảng Green Trade, người dùng cần cung cấp thông tin cá nhân chính xác, đầy đủ và trung thực, bao gồm nhưng không giới hạn ở họ tên, địa chỉ email, số điện thoại và các thông tin nhận dạng khác.', CHAR(10),
+    'Việc đăng ký đồng nghĩa với việc người dùng đã đọc, hiểu và đồng ý tuân thủ các điều khoản sử dụng (Terms of Service), chính sách bảo mật (Privacy Policy) và các quy định cộng đồng của hệ thống.', CHAR(10),
+    'Người dùng cam kết không sử dụng thông tin sai lệch, mạo danh hoặc tạo nhiều tài khoản nhằm mục đích gian lận, trục lợi hoặc gây rối hoạt động của nền tảng.', CHAR(10),
+    'Green Trade có quyền tạm khóa hoặc chấm dứt vĩnh viễn tài khoản nếu phát hiện vi phạm quy định, gian lận trong giao dịch hoặc gây ảnh hưởng tiêu cực đến cộng đồng người dùng khác.', CHAR(10),
+    'Ngoài ra, các tài khoản bị nghi ngờ có hành vi lừa đảo, vi phạm pháp luật hoặc bị báo cáo bởi người dùng khác sẽ được xem xét và xử lý theo quy định pháp luật và chính sách nội bộ.', CHAR(10),
+    'Người dùng có thể yêu cầu chỉnh sửa hoặc xóa tài khoản theo quy trình hỗ trợ chính thức được đăng tải trên trang chính sách của nền tảng.'
+  ),
+  1.0,
+  NOW(),
+  NULL,
+  NOW(),
+  NOW(),
+  'ACTIVE',
+  1
+),
+
+-- 🛍️ Chính sách 2: Nâng cấp tài khoản (Người mua → Người bán)
+(
+  'Account Upgrade Policy (Buyer to Seller)',
+  CONCAT(
+    'Người dùng khi nâng cấp tài khoản từ Người mua (Buyer) lên Người bán (Seller) phải hoàn tất quy trình xác minh danh tính, cung cấp giấy tờ cá nhân hoặc pháp lý (CMND/CCCD, giấy phép kinh doanh nếu có) và đồng ý với các điều khoản dành cho người bán.', CHAR(10),
+    'Tài khoản Người bán cần đảm bảo các thông tin hiển thị công khai, bao gồm tên cửa hàng, địa chỉ liên hệ, mô tả sản phẩm và cam kết chất lượng hàng hóa, tuân thủ các quy định thương mại điện tử của Việt Nam.', CHAR(10),
+    'Trong quá trình hoạt động, Người bán có nghĩa vụ cập nhật thông tin chính xác, không đăng tải sản phẩm vi phạm pháp luật, hàng giả, hàng cấm hoặc hàng hóa không rõ nguồn gốc.', CHAR(10),
+    'Green Trade có quyền kiểm duyệt nội dung sản phẩm, tạm ngưng hoặc xóa sản phẩm nếu phát hiện vi phạm tiêu chuẩn đăng bán hoặc có hành vi lừa đảo.', CHAR(10),
+    'Trường hợp Người bán vi phạm nghiêm trọng (ví dụ: bán hàng cấm, gian lận giao dịch, spam, đánh giá ảo), tài khoản có thể bị tạm đình chỉ hoặc khóa vĩnh viễn tùy theo mức độ.', CHAR(10),
+    'Mọi quyết định xử lý tài khoản được thực hiện bởi Ban quản trị Green Trade dựa trên chứng cứ xác minh, và Người bán có quyền gửi yêu cầu khiếu nại hoặc minh chứng bổ sung qua kênh hỗ trợ chính thức.', CHAR(10),
+    'Việc nâng cấp tài khoản đồng nghĩa với việc Người bán hiểu rõ và chấp thuận toàn bộ chính sách hoạt động, nghĩa vụ và trách nhiệm liên quan đến kinh doanh trên nền tảng.'
+  ),
+  1.0,
+  NOW(),
+  NULL,
+  NOW(),
+  NOW(),
+  'ACTIVE',
+  1
+);
 
 -- =========================================================
 -- 🚚 SHIPPING_PARTNER (ĐỐI TÁC VẬN CHUYỂN)
