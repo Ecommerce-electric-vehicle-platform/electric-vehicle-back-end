@@ -2,7 +2,7 @@ package Green_trade.green_trade_platform.advisor;
 
 import Green_trade.green_trade_platform.exception.DuplicateProfileException;
 import Green_trade.green_trade_platform.exception.EmailException;
-import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
+import Green_trade.green_trade_platform.exception.ProfileException;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.response.RestResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,8 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 
 
@@ -24,8 +22,8 @@ public class BuyerControllerAdvisor {
     @Autowired
     private ResponseMapper responseMapper;
 
-    @ExceptionHandler(ProfileNotFoundException.class)
-    public ResponseEntity<RestResponse<Object, Map<String, String>>> handleProfileNotFoundException(ProfileNotFoundException e, HttpServletRequest request) {
+    @ExceptionHandler(ProfileException.class)
+    public ResponseEntity<RestResponse<Object, Map<String, String>>> handleProfileNotFoundException(ProfileException e, HttpServletRequest request) {
         log.info(">>> Exception message of profile not found: {}", e.getMessage());
 
         RestResponse<Object, Map<String, String>> response = responseMapper.toDto(

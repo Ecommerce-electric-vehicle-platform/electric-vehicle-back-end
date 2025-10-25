@@ -225,6 +225,7 @@ public class GhnServiceImpl {
     public String findProvinceCodeByProvinceName(String provinceName) throws JsonProcessingException {
         Map<String, String> provinceList = getProvinceList();
 
+
         // Duyệt qua danh sách để tìm tỉnh có tên khớp
         for (Map.Entry<String, String> entry : provinceList.entrySet()) {
             if (entry.getValue().equalsIgnoreCase(provinceName.trim())) {

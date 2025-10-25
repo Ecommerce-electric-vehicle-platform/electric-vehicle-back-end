@@ -36,22 +36,22 @@ public class SignInServiceImpl implements SignInService {
 
     public Buyer startSignIn(SignInRequest request) {
         try {
-            log.info("startSignIn of SignInServiceImpl: started");
+            log.info(">>> [Sign In Service] Starting sign in service");
             String username = request.getUsername();
             String password = request.getPassword();
 
-            Optional<Buyer> buyerOpt = buyerRepository.findByUsername(username);
-            log.info("buyerOpt: {}", buyerOpt.get());
-            if (buyerOpt.isEmpty() || !passwordEncoder.matches(password, buyerOpt.get().getPassword())) {
-                log.info("startSignIn at SignInServiceImpl: user: {} authenticated failed", username);
+            Buyer buyerOpt = buyerRepository.findByUsername(username).orElseThrow(
+                    () -> new AuthException(">>> [Sign In Service] Can not find account with this username: " + request.getUsername()));
+            log.info(">>> [Sign In Service] buyerOpt: {}", buyerOpt);
+            if (!passwordEncoder.matches(password, buyerOpt.getPassword())) {
+                log.info(">>> [Sign In Service] Authentication failed with user {}", username);
                 throw new AuthException("Username/password is incorrect");
             }
-            log.info("startSignIn at SignInServiceImpl: user: {} authenticated successfully", username);
-            log.info("startSignIn of SignInServiceImpl: ended");
-            return buyerOpt.get();
+            log.info(">>> [Sign In Service] Authentication successfully with username: {}", username);
+            log.info(">>> [Sign In Service] Ended sign in service");
+            return buyerOpt;
         } catch (Exception e) {
-            log.info("startSignIn of SignServiceImpl: Error occurred");
-            log.info("startSignIn of SignInServiceImpl: ended");
+            log.info(">>> [Sign In Service] Error occured in sign in service: {}", e.getMessage());
             throw e;
         }
     }

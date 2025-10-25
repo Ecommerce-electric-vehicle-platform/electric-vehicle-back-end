@@ -83,18 +83,33 @@ public class AuthController {
     )
     @PostMapping("/signin")
     public ResponseEntity<RestResponse<AuthResponse, Object>>  signIn(@Valid @RequestBody SignInRequest req) {
-        Buyer user = signInService.startSignIn(req);
+        try {
+            log.info(">>> [Auth Controller] Starting sign in controller");
+            Buyer user = signInService.startSignIn(req);
 
-        String accessToken = jwtUtils.generateTokenFromUsername(user.getUsername(), ACCESS_EXPIRE_TIME);
-        String refreshToken = jwtUtils.generateTokenFromUsername(user.getUsername(), REFRESH_EXPIRE_TIME);
-        redisTokenService.saveTokenToRedis(user.getEmail(), refreshToken, REFRESH_EXPIRE_TIME);
+            log.info(">>> [Auth Controller] Generating tokens");
+            String accessToken = jwtUtils.generateTokenFromUsername(user.getUsername(), ACCESS_EXPIRE_TIME);
+            String refreshToken = jwtUtils.generateTokenFromUsername(user.getUsername(), REFRESH_EXPIRE_TIME);
 
-        AuthResponse authResponse = authMapper.toDto(user, accessToken, refreshToken);
+            log.info(">>> [Auth Controller] Saving refresh token into Redis");
+            redisTokenService.saveTokenToRedis(user.getEmail(), refreshToken, REFRESH_EXPIRE_TIME);
 
-        return ResponseEntity.status(HttpStatus.OK.value())
-                .body(responseMapper.toDto(
-                        true, "LOGIN SUCCESSFULLY", authResponse, null
-                ));
+            AuthResponse authResponse = authMapper.toDto(user, accessToken, refreshToken);
+
+            log.info(">>> [Auth Controller] Ending sign in controller");
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "SIGN IN SUCCESSFULLY",
+                    authResponse, null
+            ));
+        } catch (Exception e) {
+            log.info(">>> [Auth Controller] Error occured in sign in controller");
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "SIGN IN FAILED",
+                    null, e.getMessage()
+            ));
+        }
     }
 
     @Operation(

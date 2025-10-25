@@ -64,6 +64,17 @@ public class Seller {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    // Addition fields
+    @Column(name = "seller_name", nullable = false)
+    private String sellerName;
+
+    @Column(name = "nationality", nullable = false)
+    private String nationality;
+
+    // Quê quán
+    @Column(name = "home", nullable = false)
+    private String home;
+
     @OneToOne()
     @JoinColumn(name = "buyer_id", nullable = false, unique = true)
     @JsonManagedReference

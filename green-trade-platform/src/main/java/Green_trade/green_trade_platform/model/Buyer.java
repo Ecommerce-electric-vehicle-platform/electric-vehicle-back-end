@@ -34,25 +34,25 @@ public class Buyer {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "full_name", nullable = false)
+    @Column(name = "full_name")
     private String fullName;
 
     @Column(name = "default_shipping_address")
     private String defaultShippingAddress;
 
-    @Column(name = "ward_name", nullable = true, unique = false)
+    @Column(name = "ward_name")
     private String wardName;
 
-    @Column(name = "district_name", nullable = true, unique = false)
+    @Column(name = "district_name")
     private String districtName;
 
-    @Column(name = "province_name", nullable = true, unique = false)
+    @Column(name = "province_name")
     private String provinceName;
 
-    @Column(name = "is_active")
+    @Column(name = "is_active", nullable = false)
     private boolean isActive;
 
-    @Column(name = "phone_number", nullable = false)
+    @Column(name = "phone_number", unique = true)
     private String phoneNumber;
 
     @Column(name = "avatar_url", columnDefinition = "TEXT")
@@ -107,9 +107,6 @@ public class Buyer {
     @PrePersist
     public void onCreate() {
         this.isActive = true;
-        this.fullName = "Not have yet";
-        this.defaultShippingAddress = "Not have yet";
-        this.phoneNumber = "Not have yet";
         this.createdAt = LocalDateTime.now();
     }
 
