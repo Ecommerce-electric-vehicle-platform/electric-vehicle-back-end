@@ -46,23 +46,24 @@ public class BuyerServiceImpl {
 
         Map<String, Object> body = new HashMap<>();
         String avatarUrl = (buyer.getAvatarUrl() == null) ? "" : buyer.getAvatarUrl();
-        if(!avatarUrl.isEmpty()) {
+        if (!avatarUrl.isEmpty()) {
             throw new DuplicateProfileException("Profile already exits.");
         }
-//        // Check date and parse into LocalDate
-////        LocalDate dob = dateUtils.parseAndValidateDob(request.getDob());
+        // // Check date and parse into LocalDate
+        //// LocalDate dob = dateUtils.parseAndValidateDob(request.getDob());
         LocalDate dob = LocalDate.parse(request.getDob());
         log.info(">>> [Buyer service] Profile request: {}", request.toString());
 
         try {
-            if(!avatarFile.isEmpty() && !avatarFile.isEmpty()) {
-                Map<String, String> uploadResult = cloudinaryService.upload(avatarFile, "buyers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/avatar");
+            if (!avatarFile.isEmpty() && !avatarFile.isEmpty()) {
+                Map<String, String> uploadResult = cloudinaryService.upload(avatarFile,
+                        "buyers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/avatar");
                 avatarUrl = uploadResult.get("fileUrl");
                 buyer.setAvatarPublicId(uploadResult.get("publicId"));
                 body.put("avatar", avatarUrl);
             }
             buyer.setAvatarUrl(avatarUrl);
-            buyer.setDefaultShippingAddress(request.getDefaultShippingAddress());
+            buyer.setStreet(request.getStreet());
             buyer.setWardName(request.getWardName());
             buyer.setDistrictName(request.getDistrictName());
             buyer.setProvinceName(request.getProvinceName());
@@ -92,36 +93,34 @@ public class BuyerServiceImpl {
             buyer.setGender(request.getGender());
             buyer.setDob(request.getDob());
             buyer.setPhoneNumber(request.getPhoneNumber() == null ? "" : request.getPhoneNumber());
-            buyer.setDefaultShippingAddress(request.getDefaultShippingAddress());
+            buyer.setStreet(request.getStreet());
             buyer.setWardName(request.getWardName());
             buyer.setDistrictName(request.getDistrictName());
             buyer.setProvinceName(request.getProvinceName());
             log.info(">>> [Update profile services] set text data into buyer profile.");
 
-            //delete old avatar on cloudinary
-            if(avatarFile != null && !avatarFile.isEmpty()) {
+            // delete old avatar on cloudinary
+            if (avatarFile != null && !avatarFile.isEmpty()) {
                 log.info(">>> [Update profile services] Starting delete old avatar on Cloudinary.");
                 if (buyer.getAvatarUrl() != null) {
                     boolean isDeleted = cloudinaryService.delete(
                             buyer.getAvatarPublicId(),
-                            "buyers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/avatar"
-                    );
+                            "buyers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/avatar");
 
-                    if(!isDeleted) {
+                    if (!isDeleted) {
                         log.info(">>> [Update profile services] Error occur when deleting old avatar.");
                         throw new ProfileException("Avatar Profile is deleted failed");
                     }
                     log.info(">>> [Update profile services] Delete old avatar successfully.");
                 }
 
-                //upload new avatar on cloudinary
+                // upload new avatar on cloudinary
                 log.info(">>> [Update profile services] Starting upload new avatar into Cloudinary");
                 Map<String, String> uploadResult = cloudinaryService.upload(
                         avatarFile,
-                        "buyers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/avatar"
-                );
+                        "buyers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/avatar");
 
-                if(uploadResult == null) {
+                if (uploadResult == null) {
                     log.info(">>> [Update profile services] Error occur when uploading new avatar into Cloudinary.");
                     throw new Exception("Avatar Profile is saved failed");
                 }
@@ -134,8 +133,8 @@ public class BuyerServiceImpl {
             log.info(">>> [Update profile services] Update buyer profile successfully.");
             return buyerRepository.save(buyer);
         } catch (Exception e) {
-             log.info(">>> [Update profile services] Error at buyerServiceImpl: {}", e.getMessage());
-             throw e;
+            log.info(">>> [Update profile services] Error at buyerServiceImpl: {}", e.getMessage());
+            throw e;
         }
     }
 
@@ -143,13 +142,13 @@ public class BuyerServiceImpl {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         return buyerRepository.findByUsername(username)
-                .orElseThrow(() -> new ProfileNotFoundException("User is not existed: " + username));
+                .orElseThrow(() -> new ProfileException("User is not existed: " + username));
     }
 
     public Buyer getBuyerFromVnPayRequest(String vnpOtherType) {
         String[] temp = vnpOtherType.split(" ");
-        return buyerRepository.findById(Long.parseLong(temp[0])).
-                orElseThrow(() -> new UsernameNotFoundException("User is not existed: " + temp[0]));
+        return buyerRepository.findById(Long.parseLong(temp[0]))
+                .orElseThrow(() -> new UsernameNotFoundException("User is not existed: " + temp[0]));
     }
 
     public BigDecimal getWalletBalance() {
@@ -160,7 +159,7 @@ public class BuyerServiceImpl {
     public boolean isBuyerExisted(Long buyerId) {
         boolean result = false;
         Optional<Buyer> buyerOpt = buyerRepository.findById(buyerId);
-        if(buyerOpt.isPresent()){
+        if (buyerOpt.isPresent()) {
             result = true;
         }
         return result;
@@ -169,7 +168,7 @@ public class BuyerServiceImpl {
     public boolean isBuyerExisted(String username) {
         boolean result = false;
         Optional<Buyer> buyerOpt = buyerRepository.findByUsername(username);
-        if(buyerOpt.isPresent()){
+        if (buyerOpt.isPresent()) {
             result = true;
         }
         return result;
@@ -179,7 +178,7 @@ public class BuyerServiceImpl {
         Optional<Buyer> buyerOpt = buyerRepository.findByUsername(request.getUsername());
         Optional<PostProduct> postProductOpt = postProductRepository.findById(request.getPostProductId());
 
-        //kiểm tra các thứ
+        // kiểm tra các thứ
         if (!isBuyerExisted(request.getUsername())) {
             throw new ProfileException("User is not existed");
         }
@@ -192,21 +191,16 @@ public class BuyerServiceImpl {
             throw new ProductSoldOutException();
         }
 
-        //tạo mới một đơn hàng
+        // tạo mới một đơn hàng
         Order newOrder = Order.builder()
                 .admin(null)
                 .buyer(buyerOpt.get())
                 .orderCode(String.format("%09d", new Random().nextInt(1_000_000_000)))
                 .shippingAddress(
-                        request.getShippingAddress().isBlank() ?
-                                buyerOpt.get().getDefaultShippingAddress() :
-                                request.getShippingAddress()
-                )
+                        request.getShippingAddress().isBlank() ? buyerOpt.get().getStreet()
+                                : request.getShippingAddress())
                 .phoneNumber(
-                        request.getPhoneNumber().isBlank() ?
-                                buyerOpt.get().getPhoneNumber() :
-                                request.getPhoneNumber()
-                )
+                        request.getPhoneNumber().isBlank() ? buyerOpt.get().getPhoneNumber() : request.getPhoneNumber())
                 .transactions(null)
                 .price(postProductOpt.get().getPrice())
                 .status(OrderStatus.PENDING)
@@ -228,7 +222,7 @@ public class BuyerServiceImpl {
     }
 
     public Order placeOrder(PlaceOrderRequest request, String shippingFee) throws Exception {
-        //kiểm tra các thứ
+        // kiểm tra các thứ
         if (!isBuyerExisted(request.getUsername())) {
             throw new ProfileException("User is not existed");
         }
@@ -249,25 +243,19 @@ public class BuyerServiceImpl {
 
         ShippingPartner shippingPartner = shippingPartnerRepository.findById(request.getShippingPartnerId())
                 .orElseThrow(
-                        () -> new Exception("Shipping Partner is not existed")
-                );
+                        () -> new Exception("Shipping Partner is not existed"));
 
-        //tạo mới một đơn hàng
+        // tạo mới một đơn hàng
         Order newOrder = Order.builder()
                 .admin(null)
                 .postProduct(postProductOpt.get())
                 .buyer(buyerOpt.get())
                 .orderCode(null)
                 .shippingAddress(
-                        request.getShippingAddress().isBlank() ?
-                                buyerOpt.get().getDefaultShippingAddress() :
-                                request.getShippingAddress()
-                )
+                        request.getShippingAddress().isBlank() ? buyerOpt.get().getStreet()
+                                : request.getShippingAddress())
                 .phoneNumber(
-                        request.getPhoneNumber().isBlank() ?
-                                buyerOpt.get().getPhoneNumber() :
-                                request.getPhoneNumber()
-                )
+                        request.getPhoneNumber().isBlank() ? buyerOpt.get().getPhoneNumber() : request.getPhoneNumber())
                 .shippingPartner(shippingPartner)
                 .shippingFee(new BigDecimal(shippingFee))
                 .transactions(null)
@@ -284,8 +272,6 @@ public class BuyerServiceImpl {
         newOrder.setOrderCode(shippingCode);
         return orderRepository.save(newOrder);
     }
-
-
 
     public Wallet getWallet() {
         Buyer buyer = getCurrentUser();
