@@ -54,7 +54,7 @@ public class BuyerServiceImpl {
 //        // Check date and parse into LocalDate
 ////        LocalDate dob = dateUtils.parseAndValidateDob(request.getDob());
         LocalDate dob = LocalDate.parse(request.getDob());
-        log.info(">>> Profile request: {}", request.toString());
+        log.info(">>> [Buyer service] Profile request: {}", request.toString());
 
         try {
             if(!avatarFile.isEmpty() && !avatarFile.isEmpty()) {
@@ -85,6 +85,7 @@ public class BuyerServiceImpl {
         try {
             log.info(">>> [Update user profile service] Starting update profile service");
             Buyer buyer = getCurrentUser();
+            log.info(">>> [Update user profile service] Buyer's information: {}", buyer);
             Long id = buyer.getBuyerId();
 
             log.info(">>> [Update profile services] profile request: {}.", request);

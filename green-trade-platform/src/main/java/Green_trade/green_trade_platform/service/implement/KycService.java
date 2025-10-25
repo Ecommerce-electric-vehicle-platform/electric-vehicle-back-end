@@ -59,10 +59,10 @@ public class KycService {
     ) throws IOException {
         Buyer buyer = buyerService.getCurrentUser();
 
-        log.info(">>> Buyer's full name: {}", buyer.getFullName());
+        log.info(">>> [KYC service] username: {}", buyer.getUsername());
 
         // Check buyer profile
-        if("Not have yet".equalsIgnoreCase(buyer.getFullName())) {
+        if(buyer.getFullName() == null) {
             throw new ProfileException("Hoàn tất hồ sơ người dùng trước khi nâng cáp tài khoản");
         }
 
