@@ -1,10 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.controller.NotificationSocketController;
-import Green_trade.green_trade_platform.enumerate.AccountType;
-import Green_trade.green_trade_platform.enumerate.DisputeDecision;
-import Green_trade.green_trade_platform.enumerate.DisputeStatus;
-import Green_trade.green_trade_platform.enumerate.ResolutionType;
+import Green_trade.green_trade_platform.enumerate.*;
 import Green_trade.green_trade_platform.mapper.DisputeMapper;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.DisputeCategoryRepository;
@@ -52,7 +49,7 @@ public class DisputeServiceImpl implements DisputeService {
                             () -> new Exception("Order is not existed")
                     );
 //            log.info(">>> disputedOrder: {}", disputedOrder.toString());
-            if(!disputedOrder.getStatus().equalsIgnoreCase("COMPLETED")) {
+            if(!disputedOrder.getStatus().equals(OrderStatus.COMPLETED)) {
                 throw new Exception("Only completed order can be dispute");
             }
             Dispute newDispute = Dispute.builder()
