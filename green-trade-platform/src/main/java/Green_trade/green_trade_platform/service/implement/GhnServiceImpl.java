@@ -17,10 +17,13 @@ import java.util.*;
 public class GhnServiceImpl {
 
     @Value("${ghn.token}")
-    private static String TOKEN;
+    private String TOKEN;
 
     public String createOrder(Map<String, Object> requestBody, String shopId) {
         RestTemplate restTemplate = new RestTemplate();
+
+        log.info(">>> ghnToken: {}", TOKEN);
+        log.info(">>> requestBody in createOrderShippingAPI: {}", requestBody);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -295,6 +298,7 @@ public class GhnServiceImpl {
         Map<String, Object> bodyData = getShippingFeeServiceBodyRequest(buyer, seller, postProduct, codValue);
 
         String resultString = getShippingFee(bodyData, seller.getGhnShopId());
+        log.info(">>> resultInString: {}", resultString);
 
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode root = objectMapper.readTree(resultString);

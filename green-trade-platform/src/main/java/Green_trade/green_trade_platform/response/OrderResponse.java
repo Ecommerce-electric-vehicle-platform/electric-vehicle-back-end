@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.response;
 
+import Green_trade.green_trade_platform.enumerate.OrderStatus;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +27,7 @@ public class OrderResponse {
 
     private BigDecimal shippingFee;
 
-    private String status;
+    private OrderStatus status;
 
     private LocalDateTime createdAt;
 
