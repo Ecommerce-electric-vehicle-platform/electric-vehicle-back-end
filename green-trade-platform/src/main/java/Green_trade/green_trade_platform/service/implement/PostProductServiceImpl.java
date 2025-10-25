@@ -223,4 +223,9 @@ public class PostProductServiceImpl implements PostProductService {
         return postProductRepository.save(postProduct);
     }
 
+    public PostProduct updateSoldStatus(boolean status, PostProduct postProduct) {
+        postProduct.setSold(status);
+        return postProductRepository.save(postProduct);
+    }
+
 }

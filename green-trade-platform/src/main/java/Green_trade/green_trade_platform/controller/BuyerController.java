@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.enumerate.OrderStatus;
+import Green_trade.green_trade_platform.exception.PaymentMethodNotSupportedException;
 import Green_trade.green_trade_platform.exception.PostProductNotFound;
 import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
 import Green_trade.green_trade_platform.exception.SelfPurchaseNotAllowedException;
@@ -16,10 +17,7 @@ import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.response.BuyerResponse;
 import Green_trade.green_trade_platform.response.OrderResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
-import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
-import Green_trade.green_trade_platform.service.implement.GhnServiceImpl;
-import Green_trade.green_trade_platform.service.implement.OrderServiceImpl;
-import Green_trade.green_trade_platform.service.implement.TransactionServiceImpl;
+import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
@@ -54,6 +52,7 @@ public class BuyerController {
     private final TransactionRepository transactionRepository;
     private final OrderRepository orderRepository;
     private final OrderServiceImpl orderService;
+    private final PostProductServiceImpl postProductService;
 
     @Operation(
             summary = "Upload buyer profile",
@@ -211,7 +210,7 @@ public class BuyerController {
 
         log.info(">>> Fetch payment");
         Payment payment = paymentRepository.findById(request.getPaymentId()).orElseThrow(
-                () -> new Exception("Payment method is not existed")
+                () -> new PaymentMethodNotSupportedException()
         );
 
         log.info(">>> Fetch buyer");
@@ -286,6 +285,7 @@ public class BuyerController {
             responseData = orderMapper.toDto(newOrder);
             log.info(">>> Passed created response");
         }
+        postProductService.updateSoldStatus(true, postProduct);
 
         log.info(">>> Build response");
         response = responseMapper.toDto(

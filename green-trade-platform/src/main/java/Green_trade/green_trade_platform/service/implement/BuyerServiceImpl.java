@@ -1,9 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.enumerate.OrderStatus;
-import Green_trade.green_trade_platform.exception.DuplicateProfileException;
-import Green_trade.green_trade_platform.exception.ProfileNotFoundException;
-import Green_trade.green_trade_platform.exception.WalletNotFoundException;
+import Green_trade.green_trade_platform.exception.*;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.request.PlaceOrderRequest;
@@ -149,7 +147,7 @@ public class BuyerServiceImpl {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         return buyerRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User is not existed: " + username));
+                .orElseThrow(() -> new ProfileNotFoundException("User is not existed: " + username));
     }
 
     public Buyer getBuyerFromVnPayRequest(String vnpOtherType) {
@@ -191,11 +189,11 @@ public class BuyerServiceImpl {
         }
 
         if (postProductOpt.isEmpty()) {
-            throw new Exception("Post is not existed");
+            throw new PostProductNotFound();
         }
 
         if (postProductOpt.get().isSold()) {
-            throw new Exception("The product has been sold");
+            throw new ProductSoldOutException();
         }
 
         //tạo mới một đơn hàng
@@ -246,11 +244,11 @@ public class BuyerServiceImpl {
 
         Optional<PostProduct> postProductOpt = postProductRepository.findById(request.getPostProductId());
         if (postProductOpt.isEmpty()) {
-            throw new Exception("Post is not existed");
+            throw new PostProductNotFound();
         }
 
         if (postProductOpt.get().isSold()) {
-            throw new Exception("The product has been sold");
+            throw new ProductSoldOutException();
         }
 
         ShippingPartner shippingPartner = shippingPartnerRepository.findById(request.getShippingPartnerId())
