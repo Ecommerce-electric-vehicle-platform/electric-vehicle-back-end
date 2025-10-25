@@ -13,10 +13,16 @@ import Green_trade.green_trade_platform.response.SubscriptionResponse;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -37,8 +43,51 @@ public class SellerController {
     private final PostProductMapper postProductMapper;
 
     @PreAuthorize("hasRole('ROLE_SELLER')")
-    @Operation(summary = "Verify Service Package Validity",
-                description = "Return a result to verify that service package is valid")
+    @Operation(
+            summary = "Verify Service Package Validity",
+            description = """
+                This endpoint allows a **seller** to verify whether their current service package is still valid.
+                <br><br>
+                Workflow:
+                <ul>
+                    <li>Checks the service subscription associated with the seller's username.</li>
+                    <li>Returns whether the package is valid and the expiry date.</li>
+                </ul>
+                """,
+            parameters = {
+                    @Parameter(
+                            name = "username",
+                            description = "Username of the seller whose service package needs to be verified",
+                            required = true,
+                            example = "eco_seller01"
+                    )
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Service package validity checked successfully",
+                            content = @Content(
+                                    schema = @Schema(implementation = RestResponse.class),
+                                    examples = @ExampleObject(
+                                            name = "Valid Service Package",
+                                            value = """
+                                                {
+                                                  "success": true,
+                                                  "message": "Service Package is valid",
+                                                  "data": {
+                                                    "valid": true,
+                                                    "expiryDate": "2025-12-31T23:59:59",
+                                                    "packageName": "Premium Seller Plan"
+                                                  },
+                                                  "error": null
+                                                }
+                                                """
+                                    )
+                            )
+                    )
+            },
+            tags = {"Seller Management"}
+    )
     @PostMapping("/{username}/check-service-package-validity")
     public ResponseEntity<RestResponse<SubscriptionResponse, Object>> checkServicePackageValidity(@PathVariable String username) throws Exception {
         SubscriptionResponse result = sellerService.checkServicePackageValidity(username);
@@ -52,8 +101,85 @@ public class SellerController {
     }
 
     @PreAuthorize("hasRole('ROLE_SELLER')")
-    @Operation(summary = "Upload Post For Selling Product Of Seller",
-                description = "Return result of uploading products")
+    @Operation(
+            summary = "Upload a product post for selling",
+            description = """
+                This endpoint allows a **seller** to upload a new post for a product they want to sell.
+                <br><br>
+                The request consists of:
+                <ul>
+                    <li>Product details (title, brand, model, price, etc.) in form-data.</li>
+                    <li>One or more product images uploaded as multipart files.</li>
+                </ul>
+                The response returns the created post details after saving it successfully.
+                """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "Product post data and uploaded images",
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(implementation = UploadPostProductRequest.class),
+                            examples = @ExampleObject(
+                                    name = "Example Request",
+                                    value = """
+                                        {
+                                          "sellerId": 5,
+                                          "title": "Used Electric Bike",
+                                          "brand": "Yadea",
+                                          "model": "X5",
+                                          "manufactureYear": 2022,
+                                          "usedDuration": "6 months",
+                                          "conditionLevel": "Good",
+                                          "price": 850.00,
+                                          "length": "150",
+                                          "width": "60",
+                                          "height": "110",
+                                          "weight": "25",
+                                          "description": "Lightly used electric bike in perfect condition.",
+                                          "locationTrading": "Ho Chi Minh City",
+                                          "categoryId": 3
+                                        }
+                                        """
+                            )
+                    )
+            ),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Product post uploaded successfully",
+                            content = @Content(
+                                    schema = @Schema(implementation = RestResponse.class),
+                                    examples = @ExampleObject(
+                                            name = "Success Response",
+                                            value = """
+                                                {
+                                                  "success": true,
+                                                  "message": "UPLOADED POST SUCCESSFULLY",
+                                                  "data": {
+                                                    "postId": 101,
+                                                    "sellerId": 5,
+                                                    "sellerStoreName": "EcoRider Shop",
+                                                    "title": "Used Electric Bike",
+                                                    "brand": "Yadea",
+                                                    "model": "X5",
+                                                    "manufactureYear": 2022,
+                                                    "usedDuration": "6 months",
+                                                    "conditionLevel": "Good",
+                                                    "verifiedDecisionStatus": "PENDING",
+                                                    "verified": false,
+                                                    "active": true,
+                                                    "categoryName": "Electric Vehicles",
+                                                    "price": 850.00,
+                                                    "locationTrading": "Ho Chi Minh City"
+                                                  }
+                                                }
+                                                """
+                                    )
+                            )
+                    )
+            },
+            tags = {"Seller Management"}
+    )
     @PostMapping("/post-products")
     public ResponseEntity<RestResponse<PostProductResponse, Object>> uploadPostProduct(
             @ModelAttribute UploadPostProductRequest request,

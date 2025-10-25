@@ -140,7 +140,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
-//    @PreAuthorize("hasRole('ROLE_SELLER')")
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Decide Post Product Verified API",
             description = "Return a result show that post product decision")
     @PostMapping("/review-post-product-decision")
