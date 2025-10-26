@@ -198,6 +198,24 @@ public class SellerController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
+    @PostMapping("/upload-pictures-cloudinary/{id}")
+    public ResponseEntity<RestResponse<PostProductResponse, Object>> uploadPostProduct(
+            @PathVariable Long id,
+            @RequestPart("pictures") List<MultipartFile> files
+    ) throws Exception {
+        log.info(">>> Passed came uploadPostProduct");
+        log.info(">>> Passed mapped files data: {}", files);
+        PostProduct newPostProduct = postProductService.uploadPostProductPicture(id, files);
+        PostProductResponse responseData = postProductMapper.toDto(newPostProduct);
+        RestResponse<PostProductResponse, Object> response = responseMapper.toDto(
+                true,
+                "UPLOADED POST PICTURES SUCCESSFULLY",
+                responseData,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+    }
+
     @PreAuthorize("hasRole('ROLER_SELLER')")
     @Operation(summary = "Request verified for post product",
                 description = "Retrun result that the request has been sent")
