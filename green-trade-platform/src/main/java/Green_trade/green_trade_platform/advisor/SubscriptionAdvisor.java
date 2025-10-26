@@ -3,6 +3,7 @@ package Green_trade.green_trade_platform.advisor;
 import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.response.RestResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,10 +12,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.Map;
 
 @RestControllerAdvice
-public class SubscriptionExpiredAdvisor {
+@Slf4j
+public class SubscriptionAdvisor {
+
     private final ResponseMapper responseMapper;
 
-    public SubscriptionExpiredAdvisor(ResponseMapper responseMapper) {
+    public SubscriptionAdvisor(ResponseMapper responseMapper) {
         this.responseMapper = responseMapper;
     }
 
