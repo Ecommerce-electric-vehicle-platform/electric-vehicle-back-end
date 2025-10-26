@@ -5,6 +5,8 @@ import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.model.Admin;
 import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.model.Seller;
+import Green_trade.green_trade_platform.repository.SellerRepository;
 import Green_trade.green_trade_platform.request.*;
 import Green_trade.green_trade_platform.response.AuthResponse;
 import Green_trade.green_trade_platform.response.BuyerResponse;
@@ -17,20 +19,25 @@ import Green_trade.green_trade_platform.util.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/auth")
+@AllArgsConstructor
 public class AuthController {
 
     private final BuyerMapper buyerMapper;
@@ -41,28 +48,10 @@ public class AuthController {
     private RedisTokenService redisTokenService;
     private AuthServiceImpl authService;
     private AuthMapper authMapper;
-
-    public AuthController (
-            SignInServiceImpl signInService,
-            SignUpServiceImpl signUpService,
-            ResponseMapper responseMapper,
-            JwtUtils jwtUtils,
-            RedisTokenService redisTokenService,
-            AuthServiceImpl authService,
-            AuthMapper authMapper, BuyerMapper buyerMapper) {
-        this.signInService = signInService;
-        this.signUpService = signUpService;
-        this.responseMapper = responseMapper;
-        this.jwtUtils = jwtUtils;
-        this.redisTokenService = redisTokenService;
-        this.authService = authService;
-        this.authMapper = authMapper;
-        this.buyerMapper = buyerMapper;
-    }
-
+    private SellerRepository sellerRepository;
 
     private final long REFRESH_EXPIRE_TIME = 7L * 24 * 60 * 60 * 1000; // 7 days
-    private final long ACCESS_EXPIRE_TIME = 15 * 60 * 1000; // 15 minutes
+    private final long ACCESS_EXPIRE_TIME = 7L * 24 * 60 * 60 * 1000; // 15 * 60 * 1000; // 15 minutes
 //    private final long ACCESS_EXPIRE_TIME = 30 * 1000; // 30 seconds
 
     @Operation(
@@ -95,6 +84,13 @@ public class AuthController {
             redisTokenService.saveTokenToRedis(user.getEmail(), refreshToken, REFRESH_EXPIRE_TIME);
 
             AuthResponse authResponse = authMapper.toDto(user, accessToken, refreshToken);
+
+            Optional<Seller> seller = sellerRepository.findByBuyer(user);
+            if(seller.isPresent()) {
+                authResponse.setRole("ROLE_SELLER");
+            } else {
+                authResponse.setRole("ROLE_BUYER");
+            }
 
             log.info(">>> [Auth Controller] Ending sign in controller");
             return ResponseEntity.ok(responseMapper.toDto(

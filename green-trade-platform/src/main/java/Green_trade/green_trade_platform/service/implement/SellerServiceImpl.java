@@ -136,7 +136,7 @@ public class SellerServiceImpl implements SellerService {
                     .createdAt(LocalDateTime.now())
                     .build();
         }
-
+        notificationRepository.save(notice);
         response.setNotification(notice);
         return response;
     }
