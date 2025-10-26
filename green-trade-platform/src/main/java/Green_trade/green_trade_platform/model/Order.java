@@ -31,24 +31,24 @@ public class Order {
     @Column(name = "order_code", nullable = true, unique = true)
     private String orderCode;
 
-    @Column(name = "shipping_address", nullable = false, unique = false)
+    @Column(name = "shipping_address", nullable = true, unique = false)
     private String shippingAddress;
 
-    @Column(name = "phone_number", nullable = false, unique = false)
+    @Column(name = "phone_number", nullable = true, unique = false)
     private String phoneNumber;
 
-    @Column(name = "price",  nullable = false, unique = false)
+    @Column(name = "price",  nullable = true, unique = false)
     private BigDecimal price;
 
-    @Column(name = "shipping_fee", nullable = false, unique = false)
+    @Column(name = "shipping_fee", nullable = true, unique = false)
     private BigDecimal shippingFee;
 
-    @Column(name = "status", nullable = false, unique = false)
+    @Column(name = "status", nullable = true, unique = false)
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    @Column(name = "created_at", nullable = false, unique = false)
+    @Column(name = "created_at", nullable = true, unique = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = true, unique = false)

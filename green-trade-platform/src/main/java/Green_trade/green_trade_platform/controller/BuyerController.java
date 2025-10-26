@@ -4,7 +4,6 @@ import Green_trade.green_trade_platform.enumerate.OrderStatus;
 import Green_trade.green_trade_platform.exception.PaymentMethodNotSupportedException;
 import Green_trade.green_trade_platform.exception.PostProductNotFound;
 import Green_trade.green_trade_platform.exception.ProfileException;
-import Green_trade.green_trade_platform.exception.ProfileException;
 import Green_trade.green_trade_platform.exception.SelfPurchaseNotAllowedException;
 import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.mapper.OrderMapper;
@@ -57,6 +56,7 @@ public class BuyerController {
     private final OrderRepository orderRepository;
     private final OrderServiceImpl orderService;
     private final PostProductServiceImpl postProductService;
+    private final PaymentServiceImpl paymentService;
 
     @Operation(
             summary = "Upload buyer profile",
@@ -250,20 +250,25 @@ public class BuyerController {
         String shippingFee = "0";
 
         log.info(">>> Fetch payment");
-        Payment payment = paymentRepository.findById(request.getPaymentId()).orElseThrow(
-                () -> new PaymentMethodNotSupportedException()
-        );
+        Payment payment = paymentService.findPaymentMethodById(request.getPaymentId());
+        if(payment == null) {
+            throw new PaymentMethodNotSupportedException();
+        }
 
         log.info(">>> Fetch buyer");
-        Buyer buyer = buyerRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new ProfileException("Buyer is not existed"));
+        Buyer buyer = buyerService.findBuyerByUsername(request.getUsername());
+        if(buyer == null) {
+            throw new ProfileException("Buyer with Username: " + request.getUsername() + "is not existed");
+        }
 
         log.info(">>> Fetch post product");
-        PostProduct postProduct = postProductRepository.findById(request.getPostProductId())
-                .orElseThrow(() -> new PostProductNotFound());
+        PostProduct postProduct = postProductService.findPostProductById(request.getPostProductId());
+        if(postProduct == null) {
+            throw new PostProductNotFound();
+        }
 
         if (buyer.getBuyerId() == postProduct.getSeller().getBuyer().getBuyerId()) {
-            throw new Exception("You can not buy your own products");
+            throw new SelfPurchaseNotAllowedException();
         }
 
         log.info(">>> Calculate shipping fee");
@@ -271,14 +276,14 @@ public class BuyerController {
             log.info(">>> Calculate shipping fee COD");
             shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, postProduct.getPrice().intValue()).get("total");
         } else {
-            log.info(">>> Calculate shipping fee Online");
+            log.info(">>> Calculate shipping fee Online Payment");
             shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, 0).get("total");
         }
 
         log.info(">>> Place new order");
         newOrder = buyerService.placeOrder(request, shippingFee);
 
-        if (payment.getGatewayName().equals("COD")) {
+        if ("COD".equalsIgnoreCase(payment.getGatewayName())) {
             log.info(">>> COD payment flow");
             Transaction transaction = transactionService.checkoutCODPayment(
                     request.getUsername(),
@@ -286,20 +291,20 @@ public class BuyerController {
                     request.getPaymentId(),
                     newOrder
             );
+
             List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
             log.info(">>> Passed get transactions");
-            newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
+
+            newOrder = orderService.updateOrderTransactions(newOrder, transactions);
             log.info(">>> Passed update transactions");
+
             String orderShippingCode = ghnService.createOrderShippingResponseToDto(
                     newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()).get("orderCode");
             log.info(">>> Passed get orderShippingCode");
             log.info(">>> orderShippingCode: {}", orderShippingCode);
-            newOrder.setOrderCode(orderShippingCode);
+
+            newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
             log.info(">>> Passed set Order Code");
-            newOrder = orderRepository.save(newOrder);
-            log.info(">>> Passed saved newOrder");
-            responseData = orderMapper.toDto(newOrder);
-            log.info(">>> Passed created response");
         } else {
             log.info(">>> Wallet payment flow");
             Transaction transaction = transactionService.checkoutWalletPayment(
@@ -310,22 +315,23 @@ public class BuyerController {
             );
             List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
             log.info(">>> Passed get transactions");
-            newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
-            newOrder = buyerService.updateOrderStatus(newOrder, OrderStatus.PAID);
-            // Nghi ngo loi
+
+            newOrder = orderService.updateOrderTransactions(newOrder, transactions);
+            log.info(">>> Passed update transactions for order");
+
+            newOrder = orderService.updateOrderStatus(newOrder, OrderStatus.PAID);
+            log.info(">>> Passed update order status");
+
             String orderShippingCode = ghnService.createOrderShippingResponseToDto(
                     newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()).get("orderCode");
-            Map<String, String> test = ghnService.createOrderShippingResponseToDto(
-                    newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment());
-            log.info(">>> test: {}", test);
             log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
-            newOrder.setOrderCode(orderShippingCode);
+
+            newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
             log.info(">>> Passed set Order Code");
-            newOrder = orderRepository.save(newOrder);
-            log.info(">>> Passed saved newOrder");
-            responseData = orderMapper.toDto(newOrder);
-            log.info(">>> Passed created response");
         }
+        responseData = orderMapper.toDto(newOrder);
+        log.info(">>> Passed created response");
+
         postProductService.updateSoldStatus(true, postProduct);
 
         log.info(">>> Build response");

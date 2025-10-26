@@ -12,6 +12,7 @@ import Green_trade.green_trade_platform.request.ProfileRequest;
 import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.util.DateUtils;
 import Green_trade.green_trade_platform.util.FileUtils;
+import Green_trade.green_trade_platform.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -38,6 +39,7 @@ public class BuyerServiceImpl {
     private final PaymentRepository paymentRepository;
     private final TransactionRepository transactionRepository;
     private final ShippingPartnerRepository shippingPartnerRepository;
+    private final StringUtils stringUtils;
     private WalletServiceImpl walletService;
     private PostProductRepository postProductRepository;
 
@@ -195,10 +197,14 @@ public class BuyerServiceImpl {
         Order newOrder = Order.builder()
                 .admin(null)
                 .buyer(buyerOpt.get())
-                .orderCode(String.format("%09d", new Random().nextInt(1_000_000_000)))
+                .orderCode(null)
                 .shippingAddress(
-                        request.getShippingAddress().isBlank() ? buyerOpt.get().getStreet()
-                                : request.getShippingAddress())
+                        stringUtils.fullAddress(
+                                request.getStreet(),
+                                request.getWardName(),
+                                request.getDistrictName(),
+                                request.getProvinceName())
+                )
                 .phoneNumber(
                         request.getPhoneNumber().isBlank() ? buyerOpt.get().getPhoneNumber() : request.getPhoneNumber())
                 .transactions(null)
@@ -209,16 +215,6 @@ public class BuyerServiceImpl {
                 .build();
 
         return orderRepository.save(newOrder);
-    }
-
-    public Order updateOrderStatus(Order order, OrderStatus status) {
-        order.setStatus(status);
-        return orderRepository.save(order);
-    }
-
-    public Order updateOrderTransactions(Order order, List<Transaction> transactions) {
-        order.setTransactions(transactions);
-        return orderRepository.save(order);
     }
 
     public Order placeOrder(PlaceOrderRequest request, String shippingFee) throws Exception {
@@ -252,8 +248,12 @@ public class BuyerServiceImpl {
                 .buyer(buyerOpt.get())
                 .orderCode(null)
                 .shippingAddress(
-                        request.getShippingAddress().isBlank() ? buyerOpt.get().getStreet()
-                                : request.getShippingAddress())
+                        stringUtils.fullAddress(
+                                request.getStreet(),
+                                request.getWardName(),
+                                request.getDistrictName(),
+                                request.getProvinceName())
+                )
                 .phoneNumber(
                         request.getPhoneNumber().isBlank() ? buyerOpt.get().getPhoneNumber() : request.getPhoneNumber())
                 .shippingPartner(shippingPartner)
@@ -271,6 +271,15 @@ public class BuyerServiceImpl {
     public Order updateOrderCode(Order newOrder, String shippingCode) {
         newOrder.setOrderCode(shippingCode);
         return orderRepository.save(newOrder);
+    }
+
+    public Buyer findBuyerByUsername(String username) {
+        Buyer foundBuyer = null;
+        Optional<Buyer> buyerOpt = buyerRepository.findByUsername(username);
+        if(buyerOpt.isPresent()) {
+            foundBuyer = buyerOpt.get();
+        }
+        return foundBuyer;
     }
 
     public Wallet getWallet() {
