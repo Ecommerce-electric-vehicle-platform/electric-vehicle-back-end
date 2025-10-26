@@ -7,12 +7,12 @@ import Green_trade.green_trade_platform.exception.ProfileException;
 import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
-import Green_trade.green_trade_platform.request.NeedVerifyPostRequest;
 import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
 import Green_trade.green_trade_platform.request.VerifiedPostProductRequest;
 import Green_trade.green_trade_platform.service.PostProductService;
 import Green_trade.green_trade_platform.util.FileUtils;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -141,6 +141,40 @@ public class PostProductServiceImpl implements PostProductService {
             throw e;
         }
     }
+
+    public PostProduct uploadPostProductPicture(
+            Long id,
+            List<MultipartFile> files
+    ) throws Exception {
+        try {
+            List<PostProduct> postProducts = postProductRepository.findAll();
+            PostProduct newPost = postProductRepository.findById(id).orElseThrow(() -> new ProfileException("Post Product is not existed"));
+            postProducts.forEach((postProduct) -> {
+                for(int i = 0; i <= files.size() - 1; i++) {
+                    try {
+                        Map<String, String> uploadResult = cloudinaryService.upload(files.get(i), "PostImages/" + postProduct.getId() + ":" + postProduct.getSeller().getBuyer().getUsername() + "/product_image_" + i);
+                        String imageUrl =uploadResult.get("fileUrl");
+                        log.info(">>> Passed uploaded picture {}", i);
+                        ProductImage productImage = ProductImage.builder()
+                                .imageUrl(imageUrl)
+                                .orderImage((long) i + 1)
+                                .postProduct(postProduct)
+                                .build();
+                        productImageRepository.save(productImage);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+            log.info(">>> Passed uploaded file");
+
+            return newPost;
+        } catch (Exception e) {
+            log.info(">>> Error at createNewPostProduct: {}", e.getMessage());
+            throw e;
+        }
+    }
+
 
 
     public Page<PostProduct> getAllProductPaging(int page, int size) {

@@ -23,4 +23,9 @@ public class StringUtils {
 
         return formattedName.toString().trim();
     }
+
+    public String fullAddress(String street, String wardName, String districtName, String provinceName) {
+        String fullAddress = String.format("%s, %s, %s, %s", street, wardName, districtName, provinceName);
+        return fullAddress;
+    }
 }
