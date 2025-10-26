@@ -57,6 +57,7 @@ public class BuyerController {
     private final OrderServiceImpl orderService;
     private final PostProductServiceImpl postProductService;
     private final PaymentServiceImpl paymentService;
+    private final SystemWalletServiceImpl systemWalletService;
 
     @Operation(
             summary = "Upload buyer profile",
@@ -313,6 +314,7 @@ public class BuyerController {
                     request.getPaymentId(),
                     newOrder
             );
+            SystemWallet systemWallet = systemWalletService.createEscrowRecord(newOrder);
             List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
             log.info(">>> Passed get transactions");
 
