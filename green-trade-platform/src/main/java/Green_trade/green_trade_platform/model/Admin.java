@@ -77,6 +77,7 @@ public class Admin {
 
     @OneToMany(mappedBy = "admin", fetch = FetchType.LAZY)
     @ToString.Exclude
+    @JsonManagedReference
     private List<Seller> sellers;
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -13,9 +13,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("/api/v1/notifications")
+@RestController()
 @Slf4j
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/notifications")
 public class NotificationController {
     private final NotificationServiceImpl notificationService;
     private final NotificationSocketController socketController;

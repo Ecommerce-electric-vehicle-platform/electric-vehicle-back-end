@@ -16,7 +16,7 @@ public class NotificationSocketController {
 
     // Called by services when new notifications are created
     public void sendUpgradeNotificationToUser(ApproveSellerResponse notification) {
-        log.info(">>> [Notification Socket Controller]: {}", notification);
+        log.info(">>> [Notification Socket Controller] Send upgrade notification to user: {}", notification);
         String destination = "/queue/notifications/" + notification.getSellerId();
         messagingTemplate.convertAndSend(destination, notification);
     }
