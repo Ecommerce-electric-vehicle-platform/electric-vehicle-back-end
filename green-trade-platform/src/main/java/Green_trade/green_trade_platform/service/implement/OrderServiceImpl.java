@@ -1,7 +1,9 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.enumerate.OrderStatus;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Order;
+import Green_trade.green_trade_platform.model.Transaction;
 import Green_trade.green_trade_platform.repository.OrderRepository;
 import Green_trade.green_trade_platform.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +11,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -46,5 +49,20 @@ public class OrderServiceImpl implements OrderService {
         }
         log.info(">>> save order service: {}", data.toString());
         return data;
+    }
+
+    public Order updateOrderCode(String orderCode, Order order) {
+        order.setOrderCode(orderCode);
+        return orderRepository.save(order);
+    }
+
+    public Order updateOrderTransactions(Order order, List<Transaction> transactions) {
+        order.setTransactions(transactions);
+        return orderRepository.save(order);
+    }
+
+    public Order updateOrderStatus(Order order, OrderStatus status) {
+        order.setStatus(status);
+        return orderRepository.save(order);
     }
 }

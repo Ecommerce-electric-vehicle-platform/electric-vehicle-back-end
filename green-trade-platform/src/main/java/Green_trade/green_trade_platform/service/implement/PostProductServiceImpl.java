@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -263,6 +264,15 @@ public class PostProductServiceImpl implements PostProductService {
     public PostProduct updateSoldStatus(boolean status, PostProduct postProduct) {
         postProduct.setSold(status);
         return postProductRepository.save(postProduct);
+    }
+
+    public PostProduct findPostProductById(Long id) {
+        PostProduct foundPostProduct = null;
+        Optional<PostProduct> postProductOpt = postProductRepository.findById(id);
+        if(postProductOpt.isPresent()) {
+            foundPostProduct = postProductOpt.get();
+        }
+        return foundPostProduct;
     }
 
 }

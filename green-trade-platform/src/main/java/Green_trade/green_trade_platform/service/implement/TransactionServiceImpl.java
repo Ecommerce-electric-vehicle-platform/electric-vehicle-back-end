@@ -55,12 +55,13 @@ public class TransactionServiceImpl implements TransactionService {
             if(paymentOpt.isEmpty()) {
                 throw new PaymentMethodNotSupportedException();
             }
-            if(!buyerService.isBuyerExisted(username)) {
-                throw new ProfileException("Buyer is not existed");
+
+            Buyer buyer = buyerService.findBuyerByUsername(username);
+
+            if(buyer == null) {
+                throw new ProfileException("Buyer with Username: " + username + "is not existed");
             }
 
-            Buyer buyer = buyerRepository.findByUsername(username)
-                    .orElseThrow(() -> new ProfileException("Buyer is not existed"));
             if(!walletService.isBuyerHasWallet(buyer)) {
                 throw new WalletNotFoundException("The wallet of Buyer is not existed");
             }

@@ -187,14 +187,18 @@ public class SellerController {
             ) throws Exception {
         log.info(">>> Passed came uploadPostProduct");
         log.info(">>> Passed mapped files data: {}", files);
+
         PostProduct newPostProduct = postProductService.createNewPostProduct(request, files);
+
         PostProductResponse responseData = postProductMapper.toDto(newPostProduct);
+
         RestResponse<PostProductResponse, Object> response = responseMapper.toDto(
                 true,
                 "UPLOADED POST SUCCESSFULLY",
                 responseData,
                 null
         );
+
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 

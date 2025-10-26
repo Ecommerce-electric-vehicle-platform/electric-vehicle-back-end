@@ -20,9 +20,11 @@ public class PlaceOrderRequest {
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
     private String username;
 
-    @NotBlank(message = "Shipping address cannot be blank")
-    @Size(max = 255, message = "Shipping address must not exceed 255 characters")
-    private String shippingAddress;
+    private String fullName;
+
+    @NotBlank(message = "Street cannot be blank")
+    @Size(max = 255, message = "Street must not exceed 255 characters")
+    private String street;
 
     private String wardName;
 

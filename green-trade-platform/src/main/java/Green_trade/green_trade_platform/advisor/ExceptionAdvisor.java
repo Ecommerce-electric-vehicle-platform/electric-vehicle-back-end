@@ -20,20 +20,39 @@ public class ExceptionAdvisor {
         this.responseMapper = responseMapper;
     }
 
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<RestResponse<Object, Map<String, String>>> handleExceptionHandler(Exception e) {
-//        RestResponse response = responseMapper.toDto(
-//                false,
-//                "Internal Server Error",
-//                null,
-//                Map.of(
-//                        "origin", e.getStackTrace()[0].toString(),
-//                        "message", e.getMessage(),
-//                        "errorType", e.getClass().getSimpleName()
-//                )
-//        );
-//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
-//    }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<RestResponse<Object, Map<String, String>>> handleExceptionHandler(Exception e) {
+        Throwable rootCause = e;
+        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+            rootCause = rootCause.getCause();
+        }
+
+        List<String> projectStackTraces = Arrays.stream(rootCause.getStackTrace())
+                .filter(ste -> ste.getClassName().startsWith("Green_trade"))
+                .map(StackTraceElement::toString)
+                .toList();
+
+        StackTraceElement originElement = projectStackTraces.isEmpty()
+                ? (rootCause.getStackTrace().length > 0 ? rootCause.getStackTrace()[0] : null)
+                : Arrays.stream(rootCause.getStackTrace())
+                .filter(ste -> ste.getClassName().startsWith("Green_trade"))
+                .findFirst()
+                .orElse(null);
+
+        RestResponse response = responseMapper.toDto(
+                false,
+                "Internal Server Error",
+                null,
+                Map.of(
+                        "origin", e.getStackTrace()[0].toString(),
+                        "message", e.getMessage(),
+                        "errorType", e.getClass().getSimpleName(),
+                        "file", originElement != null ? originElement.getFileName() : "Unknown file",
+                        "lineNumber", originElement != null ? originElement.getLineNumber() : -1
+                )
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+    }
 
 //    @ExceptionHandler(Exception.class)
 //    public ResponseEntity<RestResponse<Object, Map<String, String>>> handleExceptionHandler(Exception e) {
@@ -59,54 +78,54 @@ public class ExceptionAdvisor {
 //        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 //    }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<RestResponse<Object, Map<String, Object>>> handleExceptionHandler(Exception e) {
-        // 🔹 1️⃣ Tìm nguyên nhân gốc (root cause)
-        Throwable rootCause = e;
-        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
-            rootCause = rootCause.getCause();
-        }
-
-        // 🔹 2️⃣ Lấy các stack trace thuộc về project (lọc theo package)
-        List<String> projectStackTraces = Arrays.stream(rootCause.getStackTrace())
-                .filter(ste -> ste.getClassName().startsWith("Green_trade"))
-                .map(StackTraceElement::toString)
-                .toList();
-
-        // 🔹 3️⃣ Lấy dòng đầu tiên trong project làm origin
-        StackTraceElement originElement = projectStackTraces.isEmpty()
-                ? (rootCause.getStackTrace().length > 0 ? rootCause.getStackTrace()[0] : null)
-                : Arrays.stream(rootCause.getStackTrace())
-                .filter(ste -> ste.getClassName().startsWith("Green_trade"))
-                .findFirst()
-                .orElse(null);
-
-        // 🔹 4️⃣ Tạo thông tin lỗi chi tiết
-        Map<String, Object> errorInfo = new LinkedHashMap<>();
-        errorInfo.put("errorType", rootCause.getClass().getName());
-        errorInfo.put("message", rootCause.getMessage());
-        errorInfo.put("file", originElement != null ? originElement.getFileName() : "Unknown file");
-        errorInfo.put("lineNumber", originElement != null ? originElement.getLineNumber() : -1);
-        errorInfo.put("origin", originElement != null ? originElement.toString() : "Unknown origin");
-        errorInfo.put("fullStackTrace", Arrays.stream(rootCause.getStackTrace())
-                .map(StackTraceElement::toString)
-                .toList());
-        errorInfo.put("projectStackTrace", projectStackTraces);
-
-        // 🔹 5️⃣ Gộp message + cause nếu có
-        if (rootCause != e) {
-            errorInfo.put("causedBy", e.getClass().getName() + ": " + e.getMessage());
-        }
-
-        // 🔹 6️⃣ Trả response JSON chi tiết
-        RestResponse<Object, Map<String, Object>> response = responseMapper.toDto(
-                false,
-                "Internal Server Error",
-                null,
-                errorInfo
-        );
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<RestResponse<Object, Map<String, Object>>> handleExceptionHandler(Exception e) {
+//        // 🔹 1️⃣ Tìm nguyên nhân gốc (root cause)
+//        Throwable rootCause = e;
+//        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+//            rootCause = rootCause.getCause();
+//        }
+//
+//        // 🔹 2️⃣ Lấy các stack trace thuộc về project (lọc theo package)
+//        List<String> projectStackTraces = Arrays.stream(rootCause.getStackTrace())
+//                .filter(ste -> ste.getClassName().startsWith("Green_trade"))
+//                .map(StackTraceElement::toString)
+//                .toList();
+//
+//        // 🔹 3️⃣ Lấy dòng đầu tiên trong project làm origin
+//        StackTraceElement originElement = projectStackTraces.isEmpty()
+//                ? (rootCause.getStackTrace().length > 0 ? rootCause.getStackTrace()[0] : null)
+//                : Arrays.stream(rootCause.getStackTrace())
+//                .filter(ste -> ste.getClassName().startsWith("Green_trade"))
+//                .findFirst()
+//                .orElse(null);
+//
+//        // 🔹 4️⃣ Tạo thông tin lỗi chi tiết
+//        Map<String, Object> errorInfo = new LinkedHashMap<>();
+//        errorInfo.put("errorType", rootCause.getClass().getName());
+//        errorInfo.put("message", rootCause.getMessage());
+//        errorInfo.put("file", originElement != null ? originElement.getFileName() : "Unknown file");
+//        errorInfo.put("lineNumber", originElement != null ? originElement.getLineNumber() : -1);
+//        errorInfo.put("origin", originElement != null ? originElement.toString() : "Unknown origin");
+//        errorInfo.put("fullStackTrace", Arrays.stream(rootCause.getStackTrace())
+//                .map(StackTraceElement::toString)
+//                .toList());
+//        errorInfo.put("projectStackTrace", projectStackTraces);
+//
+//        // 🔹 5️⃣ Gộp message + cause nếu có
+//        if (rootCause != e) {
+//            errorInfo.put("causedBy", e.getClass().getName() + ": " + e.getMessage());
+//        }
+//
+//        // 🔹 6️⃣ Trả response JSON chi tiết
+//        RestResponse<Object, Map<String, Object>> response = responseMapper.toDto(
+//                false,
+//                "Internal Server Error",
+//                null,
+//                errorInfo
+//        );
+//
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+//    }
 
 }
