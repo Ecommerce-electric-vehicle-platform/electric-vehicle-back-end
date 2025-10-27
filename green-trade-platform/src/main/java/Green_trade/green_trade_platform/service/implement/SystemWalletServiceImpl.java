@@ -17,9 +17,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class SystemWalletServiceImpl {
     private final SystemWalletRepossitory systemWalletRepossitory;
+    public void handleRefund(SystemWallet systemWallet) {
+        systemWallet.setStatus(SystemWalletStatus.IS_SOLVED);
+        systemWallet.setEndAt(LocalDateTime.now());
+        systemWalletRepossitory.save(systemWallet);
+    }
 
-    public void handleRefund(double percent, RefundResolveRequest request) {
-
+    public SystemWallet getSystemWalletByOrder(Order order) {
+        return systemWalletRepossitory.findByOrder(order).orElseThrow(
+                () -> new IllegalArgumentException("This order does not have any escrow service (system wallet).")
+        );
     }
 
     public SystemWallet createEscrowRecord(Order order) {
