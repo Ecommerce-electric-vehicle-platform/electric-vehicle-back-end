@@ -2,6 +2,7 @@ package Green_trade.green_trade_platform.model;
 
 import Green_trade.green_trade_platform.enumerate.AccountStatus;
 import Green_trade.green_trade_platform.enumerate.Gender;
+import Green_trade.green_trade_platform.enumerate.SystemWalletStatus;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -37,7 +38,8 @@ public class SystemWallet {
     private BigDecimal balance;
 
     @Column(name = "status", nullable = false, unique = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private SystemWalletStatus status;
 
     @Column(name = "created_at", nullable = false, unique = false)
     private LocalDateTime createdAt;

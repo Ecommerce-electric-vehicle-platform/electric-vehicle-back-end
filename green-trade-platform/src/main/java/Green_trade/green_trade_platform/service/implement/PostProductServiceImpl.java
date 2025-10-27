@@ -1,10 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
-import Green_trade.green_trade_platform.exception.ImageUploadLimitExceededException;
-import Green_trade.green_trade_platform.exception.PostProductNotFound;
-import Green_trade.green_trade_platform.exception.ProfileException;
-import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
+import Green_trade.green_trade_platform.exception.*;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
@@ -71,7 +68,9 @@ public class PostProductServiceImpl implements PostProductService {
             List<MultipartFile> files
     ) throws Exception {
         try {
-            Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(request.getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
+            Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(
+                    request.getSellerId()).orElseThrow(() -> new SubscriptionNotFound()
+            );
             Long maxImg = subscription.getSubscriptionPackage().getMaxImgPerPost();
             if (subscription.getEndDay().isBefore(LocalDateTime.now())) {
                 throw new SubscriptionExpiredException();
