@@ -8,5 +8,8 @@ public enum SystemWalletStatus {
     RELEASED,
 
     //tiền hoàn lại cho người mua
-    REFUNDED
+    REFUNDED,
+
+    // Đánh dấu là đã được giải quyết
+    IS_SOLVED
 }

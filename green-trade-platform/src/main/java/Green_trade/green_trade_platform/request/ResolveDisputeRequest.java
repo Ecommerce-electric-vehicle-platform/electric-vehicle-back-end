@@ -16,4 +16,5 @@ public class ResolveDisputeRequest {
     private DisputeDecision decision;
     private String resolution;
     private ResolutionType resolutionType;
+    private double refundPercent;
 }

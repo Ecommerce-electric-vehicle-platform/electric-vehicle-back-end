@@ -17,4 +17,6 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
     void addBalance(@Param("buyerId") Long buyerId, @Param("balance") Long balance);
 
     Optional<Wallet> findByBuyer(Buyer buyer);
+
+    Optional<Wallet> findByWalletId(Long buyerWalletId);
 }

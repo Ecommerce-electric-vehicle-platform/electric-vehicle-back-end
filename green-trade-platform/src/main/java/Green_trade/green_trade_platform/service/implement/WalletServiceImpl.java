@@ -2,6 +2,7 @@ package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.exception.WalletNotFoundException;
 import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.model.SystemWallet;
 import Green_trade.green_trade_platform.model.Wallet;
 import Green_trade.green_trade_platform.model.WalletTransaction;
 import Green_trade.green_trade_platform.repository.WalletRepository;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -85,5 +87,32 @@ public class WalletServiceImpl {
             result = true;
         }
         return result;
+    }
+
+    public Wallet handleBuyerRefund(SystemWallet systemWallet, double refundPercent, Wallet wallet, boolean isSeller) {
+        BigDecimal systemBalance = systemWallet.getBalance();
+        BigDecimal money = systemBalance
+                .multiply(BigDecimal.valueOf(refundPercent))
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        if(!isSeller) {
+            WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, true);
+            log.info(">>> [Wallet Service] Balance before refunding money for buyer: {}", wallet.getBalance());
+            wallet.setBalance(wallet.getBalance().add(money));
+            wallet = walletRepository.save(wallet);
+            log.info(">>> [Wallet Service] Balance after refunding money for buyer: {}", wallet.getBalance());
+        } else {
+            WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, false);
+            log.info(">>> [Wallet Service] Balance before refunding money for seller: {}", wallet.getBalance());
+            wallet.setBalance(wallet.getBalance().add(money));
+            wallet = walletRepository.save(wallet);
+            log.info(">>> [Wallet Service] Balance after refunding money for seller: {}", wallet.getBalance());
+        }
+        return wallet;
+    }
+
+    public Wallet findWalletById(Long buyerWalletId) {
+        return walletRepository.findByWalletId(buyerWalletId).orElseThrow(
+                () -> new IllegalArgumentException("Can not find wallet with this wallet id: " + buyerWalletId)
+        );
     }
 }
