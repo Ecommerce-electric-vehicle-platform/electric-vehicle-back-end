@@ -95,13 +95,13 @@ public class WalletServiceImpl {
                 .multiply(BigDecimal.valueOf(refundPercent))
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         if(!isSeller) {
-            WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, true);
+            WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, true, "Refund money from dispute");
             log.info(">>> [Wallet Service] Balance before refunding money for buyer: {}", wallet.getBalance());
             wallet.setBalance(wallet.getBalance().add(money));
             wallet = walletRepository.save(wallet);
             log.info(">>> [Wallet Service] Balance after refunding money for buyer: {}", wallet.getBalance());
         } else {
-            WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, false);
+            WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, false, "Refund money from dispute");
             log.info(">>> [Wallet Service] Balance before refunding money for seller: {}", wallet.getBalance());
             wallet.setBalance(wallet.getBalance().add(money));
             wallet = walletRepository.save(wallet);

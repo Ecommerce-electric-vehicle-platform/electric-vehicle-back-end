@@ -63,7 +63,7 @@ public class WalletTransactionServiceImpl {
         }
     }
 
-    public WalletTransaction handleRefundMoney(Wallet wallet, BigDecimal money, boolean isRefund) {
+    public WalletTransaction handleRefundMoney(Wallet wallet, BigDecimal money, boolean isRefund, String description) {
         log.info(">>> [Wallet Transaction Service] Handling refund money: Started.");
         try {
             log.info(">>> [Wallet Transaction Service] Started to create wallet transaction.");
@@ -76,7 +76,7 @@ public class WalletTransactionServiceImpl {
                         .balanceBefore(wallet.getBalance())
                         .status(TransactionStatus.SUCCESS)
                         .externalTransactionReference("None")
-                        .description("Refund money from dispute")
+                        .description(description)
                         .build();
             } else {
                 walletTransaction = WalletTransaction.builder()

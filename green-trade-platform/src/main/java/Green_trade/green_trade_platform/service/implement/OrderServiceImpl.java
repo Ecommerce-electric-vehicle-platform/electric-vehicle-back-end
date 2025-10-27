@@ -26,12 +26,14 @@ public class OrderServiceImpl implements OrderService {
     private final TransactionServiceImpl transactionService;
     private final GhnServiceImpl ghnServiceImpl;
     private final WalletTransactionServiceImpl walletTransactionServiceImpl;
+    private final WalletServiceImpl walletService;
 
-    public OrderServiceImpl(OrderRepository orderRepository, TransactionServiceImpl transactionService, GhnServiceImpl ghnServiceImpl, WalletTransactionServiceImpl walletTransactionServiceImpl) {
+    public OrderServiceImpl(OrderRepository orderRepository, TransactionServiceImpl transactionService, GhnServiceImpl ghnServiceImpl, WalletTransactionServiceImpl walletTransactionServiceImpl, WalletServiceImpl walletService) {
         this.orderRepository = orderRepository;
         this.transactionService = transactionService;
         this.ghnServiceImpl = ghnServiceImpl;
         this.walletTransactionServiceImpl = walletTransactionServiceImpl;
+        this.walletService = walletService;
     }
 
     public Page<Order> getOrdersOfCurrentUserPaging(int size, int page, Buyer buyer) {
@@ -91,7 +93,8 @@ public class OrderServiceImpl implements OrderService {
             } else if (orderFound.getStatus().equals(OrderStatus.PAID)) {
                 Transaction transaction = transactionService.createTransaction(orderFound, TransactionStatus.CANCELED, orderFound.getTransactions().getLast().getPayment());
                 orderFound = updateOrderStatus(orderFound, OrderStatus.CANCELED);
-                walletTransactionServiceImpl.refundMoney(orderFound);
+                walletTransactionServiceImpl.handleRefundMoney(orderFound.getBuyer().getWallet(), orderFound.getPrice(), true, "REFUNDED FROM CANCELED ORDER");
+                walletService.handleBuyerRefund(orderFound.getSystemWallet(), 100, orderFound.getBuyer().getWallet(), false);
             } else {
                 throw new Exception("Cannot cancel order");
             }
