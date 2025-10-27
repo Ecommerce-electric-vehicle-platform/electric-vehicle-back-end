@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.controller;
 
+import Green_trade.green_trade_platform.enumerate.SellerStatus;
 import Green_trade.green_trade_platform.mapper.AuthMapper;
 import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
@@ -86,7 +87,7 @@ public class AuthController {
             AuthResponse authResponse = authMapper.toDto(user, accessToken, refreshToken);
 
             Optional<Seller> seller = sellerRepository.findByBuyer(user);
-            if(seller.isPresent()) {
+            if(seller.isPresent() && seller.get().getStatus() == SellerStatus.ACCEPTED) {
                 authResponse.setRole("ROLE_SELLER");
             } else {
                 authResponse.setRole("ROLE_BUYER");
