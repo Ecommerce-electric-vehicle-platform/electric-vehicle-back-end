@@ -25,6 +25,9 @@ public class Review {
     @Column(name = "rating", nullable = true, unique = false)
     private Double rating;
 
+    @Column(name = "feedback", columnDefinition = "TEXT")
+    private String feedback;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     @JsonManagedReference
