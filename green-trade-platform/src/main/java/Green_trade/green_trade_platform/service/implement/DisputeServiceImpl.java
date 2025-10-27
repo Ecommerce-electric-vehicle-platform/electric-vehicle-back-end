@@ -69,18 +69,22 @@ public class DisputeServiceImpl implements DisputeService {
     }
 
     public Page<DisputeResponse> getAllDispute(int page, int size) {
+        log.info(">>> [Dispute Service] Get all disputes: Started.");
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
 
         Page<Dispute> disputes = disputeRepository.findAllByStatus(DisputeStatus.PENDING, pageable);
+        log.info(">>> [Dispute Service] Get all disputes: Get all dispute: {}", disputes.getContent());
 
         List<DisputeResponse> responses = disputes.getContent()
                 .stream().map(disputeMapper::toDto)
                 .toList();
 
+        log.info(">>> [Dispute Service] Get all disputes: Ended.");
         return new PageImpl<>(responses, pageable, disputes.getTotalElements());
     }
 
     public Notification handlePendingDispute(Admin admin, ResolveDisputeRequest request) {
+        log.info(">>> [Dispute service] Handling pending dispute: Started.");
         Map<String, Object> disputeOrder = getOrderByDisputeId(request.getDisputeId());
         Dispute dispute = (Dispute) disputeOrder.get("dispute");
         Order order = (Order) disputeOrder.get("order");
@@ -113,7 +117,7 @@ public class DisputeServiceImpl implements DisputeService {
             notification = Notification.builder()
                     .receiverId(order.getBuyer().getBuyerId())
                     .type(AccountType.BUYER)
-                    .title("REJECT YOUR ORDER DISPUTE")
+                    .title("ACCEPTED YOUR ORDER DISPUTE")
                     .content(request.getResolution())
                     .createdAt(LocalDateTime.now())
                     .build();
@@ -122,7 +126,7 @@ public class DisputeServiceImpl implements DisputeService {
         return notificationRepository.save(notification);
     }
 
-    private Map<String, Object> getOrderByDisputeId(long disputeId) {
+    public Map<String, Object> getOrderByDisputeId(long disputeId) {
         Map<String, Object> data = new HashMap<>();
         Dispute dispute = disputeRepository.findById(disputeId).orElseThrow(
                 () -> new IllegalArgumentException("Can not find dispute with this dispute id.")
@@ -137,4 +141,6 @@ public class DisputeServiceImpl implements DisputeService {
                 () -> new IllegalArgumentException("Can not find dispute infor with this id: " + disputeId)
         );
     }
+
+
 }

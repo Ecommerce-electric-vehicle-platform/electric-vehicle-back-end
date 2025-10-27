@@ -195,7 +195,6 @@ public class BuyerServiceImpl {
 
         // tạo mới một đơn hàng
         Order newOrder = Order.builder()
-                .admin(null)
                 .buyer(buyerOpt.get())
                 .orderCode(null)
                 .shippingAddress(
@@ -243,7 +242,6 @@ public class BuyerServiceImpl {
 
         // tạo mới một đơn hàng
         Order newOrder = Order.builder()
-                .admin(null)
                 .postProduct(postProductOpt.get())
                 .buyer(buyerOpt.get())
                 .orderCode(null)

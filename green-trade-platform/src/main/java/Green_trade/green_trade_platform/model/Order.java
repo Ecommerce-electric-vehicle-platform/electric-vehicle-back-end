@@ -44,7 +44,6 @@ public class Order {
     private BigDecimal shippingFee;
 
     @Column(name = "status", nullable = true, unique = false)
-
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
@@ -65,12 +64,6 @@ public class Order {
     @JsonManagedReference
     @ToString.Exclude
     private Buyer buyer;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id")
-    @JsonManagedReference
-    @ToString.Exclude
-    private Admin admin;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference

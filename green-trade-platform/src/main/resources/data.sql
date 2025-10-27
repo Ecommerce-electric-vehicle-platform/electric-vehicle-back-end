@@ -3,6 +3,8 @@
 -- =========================================================
 SET GLOBAL time_zone = 'Asia/Ho_Chi_Minh';
 SET FOREIGN_KEY_CHECKS = 0;
+SET GLOBAL event_scheduler = ON;
+
 
 DELETE FROM product_image;
 DELETE FROM post_product;
@@ -22,6 +24,9 @@ DELETE FROM payment;
 DELETE FROM dispute;
 DELETE FROM evidence;
 DELETE FROM notification;
+DELETE FROM system_wallet;
+DELETE FROM wallet_transaction;
+DROP EVENT IF EXISTS auto_resolve_escrow;
 
 ALTER TABLE product_image AUTO_INCREMENT = 1;
 ALTER TABLE post_product AUTO_INCREMENT = 1;
@@ -40,6 +45,21 @@ ALTER TABLE payment AUTO_INCREMENT = 1;
 ALTER TABLE dispute AUTO_INCREMENT = 1;
 ALTER TABLE evidence AUTO_INCREMENT = 1;
 ALTER TABLE notification AUTO_INCREMENT = 1;
+ALTER TABLE system_wallet AUTO_INCREMENT = 1;
+ALTER TABLE wallet_transaction AUTO_INCREMENT = 1;
+
+
+CREATE EVENT IF NOT EXISTS auto_resolve_escrow
+ON SCHEDULE EVERY 1 DAY
+DO
+UPDATE wallet_system ws
+JOIN wallet w ON ws.seller_wallet_id = w.wallet_id
+SET
+    w.balance = w.balance + ws.balance,
+    ws.status = 'IS_SOLVE'
+WHERE
+    ws.status = 'ESCROW_HOLD'
+    AND ws.created_at <= NOW() - INTERVAL 14 DAY;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -460,244 +480,69 @@ VALUES
 -- =========================================================
 -- 🚚 SHIPPING_PARTNER (ĐỐI TÁC VẬN CHUYỂN)
 -- =========================================================
---
---INSERT INTO shipping_partner (
---    email, partner_name, address, website_url, hotline, created_at, updated_at
---)
---VALUES
---    ('support@ghn.vn', 'GHN Express', '20 Đường Tân Sơn, P.15, Q.Tân Bình, TP.HCM', 'https://ghn.vn', '1900636681', NOW(), NOW()),
---    ('contact@ghtk.vn', 'Giao Hàng Tiết Kiệm', '435 Hoàng Văn Thụ, P.4, Q.Tân Bình, TP.HCM', 'https://ghtk.vn', '19008092', NOW(), NOW()),
---    ('cs@viettelpost.vn', 'Viettel Post', '01 Giang Văn Minh, Q.Ba Đình, Hà Nội', 'https://viettelpost.com.vn', '19008095', NOW(), NOW()),
---    ('info@jtexpress.vn', 'J&T Express', '19 Nguyễn Trãi, Q.Thanh Xuân, Hà Nội', 'https://jtexpress.vn', '19001088', NOW(), NOW()),
---    ('admin@beelogistics.com.vn', 'Bee Logistics', '12 Trần Hưng Đạo, Q.1, TP.HCM', 'https://beelogistics.com.vn', '02838222266', NOW(), NOW())
---    ON DUPLICATE KEY UPDATE partner_name = VALUES(partner_name);
-
+INSERT INTO shipping_partner (
+    email, partner_name, address, website_url, hotline, created_at, updated_at
+)
+VALUES
+    ('support@ghn.vn', 'GHN Express', '20 Đường Tân Sơn, P.15, Q.Tân Bình, TP.HCM', 'https://ghn.vn', '1900636681', NOW(), NOW()),
+    ('contact@ghtk.vn', 'Giao Hàng Tiết Kiệm', '435 Hoàng Văn Thụ, P.4, Q.Tân Bình, TP.HCM', 'https://ghtk.vn', '19008092', NOW(), NOW()),
+    ('cs@viettelpost.vn', 'Viettel Post', '01 Giang Văn Minh, Q.Ba Đình, Hà Nội', 'https://viettelpost.com.vn', '19008095', NOW(), NOW()),
+    ('info@jtexpress.vn', 'J&T Express', '19 Nguyễn Trãi, Q.Thanh Xuân, Hà Nội', 'https://jtexpress.vn', '19001088', NOW(), NOW()),
+    ('admin@beelogistics.com.vn', 'Bee Logistics', '12 Trần Hưng Đạo, Q.1, TP.HCM', 'https://beelogistics.com.vn', '02838222266', NOW(), NOW())
+    ON DUPLICATE KEY UPDATE partner_name = VALUES(partner_name);
 
 -- =========================================================
 -- ORDERS
 -- =========================================================
+INSERT INTO orders (
+    order_code, shipping_address, phone_number, price, shipping_fee, status, created_at, buyer_id, post_id, shipping_partner_id
+) VALUES(
+    'XYZ123@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'COMPLETED', NOW(), 2, 1, 1
+);
 
---INSERT INTO orders (
---    order_code, shipping_address, phone_number, price, shipping_fee,
---    status, created_at, updated_at, canceled_at, cancel_reason,
---    buyer_id, admin_id, post_id, shipping_partner_id
---)
---VALUES
---    ('ORD-20231001-001','123 Nguyễn Văn Cừ, TP.HCM','0900000001',1650000.00,35000.00,'COMPLETED',NOW(),NOW(),NULL,NULL,1,1,1,1),
---    ('ORD-20231001-002','124 Nguyễn Văn Cừ, Hà Nội','0900000002',1200000.00,30000.00,'SHIPPING',NOW(),NOW(),NULL,NULL,2,1,2,1),
---    ('ORD-20231001-003','125 Nguyễn Văn Cừ, Đà Nẵng','0900000003',990000.00,25000.00,'PENDING',NOW(),NOW(),NULL,NULL,3,1,3,1),
---    ('ORD-20231001-004','126 Nguyễn Văn Cừ, Huế','0900000004',850000.00,25000.00,'CANCELED',NOW(),NOW(),NOW(),'Người mua hủy do thay đổi ý định',4,1,4,1),
---    ('ORD-20231001-005','127 Nguyễn Văn Cừ, Bình Dương','0900000005',1700000.00,40000.00,'COMPLETED',NOW(),NOW(),NULL,NULL,5,1,5,1),
---    ('ORD-20231001-006','128 Nguyễn Văn Cừ, Cần Thơ','0900000006',1050000.00,30000.00,'PROCESSING',NOW(),NOW(),NULL,NULL,6,1,6,1),
---    ('ORD-20231001-007','129 Nguyễn Văn Cừ, Hải Phòng','0900000007',1120000.00,35000.00,'COMPLETED',NOW(),NOW(),NULL,NULL,6,1,39,1),
---    ('ORD-20231001-008','130 Nguyễn Văn Cừ, Đà Lạt','0900000008',1800000.00,40000.00,'SHIPPING',NOW(),NOW(),NULL,NULL,8,1,8,1),
---    ('ORD-20231001-009','131 Nguyễn Văn Cừ, Nha Trang','0900000009',1500000.00,30000.00,'CANCELED',NOW(),NOW(),NOW(),'Admin phát hiện gian lận',9,1,9,1),
---    ('ORD-20231001-010','132 Nguyễn Văn Cừ, Hà Nội','0900000010',1700000.00,35000.00,'AWAITING_PAYMENT',NOW(),NOW(),NULL,NULL,10,1,10,1);
+-- =========================================================
+-- ORDERS
+-- =========================================================
+INSERT INTO system_wallet(
+    balance, buyer_wallet_id, concurrency, created_at, seller_wallet_id, status, admin_id, order_id
+) VALUES (
+    40000000.000, 2, 'VND', NOW(), 1, 'ESCROW_HOLD', 1, 1
+);
 
 -- =========================================================
 -- ⚖️ DISPUTE_CATEGORY (DANH MỤC KHIẾU NẠI / TRANH CHẤP)
 -- =========================================================
 --
---INSERT INTO dispute_category (title, reason, description)
---VALUES
---    ('Khiếu nại đơn hàng','Người mua không nhận được hàng','Đơn hàng thất lạc hoặc chưa được giao.'),
---    ('Khiếu nại chất lượng sản phẩm','Sản phẩm không đúng mô tả','Sản phẩm không giống mô tả hoặc hư hại.'),
---    ('Khiếu nại thanh toán','Thanh toán thất bại nhưng bị trừ tiền','Giao dịch bị lỗi nhưng đã bị trừ tiền.'),
---    ('Khiếu nại hoàn tiền','Chậm xử lý hoàn tiền','Yêu cầu hoàn tiền chưa được xử lý.'),
---    ('Khiếu nại người bán','Người bán không phản hồi','Người bán không xác nhận hoặc phản hồi.'),
---    ('Khiếu nại vận chuyển','Giao hàng chậm hoặc thất lạc','Đối tác giao hàng chậm hoặc thất lạc.'),
---    ('Khiếu nại chính sách','Chính sách hoàn tiền / đổi trả không rõ ràng','Người dùng khiếu nại chính sách.'),
---    ('Khiếu nại khác','Khác (yêu cầu đặc biệt)','Các loại khiếu nại khác.')
---    ON DUPLICATE KEY UPDATE title = VALUES(title);
+INSERT INTO dispute_category (title, reason, description)
+VALUES
+    ('Khiếu nại đơn hàng','Người mua không nhận được hàng','Đơn hàng thất lạc hoặc chưa được giao.'),
+    ('Khiếu nại chất lượng sản phẩm','Sản phẩm không đúng mô tả','Sản phẩm không giống mô tả hoặc hư hại.'),
+    ('Khiếu nại thanh toán','Thanh toán thất bại nhưng bị trừ tiền','Giao dịch bị lỗi nhưng đã bị trừ tiền.'),
+    ('Khiếu nại hoàn tiền','Chậm xử lý hoàn tiền','Yêu cầu hoàn tiền chưa được xử lý.'),
+    ('Khiếu nại người bán','Người bán không phản hồi','Người bán không xác nhận hoặc phản hồi.'),
+    ('Khiếu nại vận chuyển','Giao hàng chậm hoặc thất lạc','Đối tác giao hàng chậm hoặc thất lạc.'),
+    ('Khiếu nại chính sách','Chính sách hoàn tiền / đổi trả không rõ ràng','Người dùng khiếu nại chính sách.'),
+    ('Khiếu nại khác','Khác (yêu cầu đặc biệt)','Các loại khiếu nại khác.')
+    ON DUPLICATE KEY UPDATE title = VALUES(title);
 
 -- ================= Payment Data =================
---INSERT INTO payment (description, gateway_name)
---VALUES
---    ('Thanh toán khi nhận hàng (COD)', 'COD'),
---    ('Thanh toán trực tuyến qua VNPay', 'VNPay');
+INSERT INTO payment (description, gateway_name)
+VALUES
+    ('Thanh toán khi nhận hàng (COD)', 'COD'),
+    ('Thanh toán trực tuyến qua VNPay', 'VNPay');
 
-
--- =========================================================
--- 🧾 ORDER DATA (MẪU)
--- =========================================================
 -- =========================================================
 -- ⚖️ DISPUTE - MẪU TRANH CHẤP / KHIẾU NẠI
 -- =========================================================
+INSERT INTO dispute(
+    created_at, decision, status, order_id, dispute_category_id
+) VALUES(
+    NOW(), 'NOT_HAVE_YET', 'PENDING', 1, 1
+);
 
--- =========================================================
--- ⚖️ DISPUTE DEMO DATA (30 RECORDS)
--- =========================================================
---INSERT INTO dispute (
---    created_at,
---    updated_at,
---    decision,
---    resolution_type,
---    resolution,
---    status,
---    order_id,
---    dispute_category_id,
---    admin_id
---)
---VALUES
----- 1️⃣ Mua hàng không nhận được đơn (OPEN)
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 2, 1, NULL),
---
----- 2️⃣ Sản phẩm không đúng mô tả, đang xem xét
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 3, 2, 1),
---
----- 3️⃣ Thanh toán lỗi nhưng đã bị trừ tiền → hoàn tiền
---(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Hoàn lại toàn bộ số tiền đơn hàng', 'ACCEPTED', 4, 3, 1),
---
----- 4️⃣ Người bán không phản hồi → cảnh cáo
---(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Gửi cảnh báo hệ thống tới người bán', 'ACCEPTED', 5, 5, 1),
---
----- 5️⃣ Vận chuyển thất lạc → yêu cầu hoàn tiền
---(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Hoàn tiền cho người mua vì đơn hàng thất lạc', 'ACCEPTED', 6, 6, 1),
---
----- 6️⃣ Chính sách không rõ ràng → đang xử lý
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 7, 7, 1),
---
----- 7️⃣ Khiếu nại khác → từ chối
---(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Không có hành động thêm', 'REJECTED', 8, 8, 1),
---
----- 8️⃣ Người mua hủy đơn nhưng vẫn khiếu nại → đóng
---(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Đơn hàng đã bị người mua tự hủy', 'REJECTED', 4, 1, 1),
---
----- 9️⃣ Đơn hoàn thành nhưng khiếu nại chất lượng → đang xem xét
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 1, 2, 1),
---
----- 🔟 Lỗi thanh toán, đang xử lý
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 10, 3, 1),
---
----- 11️⃣ Người mua không nhận được hàng lần 2
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 2, 1, 1),
---
----- 12️⃣ Sản phẩm bị móp méo
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 3, 2, 1),
---
----- 13️⃣ Thanh toán bị treo
---(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Hoàn tiền thủ công', 'ACCEPTED', 4, 3, 1),
---
----- 14️⃣ Giao hàng chậm 2 ngày
---(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Thông báo đến đơn vị vận chuyển GHN', 'ACCEPTED', 5, 6, 1),
---
----- 15️⃣ Chính sách bảo hành chưa rõ
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 6, 7, 1),
---
----- 16️⃣ Người bán không phản hồi yêu cầu đổi trả
---(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Không cần hành động thêm', 'REJECTED', 7, 5, 1),
---
----- 17️⃣ Hàng giao sai màu
---(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Đổi sang sản phẩm đúng màu', 'ACCEPTED', 8, 2, 1),
---
----- 18️⃣ Giao hàng bị vỡ pin
---(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Hoàn 50% giá trị do hư hại nhẹ', 'ACCEPTED', 9, 6, 1),
---
----- 19️⃣ Khiếu nại chính sách hoàn tiền
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 10, 7, 1),
---
----- 20️⃣ Khiếu nại khác (người bán cư xử thô lỗ)
---(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Gửi thư cảnh cáo chính thức', 'ACCEPTED', 1, 5, 1),
---
----- 21️⃣ Đơn 2 - Giao sai sản phẩm
---(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Người bán gửi lại hàng đúng mẫu', 'ACCEPTED', 2, 2, 1),
---
----- 22️⃣ Đơn 3 - Khiếu nại hoàn tiền lần 2
---(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Không xử lý trùng lặp', 'REJECTED', 3, 3, 1),
---
----- 23️⃣ Đơn 4 - Khiếu nại vận chuyển trễ
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 4, 6, 1),
---
----- 24️⃣ Đơn 5 - Khiếu nại chất lượng pin
---(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Đổi linh kiện lỗi', 'ACCEPTED', 5, 2, 1),
---
----- 25️⃣ Đơn 6 - Khiếu nại về chính sách giao hàng
---(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Đơn hàng đã hoàn tất đúng quy trình', 'REJECTED', 6, 7, 1),
---
----- 26️⃣ Đơn 7 - Khiếu nại người bán không phản hồi (lần 2)
---(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Ghi chú vi phạm trong hồ sơ', 'ACCEPTED', 7, 5, 1),
---
----- 27️⃣ Đơn 8 - Hàng bị thiếu phụ kiện
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 8, 2, 1),
---
----- 28️⃣ Đơn 9 - Khiếu nại thanh toán không đúng
---(NOW(), NOW(), 'NOT_HAVE_YET', 'REFUND', 'Hoàn lại phần bị trừ thừa', 'ACCEPTED', 9, 3, 1),
---
----- 29️⃣ Đơn 10 - Khiếu nại vận chuyển chậm
---(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Gửi cảnh báo chính thức', 'ACCEPTED', 10, 6, 1),
---
----- 30️⃣ Đơn 1 - Khiếu nại khác (không chính đáng)
---(NOW(), NOW(), 'NOT_HAVE_YET', 'NOT_HAVE_YET', 'Không có bằng chứng xác thực', 'REJECTED', 1, 8, 1),
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 1, 6, 1),
---
----- 32️⃣ Sản phẩm giao thiếu phụ kiện
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 2, 2, 1),
---
----- 33️⃣ Thanh toán bị trừ hai lần
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 3, 3, 1),
---
----- 34️⃣ Chính sách bảo hành chưa được giải thích rõ
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 4, 7, 1),
---
----- 35️⃣ Người bán không cập nhật trạng thái đơn hàng
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 5, 5, 1),
---
----- 36️⃣ Hàng đến muộn hơn dự kiến
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 6, 6, 1),
---
----- 37️⃣ Sản phẩm khác màu
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 7, 2, 1),
---
----- 38️⃣ Người mua yêu cầu hoàn tiền (chưa xét duyệt)
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 8, 4, 1),
---
----- 39️⃣ Khiếu nại chất lượng pin
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 9, 2, 1),
---
----- 40️⃣ Khiếu nại vận chuyển chậm trễ
---(NOW(), NULL, NULL, NULL, NULL, 'PENDING', 10, 6, 1);
---
 ---- =========================================================
 ---- 🖼 EVIDENCE - ẢNH MINH CHỨNG CHO TRANH CHẤP
 ---- =========================================================
---
---INSERT INTO evidence (order_image, image_url, dispute_id)
---VALUES
----- Dispute 1 - Không nhận được hàng
---(1, 'https://cdn.example.com/evidence/dispute1_img1.jpg', 1),
---(2, 'https://cdn.example.com/evidence/dispute1_img2.jpg', 1),
---
----- Dispute 2 - Sản phẩm không đúng mô tả
---(1, 'https://cdn.example.com/evidence/dispute2_img1.jpg', 2),
---(2, 'https://cdn.example.com/evidence/dispute2_img2.jpg', 2),
---(3, 'https://cdn.example.com/evidence/dispute2_img3.jpg', 2),
---
----- Dispute 3 - Thanh toán lỗi
---(1, 'https://cdn.example.com/evidence/dispute3_img1.jpg', 3),
---(2, 'https://cdn.example.com/evidence/dispute3_img2.jpg', 3),
---
----- Dispute 4 - Người bán không phản hồi
---(1, 'https://cdn.example.com/evidence/dispute4_img1.jpg', 4),
---
----- Dispute 5 - Giao hàng thất lạc
---(1, 'https://cdn.example.com/evidence/dispute5_img1.jpg', 5),
---(2, 'https://cdn.example.com/evidence/dispute5_img2.jpg', 5),
---
----- Dispute 6 - Chính sách không rõ ràng
---(1, 'https://cdn.example.com/evidence/dispute6_img1.jpg', 6),
---
----- Dispute 7 - Khiếu nại khác
---(1, 'https://cdn.example.com/evidence/dispute7_img1.jpg', 7),
---
----- Dispute 8 - Người mua hủy đơn nhưng vẫn khiếu nại
---(1, 'https://cdn.example.com/evidence/dispute8_img1.jpg', 8),
---
----- Dispute 9 - Khiếu nại chất lượng sản phẩm
---(1, 'https://cdn.example.com/evidence/dispute9_img1.jpg', 9),
---(2, 'https://cdn.example.com/evidence/dispute9_img2.jpg', 9),
---
----- Dispute 10 - Lỗi thanh toán
---(1, 'https://cdn.example.com/evidence/dispute10_img1.jpg', 10);
 
 -- =========================================================
 -- ✅ KẾT THÚC FILE DATA.SQL

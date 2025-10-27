@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.advisor;
 
 import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
+import Green_trade.green_trade_platform.exception.SubscriptionNotFound;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.response.RestResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,21 @@ public class SubscriptionAdvisor {
         RestResponse<Object, Map<String, String>> response = responseMapper.toDto(
                 false,
                 "SELLER SUBSCRIPTION EXPIRED",
+                null,
+                Map.of(
+                        "origin", e.getStackTrace()[0].toString(),
+                        "message", e.getMessage(),
+                        "errorType", e.getClass().getSimpleName()
+                )
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(response);
+    }
+
+    @ExceptionHandler(SubscriptionNotFound.class)
+    public ResponseEntity<RestResponse<Object, Map<String, String>>> subscriptionNotFoundHandler(SubscriptionNotFound e) {
+        RestResponse<Object, Map<String, String>> response = responseMapper.toDto(
+                false,
+                "USER'S SUBSCRIPTION NOT FOUND",
                 null,
                 Map.of(
                         "origin", e.getStackTrace()[0].toString(),

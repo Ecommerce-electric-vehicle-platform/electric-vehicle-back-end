@@ -57,4 +57,37 @@ public class WalletTransactionServiceImpl {
             throw new RuntimeException(e);
         }
     }
+
+    public WalletTransaction handleRefundMoney(Wallet wallet, BigDecimal money, boolean isRefund) {
+        log.info(">>> [Wallet Transaction Service] Handling refund money: Started.");
+        try {
+            log.info(">>> [Wallet Transaction Service] Started to create wallet transaction.");
+            WalletTransaction walletTransaction = null;
+            if(isRefund) {
+                walletTransaction = WalletTransaction.builder()
+                        .wallet(wallet)
+                        .type(TransactionType.REFUND)
+                        .amount(money)
+                        .balanceBefore(wallet.getBalance())
+                        .status(TransactionStatus.SUCCESS)
+                        .externalTransactionReference("None")
+                        .description("Refund money from dispute")
+                        .build();
+            } else {
+                walletTransaction = WalletTransaction.builder()
+                        .wallet(wallet)
+                        .type(TransactionType.DEPOSIT)
+                        .amount(money)
+                        .balanceBefore(wallet.getBalance())
+                        .status(TransactionStatus.SUCCESS)
+                        .externalTransactionReference("None")
+                        .description("Get money from order")
+                        .build();
+            }
+            return walletTransactionRepository.save(walletTransaction);
+        } catch (Exception e) {
+            log.info(">>> [Wallet Transaction Service] Error occur when handle refund money: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
 }
