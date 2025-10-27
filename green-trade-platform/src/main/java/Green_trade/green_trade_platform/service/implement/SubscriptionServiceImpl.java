@@ -18,7 +18,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
     public boolean isServicePackageExpired(Long sellerId) throws Exception {
         boolean result = false;
-        Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(sellerId)
+        Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(sellerId)
                 .orElseThrow(
                         () -> new Exception("Seller doesn't subscribe any service")
                 );

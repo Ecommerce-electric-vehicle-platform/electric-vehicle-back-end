@@ -68,7 +68,7 @@ public class PostProductServiceImpl implements PostProductService {
             List<MultipartFile> files
     ) throws Exception {
         try {
-            Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(
+            Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(
                     request.getSellerId()).orElseThrow(() -> new SubscriptionNotFound()
             );
             Long maxImg = subscription.getSubscriptionPackage().getMaxImgPerPost();
@@ -195,7 +195,7 @@ public class PostProductServiceImpl implements PostProductService {
             List<PostProduct> result = new ArrayList<>();
             for(int i = 0; i <= postProducts.size() - 1; i++) {
                 PostProduct postProduct = postProducts.get(i);
-                Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(postProduct.getSeller().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
+                Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(postProduct.getSeller().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
                 log.info(">>> subscription package id: {}", subscription.getSubscriptionPackage().getId());
                 log.info(">>> postProduct verified status: {}", postProduct.getVerifiedDecisionstatus().toString());
                 if(subscription.getSubscriptionPackage().getId() >= 2 && postProduct.getVerifiedDecisionstatus().equals(VerifiedDecisionStatus.PENDING)) {

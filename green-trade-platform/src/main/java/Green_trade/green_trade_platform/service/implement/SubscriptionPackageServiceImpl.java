@@ -102,7 +102,7 @@ public class SubscriptionPackageServiceImpl {
     }
 
     public void cancelSubscription(Seller seller) {
-        Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(seller.getSellerId()).orElseThrow(
+        Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(seller.getSellerId()).orElseThrow(
                 () -> new IllegalArgumentException("This seller has not been sign any packages yet.")
         );
 
