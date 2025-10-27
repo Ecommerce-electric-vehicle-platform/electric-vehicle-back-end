@@ -70,7 +70,7 @@ public class SellerServiceImpl implements SellerService {
                 throw new ProfileException("Seller is not existed");
             }
 
-            Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(sellerOpt.get().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
+            Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(sellerOpt.get().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
 
             if(LocalDateTime.now().isAfter(subscription.getEndDay())) {
                 throw new SubscriptionExpiredException();
