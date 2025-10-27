@@ -14,5 +14,7 @@ import java.util.Optional;
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
     Optional<Subscription> findBySeller_SellerIdOrderByEndDayDesc(Long sellerId);
 
+    Optional<Subscription> findFirstBySeller_SellerIdOrderByEndDayDesc(Long sellerId);
+
     Subscription findBySeller_SellerId(Long sellerSellerId);
 }

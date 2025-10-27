@@ -57,7 +57,7 @@ public class SubscriptionPackageServiceImpl {
         SubscriptionPackages subscriptionPackages = subscriptionPackageRepository.findById(request.getPackageId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói người bán với id " + request.getPackageId()));
 
-        Optional<Subscription> exitsSubscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(seller.getSellerId());
+        Optional<Subscription> exitsSubscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(seller.getSellerId());
         if(exitsSubscription.isPresent() && exitsSubscription.get().getIsActive() == true) {
             throw new IllegalArgumentException("Bạn đã đăng kí gói. Vui lòng hủy gói để đăng kí gói mới.");
         }
@@ -117,7 +117,7 @@ public class SubscriptionPackageServiceImpl {
 
     public Subscription getCurrentSubscription(Seller seller) {
         log.info(">>> [Subscription service] Started");
-        Subscription subscription = subscriptionRepository.findBySeller_SellerIdOrderByEndDayDesc(seller.getSellerId()).orElseThrow(
+        Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(seller.getSellerId()).orElseThrow(
                 () -> new IllegalArgumentException("This seller has not been sign any packages yet.")
         );
 
