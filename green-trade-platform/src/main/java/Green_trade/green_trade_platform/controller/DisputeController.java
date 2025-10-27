@@ -109,7 +109,7 @@ public class DisputeController {
         }
     }
 
-    @PostMapping("resolve")
+    @PostMapping("/resolve")
     public ResponseEntity<?> handleDispute(@RequestBody ResolveDisputeRequest request) {
         try {
             Admin admin = adminService.getCurrentUser();

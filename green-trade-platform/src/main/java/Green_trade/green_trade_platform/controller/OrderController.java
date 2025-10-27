@@ -1,22 +1,22 @@
 package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.mapper.OrderListMapper;
+import Green_trade.green_trade_platform.mapper.OrderMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Order;
 import Green_trade.green_trade_platform.response.OrderListResponse;
+import Green_trade.green_trade_platform.response.OrderResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
+import Green_trade.green_trade_platform.service.implement.GhnServiceImpl;
 import Green_trade.green_trade_platform.service.implement.OrderServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -29,15 +29,19 @@ public class OrderController {
     private final ResponseMapper responseMapper;
     private final OrderListMapper orderListMapper;
     private final BuyerServiceImpl buyerService;
+    private final GhnServiceImpl ghnService;
+    private final OrderMapper orderMapper;
 
     public OrderController(
             OrderServiceImpl orderService,
             ResponseMapper responseMapper,
-            OrderListMapper orderListMapper, BuyerServiceImpl buyerService) {
+            OrderListMapper orderListMapper, BuyerServiceImpl buyerService, GhnServiceImpl ghnService, OrderMapper orderMapper) {
         this.orderService = orderService;
         this.responseMapper = responseMapper;
         this.orderListMapper = orderListMapper;
         this.buyerService = buyerService;
+        this.ghnService = ghnService;
+        this.orderMapper = orderMapper;
     }
 
     @Operation(
@@ -73,5 +77,19 @@ public class OrderController {
             log.info(">>> Error at getOrdersHistoryOfCurrentUser: {}", e.getMessage());
             throw e;
         }
+    }
+
+    @PostMapping("/cancel/{id}")
+    public ResponseEntity<RestResponse<OrderResponse, Object>> cancelOrder(@PathVariable Long id) throws Exception {
+        Order canceledOrder = orderService.cancelOrder(id);
+        ghnService.createCancelOrderShippingServiceResponseToDto(canceledOrder.getOrderCode(), canceledOrder.getPostProduct().getSeller().getGhnShopId());
+        OrderResponse responseData = orderMapper.toDto(canceledOrder);
+        RestResponse<OrderResponse, Object> response = responseMapper.toDto(
+                true,
+                "CANCELED ORDER SUCCESSFULLY",
+                responseData,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 }
