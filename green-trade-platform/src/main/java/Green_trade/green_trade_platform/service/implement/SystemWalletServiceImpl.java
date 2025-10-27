@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @AllArgsConstructor
 public class SystemWalletServiceImpl {
-    public void handleRefund(double percent, RefundResolveRequest request) {
+    public void handleRefund(RefundResolveRequest request) {
 
     }
 }

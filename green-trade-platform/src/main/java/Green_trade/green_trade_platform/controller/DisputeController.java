@@ -61,11 +61,6 @@ public class DisputeController {
 
             newDispute = disputeService.updateEvidencesForDispute(evidences, newDispute);
             log.info(">>> Passed update evidences for dispute");
-//            Notification notification = notificationService.createNotificationForSeller(
-//                    newDispute.getOrder().getPostProduct().getSeller(),
-//                    "DISPUTE PRODUCT ALERT",
-//                    "Your product has been disputed");
-//            log.info(">>> Passed add notification");
             DisputeResponse responseData = disputeMapper.toDto(newDispute);
             RestResponse<DisputeResponse, Object> response = responseMapper.toDto(
                     true,
@@ -131,9 +126,8 @@ public class DisputeController {
     }
 
     @PostMapping("/refund/{return-percentage}")
-    public ResponseEntity<?> handleRefund(@PathVariable(name = "return-percentage") double percent,
-                                          @RequestBody RefundResolveRequest request) {
-        systemWalletService.handleRefund(percent, request);
+    public ResponseEntity<?> handleRefund(@RequestBody RefundResolveRequest request) {
+        systemWalletService.handleRefund(request);
         return null;
     }
 
