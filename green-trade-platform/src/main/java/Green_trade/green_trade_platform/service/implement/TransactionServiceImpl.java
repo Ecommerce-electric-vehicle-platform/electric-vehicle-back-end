@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.enumerate.TransactionStatus;
 import Green_trade.green_trade_platform.exception.PaymentMethodNotSupportedException;
 import Green_trade.green_trade_platform.exception.PostProductNotFound;
 import Green_trade.green_trade_platform.exception.ProfileException;
@@ -87,7 +88,7 @@ public class TransactionServiceImpl implements TransactionService {
                         .amount(order.getPrice())
                         .currency("VND")
                         .paymentMethod(paymentOpt.get().getGatewayName())
-                        .status("FAILED")
+                        .status(TransactionStatus.FAIL)
                         .build();
                 transactionRepository.save(newTransaction);
                 throw new Exception("The money in wallet is not enough to checkout");
@@ -100,7 +101,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .amount(postProductOpt.get().getPrice())
                     .currency("VND")
                     .paymentMethod(paymentOpt.get().getGatewayName())
-                    .status("SUCCESS")
+                    .status(TransactionStatus.SUCCESS)
                     .build();
             return transactionRepository.save(newTransaction);
         } catch (Exception e) {
@@ -133,7 +134,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .amount(order.getPrice())
                     .currency("VND")
                     .paymentMethod(paymentOpt.get().getGatewayName())
-                    .status("PENDING")
+                    .status(TransactionStatus.PENDING)
                     .build();
 
             return transactionRepository.save(newTransaction);
@@ -141,5 +142,17 @@ public class TransactionServiceImpl implements TransactionService {
             log.info(">>> Error at checkoutCODPayment: {}", e.getMessage());
             throw e;
         }
+    }
+
+    public Transaction createTransaction(Order order, TransactionStatus status, Payment payment) {
+        Transaction transaction = Transaction.builder()
+                .amount(order.getPrice())
+                .currency("VND")
+                .status(status)
+                .paymentMethod(payment.getGatewayName())
+                .order(order)
+                .payment(payment)
+                .build();
+        return transactionRepository.save(transaction);
     }
 }

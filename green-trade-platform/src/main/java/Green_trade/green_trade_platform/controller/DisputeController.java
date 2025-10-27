@@ -153,7 +153,7 @@ public class DisputeController {
         ```
     """
     )
-    @PostMapping("resolve")
+    @PostMapping("/resolve")
     public ResponseEntity<?> handleDispute(@RequestBody ResolveDisputeRequest request) {
         log.info(">>> [Dispute Controller]: Started.");
         try {

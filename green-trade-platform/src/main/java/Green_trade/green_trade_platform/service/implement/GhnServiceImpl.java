@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.sql.Array;
 import java.util.*;
 
 @Service
@@ -38,7 +40,7 @@ public class GhnServiceImpl {
         return response.getBody();
     }
 
-    public String cancelOrder(CancelOrderRequest request, String shopId) {
+    public String cancelOrder(Map<String, Object> request, String shopId) {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
@@ -46,7 +48,7 @@ public class GhnServiceImpl {
         headers.set("Token", TOKEN);
         headers.set("ShopId", shopId);
 
-        HttpEntity<CancelOrderRequest> entity = new HttpEntity<>(request, headers);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
 
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(
@@ -56,6 +58,45 @@ public class GhnServiceImpl {
             e.printStackTrace();
             return "{\"error\":\"" + e.getMessage() + "\"}";
         }
+    }
+
+    public Map<String, Object> createCancelOrderShippingServiceBodyRequest(String orderCode) {
+        return Map.of(
+                "order_codes", List.of(orderCode)
+        );
+    }
+
+    public Map<String, Object> createCancelOrderShippingServiceResponseToDto(String orderCode, String shopId) throws JsonProcessingException {
+        Map<String, Object> bodyRequest = createCancelOrderShippingServiceBodyRequest(orderCode);
+        String resultInString = cancelOrder(bodyRequest, shopId);
+
+        Map<String, Object> result = new HashMap<>();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonData = objectMapper.readTree(resultInString);
+
+        result.put("code", jsonData.path("code").asInt(0));
+        result.put("message", jsonData.path("message").asText(""));
+
+        JsonNode jsonNode = jsonData.path("data");
+
+        if (jsonNode.isArray()) {
+            List<Map<String, Object>> dataList = new ArrayList<>();
+
+            for (JsonNode node : jsonNode) {
+                Map<String, Object> item = new HashMap<>();
+                item.put("order_code", node.path("order_code").asText(""));
+                item.put("result", node.path("result").asBoolean(false));
+                item.put("message", node.path("message").asText(""));
+                dataList.add(item);
+            }
+
+            result.put("data", dataList);
+        } else {
+            result.put("data", Collections.emptyList());
+        }
+
+        return result;
     }
 
     public String getShippingFee(Map<String, Object> requestBody, String shopId) {

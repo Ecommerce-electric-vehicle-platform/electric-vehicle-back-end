@@ -2,8 +2,11 @@ package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.enumerate.TransactionStatus;
 import Green_trade.green_trade_platform.enumerate.TransactionType;
+import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.model.Order;
 import Green_trade.green_trade_platform.model.Wallet;
 import Green_trade.green_trade_platform.model.WalletTransaction;
+import Green_trade.green_trade_platform.repository.BuyerRepository;
 import Green_trade.green_trade_platform.repository.WalletTransactionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,9 +18,11 @@ import java.util.Map;
 @Slf4j
 public class WalletTransactionServiceImpl {
     private final WalletTransactionRepository walletTransactionRepository;
+    private final BuyerRepository buyerRepository;
 
-    public WalletTransactionServiceImpl(WalletTransactionRepository walletTransactionRepository) {
+    public WalletTransactionServiceImpl(WalletTransactionRepository walletTransactionRepository, BuyerRepository buyerRepository) {
         this.walletTransactionRepository = walletTransactionRepository;
+        this.buyerRepository = buyerRepository;
     }
 
     public WalletTransaction handleDepositIntoMoney(Wallet wallet, Map<String, String> params) {

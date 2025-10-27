@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.model;
 
 import Green_trade.green_trade_platform.enumerate.SellerStatus;
+import Green_trade.green_trade_platform.enumerate.TransactionStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -31,7 +32,7 @@ public class Transaction {
     private String currency;
 
     @Column(name = "status", nullable = false, unique = false)
-    private String status;
+    private TransactionStatus status;
 
     @Column(name = "payment_method", nullable = false, unique = false)
     private String paymentMethod;
