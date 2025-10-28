@@ -31,6 +31,6 @@ public class ProductSoldOutAdvisor {
                         "errorType", e.getClass().getSimpleName()
                 )
         );
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(response);
     }
 }

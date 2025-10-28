@@ -31,6 +31,6 @@ public class JwtControllerAdvisor {
                 )
         );
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
     }
 }

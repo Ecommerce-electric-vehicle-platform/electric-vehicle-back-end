@@ -31,7 +31,7 @@ public class SelfPurchaseNotAllowedExceptionAdvisor {
                         "errorType", e.getClass().getSimpleName()
                 )
         );
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return ResponseEntity.status(HttpStatus.CONFLICT.value()).body(response);
     }
 }
 
