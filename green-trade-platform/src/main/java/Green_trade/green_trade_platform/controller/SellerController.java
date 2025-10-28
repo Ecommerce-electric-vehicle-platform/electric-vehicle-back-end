@@ -246,15 +246,12 @@ public class SellerController {
             Seller seller = sellerService.getCurrentUser();
             return ResponseEntity.ok(responseMapper.toDto(true,
                     "Get seller profile successfully.",
-                    sellerMapper.toDto(seller), null));
+                    sellerMapper.toDto(seller),
+                    null));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(responseMapper.toDto(false,
                     "Error occured during get seller profile,",
                     null, e.getMessage()));
         }
     }
-
-
-
-
 }

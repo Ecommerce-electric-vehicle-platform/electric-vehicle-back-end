@@ -10,10 +10,7 @@ import Green_trade.green_trade_platform.mapper.RegisterShopShippingServiceMapper
 import Green_trade.green_trade_platform.mapper.SellerMapper;
 import Green_trade.green_trade_platform.mapper.SubscriptionMapper;
 import Green_trade.green_trade_platform.model.*;
-import Green_trade.green_trade_platform.repository.BuyerRepository;
-import Green_trade.green_trade_platform.repository.NotificationRepository;
-import Green_trade.green_trade_platform.repository.SellerRepository;
-import Green_trade.green_trade_platform.repository.SubscriptionRepository;
+import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.request.ApproveSellerRequest;
 import Green_trade.green_trade_platform.response.ApproveSellerResponse;
 import Green_trade.green_trade_platform.response.SellerResponse;
@@ -47,6 +44,7 @@ public class SellerServiceImpl implements SellerService {
     private final GhnServiceImpl ghnService;
     private final RegisterShopShippingServiceMapper registerShopShippingServiceMapper;
     private final BuyerRepository buyerRepository;
+    private final PostProductRepository postProductRepository;
 
     public Seller createShippingShop(String dataRaw, Seller seller) throws JsonProcessingException {
         try {

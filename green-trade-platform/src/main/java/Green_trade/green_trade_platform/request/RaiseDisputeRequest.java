@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class RaiseDisputeRequest {
     private Long orderId;
     private Long disputeCategoryId;
+    private String description;
 }
