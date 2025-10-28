@@ -47,6 +47,9 @@ public class Dispute {
     @Enumerated(EnumType.STRING)
     private DisputeStatus status;
 
+    @Column(name = "description", nullable = true, unique = false)
+    private String description;
+
     @OneToMany(mappedBy = "dispute", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Evidence> evidences;

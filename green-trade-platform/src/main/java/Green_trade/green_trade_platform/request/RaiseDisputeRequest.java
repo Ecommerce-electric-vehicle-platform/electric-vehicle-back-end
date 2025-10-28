@@ -14,5 +14,4 @@ public class RaiseDisputeRequest {
     private Long disputeCategoryId;
     private String description;
     private String decision;
-    private String resolutionType;
 }
