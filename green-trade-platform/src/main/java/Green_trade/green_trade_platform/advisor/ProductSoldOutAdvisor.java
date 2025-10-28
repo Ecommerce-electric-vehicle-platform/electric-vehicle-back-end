@@ -19,7 +19,7 @@ public class ProductSoldOutAdvisor {
         this.responseMapper = responseMapper;
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(ProductSoldOutException.class)
     public ResponseEntity<RestResponse<?, ?>> productSoldOutHandler(ProductSoldOutException e) {
         RestResponse<Object, Map<String, String>> response = responseMapper.toDto(
                 true,

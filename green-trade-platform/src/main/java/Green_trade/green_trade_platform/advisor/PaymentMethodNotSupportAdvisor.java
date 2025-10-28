@@ -19,7 +19,7 @@ public class PaymentMethodNotSupportAdvisor {
         this.responseMapper = responseMapper;
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(PaymentMethodNotSupportedException.class)
     public ResponseEntity<RestResponse<Object, Map<String, String>>> paymentMethodNotSupportHandler(PaymentMethodNotSupportedException e) {
         RestResponse<Object, Map<String, String>> response = responseMapper.toDto(
                 true,
