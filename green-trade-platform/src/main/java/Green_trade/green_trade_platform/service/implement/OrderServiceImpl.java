@@ -28,7 +28,9 @@ public class OrderServiceImpl implements OrderService {
     private final WalletTransactionServiceImpl walletTransactionServiceImpl;
     private final WalletServiceImpl walletService;
 
-    public OrderServiceImpl(OrderRepository orderRepository, TransactionServiceImpl transactionService, GhnServiceImpl ghnServiceImpl, WalletTransactionServiceImpl walletTransactionServiceImpl, WalletServiceImpl walletService) {
+    public OrderServiceImpl(OrderRepository orderRepository, TransactionServiceImpl transactionService,
+            GhnServiceImpl ghnServiceImpl, WalletTransactionServiceImpl walletTransactionServiceImpl,
+            WalletServiceImpl walletService) {
         this.orderRepository = orderRepository;
         this.transactionService = transactionService;
         this.ghnServiceImpl = ghnServiceImpl;
@@ -81,20 +83,24 @@ public class OrderServiceImpl implements OrderService {
     public Order cancelOrder(Long id) throws Exception {
         try {
             Optional<Order> orderOpt = orderRepository.findOrderById((id));
-            if(orderOpt.isEmpty()) {
+            if (orderOpt.isEmpty()) {
                 throw new OrderNotFound();
             }
 
             Order orderFound = orderOpt.get();
 
-            if(orderFound.getStatus().equals(OrderStatus.PENDING)) {
-                Transaction transaction = transactionService.createTransaction(orderFound, TransactionStatus.CANCELED, orderFound.getTransactions().getLast().getPayment());
+            if (orderFound.getStatus().equals(OrderStatus.PENDING)) {
+                Transaction transaction = transactionService.createTransaction(orderFound, TransactionStatus.CANCELED,
+                        orderFound.getTransactions().getLast().getPayment());
                 orderFound = updateOrderStatus(orderFound, OrderStatus.CANCELED);
             } else if (orderFound.getStatus().equals(OrderStatus.PAID)) {
-                Transaction transaction = transactionService.createTransaction(orderFound, TransactionStatus.CANCELED, orderFound.getTransactions().getLast().getPayment());
+                Transaction transaction = transactionService.createTransaction(orderFound, TransactionStatus.CANCELED,
+                        orderFound.getTransactions().getLast().getPayment());
                 orderFound = updateOrderStatus(orderFound, OrderStatus.CANCELED);
-                walletTransactionServiceImpl.handleRefundMoney(orderFound.getBuyer().getWallet(), orderFound.getPrice(), true, "REFUNDED FROM CANCELED ORDER");
-                walletService.handleBuyerRefund(orderFound.getSystemWallet(), 100, orderFound.getBuyer().getWallet(), false);
+                walletTransactionServiceImpl.handleRefundMoney(orderFound.getBuyer().getWallet(), orderFound.getPrice(),
+                        true, "REFUNDED FROM CANCELED ORDER");
+                walletService.handleBuyerRefund(orderFound.getSystemWallet(), 100, orderFound.getBuyer().getWallet(),
+                        false);
             } else {
                 throw new Exception("Cannot cancel order");
             }
