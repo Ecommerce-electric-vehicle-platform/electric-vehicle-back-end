@@ -25,13 +25,13 @@ public class SystemWallet {
     @Column(name = "system_wallet_id")
     private Long id;
 
-    @Column(name = "buyer_wallet_id", nullable = false, unique = true)
+    @Column(name = "buyer_wallet_id", nullable = false, unique = false)
     private Long buyerWalletId;
 
-    @Column(name = "seller_wallet_id", nullable = false, unique = true)
+    @Column(name = "seller_wallet_id", nullable = false, unique = false)
     private Long sellerWalletId;
 
-    @Column(name = "concurrency", nullable = false, unique = true)
+    @Column(name = "concurrency", nullable = false, unique = false)
     private String concurrency;
 
     @Column(name = "balance", nullable = false, unique = false)

@@ -40,7 +40,7 @@ public class BuyerControllerAdvisor {
     }
 
     @ExceptionHandler(DuplicateProfileException.class)
-    public ResponseEntity<RestResponse<Object, Map<String, String>>> handleProfileNotFoundException(DuplicateProfileException e, HttpServletRequest request) {
+    public ResponseEntity<RestResponse<Object, Map<String, String>>> handleDuplicateProfileException(DuplicateProfileException e, HttpServletRequest request) {
         RestResponse<Object, Map<String, String>> response = responseMapper.toDto(
                 false,
                 "DUPLICATE PROFILE",
@@ -51,7 +51,7 @@ public class BuyerControllerAdvisor {
                         "errorType", e.getClass().getSimpleName()
                 )
         );
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return ResponseEntity.status(HttpStatus.CONFLICT.value()).body(response);
     }
 
     @ExceptionHandler(EmailException.class)
