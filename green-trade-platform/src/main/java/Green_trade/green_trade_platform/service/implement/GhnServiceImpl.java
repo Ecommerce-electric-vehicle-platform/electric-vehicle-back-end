@@ -2,6 +2,7 @@ package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.request.CancelOrderRequest;
+import Green_trade.green_trade_platform.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,8 +19,13 @@ import java.util.*;
 @Slf4j
 public class GhnServiceImpl {
 
+    private final StringUtils stringUtils;
     @Value("${ghn.token}")
     private String TOKEN;
+
+    public GhnServiceImpl(StringUtils stringUtils) {
+        this.stringUtils = stringUtils;
+    }
 
     public String createOrder(Map<String, Object> requestBody, String shopId) {
         RestTemplate restTemplate = new RestTemplate();
@@ -470,12 +476,12 @@ public class GhnServiceImpl {
         data.put("required_note", "KHONGCHOXEMHANG");
         data.put("return_phone", seller.getBuyer().getPhoneNumber());
         data.put("return_address", seller.getBuyer().getStreet());
-        data.put("return_district_id", "");
-        data.put("return_ward_code", null);
+        data.put("return_district_id", Integer.parseInt(sellerDistrictId));
+        data.put("return_ward_code", sellerWardId);
         data.put("client_order_code", "");
         data.put("from_name", seller.getBuyer().getFullName());
         data.put("from_phone", seller.getBuyer().getPhoneNumber());
-        data.put("from_address", seller.getBuyer().getStreet());
+        data.put("from_address", stringUtils.fullAddress(seller.getBuyer().getStreet(), seller.getBuyer().getWardName(), seller.getBuyer().getDistrictName(), seller.getBuyer().getProvinceName()));
         data.put("from_ward_name", seller.getBuyer().getWardName());
         data.put("from_district_name", seller.getBuyer().getDistrictName());
         data.put("from_province_name", seller.getBuyer().getProvinceName());
@@ -524,8 +530,11 @@ public class GhnServiceImpl {
             throws JsonProcessingException {
 
         Map<String, Object> bodyData = createOrderShippingServiceBodyRequest(order, paymentMethod);
+        log.info(">>> [GHN Service] GHN body data: {}", bodyData);
+        log.info(">>> [GHN Service] GHN shop id: {}", order.getPostProduct().getSeller().getGhnShopId());
 
         String resultInString = createOrder(bodyData, order.getPostProduct().getSeller().getGhnShopId());
+        log.info(">>> [GHN Service] Result in String: {}", resultInString);
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(resultInString);

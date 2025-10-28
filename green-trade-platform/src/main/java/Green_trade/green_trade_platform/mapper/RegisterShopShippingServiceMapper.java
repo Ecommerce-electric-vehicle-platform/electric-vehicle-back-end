@@ -2,6 +2,7 @@ package Green_trade.green_trade_platform.mapper;
 
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.service.implement.GhnServiceImpl;
+import Green_trade.green_trade_platform.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -12,9 +13,11 @@ import java.util.Map;
 @Component
 public class RegisterShopShippingServiceMapper {
     private final GhnServiceImpl ghnService;
+    private final StringUtils stringUtils;
 
-    public RegisterShopShippingServiceMapper(GhnServiceImpl ghnService) {
+    public RegisterShopShippingServiceMapper(GhnServiceImpl ghnService, StringUtils stringUtils) {
         this.ghnService = ghnService;
+        this.stringUtils = stringUtils;
     }
 
     public Map<String, Object> toDto(Seller seller) throws JsonProcessingException {
@@ -28,7 +31,7 @@ public class RegisterShopShippingServiceMapper {
                     ghnService.findWardCodeByWardName(Integer.parseInt(districtId), seller.getBuyer().getWardName()),
                     "name", seller.getStoreName(),
                     "phone", seller.getBuyer().getPhoneNumber(),
-                    "address", seller.getBuyer().getStreet());
+                    "address", stringUtils.fullAddress(seller.getBuyer().getStreet(), seller.getBuyer().getWardName(), seller.getBuyer().getDistrictName(), seller.getBuyer().getProvinceName()));
             return result;
         } catch (Exception e) {
             log.info(">>> [RegisterShopShippingServiceMapper] error occur when mapping: {}", e.getMessage());
