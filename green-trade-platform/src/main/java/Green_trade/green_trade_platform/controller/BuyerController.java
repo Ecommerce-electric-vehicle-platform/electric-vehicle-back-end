@@ -228,7 +228,8 @@ public class BuyerController {
                                         {
                                           "postProductId": 12,
                                           "username": "duyphuong123",
-                                          "shippingAddress": "123 Le Loi Street, District 1, Ho Chi Minh City",
+                                          "fullName": "Tên đầy đủ",
+                                          "street": "256 Nguyễn Thị Minh Khai",
                                           "wardName": "Phường Bến Thành",
                                           "districtName": "Quận 1",
                                           "provinceName": "Hồ Chí Minh",
