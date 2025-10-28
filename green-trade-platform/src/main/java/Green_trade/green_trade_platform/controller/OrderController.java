@@ -3,26 +3,32 @@ package Green_trade.green_trade_platform.controller;
 import Green_trade.green_trade_platform.mapper.OrderListMapper;
 import Green_trade.green_trade_platform.mapper.OrderMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
+import Green_trade.green_trade_platform.mapper.ReviewMapper;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Order;
+import Green_trade.green_trade_platform.model.Review;
+import Green_trade.green_trade_platform.request.ReviewRequest;
 import Green_trade.green_trade_platform.response.OrderListResponse;
 import Green_trade.green_trade_platform.response.OrderResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
-import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
-import Green_trade.green_trade_platform.service.implement.GhnServiceImpl;
-import Green_trade.green_trade_platform.service.implement.OrderServiceImpl;
+import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/order")
 @Slf4j
+@AllArgsConstructor
 public class OrderController {
 
     private final OrderServiceImpl orderService;
@@ -31,18 +37,8 @@ public class OrderController {
     private final BuyerServiceImpl buyerService;
     private final GhnServiceImpl ghnService;
     private final OrderMapper orderMapper;
-
-    public OrderController(
-            OrderServiceImpl orderService,
-            ResponseMapper responseMapper,
-            OrderListMapper orderListMapper, BuyerServiceImpl buyerService, GhnServiceImpl ghnService, OrderMapper orderMapper) {
-        this.orderService = orderService;
-        this.responseMapper = responseMapper;
-        this.orderListMapper = orderListMapper;
-        this.buyerService = buyerService;
-        this.ghnService = ghnService;
-        this.orderMapper = orderMapper;
-    }
+    private final ReviewServiceImpl reviewService;
+    private final ReviewMapper reviewMapper;
 
     @Operation(
             summary = "API for request order history of user",
@@ -91,5 +87,42 @@ public class OrderController {
                 null
         );
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+    }
+
+    @Operation(
+            summary = "Create a product review with optional images",
+            description = """
+        This endpoint allows customers to create a review for an electrical product they have purchased.
+        
+        The request should include:
+        - **Review details** (order ID, rating, feedback text) as a JSON object named `request`.
+        - **Optional product images** (photos of the product or proof of use) as `pictures`.
+
+        The API automatically checks the feedback text for inappropriate or offensive language (Vietnamese supported).
+        Uploaded images will be stored on Cloudinary and associated with the review record.
+
+        **Content type:** multipart/form-data  
+        **Authentication:** Required if the platform uses user accounts.
+        """
+    )
+    @PostMapping(
+            value = "/review",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<?> createReview(@ModelAttribute ReviewRequest request,
+                                          @RequestPart(name = "pictures", required = false) List<MultipartFile> reviewImages) {
+        log.info(">>> [Order Controller] Create Review: Started.");
+        try {
+            Review savedReview = reviewService.createReview(request, reviewImages);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "MAKE REVIEW SUCCESSFULLY.",
+                    reviewMapper.toDto(savedReview), null));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "MAKE REVIEW FAILED.",
+                    null, e.getMessage()));
+        }
     }
 }

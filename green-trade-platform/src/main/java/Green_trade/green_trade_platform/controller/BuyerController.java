@@ -148,60 +148,6 @@ public class BuyerController {
         }
     }
 
-//    @PostMapping("/place-order")
-//    public ResponseEntity<?> placeOrder(@Valid @RequestBody PlaceOrderRequest request) throws Exception {
-//        Order newOrder = null;
-//        RestResponse response = null;
-//        OrderResponse responseData = null;
-//        String shippingFee = "0";
-//        Payment payment = paymentRepository.findById(request.getPaymentId()).orElseThrow(
-//                () -> new Exception("Payment method is not existed")
-//        );
-//
-//        Buyer buyer = buyerRepository.findByUsername(request.getUsername()).orElseThrow(() -> new ProfileNotFoundException("Buyer is not existed"));
-//        PostProduct postProduct = postProductRepository.findById(request.getPostProductId()).orElseThrow(() -> new Exception("Post Product is not existed"));
-//        if(payment.getGatewayName().equals("COD")) {
-//            shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, postProduct.getPrice().intValue()).get("total");
-//        } else {
-//            shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, 0).get("total");
-//        }
-//        newOrder = buyerService.placeOrder(request, shippingFee);
-//
-//        if(payment.getGatewayName().equals("COD")) {
-//            //đây là luồng xử lý cho thanh toán COD
-//            Transaction transaction = transactionService.checkoutCODPayment(
-//                    request.getUsername(),
-//                    request.getPostProductId(),
-//                    request.getPaymentId(),
-//                    newOrder
-//            );
-//            List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
-//            newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
-//            responseData = orderMapper.toDto(newOrder);
-//        } else {
-//            //tạo transaction cho việc thanh toán
-//            Transaction transaction = transactionService.checkoutWalletPayment(
-//                    request.getUsername(),
-//                    request.getPostProductId(),
-//                    request.getPaymentId(),
-//                    newOrder
-//            );
-//            List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
-//            newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
-//            newOrder = buyerService.updateOrderStatus(newOrder, "PAID");
-//            responseData = orderMapper.toDto(newOrder);
-//        }
-//
-//        response = responseMapper.toDto(
-//                true,
-//                "PLACE ORDERED SUCCESS",
-//                responseData,
-//                null
-//        );
-//
-//        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-//    }
-
     @Operation(
             summary = "Place a new order",
             description = """
@@ -349,5 +295,6 @@ public class BuyerController {
         log.info(">>> [END] placeOrder success");
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
+
 
 }

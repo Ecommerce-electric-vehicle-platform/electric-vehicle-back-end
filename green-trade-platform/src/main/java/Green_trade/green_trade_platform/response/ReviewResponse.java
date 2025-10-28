@@ -1,7 +1,6 @@
-package Green_trade.green_trade_platform.request;
+package Green_trade.green_trade_platform.response;
 
 import Green_trade.green_trade_platform.model.ReviewImage;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,12 +10,11 @@ import java.util.List;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class ReviewRequest {
-    @NotBlank(message = "Order id is required.")
+@AllArgsConstructor
+public class ReviewResponse {
     private Long orderId;
-    @NotBlank(message = "Rating is required.")
     private double rating;
     private String feedback;
+    private List<ReviewImagesResponse> reviewImages;
 }

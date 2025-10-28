@@ -26,6 +26,9 @@ public class ReviewImage {
     @Column(name = "image_url", nullable = false, unique = false)
     private String imageUrl;
 
+    @Column(name = "public_image_id")
+    private String publicImageId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "review_id")
     @JsonManagedReference
