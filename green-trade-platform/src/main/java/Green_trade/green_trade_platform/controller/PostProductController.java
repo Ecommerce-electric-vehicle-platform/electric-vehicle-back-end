@@ -12,16 +12,20 @@ import Green_trade.green_trade_platform.response.PostProductResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.response.SellerResponse;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
+import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/post-product")
 @RequiredArgsConstructor
