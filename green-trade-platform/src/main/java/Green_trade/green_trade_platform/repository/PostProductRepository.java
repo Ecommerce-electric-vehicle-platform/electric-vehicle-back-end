@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PostProductRepository extends JpaRepository<PostProduct, Long> {
     Page<PostProduct> findBySeller(Seller seller, Pageable pageable);
+
+    Page<PostProduct> findAllBySoldFalse(Pageable pageable);
 }
