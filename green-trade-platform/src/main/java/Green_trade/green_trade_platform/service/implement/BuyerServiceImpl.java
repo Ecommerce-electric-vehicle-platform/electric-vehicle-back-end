@@ -284,6 +284,12 @@ public class BuyerServiceImpl {
         return foundBuyer;
     }
 
+    public Buyer findBuyerBySellerId(Long sellerId) {
+        return buyerRepository.findBySeller_SellerId(sellerId).orElseThrow(
+                () -> new IllegalArgumentException("Can not find buyer with this seller id.")
+        );
+    }
+
     public Wallet getWallet() {
         Buyer buyer = getCurrentUser();
         return walletRepository.findByBuyer(buyer).orElseThrow();
