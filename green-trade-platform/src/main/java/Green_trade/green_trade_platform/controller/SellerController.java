@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -253,5 +254,43 @@ public class SellerController {
                     "Error occured during get seller profile,",
                     null, e.getMessage()));
         }
+    }
+
+    @Operation(
+            summary = "Get all product posts created by the authenticated seller",
+            description = """
+        This endpoint retrieves a list of all products (posts) that were created by the currently authenticated seller account.
+
+        The API identifies the seller based on the authentication token (JWT or session context) included in the request header.
+        It returns a list of product posts that belong exclusively to that seller.
+
+        **Usage notes:**
+        - Only users with a **Seller** role can access this endpoint.
+        - Each returned post contains product information such as title, price, quantity, description, and creation date.
+        - Supports pagination and filtering (if applicable).
+        
+        **Authentication:** Required (Bearer Token)
+        """
+    )
+    @GetMapping("/seller-post")
+    @PreAuthorize("hasRole('ROLE_SELLER')")
+    public ResponseEntity<?> getAllPostBySeller(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        log.info(">>> [Post Product Controller] Started get all post by seller.");
+
+        Seller seller = sellerService.getCurrentUser();
+        log.info(">>> [Post Product Controller] Seller: {}", seller.getSellerName());
+
+        Page<PostProduct> posts = postProductService.getAllPostBySeller(seller, page, size);
+        Page<PostProductResponse> responsePage = postProductMapper.toDtoPage(posts);
+
+        return ResponseEntity.ok(responseMapper.toDto(
+                true,
+                "GET POST PRODUCT BY SELLER SUCCESSFULLY.",
+                responsePage, null
+        ));
+
     }
 }

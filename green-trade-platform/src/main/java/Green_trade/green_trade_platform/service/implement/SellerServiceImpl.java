@@ -140,8 +140,9 @@ public class SellerServiceImpl implements SellerService {
     }
 
     public Seller getCurrentUser() {
+        log.info(">>> [Seller Service] Get current user.");
         Buyer buyer = buyerService.getCurrentUser();
         return sellerRepository.findByBuyer(buyer).orElseThrow(
-                () -> new AuthException("User not existsed."));
+                () -> new AuthException("User not existed."));
     }
 }

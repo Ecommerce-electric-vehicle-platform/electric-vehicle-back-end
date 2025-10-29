@@ -246,7 +246,7 @@ INSERT INTO seller(
     'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369244/sellers/1:doanvien/identity_back_image/551938c5-7612-464e-94b8-1eaf453085e9.jpg',
     'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369242/sellers/1:doanvien/business_license_image/521e8ddf-e05a-41a8-af94-fbb4b89a0655.jpg',
     NOW(), 'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369246/sellers/1:doanvien/selfie_image/d3953b0b-8423-47c0-864c-2e4bd4f2d2d9.jpg',
-    'PENDING', 'Chuyên xe máy, phụ tùng xe điện Đoàn Viên', NULL, 'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369249/sellers/1:doanvien/policy_image/96443852-fe1c-419b-bf60-8197d48f29ea.jpg',
+    'ACCEPTED', 'Chuyên xe máy, phụ tùng xe điện Đoàn Viên', 197764, 'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369249/sellers/1:doanvien/policy_image/96443852-fe1c-419b-bf60-8197d48f29ea.jpg',
     '0751487961', '075205014623', 'TRƯƠNG ĐOÀN VIÊN', 'VIỆT NAM', 'MỸ LỢI, PHÙ MỸ, BÌNH ĐỊNH',
     1, 1, NULL, NULL
 );

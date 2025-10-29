@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.enumerate.SellerStatus;
 import Green_trade.green_trade_platform.model.Admin;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Seller;
@@ -43,7 +44,7 @@ public class UserDetailsServiceCustomer implements UserDetailsService {
         Optional<Buyer> buyer = buyerRepository.findByUsername(username);
         if (buyer.isPresent()) {
             Optional<Seller> seller = sellerRepository.findByBuyer(buyer.get());
-            if(seller.isPresent()) {
+            if(seller.isPresent() && seller.get().getStatus() == SellerStatus.ACCEPTED) {
                 return new org.springframework.security.core.userdetails.User(
                         buyer.get().getUsername(),
                         buyer.get().getPassword(),

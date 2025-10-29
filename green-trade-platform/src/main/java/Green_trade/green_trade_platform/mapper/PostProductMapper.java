@@ -2,8 +2,13 @@ package Green_trade.green_trade_platform.mapper;
 
 import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.response.PostProductResponse;
-import org.hibernate.query.Page;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class PostProductMapper {
@@ -26,5 +31,16 @@ public class PostProductMapper {
                 .locationTrading(postProduct.getLocationTrading())
                 .categoryName(postProduct.getCategory().getName())
                 .build();
+    }
+
+    public Page<PostProductResponse> toDtoPage(Page<PostProduct> postProductPage) {
+        List<PostProductResponse> responses = postProductPage.getContent()
+                .stream()
+                .map(this::toDto)
+                .toList();
+
+        Pageable pageable = postProductPage.getPageable();
+
+        return new PageImpl<>(responses, pageable, postProductPage.getTotalElements());
     }
 }

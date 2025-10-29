@@ -141,8 +141,12 @@ public class BuyerServiceImpl {
     }
 
     public Buyer getCurrentUser() {
+        log.info(">>> [Buyer Service] Get current user: started.");
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.info(">>> [Buyer Service] Authentication: {}", authentication);
         String username = authentication.getName();
+
         return buyerRepository.findByUsername(username)
                 .orElseThrow(() -> new ProfileException("User is not existed: " + username));
     }
