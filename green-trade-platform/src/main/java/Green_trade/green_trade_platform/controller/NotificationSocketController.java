@@ -20,7 +20,7 @@ public class NotificationSocketController {
     // Called by services when new notifications are created
     public void sendUpgradeNotificationToUser(ApproveSellerResponse notification) {
         log.info(">>> [Notification Socket Controller] Send upgrade notification to user: {}", notification);
-        Buyer buyer = buyerService.getCurrentUser();
+        Buyer buyer = buyerService.findBuyerBySellerId(notification.getSellerId());
         String destination = "/queue/notifications/" + buyer.getBuyerId();
         messagingTemplate.convertAndSend(destination, notification);
     }
