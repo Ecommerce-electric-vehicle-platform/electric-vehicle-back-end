@@ -2,6 +2,7 @@ package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.controller.NotificationSocketController;
 import Green_trade.green_trade_platform.enumerate.*;
+import Green_trade.green_trade_platform.exception.OrderNotFound;
 import Green_trade.green_trade_platform.mapper.DisputeMapper;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.DisputeCategoryRepository;
@@ -46,7 +47,7 @@ public class DisputeServiceImpl implements DisputeService {
                     );
             Order disputedOrder = orderRepository.findById(request.getOrderId())
                     .orElseThrow(
-                            () -> new Exception("Order is not existed")
+                            () -> new OrderNotFound()
                     );
 //            log.info(">>> disputedOrder: {}", disputedOrder.toString());
             if(!disputedOrder.getStatus().equals(OrderStatus.COMPLETED)) {
@@ -57,6 +58,7 @@ public class DisputeServiceImpl implements DisputeService {
                     .disputeCategory(disputeCategory)
                     .admin(null)
                     .evidences(null)
+                    .description(request.getDescription())
                     .decision(DisputeDecision.NOT_HAVE_YET)
                     .resolution("No Resolution Yet")
                     .resolutionType(ResolutionType.NOT_HAVE_YET)
