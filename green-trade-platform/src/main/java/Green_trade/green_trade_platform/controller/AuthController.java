@@ -85,6 +85,7 @@ public class AuthController {
             redisTokenService.saveTokenToRedis(user.getEmail(), refreshToken, REFRESH_EXPIRE_TIME);
 
             AuthResponse authResponse = authMapper.toDto(user, accessToken, refreshToken);
+            authResponse.setBuyerId(user.getBuyerId());
 
             Optional<Seller> seller = sellerRepository.findByBuyer(user);
             if(seller.isPresent() && seller.get().getStatus() == SellerStatus.ACCEPTED) {
@@ -149,6 +150,7 @@ public class AuthController {
         } else {
             authResponse.setRole("ROLE_BUYER");
         }
+        authResponse.setBuyerId(user.getBuyerId());
 
         return ResponseEntity.status(HttpStatus.OK.value())
                 .body(responseMapper.toDto(

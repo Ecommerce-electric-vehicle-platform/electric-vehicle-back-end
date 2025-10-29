@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthResponse {
+    private Long buyerId;
     private String username;
     private String email;
     private String accessToken;
