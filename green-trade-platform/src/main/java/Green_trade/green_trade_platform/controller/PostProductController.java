@@ -37,17 +37,41 @@ public class PostProductController {
     private final SellerMapper sellerMapper;
 
     @Operation(
-            summary = "Get all post product with pagination",
-            description = "When buyer click to one page then FE will send page, size to BE." +
-                    "Size can be default 10 or more."
+            summary = "Get all available product posts with pagination and sorting",
+            description = """
+        This endpoint retrieves a paginated list of all product posts that are currently available for purchase
+        (i.e., not sold yet). It is typically used on the product listing page of the buyer interface.
+
+        **Usage:**
+        - When a buyer navigates to the product listing page, the frontend should send the `page` and `size` parameters to the backend.
+        - The backend returns a paginated response containing product details (title, brand, model, price, etc.).
+        - By default, results are **sorted by creation date in descending order**, so the newest products appear first.
+
+        **Query Parameters:**
+        - `page` *(integer, optional)* — Index of the page to retrieve (0-based). Default value is **0**.
+        - `size` *(integer, optional)* — Number of products per page. Default value is **10**.
+        - `sort` *(string, optional)* — Field to sort by (default: `"createdAt"`). Can be combined with direction (e.g., `"price,asc"` or `"price,desc"`).
+
+        **Filters (optional):**
+        - Future enhancements may include filters by category, price range, brand, or location.
+        - Example: `/api/posts?page=1&size=12&category=Electronics&minPrice=100&maxPrice=500`
+
+        **Example Request:**
+        GET /api/posts?page=0&size=10
+
+
+        **Authentication:** Not required for browsing public product listings.
+        """
     )
     @GetMapping("")
     public ResponseEntity<RestResponse<PostProductListResponse, Object>> getAllProduct(
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sort_by", defaultValue = "id") String sortedBy,
+            @RequestParam(name = "is_asc", defaultValue = "true") boolean isAsc
     ) {
         try {
-            Page<PostProduct> postProductPage = postProductService.getAllProductPaging(page, size);
+            Page<PostProduct> postProductPage = postProductService.getAllProductPaging(page, size, sortedBy, isAsc);
             Map<String, Object> meta = Map.of(
                     "currentPage", postProductPage.getNumber(),
                     "totalElements", postProductPage.getTotalElements(),
@@ -76,7 +100,7 @@ public class PostProductController {
     }
 
     @GetMapping("/{postId}/seller")
-    public ResponseEntity<RestResponse<SellerResponse, Object>> getSellerByPostId(@PathVariable Long id) {
+    public ResponseEntity<RestResponse<SellerResponse, Object>> getSellerByPostId(@PathVariable(name = "postId") Long id) {
         PostProduct postProduct = postProductService.findPostProductById(id);
         if(postProduct == null) {
             throw new PostProductNotFound();
