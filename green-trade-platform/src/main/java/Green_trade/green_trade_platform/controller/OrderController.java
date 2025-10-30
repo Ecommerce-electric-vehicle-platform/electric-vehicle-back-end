@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,9 +42,28 @@ public class OrderController {
     private final ReviewMapper reviewMapper;
 
     @Operation(
-            summary = "API for request order history of user",
-            description = "Return a paging list of order"
+            summary = "Get order history of current user",
+            description = """
+        Retrieves a paginated list of past orders belonging to the currently authenticated buyer.  
+        The system uses the access token to identify the buyer and fetches their order history, 
+        including details such as order ID, total amount, status, and order date.
+
+        **Workflow:**
+        1. The frontend sends a request with pagination parameters (`page`, `size`).
+        2. The backend identifies the buyer from the JWT token.
+        3. The system retrieves a paginated list of the buyer’s orders, sorted by date (latest first).
+        4. Pagination metadata (current page, total pages, total elements) is included in the response.
+
+        **Use cases:**
+        - Displaying a user’s order history in their profile dashboard.
+        - Fetching paginated order records for mobile or web apps.
+        
+        **Security Notes:**
+        - Requires authentication via JWT (`ROLE_BUYER`).
+        - Each user can only access their own order history.
+    """
     )
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @GetMapping("/history")
     public ResponseEntity<RestResponse<OrderListResponse, Object>> getOrdersHistoryOfCurrentUser(
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -75,6 +95,31 @@ public class OrderController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
+    @Operation(
+            summary = "Cancel an order",
+            description = """
+        Cancels an existing order for the currently authenticated user (buyer).  
+        This API updates the order status in the system and notifies the external GHN shipping service 
+        to cancel the corresponding shipment.
+
+        **Workflow:**
+        1. The client sends a `POST` request with the order ID in the URL path.
+        2. The system validates that the order exists and belongs to the authenticated user.
+        3. The order status is updated to `CANCELED`.
+        4. The system calls the GHN shipping service API to cancel the shipping request.
+        5. The updated order information is returned in the response.
+
+        **Use cases:**
+        - Buyers canceling an order before it is shipped.
+        - Sellers or system administrators canceling orders with failed payments or stock issues.
+        - Synchronizing order cancellations between internal system and GHN shipping API.
+
+        **Security Notes:**
+        - Requires JWT authentication (either `ROLE_BUYER` or `ROLE_SELLER`).
+        - A user can only cancel orders they own.
+    """
+    )
     @PostMapping("/cancel/{id}")
     public ResponseEntity<RestResponse<OrderResponse, Object>> cancelOrder(@PathVariable Long id) throws Exception {
         Order canceledOrder = orderService.cancelOrder(id);
@@ -105,6 +150,7 @@ public class OrderController {
         **Authentication:** Required if the platform uses user accounts.
         """
     )
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping(
             value = "/review",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE

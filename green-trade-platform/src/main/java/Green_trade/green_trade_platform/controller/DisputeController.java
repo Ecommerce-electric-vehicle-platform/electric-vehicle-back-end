@@ -51,6 +51,7 @@ public class DisputeController {
                     "updates the dispute with associated evidences, " +
                     "and sends a notification to the seller about the disputed product."
     )
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/raise-dispute")
     public ResponseEntity<RestResponse<?, ?>> raiseDispute(
             @ModelAttribute RaiseDisputeRequest request,
@@ -153,6 +154,7 @@ public class DisputeController {
         ```
     """
     )
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/resolve")
     public ResponseEntity<?> handleDispute(@RequestBody ResolveDisputeRequest request) {
         log.info(">>> [Dispute Controller]: Started.");
@@ -181,7 +183,7 @@ public class DisputeController {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_BUYER', 'ROLE_SELLER')")
     @Operation(
             summary = "Get detailed information of a specific dispute",
             description = """

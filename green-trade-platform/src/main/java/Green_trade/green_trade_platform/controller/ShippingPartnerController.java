@@ -31,8 +31,28 @@ public class ShippingPartnerController {
         this.responseMapper = responseMapper;
     }
 
-    @Operation(summary = "Fetch Shipping Partner API",
-                description = "Return a list of shipping partners")
+    @Operation(
+            summary = "Fetch available shipping partners",
+            description = """
+        Retrieves a list of all active shipping partners integrated with the platform.  
+        Each partner entry contains details such as partner name, service type, code, 
+        and additional configuration details used for order delivery.
+
+        **Workflow:**
+        1. The system queries all registered or active shipping partners from the database.
+        2. Each partner record is mapped to a standardized response format.
+        3. The endpoint returns the complete list of shipping partners available for order delivery.
+
+        **Use cases:**
+        - Allowing buyers to select a preferred shipping carrier during checkout.
+        - Enabling sellers or admins to view supported logistics partners.
+        - Integrating third-party shipping APIs like GHN, GHTK, or Viettel Post.
+
+        **Security Notes:**
+        - This endpoint can be public or protected depending on configuration.
+        - If authentication is enforced, only authorized roles (e.g., `ROLE_SELLER`, `ROLE_ADMIN`) can access it.
+    """
+    )
     @GetMapping("/partners")
     public ResponseEntity<RestResponse<List<ShippingPartnerResponse>, Object>> getShippingPartners()  {
         List<ShippingPartnerResponse> responseData = new ArrayList<>();
