@@ -1,12 +1,14 @@
 package Green_trade.green_trade_platform.response;
 
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
+import Green_trade.green_trade_platform.model.ProductImage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -30,4 +32,5 @@ public class PostProductResponse {
     private String categoryName;
     private BigDecimal price;
     private String locationTrading;
+    private List<ProductImageResponse> images;
 }

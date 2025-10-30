@@ -40,7 +40,7 @@ public class OrderServiceImpl implements OrderService {
 
     public Page<Order> getOrdersOfCurrentUserPaging(int size, int page, Buyer buyer) {
         try {
-            Pageable pageable = PageRequest.of(size, page, Sort.by("order_id"));
+            Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
             Page<Order> ordersPage = orderRepository.findAllByBuyer(buyer, pageable);
             return new PageImpl<>(ordersPage.getContent(), pageable, ordersPage.getTotalElements());
         } catch (Exception e) {

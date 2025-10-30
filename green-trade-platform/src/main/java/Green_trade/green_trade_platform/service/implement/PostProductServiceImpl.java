@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.enumerate.SellerStatus;
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
 import Green_trade.green_trade_platform.exception.*;
 import Green_trade.green_trade_platform.model.*;
@@ -7,6 +8,7 @@ import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
 import Green_trade.green_trade_platform.request.VerifiedPostProductRequest;
+import Green_trade.green_trade_platform.response.SellerResponse;
 import Green_trade.green_trade_platform.service.PostProductService;
 import Green_trade.green_trade_platform.util.FileUtils;
 import jakarta.transaction.Transactional;
@@ -26,7 +28,6 @@ import java.util.Optional;
 public class PostProductServiceImpl implements PostProductService {
 
     private final PostProductRepository postProductRepository;
-
     private final CategoryRepository categoryRepository;
     private final AdminServiceImpl adminService;
     private final FileUtils fileUtils;
@@ -177,9 +178,12 @@ public class PostProductServiceImpl implements PostProductService {
 
 
 
-    public Page<PostProduct> getAllProductPaging(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
-        Page<PostProduct> postProductsPaging = postProductRepository.findAll(pageable);
+    public Page<PostProduct> getAllProductPaging(int page, int size, String sortedBy, boolean isAsc) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortedBy).ascending());
+        if(!isAsc) {
+            pageable = PageRequest.of(page, size, Sort.by(sortedBy).descending());
+        }
+        Page<PostProduct> postProductsPaging = postProductRepository.findAllBySoldFalseAndActiveTrue(pageable);
         return new PageImpl<>(
                 postProductsPaging.getContent(),
                 pageable,
@@ -274,4 +278,17 @@ public class PostProductServiceImpl implements PostProductService {
         return foundPostProduct;
     }
 
+    public Page<PostProduct> getAllPostBySeller(Seller seller, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return postProductRepository.findBySeller(seller, pageable);
+    }
+
+    public PostProduct hidePostProduct(Long id) {
+        PostProduct selected = postProductRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Post product id does not existed.")
+        );
+
+        selected.setActive(false);
+        return postProductRepository.save(selected);
+    }
 }

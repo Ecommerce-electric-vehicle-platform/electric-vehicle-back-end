@@ -15,6 +15,7 @@ public class CurrentSubscriptionResponse {
     private Long sellerId;
     private String sellerName;
     private Long packageId;
+    private String packageName;
     private LocalDateTime start;
     private LocalDateTime end;
 }

@@ -17,15 +17,14 @@ import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.response.BuyerResponse;
 import Green_trade.green_trade_platform.response.OrderResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
+import Green_trade.green_trade_platform.response.WalletTransactionResponse;
 import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -58,16 +57,35 @@ public class BuyerController {
     private final PostProductServiceImpl postProductService;
     private final PaymentServiceImpl paymentService;
     private final SystemWalletServiceImpl systemWalletService;
+    private final WalletServiceImpl walletService;
 
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @Operation(
             summary = "Upload buyer profile",
-            description = "Upload buyer profile: avatar, full name, shipping address, and so on"
+            description = """
+        Allows a buyer to upload or update their profile information including full name,
+        shipping address, contact details, and avatar image.  
+        This endpoint accepts multipart form data containing both profile fields and an image file.
+
+        **Workflow:**
+        1. The buyer submits profile data (name, address, etc.) and an avatar image via multipart form.
+        2. The system uploads the avatar file, updates the buyer's profile in the database, 
+           and returns the updated profile data.
+        3. Only authenticated buyers (ROLE_BUYER) can access this endpoint.
+
+        **Use cases:**
+        - Buyers updating their account profile for the first time.
+        - Allowing users to change their avatar or update shipping address information.
+
+        **Security Notes:**
+        - Requires valid JWT token with `ROLE_BUYER` authority.
+        - The uploaded image must comply with allowed size and format restrictions.
+    """
     )
     @PostMapping(
             value = "/upload-profile",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
-    @PreAuthorize("hasRole('ROLE_BUYER')")
     public ResponseEntity<?> uploadBuyerProfile(@Parameter(description = "profile request for buyer")
                                                 @Valid @ModelAttribute ProfileRequest profileRequest,
                                                 @Parameter(description = "avatar of buyer")
@@ -81,12 +99,33 @@ public class BuyerController {
                 null));
     }
 
-    @Operation(summary = "Update Profile Buyer",
-                description = "Update buyer profile: buyer profile information")
+    @Operation(
+            summary = "Update Buyer Profile",
+            description = """
+        Allows a buyer to update their existing profile information, including full name, 
+        contact details, shipping address, and optionally their avatar image.  
+        This endpoint accepts multipart/form-data requests where both text fields and a file may be included.
+
+        **Workflow:**
+        1. The buyer submits updated profile details and, optionally, a new avatar image.
+        2. The system updates the corresponding fields in the buyer’s profile.
+        3. If a new avatar is provided, the image is uploaded and replaces the previous one.
+        4. The response returns the updated buyer profile information.
+
+        **Use cases:**
+        - Buyers updating their personal information such as name, phone number, or address.
+        - Changing or removing an avatar profile picture.
+        
+        **Security Notes:**
+        - Requires authentication via JWT token (ROLE_BUYER).
+        - Only the owner of the account can update their own profile.
+    """
+    )
     @PutMapping(
             value = "/update-profile",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     public ResponseEntity<RestResponse<BuyerResponse, Object>> updateProfile(
             @Valid @ModelAttribute UpdateBuyerProfileRequest updateProfileRequest,
             @RequestPart(value = "avatar_url", required = false) MultipartFile avatarFile
@@ -109,10 +148,29 @@ public class BuyerController {
     }
 
     @Operation(
-            summary = "Get buyer profile.",
-            description = "This API return user profile. Front-end just pass token into header of request," +
-                    " then system will return profile based on token passed."
+            summary = "Get buyer profile",
+            description = """
+        Retrieves the profile information of the currently authenticated buyer.  
+        The client must include a valid JWT access token in the `Authorization` header.  
+        The system will decode the token, identify the buyer, and return their corresponding profile details.
+
+        **Workflow:**
+        1. The client sends a `GET /profile` request with an Authorization header:  
+           `Authorization: Bearer <access_token>`
+        2. The system validates the access token.
+        3. The system identifies the buyer associated with the token.
+        4. The buyer’s profile is fetched and returned as a response.
+
+        **Use cases:**
+        - Retrieving current logged-in buyer’s profile for display in their dashboard.
+        - Ensuring front-end applications can show user-specific information without manually passing user IDs.
+
+        **Security Notes:**
+        - Requires a valid access token (`ROLE_BUYER`).
+        - Access is limited to the authenticated buyer’s own profile.
+    """
     )
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @GetMapping("/profile")
     public ResponseEntity<RestResponse<Object, Object>> getProfile() {
         try {
@@ -133,7 +191,7 @@ public class BuyerController {
             description = "Front-end put access token in the header request. " +
                     "Back-end will give user's wallet information."
     )
-
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @GetMapping("/wallet")
     public ResponseEntity<RestResponse<Object, Object>> getWallet() {
         try {
@@ -147,60 +205,6 @@ public class BuyerController {
                     null, e));
         }
     }
-
-//    @PostMapping("/place-order")
-//    public ResponseEntity<?> placeOrder(@Valid @RequestBody PlaceOrderRequest request) throws Exception {
-//        Order newOrder = null;
-//        RestResponse response = null;
-//        OrderResponse responseData = null;
-//        String shippingFee = "0";
-//        Payment payment = paymentRepository.findById(request.getPaymentId()).orElseThrow(
-//                () -> new Exception("Payment method is not existed")
-//        );
-//
-//        Buyer buyer = buyerRepository.findByUsername(request.getUsername()).orElseThrow(() -> new ProfileNotFoundException("Buyer is not existed"));
-//        PostProduct postProduct = postProductRepository.findById(request.getPostProductId()).orElseThrow(() -> new Exception("Post Product is not existed"));
-//        if(payment.getGatewayName().equals("COD")) {
-//            shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, postProduct.getPrice().intValue()).get("total");
-//        } else {
-//            shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, 0).get("total");
-//        }
-//        newOrder = buyerService.placeOrder(request, shippingFee);
-//
-//        if(payment.getGatewayName().equals("COD")) {
-//            //đây là luồng xử lý cho thanh toán COD
-//            Transaction transaction = transactionService.checkoutCODPayment(
-//                    request.getUsername(),
-//                    request.getPostProductId(),
-//                    request.getPaymentId(),
-//                    newOrder
-//            );
-//            List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
-//            newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
-//            responseData = orderMapper.toDto(newOrder);
-//        } else {
-//            //tạo transaction cho việc thanh toán
-//            Transaction transaction = transactionService.checkoutWalletPayment(
-//                    request.getUsername(),
-//                    request.getPostProductId(),
-//                    request.getPaymentId(),
-//                    newOrder
-//            );
-//            List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
-//            newOrder = buyerService.updateOrderTransactions(newOrder, transactions);
-//            newOrder = buyerService.updateOrderStatus(newOrder, "PAID");
-//            responseData = orderMapper.toDto(newOrder);
-//        }
-//
-//        response = responseMapper.toDto(
-//                true,
-//                "PLACE ORDERED SUCCESS",
-//                responseData,
-//                null
-//        );
-//
-//        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-//    }
 
     @Operation(
             summary = "Place a new order",
@@ -216,32 +220,9 @@ public class BuyerController {
                     <li>Create a new order, transaction, and GHN shipping order.</li>
                     <li>Return a response containing the new order details and GHN order code.</li>
                 </ul>
-                """,
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "The request body containing buyer, product, and payment information to place an order.",
-                    required = true,
-                    content = @Content(
-                            schema = @Schema(implementation = PlaceOrderRequest.class),
-                            examples = @ExampleObject(
-                                    name = "Example Request",
-                                    value = """
-                                        {
-                                          "postProductId": 12,
-                                          "username": "duyphuong123",
-                                          "fullName": "Tên đầy đủ",
-                                          "street": "256 Nguyễn Thị Minh Khai",
-                                          "wardName": "Phường Bến Thành",
-                                          "districtName": "Quận 1",
-                                          "provinceName": "Hồ Chí Minh",
-                                          "phoneNumber": "0905123456",
-                                          "shippingPartnerId": 1,
-                                          "paymentId": 1
-                                        }
-                                        """
-                            )
-                    )
-            )
+                """
     )
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/place-order")
     public ResponseEntity<RestResponse<OrderResponse, Object>> placeOrder(@Valid @RequestBody PlaceOrderRequest request) throws Exception {
         log.info(">>> [START] placeOrder");
@@ -350,4 +331,44 @@ public class BuyerController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
+    @Operation(
+            summary = "Get wallet transaction history",
+            description = """
+        Retrieves a paginated list of wallet transactions for the currently authenticated user.
+        This endpoint supports pagination through 'page' and 'size' query parameters.
+        Each record in the result includes transaction details such as:
+        - Transaction ID
+        - Type (credit/debit)
+        - Amount
+        - Status
+        - Timestamp
+        - ...
+        Use this API to display a user's transaction history in their dashboard or account page.
+    """
+    )
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
+    @GetMapping("/transaction-history")
+    public ResponseEntity<?> getWalletTransactionHistory(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            Buyer buyer = buyerService.getCurrentUser();
+            Page<WalletTransaction> transactions = walletService.getTransactionHistory(buyer, page, size);
+
+            Page<WalletTransactionResponse> responsePage = transactions.map(walletMapper::toTransactionResponse);
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ALL WALLET TRANSACTION SUCCESSFULLY.",
+                    responsePage, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET ALL WALLET TRANSACTION SUCCESSFULLY.",
+                    null, e.getMessage()
+            ));
+        }
+    }
 }

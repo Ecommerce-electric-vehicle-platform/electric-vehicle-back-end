@@ -102,6 +102,7 @@ public class PostProduct {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     @ToString.Exclude
+    @JsonManagedReference
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
