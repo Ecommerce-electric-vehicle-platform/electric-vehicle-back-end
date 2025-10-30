@@ -46,6 +46,22 @@ public class AdminController {
     private final PostProductListMapper postProductListMapper;
     private final NotificationSocketController socketController;
 
+    @Operation(
+            summary = "Get all pending seller accounts",
+            description = """
+        Retrieves a paginated list of seller accounts that are currently in a pending verification or approval state.
+        This endpoint is restricted to administrators only (requires ROLE_ADMIN authority).
+
+        The API supports pagination using the 'page' and 'size' query parameters.
+
+        Response includes:
+        - A list of sellers awaiting approval (`sellers`)
+        - Pagination details such as current page, total elements, and total pages
+
+        Typical use cases:
+        - Admin dashboard for managing seller approvals
+    """
+    )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/pending-seller")
     public ResponseEntity<?> findAllPendingSeller(
@@ -62,6 +78,27 @@ public class AdminController {
         return ResponseEntity.ok(body);
     }
 
+    @Operation(
+            summary = "Approve or reject a pending seller account",
+            description = """
+        Handles the approval or rejection process for a pending seller registration request. 
+        This endpoint is restricted to administrators and requires a valid bearer token.
+
+        The request body should contain seller information along with an approval decision. 
+        If approved, the seller's account status is updated and a notification is sent to the user 
+        in real time via WebSocket.
+
+        **Workflow:**
+        1. Admin submits approval/rejection data through this endpoint.
+        2. The system updates the seller’s status.
+        3. A notification is constructed and timestamped (`sendAt`).
+        4. The notification is sent to the corresponding seller user through a socket event.
+
+        **Use cases:**
+        - Approving verified sellers after document validation.
+        - Rejecting invalid or incomplete seller registration requests.
+    """
+    )
     @PostMapping("/approve-seller")
     public ResponseEntity<RestResponse<?, ?>> handlePendingSeller(@RequestBody ApproveSellerRequest request) throws JsonProcessingException {
         ApproveSellerResponse sellerNotification = sellerService.handlePendingSeller(request);
@@ -72,6 +109,26 @@ public class AdminController {
                 sellerNotification, null));
     }
 
+    @Operation(
+            summary = "Create a new admin account",
+            description = """
+        Allows an existing administrator to create a new admin account in the system.
+        This endpoint accepts both form data and a profile image file (`avatar_url`) for the new admin.
+
+        The request must include valid admin details (username, email, password, role, etc.) 
+        and an avatar image. The uploaded avatar will be processed and linked to the new account.
+
+        **Workflow:**
+        1. Admin submits a multipart/form-data request containing admin details and an avatar image.
+        2. The system validates the request and saves the image.
+        3. The new admin account is created and persisted in the database.
+        4. A success response is returned with the created admin's information.
+
+        **Use cases:**
+        - Registering additional admin users for system management.
+        - Managing multi-admin access in the platform.
+    """
+    )
     @PostMapping("creating-admin")
     public ResponseEntity<?> handleCreatingAdmin(
             @Valid @ModelAttribute CreateAdminRequest request,
