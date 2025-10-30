@@ -17,6 +17,7 @@ import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.response.BuyerResponse;
 import Green_trade.green_trade_platform.response.OrderResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
+import Green_trade.green_trade_platform.response.WalletTransactionResponse;
 import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,6 +27,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -58,6 +60,7 @@ public class BuyerController {
     private final PostProductServiceImpl postProductService;
     private final PaymentServiceImpl paymentService;
     private final SystemWalletServiceImpl systemWalletService;
+    private final WalletServiceImpl walletService;
 
     @Operation(
             summary = "Upload buyer profile",
@@ -296,5 +299,43 @@ public class BuyerController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
+    @Operation(
+            summary = "Get wallet transaction history",
+            description = """
+        Retrieves a paginated list of wallet transactions for the currently authenticated user.
+        This endpoint supports pagination through 'page' and 'size' query parameters.
+        Each record in the result includes transaction details such as:
+        - Transaction ID
+        - Type (credit/debit)
+        - Amount
+        - Status
+        - Timestamp
+        - ...
+        Use this API to display a user's transaction history in their dashboard or account page.
+    """
+    )
+    @GetMapping("/transaction-history")
+    public ResponseEntity<?> getWalletTransactionHistory(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            Buyer buyer = buyerService.getCurrentUser();
+            Page<WalletTransaction> transactions = walletService.getTransactionHistory(buyer, page, size);
 
+            Page<WalletTransactionResponse> responsePage = transactions.map(walletMapper::toTransactionResponse);
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ALL WALLET TRANSACTION SUCCESSFULLY.",
+                    responsePage, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET ALL WALLET TRANSACTION SUCCESSFULLY.",
+                    null, e.getMessage()
+            ));
+        }
+    }
 }
