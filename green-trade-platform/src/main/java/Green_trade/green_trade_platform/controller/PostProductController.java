@@ -35,6 +35,7 @@ public class PostProductController {
     private final PostProductListMapper postProductListMapper;
     private final PostProductMapper postProductMapper;
     private final SellerMapper sellerMapper;
+    private final SellerServiceImpl sellerService;
 
     @Operation(
             summary = "Get all available product posts with pagination and sorting",
@@ -137,4 +138,5 @@ public class PostProductController {
         );
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
+
 }
