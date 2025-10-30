@@ -99,6 +99,28 @@ public class PostProductController {
         }
     }
 
+    @Operation(
+            summary = "Get seller information by post product ID",
+            description = """
+        Retrieves detailed information about the seller associated with a specific post product.  
+        The client provides a `postId`, and the system returns the corresponding seller’s profile and business details.
+
+        **Workflow:**
+        1. The system locates the post product using the provided `postId`.
+        2. If found, it retrieves the seller linked to that post.
+        3. The endpoint returns seller details such as store name, contact info, and verification status.
+        4. If the post product is not found, a `404` error is thrown.
+
+        **Use cases:**
+        - Displaying seller information on a product detail page.
+        - Showing seller ratings, verification status, or contact details alongside their listings.
+        - Allowing buyers to view who owns a particular product post.
+
+        **Security Notes:**
+        - This endpoint may be publicly accessible or protected depending on platform policy.
+        - Sensitive seller data (like private contact info) should only be returned to authorized users.
+    """
+    )
     @GetMapping("/{postId}/seller")
     public ResponseEntity<RestResponse<SellerResponse, Object>> getSellerByPostId(@PathVariable(name = "postId") Long id) {
         PostProduct postProduct = postProductService.findPostProductById(id);

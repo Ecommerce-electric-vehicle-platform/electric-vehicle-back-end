@@ -106,6 +106,31 @@ public class SellerController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
+    @Operation(
+            summary = "Upload post product pictures to Cloudinary",
+            description = """
+        Allows a seller to upload one or more pictures for a specific post product.  
+        The uploaded images are stored on Cloudinary, and the post product record is updated 
+        with the image URLs.
+
+        **Workflow:**
+        1. The seller provides the post product ID as a path parameter.
+        2. Multiple images are sent as multipart files in the `pictures` request part.
+        3. The system uploads each file to Cloudinary and associates the image URLs with the post product.
+        4. The endpoint returns the updated post product details including all image URLs.
+
+        **Use cases:**
+        - Sellers adding images for a newly created product listing.
+        - Updating existing listings with better or additional pictures.
+        - Synchronizing image uploads with Cloudinary storage.
+
+        **Security Notes:**
+        - Requires a valid JWT token with `ROLE_SELLER` authority.
+        - Only the owner of the product can upload or modify its images.
+        - File validation (e.g., image size and type) should be enforced on both client and server.
+    """
+    )
+    @PreAuthorize("hasRole('ROLE_SELLER')")
     @PostMapping("/upload-pictures-cloudinary/{id}")
     public ResponseEntity<RestResponse<PostProductResponse, Object>> uploadPostProduct(
             @PathVariable Long id,
@@ -125,8 +150,29 @@ public class SellerController {
     }
 
     @PreAuthorize("hasRole('ROLER_SELLER')")
-    @Operation(summary = "Request verified for post product",
-                description = "Retrun result that the request has been sent")
+    @Operation(
+            summary = "Request verification for a post product",
+            description = """
+        Allows a seller to request verification for a specific post product.  
+        This process typically ensures that the post product meets platform standards 
+        (e.g., authenticity, completeness, compliance) before being made public or promoted.
+
+        **Workflow:**
+        1. The seller sends a verification request for one of their post products.
+        2. The system validates ownership and product eligibility.
+        3. The post product status changes to `PENDING_VERIFICATION`.
+        4. The platform’s review team will then approve or reject the verification request.
+
+        **Use cases:**
+        - Sellers submitting products for manual review or moderation before publishing.
+        - Quality control and fraud prevention workflows.
+        - Enabling verified products to gain higher trust and visibility on the platform.
+
+        **Security Notes:**
+        - Requires authentication via JWT token with `ROLE_SELLER`.
+        - Sellers can only request verification for products they own.
+    """
+    )
     @PostMapping("/verified-post-product-request")
     public ResponseEntity<RestResponse<PostProductResponse, Object>> postProductVerifiedRequest(@Valid @RequestBody VerifiedPostProductRequest request) throws Exception {
         PostProduct result = postProductService.postProductVerifiedRequest(request);
@@ -141,9 +187,29 @@ public class SellerController {
     }
 
     @Operation(
-            description = "Front-end just pass token then will get seller profile (if seller exists).",
-            summary = "Get seller profile."
+            summary = "Get seller profile",
+            description = """
+        Retrieves the profile information of the currently authenticated seller.  
+        The frontend only needs to send the JWT access token in the `Authorization` header;  
+        the system identifies the seller automatically from the token.
+
+        **Workflow:**
+        1. The client sends a `GET /seller/profile` request with an Authorization header:  
+           `Authorization: Bearer <access_token>`
+        2. The system verifies the access token and identifies the seller.
+        3. The seller’s profile details are fetched and returned in the response.
+
+        **Use cases:**
+        - Displaying seller account details in their dashboard or settings.
+        - Allowing sellers to view their store and verification status.
+        - Returning only the seller’s own profile based on token authentication.
+
+        **Security Notes:**
+        - Requires a valid JWT token with `ROLE_SELLER`.
+        - Each seller can only access their own profile.
+    """
     )
+    @PreAuthorize("hasRole('ROLE_SELLER')")
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile() {
         try {
@@ -176,7 +242,7 @@ public class SellerController {
         """
     )
     @GetMapping("/seller-post")
-    @PreAuthorize("hasRole('ROLE_SELLER')")
+    @PreAuthorize("hasAnyRole('ROLE_SELLER', 'ROLE_BUYER')")
     public ResponseEntity<?> getAllPostBySeller(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {

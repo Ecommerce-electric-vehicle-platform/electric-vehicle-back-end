@@ -23,6 +23,7 @@ public class AuthMapper {
                 .email(admin.getEmail())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .employeeId(admin.getEmployeeNumber())
                 .build();
     }
 

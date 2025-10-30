@@ -99,6 +99,7 @@ public class AdminController {
         - Rejecting invalid or incomplete seller registration requests.
     """
     )
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/approve-seller")
     public ResponseEntity<RestResponse<?, ?>> handlePendingSeller(@RequestBody ApproveSellerRequest request) throws JsonProcessingException {
         ApproveSellerResponse sellerNotification = sellerService.handlePendingSeller(request);
@@ -129,6 +130,7 @@ public class AdminController {
         - Managing multi-admin access in the platform.
     """
     )
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("creating-admin")
     public ResponseEntity<?> handleCreatingAdmin(
             @Valid @ModelAttribute CreateAdminRequest request,
@@ -149,9 +151,28 @@ public class AdminController {
 
     }
 
-//    @PreAuthorize("hasRole('ROLE_SELLER')")
-    @Operation(summary = "Review Post Product List API",
-            description = "Return a post product list")
+    @Operation(
+            summary = "Review Post Product List (Admin Only)",
+            description = """
+        Retrieves a paginated list of post products that are pending verification or review by administrators.  
+        This API is restricted to users with the `ROLE_ADMIN` authority.
+
+        **Workflow:**
+        1. The admin calls this endpoint with pagination parameters (`page`, `size`).
+        2. The system queries all post products that are awaiting verification or moderation.
+        3. The endpoint returns a paginated response containing post details, along with metadata.
+
+        **Use cases:**
+        - Admins reviewing newly submitted product posts before approval.
+        - Moderators checking flagged or edited posts that require re-verification.
+        - Ensuring quality control and compliance of product listings before publication.
+
+        **Security Notes:**
+        - Requires JWT authentication with `ROLE_ADMIN`.
+        - Unauthorized users (buyers/sellers) will be denied access.
+    """
+    )
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/review-post-seller-list")
     public ResponseEntity<RestResponse<PostProductListResponse, Object>> getAllPostProductForReview(
             @RequestParam(name = "size",defaultValue = "10") int size,
@@ -179,9 +200,28 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
-//    @PreAuthorize("hasRole('ROLE_SELLER')")
-    @Operation(summary = "View Post Details For Admin Review API",
-            description = "Return post product detail")
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER', 'ROLE_ADMIN')")
+    @Operation(
+            summary = "View post product details by ID",
+            description = """
+        Retrieves detailed information for a specific post product based on its unique ID.  
+        Accessible to **Buyers**, **Sellers**, and **Admins** with appropriate privileges.
+
+        **Workflow:**
+        1. The client sends a request containing the post product ID as a path variable.
+        2. The system retrieves the corresponding post product record from the database.
+        3. The product details are returned as a structured response, including product info, seller data, and review status.
+        
+        **Use cases:**
+        - **Admin:** Reviewing pending or verified posts before approval or publication.
+        - **Seller:** Viewing or verifying their own product submission details.
+        - **Buyer:** Viewing detailed product information for browsing or purchasing decisions.
+        
+        **Security Notes:**
+        - Requires JWT authentication (`ROLE_BUYER`, `ROLE_SELLER`, or `ROLE_ADMIN`).
+        - Different roles may have access to different levels of detail based on internal authorization rules.
+    """
+    )
     @GetMapping("/{postProductId}/post-details")
     public ResponseEntity<RestResponse<PostProductResponse, Object>> viewPostProductDetail(
             @PathVariable Long postProductId
@@ -197,9 +237,25 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @Operation(summary = "Decide Post Product Verified API",
-            description = "Return a result show that post product decision")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(
+            summary = "Review and decide post product verification",
+            description = """
+        Allows an admin or moderator to approve or reject a seller's post product after manual review.
+        This endpoint records the decision, updates the product's verification status, 
+        and returns the updated product details.
+
+        **Workflow:**
+        1. Admin sends a decision request containing the post product ID and decision details (approve or reject).
+        2. The system validates the product and applies the verification decision.
+        3. The updated post product entity is returned in the response.
+
+        **Use cases:**
+        - Approving a verified product for listing.
+        - Rejecting a product submission with a reason or remark.
+        - Managing product moderation workflows.
+    """
+    )
     @PostMapping("/review-post-product-decision")
     public ResponseEntity<RestResponse<PostProductResponse, Object>> reviewPostProductDecision(@Valid @RequestBody PostProductDecisionRequest request) throws Exception {
         PostProduct result = postProductServiceImpl.checkPostProductVerification(request);

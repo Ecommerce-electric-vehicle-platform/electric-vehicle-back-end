@@ -34,8 +34,25 @@ public class SubscriptionPackageController {
     private final SubscriptionMapper subscriptionMapper;
 
     @Operation(
-            summary = "Trả về các gói (active) của hệ thống dành cho seller,",
-            description = "Trả về các gói của hệ thống để người dùng đăng ký."
+            summary = "Get active subscription packages for sellers",
+            description = """
+        Returns a paginated list of active subscription packages available in the system for sellers to register.  
+        Each package contains details such as package name, description, duration, price, and features.
+
+        **Workflow:**
+        1. The client calls this endpoint with optional pagination parameters (`page`, `size`).
+        2. The system retrieves all active (enabled) subscription packages from the database.
+        3. The results are returned in a paginated format, sorted by creation or activation date.
+
+        **Use cases:**
+        - Displaying available subscription plans for sellers on the pricing or upgrade page.
+        - Allowing sellers to choose which package to subscribe to when upgrading their account.
+        - Used by admins or frontend dashboards to show currently active plans.
+
+        **Security Notes:**
+        - This endpoint may be public or restricted depending on your system configuration.
+        - Data shown includes only active packages (`status = ACTIVE`).
+    """
     )
     @GetMapping("/active")
     public ResponseEntity<?> getActivePackages(
@@ -47,6 +64,30 @@ public class SubscriptionPackageController {
                 subscriptionPackageService.getActivePackageResponses(PageRequest.of(page, size)), null));
     }
 
+    @Operation(
+            summary = "Register or subscribe to a seller package",
+            description = """
+        Allows a seller to register (sign) for an active subscription package.  
+        The system validates the seller’s wallet balance, deducts the required amount, 
+        and activates the selected package upon successful payment.
+
+        **Workflow:**
+        1. The seller selects an active subscription package from the available list.
+        2. The frontend sends a `SignPackageRequest` containing the package ID and optional payment details.
+        3. The system checks the seller’s wallet balance:
+           - If sufficient funds exist, the package is activated and wallet balance is deducted.
+           - If funds are insufficient, the system returns an error response.
+        4. A transaction record is saved, and the subscription is linked to the seller’s account.
+
+        **Use cases:**
+        - Sellers subscribing to premium plans for additional posting limits or advanced features.
+        - Enabling monetization via recurring or one-time package purchases.
+
+        **Security Notes:**
+        - Requires JWT authentication (`ROLE_SELLER`).
+        - The authenticated seller can only register packages for their own account.
+    """
+    )
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @PostMapping("/sign-package")
     public ResponseEntity<?> signPackage(@RequestBody SignPackageRequest request) {
