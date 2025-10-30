@@ -10,6 +10,10 @@ import Green_trade.green_trade_platform.repository.WalletTransactionRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -115,4 +119,12 @@ public class WalletServiceImpl {
                 () -> new IllegalArgumentException("Can not find wallet with this wallet id: " + buyerWalletId)
         );
     }
+
+    public Page<WalletTransaction> getTransactionHistory(Buyer buyer, int page, int size) {
+        Wallet wallet = buyer.getWallet();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        return walletTransactionRepository.findByWallet(wallet, pageable);
+    }
+
 }
