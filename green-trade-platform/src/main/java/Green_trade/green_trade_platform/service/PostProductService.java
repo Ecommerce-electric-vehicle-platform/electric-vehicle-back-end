@@ -15,7 +15,7 @@ public interface PostProductService {
             List<MultipartFile> files
     ) throws Exception;
 
-    Page<PostProduct> getAllProductPaging(int page, int size);
+    Page<PostProduct> getAllProductPaging(int page, int size, String sortedBy, boolean isAsc);
 
     Page<PostProduct> getAllPostProductForVerifiedReview(int size, int page) throws Exception;
 
