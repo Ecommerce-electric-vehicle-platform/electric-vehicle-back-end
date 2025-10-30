@@ -183,7 +183,7 @@ public class PostProductServiceImpl implements PostProductService {
         if(!isAsc) {
             pageable = PageRequest.of(page, size, Sort.by(sortedBy).descending());
         }
-        Page<PostProduct> postProductsPaging = postProductRepository.findAllBySoldFalse(pageable);
+        Page<PostProduct> postProductsPaging = postProductRepository.findAllBySoldFalseAndActiveTrue(pageable);
         return new PageImpl<>(
                 postProductsPaging.getContent(),
                 pageable,
@@ -281,5 +281,14 @@ public class PostProductServiceImpl implements PostProductService {
     public Page<PostProduct> getAllPostBySeller(Seller seller, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return postProductRepository.findBySeller(seller, pageable);
+    }
+
+    public PostProduct hidePostProduct(Long id) {
+        PostProduct selected = postProductRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Post product id does not existed.")
+        );
+
+        selected.setActive(false);
+        return postProductRepository.save(selected);
     }
 }
