@@ -52,7 +52,7 @@ public class DisputeController {
                     "and sends a notification to the seller about the disputed product."
     )
     @PostMapping("/raise-dispute")
-    public ResponseEntity<RestResponse<?, ?>> raiseDispute(
+    public ResponseEntity<RestResponse<DisputeResponse, Object>> raiseDispute(
             @ModelAttribute RaiseDisputeRequest request,
             @RequestPart("pictures") List<MultipartFile> files
     ) throws Exception {
