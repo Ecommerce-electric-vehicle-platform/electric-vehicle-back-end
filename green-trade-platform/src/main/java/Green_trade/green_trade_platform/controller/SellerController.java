@@ -54,40 +54,7 @@ public class SellerController {
                     <li>Checks the service subscription associated with the seller's username.</li>
                     <li>Returns whether the package is valid and the expiry date.</li>
                 </ul>
-                """,
-            parameters = {
-                    @Parameter(
-                            name = "username",
-                            description = "Username of the seller whose service package needs to be verified",
-                            required = true,
-                            example = "viennehaha"
-                    )
-            },
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Service package validity checked successfully",
-                            content = @Content(
-                                    schema = @Schema(implementation = RestResponse.class),
-                                    examples = @ExampleObject(
-                                            name = "Valid Service Package",
-                                            value = """
-                                                {
-                                                  "success": true,
-                                                  "message": "Service Package is valid",
-                                                  "data": {
-                                                    "valid": true,
-                                                    "expiryDate": "2025-12-31T23:59:59",
-                                                    "packageName": "Premium Seller Plan"
-                                                  },
-                                                  "error": null
-                                                }
-                                                """
-                                    )
-                            )
-                    )
-            },
-            tags = {"Seller Management"}
+                """
     )
     @PostMapping("/{username}/check-service-package-validity")
     public ResponseEntity<RestResponse<SubscriptionResponse, Object>> checkServicePackageValidity(@PathVariable String username) throws Exception {
@@ -113,73 +80,7 @@ public class SellerController {
                     <li>One or more product images uploaded as multipart files.</li>
                 </ul>
                 The response returns the created post details after saving it successfully.
-                """,
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    description = "Product post data and uploaded images",
-                    content = @Content(
-                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                            schema = @Schema(implementation = UploadPostProductRequest.class),
-                            examples = @ExampleObject(
-                                    name = "Example Request",
-                                    value = """
-                                        {
-                                          "sellerId": 5,
-                                          "title": "Used Electric Bike",
-                                          "brand": "Yadea",
-                                          "model": "X5",
-                                          "manufactureYear": 2022,
-                                          "usedDuration": "6 months",
-                                          "conditionLevel": "Good",
-                                          "price": 850.00,
-                                          "length": "150",
-                                          "width": "60",
-                                          "height": "110",
-                                          "weight": "25000",
-                                          "description": "Lightly used electric bike in perfect condition.",
-                                          "locationTrading": "Ho Chi Minh City",
-                                          "categoryId": 3
-                                        }
-                                        """
-                            )
-                    )
-            ),
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Product post uploaded successfully",
-                            content = @Content(
-                                    schema = @Schema(implementation = RestResponse.class),
-                                    examples = @ExampleObject(
-                                            name = "Success Response",
-                                            value = """
-                                                {
-                                                  "success": true,
-                                                  "message": "UPLOADED POST SUCCESSFULLY",
-                                                  "data": {
-                                                    "postId": 101,
-                                                    "sellerId": 5,
-                                                    "sellerStoreName": "EcoRider Shop",
-                                                    "title": "Used Electric Bike",
-                                                    "brand": "Yadea",
-                                                    "model": "X5",
-                                                    "manufactureYear": 2022,
-                                                    "usedDuration": "6 months",
-                                                    "conditionLevel": "Good",
-                                                    "verifiedDecisionStatus": "PENDING",
-                                                    "verified": false,
-                                                    "active": true,
-                                                    "categoryName": "Electric Vehicles",
-                                                    "price": 850.00,
-                                                    "locationTrading": "Ho Chi Minh City"
-                                                  }
-                                                }
-                                                """
-                                    )
-                            )
-                    )
-            },
-            tags = {"Seller Management"}
+                """
     )
     @PostMapping("/post-products")
     public ResponseEntity<RestResponse<PostProductResponse, Object>> uploadPostProduct(
@@ -188,6 +89,8 @@ public class SellerController {
             ) throws Exception {
         log.info(">>> Passed came uploadPostProduct");
         log.info(">>> Passed mapped files data: {}", files);
+        Seller seller = sellerService.getCurrentUser();
+        request.setSellerId(seller.getSellerId());
 
         PostProduct newPostProduct = postProductService.createNewPostProduct(request, files);
 
