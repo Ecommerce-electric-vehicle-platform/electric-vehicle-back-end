@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.model;
 
+import Green_trade.green_trade_platform.enumerate.WishListPriority;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,16 +23,14 @@ public class WishListing {
     private Long id;
 
     @Column(name = "priority", nullable = false, unique = false)
-    private String priority;
+    @Enumerated(EnumType.STRING)
+    private WishListPriority priority;
 
     @Column(name = "note", nullable = false, unique = false)
     private String note;
 
-    @Column(name = "created_at", nullable = false, unique = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-
-    @Column(name = "deleted_at", nullable = false, unique = false)
-    private LocalDateTime deletedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id")
@@ -41,4 +40,9 @@ public class WishListing {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private PostProduct postProduct;
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

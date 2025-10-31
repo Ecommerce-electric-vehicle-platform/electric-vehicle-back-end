@@ -216,9 +216,11 @@ public class PostProductServiceImpl implements PostProductService {
 
     public PostProduct getPostProductById(Long postProductId) throws Exception {
         try {
+            log.info(">>> [Post Product Service] 2 Find post product by id: Started.");
             PostProduct foundPostProduct = postProductRepository.findById(postProductId).orElseThrow(
                     () -> new PostProductNotFound()
             );
+            log.info(">>> [Post Product Service] 2 Post product info: {}", foundPostProduct);
             return foundPostProduct;
         } catch (Exception e) {
             throw e;
@@ -270,11 +272,13 @@ public class PostProductServiceImpl implements PostProductService {
     }
 
     public PostProduct findPostProductById(Long id) {
+        log.info(">>> [Post Product Service] Find post product by id: Started.");
         PostProduct foundPostProduct = null;
         Optional<PostProduct> postProductOpt = postProductRepository.findById(id);
         if(postProductOpt.isPresent()) {
             foundPostProduct = postProductOpt.get();
         }
+        log.info(">>> [Post Product Service] Post product info: {}", foundPostProduct);
         return foundPostProduct;
     }
 
