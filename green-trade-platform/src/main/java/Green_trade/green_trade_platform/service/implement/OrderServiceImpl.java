@@ -110,4 +110,13 @@ public class OrderServiceImpl implements OrderService {
             throw e;
         }
     }
+
+    public Order getOrderById(Long orderId) {
+        Order result = null;
+        Optional<Order> orderOpt = orderRepository.findOrderById(orderId);
+        if(orderOpt.isPresent()) {
+            result = orderOpt.get();
+        }
+        return result;
+    }
 }
