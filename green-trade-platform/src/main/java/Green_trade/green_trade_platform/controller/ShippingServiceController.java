@@ -204,9 +204,10 @@ public class ShippingServiceController {
         PostProduct postProduct = postProductRepository.findById(request.getPostId()).orElseThrow(() -> new PostProductNotFound());
 
         Buyer currentBuyer = buyerService.getCurrentUser();
-        currentBuyer.setWardName(request.getWardName());
-        currentBuyer.setDistrictName(request.getDistrictName());
-        currentBuyer.setDistrictName(request.getDistrictName());
+        Buyer targetBuyer = currentBuyer;
+        targetBuyer.setWardName(request.getWardName());
+        targetBuyer.setDistrictName(request.getDistrictName());
+        targetBuyer.setProvinceName(request.getProvinceName());
 
         Seller seller = postProduct.getSeller();
 
@@ -224,7 +225,7 @@ public class ShippingServiceController {
         }
         log.info(">>> [ShippingServiceController] in getShippingFee: codValue = {}", codValue);
 
-        Map<String, String> shippingFeeData = ghnService.getShippingFeeDto(currentBuyer, seller, postProduct, codValue);
+        Map<String, String> shippingFeeData = ghnService.getShippingFeeDto(targetBuyer, seller, postProduct, codValue);
 
         RestResponse<Map<String, String>, Object> response = responseMapper.toDto(
                 true,
