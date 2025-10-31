@@ -124,6 +124,8 @@ public class OrderServiceImpl implements OrderService {
 
         order.setStatus(OrderStatus.VERIFIED);
         return orderRepository.save(order);
+    }
+
     public Order getOrderById(Long orderId) {
         Order result = null;
         Optional<Order> orderOpt = orderRepository.findOrderById(orderId);
