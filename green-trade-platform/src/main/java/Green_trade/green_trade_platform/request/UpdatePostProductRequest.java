@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdatePostProductRequest {
-    private Long postId;
     private String title;
     private String brand;
     private String model;

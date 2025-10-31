@@ -30,8 +30,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -230,7 +232,11 @@ public class PostProductController {
     )
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @PutMapping("/{postId}")
-    public ResponseEntity<RestResponse<PostProductResponse, Object>> updatePostProduct(@PathVariable Long postId, @Valid @RequestBody UpdatePostProductRequest request) throws Exception {
+    public ResponseEntity<RestResponse<PostProductResponse, Object>> updatePostProduct(
+            @PathVariable Long postId,
+            @Valid @ModelAttribute UpdatePostProductRequest request,
+            @RequestPart("pictures") List<MultipartFile> files
+    ) throws Exception {
         try {
             PostProduct foundPostProduct = postProductService.findPostProductById(postId);
             if (foundPostProduct == null) {
@@ -241,8 +247,10 @@ public class PostProductController {
                 throw new Exception("Sold product's post cannot be changed the content");
             }
 
-            PostProduct updatedPostProduct = postProductService.updatePostProduct(foundPostProduct, request);
+            PostProduct updatedPostProduct = postProductService.updatePostProduct(foundPostProduct, request, files);
+
             PostProductResponse responseData = postProductMapper.toDto(updatedPostProduct);
+
             RestResponse<PostProductResponse, Object> response = responseMapper.toDto(
                     true,
                     "UPDATED POST PRODUCT SUCCESSFULLY",
