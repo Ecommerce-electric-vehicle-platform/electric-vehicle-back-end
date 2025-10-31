@@ -29,8 +29,12 @@ DELETE FROM wallet_transaction;
 DELETE FROM conservation;
 DELETE FROM wish_listing;
 DELETE FROM reviews;
+DELETE FROM product_image;
+DELETE FROM review_image;
 DROP EVENT IF EXISTS auto_resolve_escrow;
 
+ALTER TABLE review_image AUTO_INCREMENT = 1;
+ALTER TABLE product_image AUTO_INCREMENT = 1;
 ALTER TABLE conservation AUTO_INCREMENT = 1;
 ALTER TABLE wish_listing AUTO_INCREMENT = 1;
 ALTER TABLE reviews AUTO_INCREMENT = 1;

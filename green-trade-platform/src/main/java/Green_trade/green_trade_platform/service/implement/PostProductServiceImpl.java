@@ -267,12 +267,12 @@ public class PostProductServiceImpl implements PostProductService {
         return postProductRepository.findBySeller(seller, pageable);
     }
 
-    public PostProduct hidePostProduct(Long id) {
+    public PostProduct hidePostProduct(Long id, boolean isHide) {
         PostProduct selected = postProductRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("Post product id does not existed.")
         );
 
-        selected.setActive(false);
+        selected.setActive(!isHide);
         return postProductRepository.save(selected);
     }
 
