@@ -6,6 +6,7 @@ import Green_trade.green_trade_platform.exception.*;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
+import Green_trade.green_trade_platform.request.UpdatePostProductRequest;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
 import Green_trade.green_trade_platform.request.VerifiedPostProductRequest;
 import Green_trade.green_trade_platform.response.SellerResponse;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -265,12 +267,12 @@ public class PostProductServiceImpl implements PostProductService {
         return postProductRepository.findBySeller(seller, pageable);
     }
 
-    public PostProduct hidePostProduct(Long id, boolean isHide) {
+    public PostProduct hidePostProduct(Long id) {
         PostProduct selected = postProductRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("Post product id does not existed.")
         );
 
-        selected.setActive(!isHide);
+        selected.setActive(false);
         return postProductRepository.save(selected);
     }
 
@@ -278,5 +280,77 @@ public class PostProductServiceImpl implements PostProductService {
         return wishListingRepository.findPostProductByWishListId(id).orElseThrow(
                 () -> new IllegalArgumentException("Can not find post product with this wish-list id: " + id)
         );
+    }
+
+    public PostProduct updatePostProduct(
+            PostProduct postProduct,
+            UpdatePostProductRequest request,
+            List<MultipartFile> files
+    ) throws Exception {
+        try {
+            postProduct.setTitle(request.getTitle());
+            postProduct.setBrand(request.getBrand());
+            postProduct.setModel(request.getModel());
+            postProduct.setManufactureYear(request.getManufactureYear());
+            postProduct.setUsedDuration(request.getUsedDuration());
+            postProduct.setConditionLevel(request.getConditionLevel());
+            postProduct.setPrice(request.getPrice());
+            postProduct.setWidth(request.getWidth());
+            postProduct.setHeight(request.getHeight());
+            postProduct.setLength((request.getLength()));
+            postProduct.setWeight(request.getWeight());
+            postProduct.setDescription(request.getDescription());
+            postProduct.setLocationTrading(request.getLocationTrading());
+
+
+
+            postProduct.setVerified(false);
+            postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.PENDING);
+
+            List<ProductImage> productImages = productImageRepository.findAllByPostProduct(postProduct);
+
+            for(int i = 0; i <= productImages.size() - 1; i++) {
+                String imagePublicId = productImages.get(i).getImagePublicId();
+                String folder = "PostImages/" + postProduct.getId() + ":" + postProduct.getSeller().getBuyer().getUsername() + "/product_image_" + i;
+                if(
+                        (!(imagePublicId == null)) && (!imagePublicId.equalsIgnoreCase(""))
+                ) {
+                    boolean isDeleted = cloudinaryService.delete(imagePublicId, folder);
+
+                    if(!isDeleted) {
+                        throw new Exception("Delete product image failed");
+                    }
+                }
+            }
+
+            productImageRepository.deleteAllInBatch(productImages);
+
+            if(files != null && files.size() > 0) {
+                log.info(">>> files data: {}", files);
+//                files.forEach((file) -> {
+//                    fileUtils.validateFile(file);
+//                    log.info(">>> Checked File name: {}", file.toString());
+//                });
+
+                for(int i = 0; i <= files.size() - 1; i++) {
+                    Map<String, String> uploadResult = cloudinaryService.upload(files.get(i), "PostImages/" + postProduct.getId() + ":" + postProduct.getSeller().getBuyer().getUsername() + "/product_image_" + i);
+                    String imageUrl =uploadResult.get("fileUrl");
+                    String imagePublicId = uploadResult.get("publicId");
+                    log.info(">>> Passed uploaded picture {}", i);
+                    ProductImage productImage = ProductImage.builder()
+                            .imageUrl(imageUrl)
+                            .imagePublicId(imagePublicId)
+                            .orderImage((long) i + 1)
+                            .postProduct(postProduct)
+                            .build();
+                    productImageRepository.save(productImage);
+                }
+                log.info(">>> Passed uploaded file");
+            }
+            return postProductRepository.save(postProduct);
+        } catch(Exception e) {
+            log.info(">>> [PostProductServiceImpl] error at updatePostProduct: {}", e.getMessage());
+            throw e;
+        }
     }
 }

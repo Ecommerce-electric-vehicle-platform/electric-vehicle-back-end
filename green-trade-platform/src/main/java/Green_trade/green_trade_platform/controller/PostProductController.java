@@ -1,28 +1,39 @@
 package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.exception.PostProductNotFound;
+import Green_trade.green_trade_platform.exception.SubscriptionExpiredException;
 import Green_trade.green_trade_platform.mapper.PostProductListMapper;
 import Green_trade.green_trade_platform.mapper.PostProductMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.mapper.SellerMapper;
 import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.model.Seller;
+import Green_trade.green_trade_platform.request.UpdatePostProductRequest;
 import Green_trade.green_trade_platform.response.PostProductListResponse;
 import Green_trade.green_trade_platform.response.PostProductResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.response.SellerResponse;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
+import Green_trade.green_trade_platform.service.implement.SubscriptionServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -219,4 +230,59 @@ public class PostProductController {
             ));
         }
     }
+
+    @Operation(
+            summary = "Update an existing post product",
+            description = """
+        Allows a seller to update details of an existing product post.
+        Only users with the role **ROLE_SELLER** can perform this operation.
+        The post cannot be modified if the product has already been sold.
+        """,
+            security = { @SecurityRequirement(name = "bearerAuth") },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Post product updated successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = RestResponse.class)
+                            )
+                    )
+            }
+    )
+    @PreAuthorize("hasRole('ROLE_SELLER')")
+    @PutMapping("/{postId}")
+    public ResponseEntity<RestResponse<PostProductResponse, Object>> updatePostProduct(
+            @PathVariable Long postId,
+            @Valid @ModelAttribute UpdatePostProductRequest request,
+            @RequestPart("pictures") List<MultipartFile> files
+    ) throws Exception {
+        try {
+            PostProduct foundPostProduct = postProductService.findPostProductById(postId);
+            if (foundPostProduct == null) {
+                throw new PostProductNotFound();
+            }
+
+            if(foundPostProduct.isSold()) {
+                throw new Exception("Sold product's post cannot be changed the content");
+            }
+
+            PostProduct updatedPostProduct = postProductService.updatePostProduct(foundPostProduct, request, files);
+
+            PostProductResponse responseData = postProductMapper.toDto(updatedPostProduct);
+
+            RestResponse<PostProductResponse, Object> response = responseMapper.toDto(
+                    true,
+                    "UPDATED POST PRODUCT SUCCESSFULLY",
+                    responseData,
+                    null
+            );
+
+            return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        } catch (Exception e) {
+            log.info(">>> [PostProductController] error at updatePostProduct: {}", e.getMessage());
+            throw e;
+        }
+    }
+
 }

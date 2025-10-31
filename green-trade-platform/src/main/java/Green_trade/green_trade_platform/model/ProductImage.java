@@ -24,6 +24,9 @@ public class ProductImage {
     @Column(name = "image_url", nullable = false, unique = false)
     private String imageUrl;
 
+    @Column(name = "image_public_id", nullable = true, unique = false)
+    private String imagePublicId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private PostProduct postProduct;
