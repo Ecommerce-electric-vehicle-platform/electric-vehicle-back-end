@@ -53,7 +53,7 @@ public class DisputeController {
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/raise-dispute")
-    public ResponseEntity<RestResponse<?, ?>> raiseDispute(
+    public ResponseEntity<RestResponse<DisputeResponse, Object>> raiseDispute(
             @ModelAttribute RaiseDisputeRequest request,
             @RequestPart("pictures") List<MultipartFile> files
     ) throws Exception {
