@@ -195,7 +195,7 @@ public class ShippingServiceController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
-    @GetMapping("/shipping-fee")
+    @PostMapping("/shipping-fee")
     public ResponseEntity<RestResponse<Map<String, String>, Object>> getShippingFee(
             @Valid @RequestBody ShippingFeeRequest request
     ) throws Exception {
