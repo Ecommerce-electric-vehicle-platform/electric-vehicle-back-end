@@ -39,7 +39,7 @@ public class PostProductServiceImpl implements PostProductService {
     private final BuyerRepository buyerRepository;
     private final AdminRepository adminRepository;
     private final SubscriptionServiceImpl subscriptionService;
-    private final GhnServiceImpl ghnServiceImpl;
+    private final GhnServiceImpl ghnService;
 
     public PostProductServiceImpl(
             PostProductRepository postProductRepository,
@@ -52,7 +52,8 @@ public class PostProductServiceImpl implements PostProductService {
             BuyerRepository buyerRepository,
             AdminRepository adminRepository,
             SubscriptionServiceImpl subscriptionService,
-            AdminServiceImpl adminService, GhnServiceImpl ghnServiceImpl) {
+            AdminServiceImpl adminService,
+            GhnServiceImpl ghnService) {
         this.postProductRepository = postProductRepository;
         this.categoryRepository = categoryRepository;
         this.fileUtils = fileUtils;
@@ -64,6 +65,7 @@ public class PostProductServiceImpl implements PostProductService {
         this.adminRepository = adminRepository;
         this.subscriptionService = subscriptionService;
         this.adminService = adminService;
+        this.ghnService = ghnService;
     }
 
     public PostProduct createNewPostProduct(
