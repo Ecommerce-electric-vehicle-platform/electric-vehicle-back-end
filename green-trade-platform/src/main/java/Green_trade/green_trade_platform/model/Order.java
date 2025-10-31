@@ -43,7 +43,7 @@ public class Order {
     @Column(name = "shipping_fee", nullable = true, unique = false)
     private BigDecimal shippingFee;
 
-    @Column(name = "status", nullable = true, unique = false)
+    @Column(name = "status", nullable = true, unique = false, length = 15)
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
