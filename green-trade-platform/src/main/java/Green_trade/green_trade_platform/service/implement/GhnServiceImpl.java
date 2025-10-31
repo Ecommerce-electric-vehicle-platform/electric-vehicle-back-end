@@ -503,15 +503,21 @@ public class GhnServiceImpl {
     public Map<String, Object> getShippingFeeServiceBodyRequest(Buyer buyer, Seller seller, PostProduct postProduct,
             int codValue) throws JsonProcessingException {
         String sellerProvinceId = findProvinceCodeByProvinceName(seller.getBuyer().getProvinceName());
+        log.info(">>> [GhnServiceImpl] seller province id: {}", sellerProvinceId);
         String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId),
                 seller.getBuyer().getDistrictName());
+        log.info(">>> [GhnServiceImpl] seller district id: {}", sellerProvinceId);
         String sellerWardId = findWardCodeByWardName(Integer.parseInt(sellerDistrictId),
                 seller.getBuyer().getWardName());
+        log.info(">>> [GhnServiceImpl] seller ward id: {}", sellerWardId);
 
         String buyerProvinceId = findProvinceCodeByProvinceName(buyer.getProvinceName());
+        log.info(">>> [GhnServiceImpl] buyer province id: {}", sellerProvinceId);
         String buyerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(buyerProvinceId),
                 buyer.getDistrictName());
+        log.info(">>> [GhnServiceImpl] buyer district id: {}", buyerDistrictId);
         String buyerWardId = findWardCodeByWardName(Integer.parseInt(buyerDistrictId), buyer.getWardName());
+        log.info(">>> [GhnServiceImpl] buyer ward id: {}", buyerWardId);
 
         Map<String, Object> result = new HashMap<>();
         result.put("service_type_id", 5);
