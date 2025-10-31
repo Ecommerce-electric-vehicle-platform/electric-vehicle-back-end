@@ -12,6 +12,7 @@ import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.service.PostProductService;
 import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
 import Green_trade.green_trade_platform.service.implement.GhnServiceImpl;
+import Green_trade.green_trade_platform.service.implement.OrderServiceImpl;
 import Green_trade.green_trade_platform.service.implement.PaymentServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -38,8 +39,18 @@ public class ShippingServiceController {
     private final PostProductRepository postProductRepository;
     private final BuyerServiceImpl buyerService;
     private final PaymentServiceImpl paymentService;
+    private final OrderServiceImpl orderService;
 
-    public ShippingServiceController(GhnServiceImpl ghnService, ResponseMapper responseMapper, OrderRepository orderRepository, PostProductService postProductService, PostProductRepository postProductRepository, BuyerServiceImpl buyerService, PaymentServiceImpl paymentService) {
+    public ShippingServiceController(
+            GhnServiceImpl ghnService,
+            ResponseMapper responseMapper,
+            OrderRepository orderRepository,
+            PostProductService postProductService,
+            PostProductRepository postProductRepository,
+            BuyerServiceImpl buyerService,
+            PaymentServiceImpl paymentService,
+            OrderServiceImpl orderService
+    ) {
         this.ghnService = ghnService;
         this.responseMapper = responseMapper;
         this.orderRepository = orderRepository;
@@ -47,6 +58,7 @@ public class ShippingServiceController {
         this.postProductRepository = postProductRepository;
         this.buyerService = buyerService;
         this.paymentService = paymentService;
+        this.orderService = orderService;
     }
 
     @Operation(
@@ -183,7 +195,7 @@ public class ShippingServiceController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
-    @GetMapping("/shipping-fee")
+    @PostMapping("/shipping-fee")
     public ResponseEntity<RestResponse<Map<String, String>, Object>> getShippingFee(
             @Valid @RequestBody ShippingFeeRequest request
     ) throws Exception {
@@ -221,6 +233,25 @@ public class ShippingServiceController {
                 null
         );
 
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+    }
+
+    @GetMapping("/order/{orderId}/status")
+    public ResponseEntity<RestResponse<?, ?>> getOrderStatus(@PathVariable Long orderId) {
+        Order foundOrder = orderService.getOrderById(orderId);
+
+        if(foundOrder == null) {
+            throw new OrderNotFound();
+        }
+
+        Map<String, Object> responseData = ghnService.getLastestOrderStatus(foundOrder.getOrderCode());
+
+        RestResponse<Map<String, Object>, Object> response = responseMapper.toDto(
+                true,
+                "FETCH ORDER SHIPPING STATUS SUCCESSFULLY",
+                responseData,
+                null
+        );
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 }

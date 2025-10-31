@@ -66,6 +66,92 @@ public class GhnServiceImpl {
         }
     }
 
+    public String getOrderDetail(String orderCode) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        log.info(">>> ghnToken: {}", TOKEN);
+        log.info(">>> orderCode in getOrderDetail: {}", orderCode);
+
+        // Body request
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("order_code", orderCode);
+
+        // Header
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Token", TOKEN);
+
+        // Entity (body + header)
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+        // Gọi API GHN
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/detail",
+                entity,
+                String.class
+        );
+
+        log.info(">>> response from GHN: {}", response.getBody());
+        return response.getBody();
+    }
+
+    public Map<String, Object> extractLatestOrderStatus(String ghnResponse) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(ghnResponse);
+
+            JsonNode dataNode = root.path("data");
+            JsonNode orderData;
+
+            if (dataNode.isArray() && dataNode.size() > 0) {
+                orderData = dataNode.get(0);
+            } else if (dataNode.isObject()) {
+                orderData = dataNode;
+            } else {
+                log.warn(">>> GHN response không có data hợp lệ");
+                result.put("status", "no_data");
+                result.put("message", "Không có dữ liệu đơn hàng");
+                return result;
+            }
+
+            JsonNode logs = orderData.path("log");
+            String status = orderData.path("status").asText("");
+            String updatedDate = orderData.path("updated_date").asText("");
+            String orderCode = orderData.path("order_code").asText("");
+            long shopId = orderData.path("shop_id").asLong(0);
+
+            if (logs.isArray() && logs.size() > 0) {
+                JsonNode latestLog = logs.get(logs.size() - 1);
+                // Nếu log có status mới nhất thì ưu tiên lấy từ đó
+                status = latestLog.path("status").asText(status);
+                updatedDate = latestLog.path("updated_date").asText(updatedDate);
+            }
+
+            result.put("status", status.isEmpty() ? "unknown" : status);
+            result.put("updated_date", updatedDate);
+            result.put("order_code", orderCode);
+            result.put("shop_id", shopId);
+            result.put("message", "Success");
+
+            log.info(">>> Trạng thái mới nhất: {} (updated_date: {} | order_code: {} | shop_id: {})",
+                    status, updatedDate, orderCode, shopId);
+
+            return result;
+
+        } catch (Exception e) {
+            log.error(">>> Lỗi khi phân tích GHN response: {}", e.getMessage());
+            result.put("status", "error");
+            result.put("message", "Lỗi khi xử lý dữ liệu GHN: " + e.getMessage());
+            return result;
+        }
+    }
+
+    public Map<String, Object> getLastestOrderStatus(String orderCode) {
+        String resultInString = getOrderDetail(orderCode);
+        return extractLatestOrderStatus(resultInString);
+    }
+
     public Map<String, Object> createCancelOrderShippingServiceBodyRequest(String orderCode) {
         return Map.of(
                 "order_codes", List.of(orderCode)
