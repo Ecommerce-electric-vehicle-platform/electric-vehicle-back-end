@@ -6,6 +6,7 @@ import Green_trade.green_trade_platform.exception.*;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
+import Green_trade.green_trade_platform.request.UpdatePostProductRequest;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
 import Green_trade.green_trade_platform.request.VerifiedPostProductRequest;
 import Green_trade.green_trade_platform.response.SellerResponse;
@@ -38,6 +39,7 @@ public class PostProductServiceImpl implements PostProductService {
     private final BuyerRepository buyerRepository;
     private final AdminRepository adminRepository;
     private final SubscriptionServiceImpl subscriptionService;
+    private final GhnServiceImpl ghnServiceImpl;
 
     public PostProductServiceImpl(
             PostProductRepository postProductRepository,
@@ -50,7 +52,7 @@ public class PostProductServiceImpl implements PostProductService {
             BuyerRepository buyerRepository,
             AdminRepository adminRepository,
             SubscriptionServiceImpl subscriptionService,
-            AdminServiceImpl adminService) {
+            AdminServiceImpl adminService, GhnServiceImpl ghnServiceImpl) {
         this.postProductRepository = postProductRepository;
         this.categoryRepository = categoryRepository;
         this.fileUtils = fileUtils;
@@ -290,5 +292,30 @@ public class PostProductServiceImpl implements PostProductService {
 
         selected.setActive(false);
         return postProductRepository.save(selected);
+    }
+
+    public PostProduct updatePostProduct(PostProduct postProduct, UpdatePostProductRequest request) {
+        try {
+            postProduct.setTitle(request.getTitle());
+            postProduct.setBrand(request.getBrand());
+            postProduct.setModel(request.getModel());
+            postProduct.setManufactureYear(request.getManufactureYear());
+            postProduct.setUsedDuration(request.getUsedDuration());
+            postProduct.setConditionLevel(request.getConditionLevel());
+            postProduct.setPrice(request.getPrice());
+            postProduct.setWidth(request.getWidth());
+            postProduct.setHeight(request.getHeight());
+            postProduct.setLength((request.getLength()));
+            postProduct.setWeight(request.getWeight());
+            postProduct.setDescription(request.getDescription());
+            postProduct.setLocationTrading(request.getLocationTrading());
+
+            postProduct.setVerified(false);
+            postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.PENDING);
+            return postProductRepository.save(postProduct);
+        } catch(Exception e) {
+            log.info(">>> [PostProductServiceImpl] error at updatePostProduct: {}", e.getMessage());
+            throw e;
+        }
     }
 }
