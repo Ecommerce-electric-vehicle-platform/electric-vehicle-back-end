@@ -15,7 +15,15 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "wish_listing")
+@Table(
+        name = "wish_listing",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "UK_wish_list_buyer_post",
+                        columnNames = {"buyer_id", "post_id"}
+                )
+        }
+)
 public class WishListing {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

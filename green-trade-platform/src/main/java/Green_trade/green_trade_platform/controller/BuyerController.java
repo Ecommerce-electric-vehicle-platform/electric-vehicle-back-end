@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.enumerate.OrderStatus;
+import Green_trade.green_trade_platform.enumerate.WishListPriority;
 import Green_trade.green_trade_platform.exception.PaymentMethodNotSupportedException;
 import Green_trade.green_trade_platform.exception.PostProductNotFound;
 import Green_trade.green_trade_platform.exception.ProfileException;
@@ -12,10 +13,7 @@ import Green_trade.green_trade_platform.request.PlaceOrderRequest;
 import Green_trade.green_trade_platform.request.ProfileRequest;
 import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.request.WishListRequest;
-import Green_trade.green_trade_platform.response.BuyerResponse;
-import Green_trade.green_trade_platform.response.OrderResponse;
-import Green_trade.green_trade_platform.response.RestResponse;
-import Green_trade.green_trade_platform.response.WalletTransactionResponse;
+import Green_trade.green_trade_platform.response.*;
 import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -31,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -387,6 +386,7 @@ public class BuyerController {
         Buyers use this API to save or bookmark products they are interested in purchasing later.
         """
     )
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/wish-list")
     public ResponseEntity<?> addProductToWishList(@RequestBody WishListRequest request) {
         log.info(">>> [Buyer Controller] Add product to wish list: Started.");
@@ -434,6 +434,7 @@ public class BuyerController {
         Buyers use this endpoint when they no longer wish to keep a product in their saved wish-list.
         """
     )
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/remove-wish-list/{wishId}")
     public ResponseEntity<?> removeWishList(@PathVariable(name = "wishId") long id) {
         try {
@@ -448,6 +449,58 @@ public class BuyerController {
                     false,
                     "REMOVE POST PRODUCT FROM WISH LIST FAILED.",
                     null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Retrieve the buyer's wish list",
+            description = """
+        This endpoint returns a paginated list of the buyer's wish-list items.
+
+        - The buyer must be logged in.
+        - Results can be optionally filtered by **priority** (e.g., HIGH, MEDIUM, LOW).
+        - If no priority is specified, all wish-list items are returned.
+        - Supports pagination via `page` and `size` parameters.
+
+        **Use case:**  
+        Buyers use this endpoint to view and manage the list of product posts they have added to their wish-list.
+        """
+    )
+    @GetMapping("/wish-list")
+    public ResponseEntity<?> getWishList(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "priority", required = false) WishListPriority priority
+    ) {
+        try {
+            Buyer buyer = buyerService.getCurrentUser();
+            Page<WishListing> wishListings = wishListingService.getWishList(buyer, page, size, priority);
+            Page<WishListingResponse> mapped = wishListings.map(wishListMapper::toDto);
+
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("content", mapped.getContent());
+            data.put("pageNumber", mapped.getNumber());
+            data.put("pageSize", mapped.getSize());
+            data.put("totalElements", mapped.getTotalElements());
+            data.put("totalPages", mapped.getTotalPages());
+            data.put("first", mapped.isFirst());
+            data.put("last", mapped.isLast());
+            data.put("hasNext", mapped.hasNext());
+            data.put("hasPrevious", mapped.hasPrevious());
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET WISH LIST SUCCESSFULLY.",
+                    data,
+                    null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET WISH LIST FAILED.",
+                    null,
+                    e.getMessage()
             ));
         }
     }

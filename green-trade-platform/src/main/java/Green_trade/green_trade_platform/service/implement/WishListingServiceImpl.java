@@ -1,9 +1,15 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.enumerate.WishListPriority;
+import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.WishListing;
 import Green_trade.green_trade_platform.repository.WishListingRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,5 +33,17 @@ public class WishListingServiceImpl {
         );
 
         wishListingRepository.delete(wishListing);
+    }
+
+    public Page<WishListing> getWishList(Buyer buyer, int page, int size, WishListPriority priority) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        if (priority != null) {
+            // Lọc theo priority nếu có
+            return wishListingRepository.findByBuyer_BuyerIdAndPriority(buyer.getBuyerId(), priority, pageable);
+        }
+
+        // Không truyền priority → lấy toàn bộ wishlist của buyer
+        return wishListingRepository.findByBuyer_BuyerId(buyer.getBuyerId(), pageable);
     }
 }

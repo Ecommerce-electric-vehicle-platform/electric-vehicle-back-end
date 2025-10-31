@@ -141,45 +141,82 @@ public class PostProductController {
 
 
     @Operation(
-            summary = "Hide a post product by ID",
+            summary = "Hide or unhide a post product by ID",
             description = """
-        Hides (deactivates) a specific post product from the platform by setting its `active` status to `false`.  
-        The product remains stored in the database but will no longer be visible to buyers or appear in public listings.
+        Allows a **seller** to hide (deactivate) or unhide (reactivate) a specific post product 
+        from the platform by toggling its `active` status.
 
         **Workflow:**
-        1. The client sends a request with the `postId` of the product to hide.
+        1. The client sends a request with the `postId` of the product and the desired `is_hide` flag.
         2. The system verifies ownership or admin privileges.
-        3. The product’s `active` flag is updated to `false`.
-        4. A confirmation response is returned with the updated product details.
+        3. The product’s `active` field is updated:
+           - `is_hide = true` → `active = false` (hidden)
+           - `is_hide = false` → `active = true` (visible)
+        4. The updated product information is returned.
 
         **Use cases:**
-        - **Seller:** Temporarily hides a product that is out of stock or under maintenance.
-        - **Admin:** Moderates or disables posts violating policies.
-        - **Buyer (optional):** Typically not allowed; only for viewing hidden-state results if permitted.
-
+        - **Seller:** Temporarily hides a product that is out of stock, being edited, or under maintenance.
+        - **Admin:** Can also moderate or disable posts violating content or policy rules.
+        
         **Security Notes:**
-        - Requires authentication via JWT.
+        - Requires JWT authentication.
         - Accessible to roles: `ROLE_SELLER`, `ROLE_ADMIN`.
-        - The request is **idempotent** — hiding an already hidden product returns the same result.
+        - Operation is **idempotent** — hiding an already hidden product (or unhiding an already active one) 
+          will not cause errors.
     """
     )
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @PostMapping("/hide/{postId}")
-    public ResponseEntity<?> hidePostProduct(@PathVariable(name = "postId") Long id) {
+    public ResponseEntity<?> hidePostProduct(@PathVariable(name = "postId") Long id,
+                                             @RequestParam(name = "is_hide") boolean isHide) {
+        String hide = isHide ? "HIDE" : "FALSE";
         try {
-            PostProduct temp = postProductService.hidePostProduct(id);
+            PostProduct temp = postProductService.hidePostProduct(id, isHide);
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
-                    "HIDE PRODUCT SUCCESSFULLY.",
+                    hide + " PRODUCT SUCCESSFULLY.",
                     postProductMapper.toDto(temp), null
             ));
         } catch (Exception e) {
             return ResponseEntity.ok(responseMapper.toDto(
                     false,
-                    "HIDE PRODUCT FAILED.",
+                    hide + " PRODUCT SUCCESSFULLY.",
                    null, e.getMessage()
             ));
         }
     }
 
+    @Operation(
+            summary = "Get post product information based on a wish-list ID",
+            description = """
+        This endpoint allows an authenticated **buyer** or **seller** to retrieve the detailed information 
+        of a product post (`PostProduct`) that is associated with a specific **wish-list item**.
+
+        - The `wishId` parameter must correspond to an existing wish-list record.
+        - The system will automatically fetch the `PostProduct` linked to that wish-list entry.
+        - This endpoint is accessible to both buyers and sellers.
+        
+        **Use case:**  
+        Buyers can use this API to quickly view the details of an item they have added to their wish-list,  
+        and sellers can use it to verify which of their posts are currently in wish lists of buyers.
+        """
+    )
+    @PreAuthorize("hasAnyRole('ROLE_SELLER', 'ROLE_BUYER')")
+    @GetMapping("/{wishId}")
+    public ResponseEntity<?> getPostInfoByWishId(@PathVariable(name = "wishId") long id) {
+        try {
+            PostProduct postProduct = postProductService.findPostByWishId(id);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET POST PRODUCT INFORMATION SUCCESSFULLY.",
+                    postProductMapper.toDto(postProduct), null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET POST PRODUCT INFORMATION FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
 }

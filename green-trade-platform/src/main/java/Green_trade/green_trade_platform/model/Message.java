@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.model;
 
+import Green_trade.green_trade_platform.enumerate.MessageStatus;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,31 +22,26 @@ public class Message {
     @Column(name = "message_id")
     private Long id;
 
-    @Column(name = "sender", nullable = false, unique = false)
-    private String sender;
-
-    @Column(name = "receiver", nullable = false, unique = false)
-    private String receiver;
-
-    @Column(name = "status", nullable = false, unique = false)
-    private String status;
-
-    @Column(name = "sent_at", nullable = false, unique = false)
-    private LocalDateTime sentAt;
-
-    @Column(name = "read_at", nullable = false, unique = false)
-    private LocalDateTime readAt;
-
     @Column(name = "sender_id", nullable = false, unique = false)
     private Long senderId;
-
-    @Column(name = "content", nullable = false, unique = false)
-    private String content;
 
     @Column(name = "receiver_id", nullable = false, unique = false)
     private Long receiverId;
 
-    @Column(name = "attached_url", nullable = false, unique = false)
+    @Column(name = "status", nullable = false, unique = false, length = 50)
+    @Enumerated(EnumType.STRING)
+    private MessageStatus status;
+
+    @Column(name = "sent_at")
+    private LocalDateTime sentAt;
+
+    @Column(name = "read_at")
+    private LocalDateTime readAt;
+
+    @Column(name = "content")
+    private String content;
+
+    @Column(name = "attached_url")
     private String attachedUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -26,8 +26,14 @@ DELETE FROM evidence;
 DELETE FROM notification;
 DELETE FROM system_wallet;
 DELETE FROM wallet_transaction;
+DELETE FROM conservation;
+DELETE FROM wish_listing;
+DELETE FROM reviews;
 DROP EVENT IF EXISTS auto_resolve_escrow;
 
+ALTER TABLE conservation AUTO_INCREMENT = 1;
+ALTER TABLE wish_listing AUTO_INCREMENT = 1;
+ALTER TABLE reviews AUTO_INCREMENT = 1;
 ALTER TABLE product_image AUTO_INCREMENT = 1;
 ALTER TABLE post_product AUTO_INCREMENT = 1;
 ALTER TABLE wallet AUTO_INCREMENT = 1;
@@ -423,15 +429,25 @@ INSERT INTO product_image (order_image, image_url, post_id) VALUES
 UPDATE product_image
 SET image_url = 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg'
 WHERE image_url = '';
-
---INSERT INTO product_image (order_image, image_url, post_id)
---VALUES
---(1, 'https://cdn.example.com/images/vinfast_klara_front.jpg', 1),
---(2, 'https://cdn.example.com/images/vinfast_klara_side.jpg', 1),
---(1, 'https://cdn.example.com/images/pega_esh_front.jpg', 2),
---(1, 'https://cdn.example.com/images/lithium_battery_60v_front.jpg', 3),
---(1, 'https://cdn.example.com/images/charger_60v5a.jpg', 4),
---(1, 'https://cdn.example.com/images/brake_disc_vf.jpg', 5);
+-- =========================================================
+-- 🖼 WISH-LISTING
+-- =========================================================
+INSERT INTO wish_listing(created_at, note, priority, buyer_id, post_id)
+VALUES
+(NOW(), 'Để đây và sẽ mua sau', 'LOW', 2, 1),
+(NOW(), 'Sản phẩm này hay nè. Sẽ mua', 'HIGH', 2, 2),
+(NOW(), 'Cũng thích nhưng mà chưa cần lắm', 'LOW', 2, 3),
+(NOW(), 'Cũng ok thôi', 'MEDIUM', 2, 4),
+(NOW(), 'Má ơi hay nha, rất thích', 'HIGH', 2, 5),
+(NOW(), 'Thích vãiiii', 'HIGH', 2, 6),
+(NOW(), 'Để đây và sẽ mua sau', 'LOW', 2, 7),
+(NOW(), 'Để đây và sẽ mua sau', 'MEDIUM', 2, 8),
+(NOW(), 'Không thích cho lắm', 'LOW', 2, 9),
+(NOW(), 'Để đây và sẽ mua sau', 'HIGH', 2, 10),
+(NOW(), 'Cũng ok thôi', 'MEDIUM', 2, 11),
+(NOW(), 'Để đây và sẽ mua sau', 'LOW', 2, 12),
+(NOW(), 'Để đây và sẽ mua sau', 'HIGH', 2, 13),
+(NOW(), 'Thích vãiiii', 'HIGH', 2, 14);
 
 -- =========================================================
 -- 🖼 SYSTEM_POLICY
