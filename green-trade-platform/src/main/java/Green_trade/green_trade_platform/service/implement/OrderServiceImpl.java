@@ -5,6 +5,7 @@ import Green_trade.green_trade_platform.enumerate.TransactionStatus;
 import Green_trade.green_trade_platform.exception.OrderNotFound;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Order;
+import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.model.Transaction;
 import Green_trade.green_trade_platform.repository.OrderRepository;
 import Green_trade.green_trade_platform.service.OrderService;
@@ -109,5 +110,19 @@ public class OrderServiceImpl implements OrderService {
             log.info(">>> [OrderServiceImpl] Error at cancelOrder: {}", e.getMessage());
             throw e;
         }
+    }
+
+    public Page<Order> getPendingOrders(Seller seller, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return orderRepository.findByPostProduct_SellerAndStatus(seller, OrderStatus.PENDING, pageable);
+    }
+
+    public Order verifyOrder(long id) {
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Can not find order with this order id: " + id)
+        );
+
+        order.setStatus(OrderStatus.VERIFIED);
+        return orderRepository.save(order);
     }
 }
