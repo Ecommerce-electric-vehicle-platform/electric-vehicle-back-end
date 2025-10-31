@@ -671,4 +671,17 @@ public class GhnServiceImpl {
         return response;
     }
 
+    public String getLastestOrderStatusOnlyStatus(String orderCode) {
+        Map<String, Object> result = getLastestOrderStatus(orderCode);
+
+        if (result == null || result.isEmpty()) {
+            return "unknown";
+        }
+
+        Object statusObj = result.get("status");
+        String status = statusObj != null ? statusObj.toString() : "unknown";
+
+        return status;
+    }
+
 }
