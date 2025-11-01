@@ -3,6 +3,7 @@ package Green_trade.green_trade_platform.response;
 
 import lombok.Builder;
 import lombok.Data;
+
 import java.util.List;
 
 @Data

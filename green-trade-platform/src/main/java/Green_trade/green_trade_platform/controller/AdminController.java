@@ -49,18 +49,18 @@ public class AdminController {
     @Operation(
             summary = "Get all pending seller accounts",
             description = """
-        Retrieves a paginated list of seller accounts that are currently in a pending verification or approval state.
-        This endpoint is restricted to administrators only (requires ROLE_ADMIN authority).
-
-        The API supports pagination using the 'page' and 'size' query parameters.
-
-        Response includes:
-        - A list of sellers awaiting approval (`sellers`)
-        - Pagination details such as current page, total elements, and total pages
-
-        Typical use cases:
-        - Admin dashboard for managing seller approvals
-    """
+                        Retrieves a paginated list of seller accounts that are currently in a pending verification or approval state.
+                        This endpoint is restricted to administrators only (requires ROLE_ADMIN authority).
+                    
+                        The API supports pagination using the 'page' and 'size' query parameters.
+                    
+                        Response includes:
+                        - A list of sellers awaiting approval (`sellers`)
+                        - Pagination details such as current page, total elements, and total pages
+                    
+                        Typical use cases:
+                        - Admin dashboard for managing seller approvals
+                    """
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/pending-seller")
@@ -81,23 +81,23 @@ public class AdminController {
     @Operation(
             summary = "Approve or reject a pending seller account",
             description = """
-        Handles the approval or rejection process for a pending seller registration request. 
-        This endpoint is restricted to administrators and requires a valid bearer token.
-
-        The request body should contain seller information along with an approval decision. 
-        If approved, the seller's account status is updated and a notification is sent to the user 
-        in real time via WebSocket.
-
-        **Workflow:**
-        1. Admin submits approval/rejection data through this endpoint.
-        2. The system updates the seller’s status.
-        3. A notification is constructed and timestamped (`sendAt`).
-        4. The notification is sent to the corresponding seller user through a socket event.
-
-        **Use cases:**
-        - Approving verified sellers after document validation.
-        - Rejecting invalid or incomplete seller registration requests.
-    """
+                        Handles the approval or rejection process for a pending seller registration request. 
+                        This endpoint is restricted to administrators and requires a valid bearer token.
+                    
+                        The request body should contain seller information along with an approval decision. 
+                        If approved, the seller's account status is updated and a notification is sent to the user 
+                        in real time via WebSocket.
+                    
+                        **Workflow:**
+                        1. Admin submits approval/rejection data through this endpoint.
+                        2. The system updates the seller’s status.
+                        3. A notification is constructed and timestamped (`sendAt`).
+                        4. The notification is sent to the corresponding seller user through a socket event.
+                    
+                        **Use cases:**
+                        - Approving verified sellers after document validation.
+                        - Rejecting invalid or incomplete seller registration requests.
+                    """
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/approve-seller")
@@ -113,70 +113,70 @@ public class AdminController {
     @Operation(
             summary = "Create a new admin account",
             description = """
-        Allows an existing administrator to create a new admin account in the system.
-        This endpoint accepts both form data and a profile image file (`avatar_url`) for the new admin.
-
-        The request must include valid admin details (username, email, password, role, etc.) 
-        and an avatar image. The uploaded avatar will be processed and linked to the new account.
-
-        **Workflow:**
-        1. Admin submits a multipart/form-data request containing admin details and an avatar image.
-        2. The system validates the request and saves the image.
-        3. The new admin account is created and persisted in the database.
-        4. A success response is returned with the created admin's information.
-
-        **Use cases:**
-        - Registering additional admin users for system management.
-        - Managing multi-admin access in the platform.
-    """
+                        Allows an existing administrator to create a new admin account in the system.
+                        This endpoint accepts both form data and a profile image file (`avatar_url`) for the new admin.
+                    
+                        The request must include valid admin details (username, email, password, role, etc.) 
+                        and an avatar image. The uploaded avatar will be processed and linked to the new account.
+                    
+                        **Workflow:**
+                        1. Admin submits a multipart/form-data request containing admin details and an avatar image.
+                        2. The system validates the request and saves the image.
+                        3. The new admin account is created and persisted in the database.
+                        4. A success response is returned with the created admin's information.
+                    
+                        **Use cases:**
+                        - Registering additional admin users for system management.
+                        - Managing multi-admin access in the platform.
+                    """
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("creating-admin")
     public ResponseEntity<?> handleCreatingAdmin(
             @Valid @ModelAttribute CreateAdminRequest request,
-            @RequestPart(value = "avatar_url", required = true)MultipartFile avatarFile
+            @RequestPart(value = "avatar_url", required = true) MultipartFile avatarFile
     ) {
-       try {
-           Admin data = adminService.handleCreateAdminAccount(avatarFile, request);
-           return ResponseEntity.ok(responseMapper.toDto(true,
-                   "Create admin account successfully.",
-                   adminMapper.toDto(data),
-                   null));
-       } catch (Exception e) {
-           return ResponseEntity.ok(responseMapper.toDto(false,
-                   "Create admin account failed.",
-                   null,
-                   e));
-       }
+        try {
+            Admin data = adminService.handleCreateAdminAccount(avatarFile, request);
+            return ResponseEntity.ok(responseMapper.toDto(true,
+                    "Create admin account successfully.",
+                    adminMapper.toDto(data),
+                    null));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(false,
+                    "Create admin account failed.",
+                    null,
+                    e));
+        }
 
     }
 
     @Operation(
             summary = "Review Post Product List (Admin Only)",
             description = """
-        Retrieves a paginated list of post products that are pending verification or review by administrators.  
-        This API is restricted to users with the `ROLE_ADMIN` authority.
-
-        **Workflow:**
-        1. The admin calls this endpoint with pagination parameters (`page`, `size`).
-        2. The system queries all post products that are awaiting verification or moderation.
-        3. The endpoint returns a paginated response containing post details, along with metadata.
-
-        **Use cases:**
-        - Admins reviewing newly submitted product posts before approval.
-        - Moderators checking flagged or edited posts that require re-verification.
-        - Ensuring quality control and compliance of product listings before publication.
-
-        **Security Notes:**
-        - Requires JWT authentication with `ROLE_ADMIN`.
-        - Unauthorized users (buyers/sellers) will be denied access.
-    """
+                        Retrieves a paginated list of post products that are pending verification or review by administrators.  
+                        This API is restricted to users with the `ROLE_ADMIN` authority.
+                    
+                        **Workflow:**
+                        1. The admin calls this endpoint with pagination parameters (`page`, `size`).
+                        2. The system queries all post products that are awaiting verification or moderation.
+                        3. The endpoint returns a paginated response containing post details, along with metadata.
+                    
+                        **Use cases:**
+                        - Admins reviewing newly submitted product posts before approval.
+                        - Moderators checking flagged or edited posts that require re-verification.
+                        - Ensuring quality control and compliance of product listings before publication.
+                    
+                        **Security Notes:**
+                        - Requires JWT authentication with `ROLE_ADMIN`.
+                        - Unauthorized users (buyers/sellers) will be denied access.
+                    """
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/review-post-seller-list")
     public ResponseEntity<RestResponse<PostProductListResponse, Object>> getAllPostProductForReview(
-            @RequestParam(name = "size",defaultValue = "10") int size,
-            @RequestParam(name = "page",defaultValue = "0") int page
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "page", defaultValue = "0") int page
     ) throws Exception {
         log.info(">>> Server came getAllPostProductForReview API");
         Page<PostProduct> postProducts = postProductServiceImpl.getAllPostProductForVerifiedReview(size, page);
@@ -204,23 +204,23 @@ public class AdminController {
     @Operation(
             summary = "View post product details by ID",
             description = """
-        Retrieves detailed information for a specific post product based on its unique ID.  
-        Accessible to **Buyers**, **Sellers**, and **Admins** with appropriate privileges.
-
-        **Workflow:**
-        1. The client sends a request containing the post product ID as a path variable.
-        2. The system retrieves the corresponding post product record from the database.
-        3. The product details are returned as a structured response, including product info, seller data, and review status.
-        
-        **Use cases:**
-        - **Admin:** Reviewing pending or verified posts before approval or publication.
-        - **Seller:** Viewing or verifying their own product submission details.
-        - **Buyer:** Viewing detailed product information for browsing or purchasing decisions.
-        
-        **Security Notes:**
-        - Requires JWT authentication (`ROLE_BUYER`, `ROLE_SELLER`, or `ROLE_ADMIN`).
-        - Different roles may have access to different levels of detail based on internal authorization rules.
-    """
+                        Retrieves detailed information for a specific post product based on its unique ID.  
+                        Accessible to **Buyers**, **Sellers**, and **Admins** with appropriate privileges.
+                    
+                        **Workflow:**
+                        1. The client sends a request containing the post product ID as a path variable.
+                        2. The system retrieves the corresponding post product record from the database.
+                        3. The product details are returned as a structured response, including product info, seller data, and review status.
+                    
+                        **Use cases:**
+                        - **Admin:** Reviewing pending or verified posts before approval or publication.
+                        - **Seller:** Viewing or verifying their own product submission details.
+                        - **Buyer:** Viewing detailed product information for browsing or purchasing decisions.
+                    
+                        **Security Notes:**
+                        - Requires JWT authentication (`ROLE_BUYER`, `ROLE_SELLER`, or `ROLE_ADMIN`).
+                        - Different roles may have access to different levels of detail based on internal authorization rules.
+                    """
     )
     @GetMapping("/{postProductId}/post-details")
     public ResponseEntity<RestResponse<PostProductResponse, Object>> viewPostProductDetail(
@@ -241,20 +241,20 @@ public class AdminController {
     @Operation(
             summary = "Review and decide post product verification",
             description = """
-        Allows an admin or moderator to approve or reject a seller's post product after manual review.
-        This endpoint records the decision, updates the product's verification status, 
-        and returns the updated product details.
-
-        **Workflow:**
-        1. Admin sends a decision request containing the post product ID and decision details (approve or reject).
-        2. The system validates the product and applies the verification decision.
-        3. The updated post product entity is returned in the response.
-
-        **Use cases:**
-        - Approving a verified product for listing.
-        - Rejecting a product submission with a reason or remark.
-        - Managing product moderation workflows.
-    """
+                        Allows an admin or moderator to approve or reject a seller's post product after manual review.
+                        This endpoint records the decision, updates the product's verification status, 
+                        and returns the updated product details.
+                    
+                        **Workflow:**
+                        1. Admin sends a decision request containing the post product ID and decision details (approve or reject).
+                        2. The system validates the product and applies the verification decision.
+                        3. The updated post product entity is returned in the response.
+                    
+                        **Use cases:**
+                        - Approving a verified product for listing.
+                        - Rejecting a product submission with a reason or remark.
+                        - Managing product moderation workflows.
+                    """
     )
     @PostMapping("/review-post-product-decision")
     public ResponseEntity<RestResponse<PostProductResponse, Object>> reviewPostProductDecision(@Valid @RequestBody PostProductDecisionRequest request) throws Exception {

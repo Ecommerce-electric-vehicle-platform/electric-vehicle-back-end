@@ -10,6 +10,8 @@ import java.util.Optional;
 
 public interface WalletTransactionRepository extends JpaRepository<WalletTransaction, Long> {
     boolean existsByExternalTransactionReference(String txnRef);
+
     Optional<WalletTransaction> findByExternalTransactionReference(String txnRef);
+
     Page<WalletTransaction> findByWallet(Wallet wallet, Pageable pageable);
 }

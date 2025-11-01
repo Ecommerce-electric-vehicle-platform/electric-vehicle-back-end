@@ -37,7 +37,7 @@ public class Order {
     @Column(name = "phone_number", nullable = true, unique = false)
     private String phoneNumber;
 
-    @Column(name = "price",  nullable = true, unique = false)
+    @Column(name = "price", nullable = true, unique = false)
     private BigDecimal price;
 
     @Column(name = "shipping_fee", nullable = true, unique = false)

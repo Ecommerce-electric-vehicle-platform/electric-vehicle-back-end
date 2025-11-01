@@ -34,19 +34,19 @@ public class ChattingController {
             summary = """
                     Create a new conversation between the buyer and the seller of a post 
                     One buyer just can create one conversation with a post.
-                     """,
+                    """,
             description = """
-        This endpoint allows an authenticated **buyer** to initiate a new conversation 
-        with the **seller** who owns the specified product post (`PostProduct`).
-
-        - The buyer must be logged in.
-        - The `postId` must correspond to an existing and active post.
-        - A conversation will only be created **if it does not already exist** between the buyer and seller for this post.
-        - Once created, the conversation can be used to exchange chat messages.
-
-        **Use case:**  
-        Buyers use this API to start chatting with the seller about a specific product they are interested in.
-        """
+                    This endpoint allows an authenticated **buyer** to initiate a new conversation 
+                    with the **seller** who owns the specified product post (`PostProduct`).
+                    
+                    - The buyer must be logged in.
+                    - The `postId` must correspond to an existing and active post.
+                    - A conversation will only be created **if it does not already exist** between the buyer and seller for this post.
+                    - Once created, the conversation can be used to exchange chat messages.
+                    
+                    **Use case:**  
+                    Buyers use this API to start chatting with the seller about a specific product they are interested in.
+                    """
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/create-conversation/{postId}")
@@ -56,7 +56,7 @@ public class ChattingController {
             Buyer buyer = buyerService.getCurrentUser();
             PostProduct postProduct = postProductService.findPostProductById(id);
 
-            if(buyer.getSeller() == postProduct.getSeller()) {
+            if (buyer.getSeller() == postProduct.getSeller()) {
                 throw new IllegalArgumentException("Sellers cannot create conversation with themselves.");
             }
 

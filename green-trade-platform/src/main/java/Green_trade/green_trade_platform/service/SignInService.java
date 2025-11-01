@@ -8,5 +8,6 @@ import java.util.Map;
 
 public interface SignInService {
     Buyer startSignIn(SignInRequest request);
+
     Buyer startSignInWithGoogle(SignInGoogleRequest body) throws Exception;
 }
