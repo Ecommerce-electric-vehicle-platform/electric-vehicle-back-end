@@ -6,5 +6,8 @@ import lombok.Data;
 @Data
 @Builder
 public class MessageRequest {
-
+    private Long conversationId;
+    private Long buyerId;
+    private Long postId;
+    private String content;
 }

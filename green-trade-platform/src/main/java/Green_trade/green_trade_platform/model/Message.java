@@ -1,6 +1,8 @@
 package Green_trade.green_trade_platform.model;
 
 import Green_trade.green_trade_platform.enumerate.MessageStatus;
+import Green_trade.green_trade_platform.enumerate.MessageType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,29 +34,33 @@ public class Message {
     @Enumerated(EnumType.STRING)
     private MessageStatus status;
 
-    @Column(name = "sent_at")
-    private LocalDateTime sentAt;
-
     @Column(name = "read_at")
     private LocalDateTime readAt;
 
-    @Column(name = "content")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "attached_url")
     private String attachedUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "message_type_id")
+    @Column(name = "public_image_id")
+    private String publicImageId;
+
+    @Column(name = "sent_at")
+    private LocalDateTime sentAt;
+
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
     private MessageType messageType;
 
     @ManyToOne
     @JoinColumn(name = "conservation")
-    @JsonManagedReference
+    @JsonBackReference
     private Conversation conversation;
 
     @PrePersist
     public void onCreate() {
+        this.status = MessageStatus.NOT_READ_YET;
         this.sentAt = LocalDateTime.now();
     }
 }
