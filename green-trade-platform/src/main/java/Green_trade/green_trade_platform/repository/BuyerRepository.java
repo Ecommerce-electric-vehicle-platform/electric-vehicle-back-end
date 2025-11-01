@@ -12,8 +12,11 @@ import java.util.Optional;
 @Repository
 public interface BuyerRepository extends JpaRepository<Buyer, Long> {
     Optional<Buyer> findByUsername(String username);
+
     boolean existsByEmail(String email);
+
     Optional<Buyer> findByEmail(String email);
+
     boolean existsByUsername(String username);
 
     Optional<Buyer> findBySeller_SellerId(Long sellerId);

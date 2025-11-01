@@ -374,17 +374,17 @@ public class BuyerController {
     @Operation(
             summary = "Add a product post to the buyer's wish-list",
             description = """
-        This endpoint allows an authenticated **buyer** to add a product post 
-        (`PostProduct`) to their personal wish-list.
-
-        - The buyer must be logged in.
-        - The product (`PostProduct`) must exist and be active.
-        - A seller **cannot** add their own product to their own wish-list (for fairness and data integrity).
-        - If the product is already in the buyer's wish-list, the service may prevent duplication or update the record, depending on business logic.
-
-        **Use case:**  
-        Buyers use this API to save or bookmark products they are interested in purchasing later.
-        """
+                    This endpoint allows an authenticated **buyer** to add a product post 
+                    (`PostProduct`) to their personal wish-list.
+                    
+                    - The buyer must be logged in.
+                    - The product (`PostProduct`) must exist and be active.
+                    - A seller **cannot** add their own product to their own wish-list (for fairness and data integrity).
+                    - If the product is already in the buyer's wish-list, the service may prevent duplication or update the record, depending on business logic.
+                    
+                    **Use case:**  
+                    Buyers use this API to save or bookmark products they are interested in purchasing later.
+                    """
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/wish-list")
@@ -398,7 +398,7 @@ public class BuyerController {
             PostProduct postProduct = postProductService.getPostProductById(request.getPostId());
             log.info(">>> [Buyer Controller] Post product: {}", postProduct);
 
-            if(buyer.getSeller() == postProduct.getSeller()) {
+            if (buyer.getSeller() == postProduct.getSeller()) {
                 throw new IllegalArgumentException("Seller can not add your product into your wish-listing.");
             }
 
@@ -423,16 +423,16 @@ public class BuyerController {
     @Operation(
             summary = "Remove a product from the buyer's wish list",
             description = """
-        This endpoint allows an authenticated **buyer** to remove a product post 
-        from their personal wish list.
-
-        - The `wishId` must correspond to an existing wish-list entry.
-        - The buyer must own the wish-list entry; otherwise, access will be denied.
-        - If the wish-list item does not exist or has already been removed, the API will return an appropriate error message.
-
-        **Use case:**  
-        Buyers use this endpoint when they no longer wish to keep a product in their saved wish-list.
-        """
+                    This endpoint allows an authenticated **buyer** to remove a product post 
+                    from their personal wish list.
+                    
+                    - The `wishId` must correspond to an existing wish-list entry.
+                    - The buyer must own the wish-list entry; otherwise, access will be denied.
+                    - If the wish-list item does not exist or has already been removed, the API will return an appropriate error message.
+                    
+                    **Use case:**  
+                    Buyers use this endpoint when they no longer wish to keep a product in their saved wish-list.
+                    """
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/remove-wish-list/{wishId}")
@@ -456,16 +456,16 @@ public class BuyerController {
     @Operation(
             summary = "Retrieve the buyer's wish list",
             description = """
-        This endpoint returns a paginated list of the buyer's wish-list items.
-
-        - The buyer must be logged in.
-        - Results can be optionally filtered by **priority** (e.g., HIGH, MEDIUM, LOW).
-        - If no priority is specified, all wish-list items are returned.
-        - Supports pagination via `page` and `size` parameters.
-
-        **Use case:**  
-        Buyers use this endpoint to view and manage the list of product posts they have added to their wish-list.
-        """
+                    This endpoint returns a paginated list of the buyer's wish-list items.
+                    
+                    - The buyer must be logged in.
+                    - Results can be optionally filtered by **priority** (e.g., HIGH, MEDIUM, LOW).
+                    - If no priority is specified, all wish-list items are returned.
+                    - Supports pagination via `page` and `size` parameters.
+                    
+                    **Use case:**  
+                    Buyers use this endpoint to view and manage the list of product posts they have added to their wish-list.
+                    """
     )
     @GetMapping("/wish-list")
     public ResponseEntity<?> getWishList(

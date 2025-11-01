@@ -271,17 +271,17 @@ public class SellerController {
     @Operation(
             summary = "Retrieve all pending orders for the current seller",
             description = """
-        This endpoint returns a paginated list of orders that are currently in **PENDING** status
-        and belong to the authenticated seller.
-
-        - It requires the user to be logged in as a seller.
-        - Each order in the response is mapped to the `OrderResponse` DTO.
-        - Pagination is supported using the `page` and `size` query parameters.
-
-        **Use case:**  
-        Sellers can use this endpoint to track customer orders that have been placed
-        but not yet processed, shipped, or completed.
-        """
+                    This endpoint returns a paginated list of orders that are currently in **PENDING** status
+                    and belong to the authenticated seller.
+                    
+                    - It requires the user to be logged in as a seller.
+                    - Each order in the response is mapped to the `OrderResponse` DTO.
+                    - Pagination is supported using the `page` and `size` query parameters.
+                    
+                    **Use case:**  
+                    Sellers can use this endpoint to track customer orders that have been placed
+                    but not yet processed, shipped, or completed.
+                    """
     )
     @GetMapping("/pending-orders")
     public ResponseEntity<?> getAllPendingOrders(
@@ -309,16 +309,16 @@ public class SellerController {
     @Operation(
             summary = "Seller accepts (verifies) a pending order",
             description = """
-        This endpoint allows the **authenticated seller** to verify or accept a customer's pending order.
-
-        - The seller must own the product (PostProduct) associated with the order.
-        - Once verified, the order status will change from **PENDING** to **VERIFIED**.
-        - This action signifies that the seller agrees to fulfill the order and proceed to the shipping or payment phase.
-        - If the order is not found, does not belong to the seller, or has already been processed (not pending), an appropriate error will be returned.
-
-        **Use case:**  
-        Sellers use this endpoint to approve customer orders before shipment or payment confirmation.
-        """
+                    This endpoint allows the **authenticated seller** to verify or accept a customer's pending order.
+                    
+                    - The seller must own the product (PostProduct) associated with the order.
+                    - Once verified, the order status will change from **PENDING** to **VERIFIED**.
+                    - This action signifies that the seller agrees to fulfill the order and proceed to the shipping or payment phase.
+                    - If the order is not found, does not belong to the seller, or has already been processed (not pending), an appropriate error will be returned.
+                    
+                    **Use case:**  
+                    Sellers use this endpoint to approve customer orders before shipment or payment confirmation.
+                    """
     )
     @PostMapping("/verify-order/{orderId}")
     public ResponseEntity<?> verifyPendingOrder(@PathVariable(name = "orderId") long id) {

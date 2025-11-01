@@ -16,7 +16,7 @@ public class PostProductListMapper {
         this.postProductMapper = postProductMapper;
     }
 
-    public PostProductListResponse toDto (List<PostProduct> postProducts, Map<String, Object> meta) {
+    public PostProductListResponse toDto(List<PostProduct> postProducts, Map<String, Object> meta) {
         List<PostProductResponse> postProductListResponses = postProducts.stream()
                 .map(
                         postProduct -> postProductMapper.toDto(postProduct)

@@ -177,12 +177,12 @@ public class OrderController {
     @Operation(
             summary = "Get all reviews by order ID",
             description = """
-        This endpoint allows an authenticated user (buyer or seller) to retrieve all reviews 
-        associated with a specific order.
-
-        - The `orderId` parameter must correspond to an existing order.
-        - Each review may include its rating, feedback text, and attached review images.
-        """
+                    This endpoint allows an authenticated user (buyer or seller) to retrieve all reviews 
+                    associated with a specific order.
+                    
+                    - The `orderId` parameter must correspond to an existing order.
+                    - Each review may include its rating, feedback text, and attached review images.
+                    """
     )
     @GetMapping("/get-review/{orderId}")
     public ResponseEntity<?> getReviewByOrderId(@PathVariable(name = "orderId") long id) {

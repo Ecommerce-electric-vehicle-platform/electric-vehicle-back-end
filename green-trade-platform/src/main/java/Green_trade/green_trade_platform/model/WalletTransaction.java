@@ -58,5 +58,7 @@ public class WalletTransaction {
     }
 
     @PreUpdate
-    public void onUpdate() {this.updatedAt = LocalDateTime.now(); }
+    public void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

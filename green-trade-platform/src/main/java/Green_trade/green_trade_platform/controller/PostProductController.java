@@ -190,7 +190,7 @@ public class PostProductController {
             return ResponseEntity.ok(responseMapper.toDto(
                     false,
                     hide + " PRODUCT SUCCESSFULLY.",
-                   null, e.getMessage()
+                    null, e.getMessage()
             ));
         }
     }
@@ -198,17 +198,17 @@ public class PostProductController {
     @Operation(
             summary = "Get post product information based on a wish-list ID",
             description = """
-        This endpoint allows an authenticated **buyer** or **seller** to retrieve the detailed information 
-        of a product post (`PostProduct`) that is associated with a specific **wish-list item**.
-
-        - The `wishId` parameter must correspond to an existing wish-list record.
-        - The system will automatically fetch the `PostProduct` linked to that wish-list entry.
-        - This endpoint is accessible to both buyers and sellers.
-        
-        **Use case:**  
-        Buyers can use this API to quickly view the details of an item they have added to their wish-list,  
-        and sellers can use it to verify which of their posts are currently in wish lists of buyers.
-        """
+                    This endpoint allows an authenticated **buyer** or **seller** to retrieve the detailed information 
+                    of a product post (`PostProduct`) that is associated with a specific **wish-list item**.
+                    
+                    - The `wishId` parameter must correspond to an existing wish-list record.
+                    - The system will automatically fetch the `PostProduct` linked to that wish-list entry.
+                    - This endpoint is accessible to both buyers and sellers.
+                    
+                    **Use case:**  
+                    Buyers can use this API to quickly view the details of an item they have added to their wish-list,  
+                    and sellers can use it to verify which of their posts are currently in wish lists of buyers.
+                    """
     )
     @PreAuthorize("hasAnyRole('ROLE_SELLER', 'ROLE_BUYER')")
     @GetMapping("/{wishId}")

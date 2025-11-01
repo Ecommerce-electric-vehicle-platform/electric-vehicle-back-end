@@ -16,7 +16,7 @@ public class OrderListMapper {
         this.orderMapper = orderMapper;
     }
 
-    public OrderListResponse toDto (List<Order> orders, Map<String, Object> meta) {
+    public OrderListResponse toDto(List<Order> orders, Map<String, Object> meta) {
         List<OrderResponse> orderListResponses = orders.stream()
                 .map(
                         order -> orderMapper.toDto(order)

@@ -11,7 +11,7 @@ import java.util.List;
 public class FileUtils {
 
     public void validateFile(MultipartFile file) {
-        if(file == null || file.isEmpty())
+        if (file == null || file.isEmpty())
             throw new IllegalArgumentException("File does not exist.");
 
         long maxSize = 5 * 1024 * 1024; // 5MB

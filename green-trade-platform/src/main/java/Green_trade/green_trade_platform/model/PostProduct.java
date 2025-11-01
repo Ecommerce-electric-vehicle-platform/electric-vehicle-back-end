@@ -79,7 +79,7 @@ public class PostProduct {
     private VerifiedDecisionStatus verifiedDecisionstatus;
 
     @Column(name = "verified", nullable = false, unique = false)
-    private boolean verified ;
+    private boolean verified;
 
     @Column(name = "created_at", nullable = true, unique = false)
     private LocalDateTime createdAt;
