@@ -22,5 +22,7 @@ public enum OrderStatus {
     // Đơn hàng bị trả lại hoặc yêu cầu hoàn tiền
     RETURN_REQUESTED,
     // Đơn hàng đã được hoàn tiền
-    REFUNDED
+    REFUNDED,
+    // Đơn hàng đã được người bán xác nhận bán
+    VERIFIED
 }

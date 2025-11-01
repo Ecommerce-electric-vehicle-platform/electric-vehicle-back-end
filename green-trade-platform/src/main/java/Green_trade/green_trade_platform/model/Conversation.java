@@ -16,7 +16,15 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "conservation")
+@Table(
+        name = "conservation",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "UK_conversation_buyer_post",
+                        columnNames = {"buyer_id", "post_id"}
+                )
+        }
+)
 public class Conversation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,4 +46,9 @@ public class Conversation {
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL)
     @JsonBackReference
     private List<Message> messages;
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

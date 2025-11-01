@@ -11,6 +11,7 @@ import Green_trade.green_trade_platform.request.ReviewRequest;
 import Green_trade.green_trade_platform.response.OrderListResponse;
 import Green_trade.green_trade_platform.response.OrderResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
+import Green_trade.green_trade_platform.response.ReviewResponse;
 import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
@@ -158,6 +159,7 @@ public class OrderController {
     public ResponseEntity<?> createReview(@ModelAttribute ReviewRequest request,
                                           @RequestPart(name = "pictures", required = false) List<MultipartFile> reviewImages) {
         log.info(">>> [Order Controller] Create Review: Started.");
+        log.info(">>> [Order Controller] Request: {}.", request);
         try {
             Review savedReview = reviewService.createReview(request, reviewImages);
             return ResponseEntity.ok(responseMapper.toDto(
@@ -169,6 +171,38 @@ public class OrderController {
                     true,
                     "MAKE REVIEW FAILED.",
                     null, e.getMessage()));
+        }
+    }
+
+    @Operation(
+            summary = "Get all reviews by order ID",
+            description = """
+        This endpoint allows an authenticated user (buyer or seller) to retrieve all reviews 
+        associated with a specific order.
+
+        - The `orderId` parameter must correspond to an existing order.
+        - Each review may include its rating, feedback text, and attached review images.
+        """
+    )
+    @GetMapping("/get-review/{orderId}")
+    public ResponseEntity<?> getReviewByOrderId(@PathVariable(name = "orderId") long id) {
+        try {
+            Review reviews = reviewService.getReviewsByOrderId(id);
+            ReviewResponse response = reviewMapper.toDto(reviews);
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET REVIEWS BY ORDER SUCCESSFULLY.",
+                    response,
+                    null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET REVIEWS BY ORDER FAILED.",
+                    null,
+                    e.getMessage()
+            ));
         }
     }
 }

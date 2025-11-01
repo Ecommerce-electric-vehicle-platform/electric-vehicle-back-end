@@ -26,8 +26,18 @@ DELETE FROM evidence;
 DELETE FROM notification;
 DELETE FROM system_wallet;
 DELETE FROM wallet_transaction;
+DELETE FROM conservation;
+DELETE FROM wish_listing;
+DELETE FROM reviews;
+DELETE FROM product_image;
+DELETE FROM review_image;
 DROP EVENT IF EXISTS auto_resolve_escrow;
 
+ALTER TABLE review_image AUTO_INCREMENT = 1;
+ALTER TABLE product_image AUTO_INCREMENT = 1;
+ALTER TABLE conservation AUTO_INCREMENT = 1;
+ALTER TABLE wish_listing AUTO_INCREMENT = 1;
+ALTER TABLE reviews AUTO_INCREMENT = 1;
 ALTER TABLE product_image AUTO_INCREMENT = 1;
 ALTER TABLE post_product AUTO_INCREMENT = 1;
 ALTER TABLE wallet AUTO_INCREMENT = 1;
@@ -340,13 +350,13 @@ VALUES
 ---- =========================================================
 INSERT INTO product_image (order_image, image_url, post_id) VALUES
 -- Post 1
-(1, '', 1),(2, '', 1),(3, '', 1),(4, '', 1),(5, '', 1),
+(1, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 1),(2, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 1),(3, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 1),(4, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 1),(5, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 1),
 -- Post 2
-(1, '', 2),(2, '', 2),(3, '', 2),(4, '', 2),(5, '', 2),
+(1, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 2),(2, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 2),(3, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 2),(4, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 2),(5, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 2),
 -- Post 3
-(1, '', 3),(2, '', 3),(3, '', 3),(4, '', 3),(5, '', 3),
+(1, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 3),(2, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 3),(3, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 3),(4, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 3),(5, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 3),
 -- Post 4
-(1, '', 4),(2, '', 4),(3, '', 4),(4, '', 4),(5, '', 4),
+(1, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 4),(2, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 4),(3, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 4),(4, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 4),(5, 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg', 4),
 -- Post 5
 (1, '', 5),(2, '', 5),(3, '', 5),(4, '', 5),(5, '', 5),
 -- Post 6
@@ -420,14 +430,28 @@ INSERT INTO product_image (order_image, image_url, post_id) VALUES
 -- Post 40
 (1, '', 40),(2, '', 40),(3, '', 40),(4, '', 40),(5, '', 40);
 
---INSERT INTO product_image (order_image, image_url, post_id)
---VALUES
---(1, 'https://cdn.example.com/images/vinfast_klara_front.jpg', 1),
---(2, 'https://cdn.example.com/images/vinfast_klara_side.jpg', 1),
---(1, 'https://cdn.example.com/images/pega_esh_front.jpg', 2),
---(1, 'https://cdn.example.com/images/lithium_battery_60v_front.jpg', 3),
---(1, 'https://cdn.example.com/images/charger_60v5a.jpg', 4),
---(1, 'https://cdn.example.com/images/brake_disc_vf.jpg', 5);
+UPDATE product_image
+SET image_url = 'https://media-cdn-v2.laodong.vn/storage/newsportal/2024/9/22/1397812/Xe-May-Dien-Re-Dep-2.jpg'
+WHERE image_url = '';
+-- =========================================================
+-- 🖼 WISH-LISTING
+-- =========================================================
+INSERT INTO wish_listing(created_at, note, priority, buyer_id, post_id)
+VALUES
+(NOW(), 'Để đây và sẽ mua sau', 'LOW', 2, 1),
+(NOW(), 'Sản phẩm này hay nè. Sẽ mua', 'HIGH', 2, 2),
+(NOW(), 'Cũng thích nhưng mà chưa cần lắm', 'LOW', 2, 3),
+(NOW(), 'Cũng ok thôi', 'MEDIUM', 2, 4),
+(NOW(), 'Má ơi hay nha, rất thích', 'HIGH', 2, 5),
+(NOW(), 'Thích vãiiii', 'HIGH', 2, 6),
+(NOW(), 'Để đây và sẽ mua sau', 'LOW', 2, 7),
+(NOW(), 'Để đây và sẽ mua sau', 'MEDIUM', 2, 8),
+(NOW(), 'Không thích cho lắm', 'LOW', 2, 9),
+(NOW(), 'Để đây và sẽ mua sau', 'HIGH', 2, 10),
+(NOW(), 'Cũng ok thôi', 'MEDIUM', 2, 11),
+(NOW(), 'Để đây và sẽ mua sau', 'LOW', 2, 12),
+(NOW(), 'Để đây và sẽ mua sau', 'HIGH', 2, 13),
+(NOW(), 'Thích vãiiii', 'HIGH', 2, 14);
 
 -- =========================================================
 -- 🖼 SYSTEM_POLICY
@@ -497,10 +521,10 @@ VALUES
 INSERT INTO orders (
     order_code, shipping_address, phone_number, price, shipping_fee, status, created_at, buyer_id, post_id, shipping_partner_id
 ) VALUES
-('XYZ123@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'COMPLETED', NOW(), 2, 1, 1),
-('XYZ133@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'COMPLETED', NOW(), 2, 10, 1),
+('XYZ123@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'PENDING', NOW(), 2, 1, 1),
+('XYZ133@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'PENDING', NOW(), 2, 10, 1),
 ('XYZ143@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'COMPLETED', NOW(), 2, 3, 1),
-('XYZ153@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'COMPLETED', NOW(), 2, 7, 1),
+('XYZ153@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'PENDING', NOW(), 2, 7, 1),
 ('XYZ163@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'COMPLETED', NOW(), 2, 2, 1);
 
 

@@ -118,4 +118,10 @@ public class ReviewServiceImpl {
 
         return order;
     }
+
+    public Review getReviewsByOrderId(Long orderId) {
+        return reviewRepository.findByOrder_Id(orderId).orElseThrow(
+                () -> new IllegalArgumentException("Do not have any review for order id: " + orderId)
+        );
+    }
 }

@@ -1,15 +1,19 @@
 package Green_trade.green_trade_platform.controller;
 
+import Green_trade.green_trade_platform.mapper.OrderMapper;
 import Green_trade.green_trade_platform.mapper.PostProductMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.mapper.SellerMapper;
+import Green_trade.green_trade_platform.model.Order;
 import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
 import Green_trade.green_trade_platform.request.VerifiedPostProductRequest;
+import Green_trade.green_trade_platform.response.OrderResponse;
 import Green_trade.green_trade_platform.response.PostProductResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.response.SubscriptionResponse;
+import Green_trade.green_trade_platform.service.implement.OrderServiceImpl;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,6 +46,8 @@ public class SellerController {
     private final SellerMapper sellerMapper;
     private final PostProductServiceImpl postProductService;
     private final PostProductMapper postProductMapper;
+    private final OrderServiceImpl orderService;
+    private final OrderMapper orderMapper;
 
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(
@@ -262,5 +268,74 @@ public class SellerController {
         ));
     }
 
+    @Operation(
+            summary = "Retrieve all pending orders for the current seller",
+            description = """
+        This endpoint returns a paginated list of orders that are currently in **PENDING** status
+        and belong to the authenticated seller.
+
+        - It requires the user to be logged in as a seller.
+        - Each order in the response is mapped to the `OrderResponse` DTO.
+        - Pagination is supported using the `page` and `size` query parameters.
+
+        **Use case:**  
+        Sellers can use this endpoint to track customer orders that have been placed
+        but not yet processed, shipped, or completed.
+        """
+    )
+    @GetMapping("/pending-orders")
+    public ResponseEntity<?> getAllPendingOrders(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            Seller seller = sellerService.getCurrentUser();
+            Page<Order> pendingOrder = orderService.getPendingOrders(seller, page, size);
+            Page<OrderResponse> response = pendingOrder.map(orderMapper::toDto);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ALL PENDING ORDER SUCCESSFULLY.",
+                    response, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET ALL PENDING ORDER FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Seller accepts (verifies) a pending order",
+            description = """
+        This endpoint allows the **authenticated seller** to verify or accept a customer's pending order.
+
+        - The seller must own the product (PostProduct) associated with the order.
+        - Once verified, the order status will change from **PENDING** to **VERIFIED**.
+        - This action signifies that the seller agrees to fulfill the order and proceed to the shipping or payment phase.
+        - If the order is not found, does not belong to the seller, or has already been processed (not pending), an appropriate error will be returned.
+
+        **Use case:**  
+        Sellers use this endpoint to approve customer orders before shipment or payment confirmation.
+        """
+    )
+    @PostMapping("/verify-order/{orderId}")
+    public ResponseEntity<?> verifyPendingOrder(@PathVariable(name = "orderId") long id) {
+        try {
+            Order order = orderService.verifyOrder(id);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "VERIFY ORDER SUCCESSFULLY",
+                    orderMapper.toDto(order), null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "VERIFY ORDER FAILED",
+                    null, e.getMessage()
+            ));
+        }
+    }
 
 }

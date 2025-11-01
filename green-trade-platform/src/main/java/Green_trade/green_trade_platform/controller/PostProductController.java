@@ -39,6 +39,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/post-product")
+@RequiredArgsConstructor
 public class PostProductController {
     private final PostProductServiceImpl postProductService;
     private final ResponseMapper responseMapper;
@@ -46,25 +47,6 @@ public class PostProductController {
     private final PostProductMapper postProductMapper;
     private final SellerMapper sellerMapper;
     private final SellerServiceImpl sellerService;
-    private final SubscriptionServiceImpl subscriptionService;
-
-    public PostProductController(
-            PostProductServiceImpl postProductService,
-            ResponseMapper responseMapper,
-            PostProductListMapper postProductListMapper,
-            PostProductMapper postProductMapper,
-            SellerMapper sellerMapper,
-            SellerServiceImpl sellerService,
-            SubscriptionServiceImpl subscriptionService
-    ) {
-        this.postProductService = postProductService;
-        this.responseMapper = responseMapper;
-        this.postProductListMapper = postProductListMapper;
-        this.postProductMapper = postProductMapper;
-        this.sellerMapper = sellerMapper;
-        this.sellerService = sellerService;
-        this.subscriptionService = subscriptionService;
-    }
 
     @Operation(
             summary = "Get all available product posts with pagination and sorting",
@@ -170,7 +152,7 @@ public class PostProductController {
 
 
     @Operation(
-            summary = "Hide a post product by ID",
+            summary = "Hide or unhide a post product by ID",
             description = """
                         Hides (deactivates) a specific post product from the platform by setting its `active` status to `false`.  
                         The product remains stored in the database but will no longer be visible to buyers or appear in public listings.
@@ -194,18 +176,54 @@ public class PostProductController {
     )
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @PostMapping("/hide/{postId}")
-    public ResponseEntity<?> hidePostProduct(@PathVariable(name = "postId") Long id) {
+    public ResponseEntity<?> hidePostProduct(@PathVariable(name = "postId") Long id,
+                                             @RequestParam(name = "is_hide") boolean isHide) {
+        String hide = isHide ? "HIDE" : "FALSE";
         try {
-            PostProduct temp = postProductService.hidePostProduct(id);
+            PostProduct temp = postProductService.hidePostProduct(id, isHide);
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
-                    "HIDE PRODUCT SUCCESSFULLY.",
+                    hide + " PRODUCT SUCCESSFULLY.",
                     postProductMapper.toDto(temp), null
             ));
         } catch (Exception e) {
             return ResponseEntity.ok(responseMapper.toDto(
                     false,
-                    "HIDE PRODUCT FAILED.",
+                    hide + " PRODUCT SUCCESSFULLY.",
+                   null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Get post product information based on a wish-list ID",
+            description = """
+        This endpoint allows an authenticated **buyer** or **seller** to retrieve the detailed information 
+        of a product post (`PostProduct`) that is associated with a specific **wish-list item**.
+
+        - The `wishId` parameter must correspond to an existing wish-list record.
+        - The system will automatically fetch the `PostProduct` linked to that wish-list entry.
+        - This endpoint is accessible to both buyers and sellers.
+        
+        **Use case:**  
+        Buyers can use this API to quickly view the details of an item they have added to their wish-list,  
+        and sellers can use it to verify which of their posts are currently in wish lists of buyers.
+        """
+    )
+    @PreAuthorize("hasAnyRole('ROLE_SELLER', 'ROLE_BUYER')")
+    @GetMapping("/{wishId}")
+    public ResponseEntity<?> getPostInfoByWishId(@PathVariable(name = "wishId") long id) {
+        try {
+            PostProduct postProduct = postProductService.findPostByWishId(id);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET POST PRODUCT INFORMATION SUCCESSFULLY.",
+                    postProductMapper.toDto(postProduct), null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET POST PRODUCT INFORMATION FAILED.",
                     null, e.getMessage()
             ));
         }

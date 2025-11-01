@@ -1,23 +1,19 @@
 package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.enumerate.OrderStatus;
+import Green_trade.green_trade_platform.enumerate.WishListPriority;
 import Green_trade.green_trade_platform.exception.PaymentMethodNotSupportedException;
 import Green_trade.green_trade_platform.exception.PostProductNotFound;
 import Green_trade.green_trade_platform.exception.ProfileException;
 import Green_trade.green_trade_platform.exception.SelfPurchaseNotAllowedException;
-import Green_trade.green_trade_platform.mapper.BuyerMapper;
-import Green_trade.green_trade_platform.mapper.OrderMapper;
-import Green_trade.green_trade_platform.mapper.ResponseMapper;
-import Green_trade.green_trade_platform.mapper.WalletMapper;
+import Green_trade.green_trade_platform.mapper.*;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.request.PlaceOrderRequest;
 import Green_trade.green_trade_platform.request.ProfileRequest;
 import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
-import Green_trade.green_trade_platform.response.BuyerResponse;
-import Green_trade.green_trade_platform.response.OrderResponse;
-import Green_trade.green_trade_platform.response.RestResponse;
-import Green_trade.green_trade_platform.response.WalletTransactionResponse;
+import Green_trade.green_trade_platform.request.WishListRequest;
+import Green_trade.green_trade_platform.response.*;
 import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +55,8 @@ public class BuyerController {
     private final PaymentServiceImpl paymentService;
     private final SystemWalletServiceImpl systemWalletService;
     private final WalletServiceImpl walletService;
+    private final WishListMapper wishListMapper;
+    private final WishListingServiceImpl wishListingService;
 
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @Operation(
@@ -368,6 +367,140 @@ public class BuyerController {
                     false,
                     "GET ALL WALLET TRANSACTION SUCCESSFULLY.",
                     null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Add a product post to the buyer's wish-list",
+            description = """
+        This endpoint allows an authenticated **buyer** to add a product post 
+        (`PostProduct`) to their personal wish-list.
+
+        - The buyer must be logged in.
+        - The product (`PostProduct`) must exist and be active.
+        - A seller **cannot** add their own product to their own wish-list (for fairness and data integrity).
+        - If the product is already in the buyer's wish-list, the service may prevent duplication or update the record, depending on business logic.
+
+        **Use case:**  
+        Buyers use this API to save or bookmark products they are interested in purchasing later.
+        """
+    )
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
+    @PostMapping("/wish-list")
+    public ResponseEntity<?> addProductToWishList(@RequestBody WishListRequest request) {
+        log.info(">>> [Buyer Controller] Add product to wish list: Started.");
+        try {
+            Buyer buyer = buyerService.getCurrentUser();
+            log.info(">>> [Buyer Controller] Buyer info: {}", buyer.getUsername());
+
+            log.info(">>> [Buyer Controller] Post product id: {}", request.getPostId());
+            PostProduct postProduct = postProductService.getPostProductById(request.getPostId());
+            log.info(">>> [Buyer Controller] Post product: {}", postProduct);
+
+            if(buyer.getSeller() == postProduct.getSeller()) {
+                throw new IllegalArgumentException("Seller can not add your product into your wish-listing.");
+            }
+
+            WishListing wishListing = wishListMapper.toEntity(request, buyer, postProduct);
+
+            WishListing savedWishList = wishListingService.addWishList(wishListing);
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "ADD PRODUCT TO WISH LISTING SUCCESSFULLY.",
+                    wishListMapper.toDto(savedWishList), null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "ADD PRODUCT TO WISH LISTING FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Remove a product from the buyer's wish list",
+            description = """
+        This endpoint allows an authenticated **buyer** to remove a product post 
+        from their personal wish list.
+
+        - The `wishId` must correspond to an existing wish-list entry.
+        - The buyer must own the wish-list entry; otherwise, access will be denied.
+        - If the wish-list item does not exist or has already been removed, the API will return an appropriate error message.
+
+        **Use case:**  
+        Buyers use this endpoint when they no longer wish to keep a product in their saved wish-list.
+        """
+    )
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
+    @PostMapping("/remove-wish-list/{wishId}")
+    public ResponseEntity<?> removeWishList(@PathVariable(name = "wishId") long id) {
+        try {
+            wishListingService.removePostProduct(id);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "REMOVE POST PRODUCT FROM WISH LIST SUCCESSFULLY.",
+                    null, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "REMOVE POST PRODUCT FROM WISH LIST FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Retrieve the buyer's wish list",
+            description = """
+        This endpoint returns a paginated list of the buyer's wish-list items.
+
+        - The buyer must be logged in.
+        - Results can be optionally filtered by **priority** (e.g., HIGH, MEDIUM, LOW).
+        - If no priority is specified, all wish-list items are returned.
+        - Supports pagination via `page` and `size` parameters.
+
+        **Use case:**  
+        Buyers use this endpoint to view and manage the list of product posts they have added to their wish-list.
+        """
+    )
+    @GetMapping("/wish-list")
+    public ResponseEntity<?> getWishList(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "priority", required = false) WishListPriority priority
+    ) {
+        try {
+            Buyer buyer = buyerService.getCurrentUser();
+            Page<WishListing> wishListings = wishListingService.getWishList(buyer, page, size, priority);
+            Page<WishListingResponse> mapped = wishListings.map(wishListMapper::toDto);
+
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("content", mapped.getContent());
+            data.put("pageNumber", mapped.getNumber());
+            data.put("pageSize", mapped.getSize());
+            data.put("totalElements", mapped.getTotalElements());
+            data.put("totalPages", mapped.getTotalPages());
+            data.put("first", mapped.isFirst());
+            data.put("last", mapped.isLast());
+            data.put("hasNext", mapped.hasNext());
+            data.put("hasPrevious", mapped.hasPrevious());
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET WISH LIST SUCCESSFULLY.",
+                    data,
+                    null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET WISH LIST FAILED.",
+                    null,
+                    e.getMessage()
             ));
         }
     }

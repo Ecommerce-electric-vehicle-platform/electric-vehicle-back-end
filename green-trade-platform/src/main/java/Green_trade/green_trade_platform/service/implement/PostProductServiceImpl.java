@@ -13,6 +13,7 @@ import Green_trade.green_trade_platform.response.SellerResponse;
 import Green_trade.green_trade_platform.service.PostProductService;
 import Green_trade.green_trade_platform.util.FileUtils;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class PostProductServiceImpl implements PostProductService {
 
     private final PostProductRepository postProductRepository;
@@ -40,34 +42,7 @@ public class PostProductServiceImpl implements PostProductService {
     private final BuyerRepository buyerRepository;
     private final AdminRepository adminRepository;
     private final SubscriptionServiceImpl subscriptionService;
-    private final GhnServiceImpl ghnService;
-
-    public PostProductServiceImpl(
-            PostProductRepository postProductRepository,
-            CategoryRepository categoryRepository,
-            FileUtils fileUtils,
-            CloudinaryService cloudinaryService,
-            SellerRepository sellerRepository,
-            ProductImageRepository productImageRepository,
-            SubscriptionRepository subscriptionRepository,
-            BuyerRepository buyerRepository,
-            AdminRepository adminRepository,
-            SubscriptionServiceImpl subscriptionService,
-            AdminServiceImpl adminService,
-            GhnServiceImpl ghnService) {
-        this.postProductRepository = postProductRepository;
-        this.categoryRepository = categoryRepository;
-        this.fileUtils = fileUtils;
-        this.cloudinaryService = cloudinaryService;
-        this.sellerRepository = sellerRepository;
-        this.productImageRepository = productImageRepository;
-        this.subscriptionRepository = subscriptionRepository;
-        this.buyerRepository = buyerRepository;
-        this.adminRepository = adminRepository;
-        this.subscriptionService = subscriptionService;
-        this.adminService = adminService;
-        this.ghnService = ghnService;
-    }
+    private final WishListingRepository wishListingRepository;
 
     public PostProduct createNewPostProduct(
             UploadPostProductRequest request,
@@ -135,7 +110,6 @@ public class PostProductServiceImpl implements PostProductService {
                 log.info(">>> Passed uploaded picture {}", i);
                 ProductImage productImage = ProductImage.builder()
                         .imageUrl(imageUrl)
-                        .imagePublicId(publicId)
                         .orderImage((long) i + 1)
                         .postProduct(newPost)
                         .build();
@@ -222,9 +196,11 @@ public class PostProductServiceImpl implements PostProductService {
 
     public PostProduct getPostProductById(Long postProductId) throws Exception {
         try {
+            log.info(">>> [Post Product Service] 2 Find post product by id: Started.");
             PostProduct foundPostProduct = postProductRepository.findById(postProductId).orElseThrow(
                     () -> new PostProductNotFound()
             );
+            log.info(">>> [Post Product Service] 2 Post product info: {}", foundPostProduct);
             return foundPostProduct;
         } catch (Exception e) {
             throw e;
@@ -276,11 +252,13 @@ public class PostProductServiceImpl implements PostProductService {
     }
 
     public PostProduct findPostProductById(Long id) {
+        log.info(">>> [Post Product Service] Find post product by id: Started.");
         PostProduct foundPostProduct = null;
         Optional<PostProduct> postProductOpt = postProductRepository.findById(id);
         if (postProductOpt.isPresent()) {
             foundPostProduct = postProductOpt.get();
         }
+        log.info(">>> [Post Product Service] Post product info: {}", foundPostProduct);
         return foundPostProduct;
     }
 
@@ -289,13 +267,19 @@ public class PostProductServiceImpl implements PostProductService {
         return postProductRepository.findBySeller(seller, pageable);
     }
 
-    public PostProduct hidePostProduct(Long id) {
+    public PostProduct hidePostProduct(Long id, boolean isHide) {
         PostProduct selected = postProductRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("Post product id does not existed.")
         );
 
-        selected.setActive(false);
+        selected.setActive(!isHide);
         return postProductRepository.save(selected);
+    }
+
+    public PostProduct findPostByWishId(long id) {
+        return wishListingRepository.findPostProductByWishListId(id).orElseThrow(
+                () -> new IllegalArgumentException("Can not find post product with this wish-list id: " + id)
+        );
     }
 
     public PostProduct updatePostProduct(
