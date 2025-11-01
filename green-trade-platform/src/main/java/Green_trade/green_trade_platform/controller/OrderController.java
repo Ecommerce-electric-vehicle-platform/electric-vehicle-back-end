@@ -45,24 +45,24 @@ public class OrderController {
     @Operation(
             summary = "Get order history of current user",
             description = """
-        Retrieves a paginated list of past orders belonging to the currently authenticated buyer.  
-        The system uses the access token to identify the buyer and fetches their order history, 
-        including details such as order ID, total amount, status, and order date.
-
-        **Workflow:**
-        1. The frontend sends a request with pagination parameters (`page`, `size`).
-        2. The backend identifies the buyer from the JWT token.
-        3. The system retrieves a paginated list of the buyer’s orders, sorted by date (latest first).
-        4. Pagination metadata (current page, total pages, total elements) is included in the response.
-
-        **Use cases:**
-        - Displaying a user’s order history in their profile dashboard.
-        - Fetching paginated order records for mobile or web apps.
-        
-        **Security Notes:**
-        - Requires authentication via JWT (`ROLE_BUYER`).
-        - Each user can only access their own order history.
-    """
+                        Retrieves a paginated list of past orders belonging to the currently authenticated buyer.  
+                        The system uses the access token to identify the buyer and fetches their order history, 
+                        including details such as order ID, total amount, status, and order date.
+                    
+                        **Workflow:**
+                        1. The frontend sends a request with pagination parameters (`page`, `size`).
+                        2. The backend identifies the buyer from the JWT token.
+                        3. The system retrieves a paginated list of the buyer’s orders, sorted by date (latest first).
+                        4. Pagination metadata (current page, total pages, total elements) is included in the response.
+                    
+                        **Use cases:**
+                        - Displaying a user’s order history in their profile dashboard.
+                        - Fetching paginated order records for mobile or web apps.
+                    
+                        **Security Notes:**
+                        - Requires authentication via JWT (`ROLE_BUYER`).
+                        - Each user can only access their own order history.
+                    """
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @GetMapping("/history")
@@ -100,26 +100,26 @@ public class OrderController {
     @Operation(
             summary = "Cancel an order",
             description = """
-        Cancels an existing order for the currently authenticated user (buyer).  
-        This API updates the order status in the system and notifies the external GHN shipping service 
-        to cancel the corresponding shipment.
-
-        **Workflow:**
-        1. The client sends a `POST` request with the order ID in the URL path.
-        2. The system validates that the order exists and belongs to the authenticated user.
-        3. The order status is updated to `CANCELED`.
-        4. The system calls the GHN shipping service API to cancel the shipping request.
-        5. The updated order information is returned in the response.
-
-        **Use cases:**
-        - Buyers canceling an order before it is shipped.
-        - Sellers or system administrators canceling orders with failed payments or stock issues.
-        - Synchronizing order cancellations between internal system and GHN shipping API.
-
-        **Security Notes:**
-        - Requires JWT authentication (either `ROLE_BUYER` or `ROLE_SELLER`).
-        - A user can only cancel orders they own.
-    """
+                        Cancels an existing order for the currently authenticated user (buyer).  
+                        This API updates the order status in the system and notifies the external GHN shipping service 
+                        to cancel the corresponding shipment.
+                    
+                        **Workflow:**
+                        1. The client sends a `POST` request with the order ID in the URL path.
+                        2. The system validates that the order exists and belongs to the authenticated user.
+                        3. The order status is updated to `CANCELED`.
+                        4. The system calls the GHN shipping service API to cancel the shipping request.
+                        5. The updated order information is returned in the response.
+                    
+                        **Use cases:**
+                        - Buyers canceling an order before it is shipped.
+                        - Sellers or system administrators canceling orders with failed payments or stock issues.
+                        - Synchronizing order cancellations between internal system and GHN shipping API.
+                    
+                        **Security Notes:**
+                        - Requires JWT authentication (either `ROLE_BUYER` or `ROLE_SELLER`).
+                        - A user can only cancel orders they own.
+                    """
     )
     @PostMapping("/cancel/{id}")
     public ResponseEntity<RestResponse<OrderResponse, Object>> cancelOrder(@PathVariable Long id) throws Exception {
@@ -138,18 +138,18 @@ public class OrderController {
     @Operation(
             summary = "Create a product review with optional images",
             description = """
-        This endpoint allows customers to create a review for an electrical product they have purchased.
-        
-        The request should include:
-        - **Review details** (order ID, rating, feedback text) as a JSON object named `request`.
-        - **Optional product images** (photos of the product or proof of use) as `pictures`.
-
-        The API automatically checks the feedback text for inappropriate or offensive language (Vietnamese supported).
-        Uploaded images will be stored on Cloudinary and associated with the review record.
-
-        **Content type:** multipart/form-data  
-        **Authentication:** Required if the platform uses user accounts.
-        """
+                    This endpoint allows customers to create a review for an electrical product they have purchased.
+                    
+                    The request should include:
+                    - **Review details** (order ID, rating, feedback text) as a JSON object named `request`.
+                    - **Optional product images** (photos of the product or proof of use) as `pictures`.
+                    
+                    The API automatically checks the feedback text for inappropriate or offensive language (Vietnamese supported).
+                    Uploaded images will be stored on Cloudinary and associated with the review record.
+                    
+                    **Content type:** multipart/form-data  
+                    **Authentication:** Required if the platform uses user accounts.
+                    """
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping(

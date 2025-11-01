@@ -62,16 +62,16 @@ public class VnPayServiceImpl {
         vnp_Params.put("vnp_ReturnUrl", VnPayConfig.vnp_ReturnUrl);
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
 
 // Lấy thời gian bắt đầu theo múi giờ Việt Nam
-            Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
-            String startTime = sdf.format(cld.getTime());
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+        String startTime = sdf.format(cld.getTime());
 
 // Cộng thêm 15 phút để tính expire
-            cld.add(Calendar.MINUTE, 15);
-            String expire = sdf.format(cld.getTime());
+        cld.add(Calendar.MINUTE, 15);
+        String expire = sdf.format(cld.getTime());
 
         vnp_Params.put("vnp_CreateDate", startTime);
         vnp_Params.put("vnp_ExpireDate", expire);
@@ -97,7 +97,7 @@ public class VnPayServiceImpl {
         String paymentUrl = VnPayConfig.vnp_Url + "?" + query.toString();
 
         Map<String, Object> result = new HashMap<>();
-            result.put("url_payment", paymentUrl);
+        result.put("url_payment", paymentUrl);
         return result;
     }
 

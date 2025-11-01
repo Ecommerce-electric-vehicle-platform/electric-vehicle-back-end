@@ -36,23 +36,23 @@ public class SubscriptionPackageController {
     @Operation(
             summary = "Get active subscription packages for sellers",
             description = """
-        Returns a paginated list of active subscription packages available in the system for sellers to register.  
-        Each package contains details such as package name, description, duration, price, and features.
-
-        **Workflow:**
-        1. The client calls this endpoint with optional pagination parameters (`page`, `size`).
-        2. The system retrieves all active (enabled) subscription packages from the database.
-        3. The results are returned in a paginated format, sorted by creation or activation date.
-
-        **Use cases:**
-        - Displaying available subscription plans for sellers on the pricing or upgrade page.
-        - Allowing sellers to choose which package to subscribe to when upgrading their account.
-        - Used by admins or frontend dashboards to show currently active plans.
-
-        **Security Notes:**
-        - This endpoint may be public or restricted depending on your system configuration.
-        - Data shown includes only active packages (`status = ACTIVE`).
-    """
+                        Returns a paginated list of active subscription packages available in the system for sellers to register.  
+                        Each package contains details such as package name, description, duration, price, and features.
+                    
+                        **Workflow:**
+                        1. The client calls this endpoint with optional pagination parameters (`page`, `size`).
+                        2. The system retrieves all active (enabled) subscription packages from the database.
+                        3. The results are returned in a paginated format, sorted by creation or activation date.
+                    
+                        **Use cases:**
+                        - Displaying available subscription plans for sellers on the pricing or upgrade page.
+                        - Allowing sellers to choose which package to subscribe to when upgrading their account.
+                        - Used by admins or frontend dashboards to show currently active plans.
+                    
+                        **Security Notes:**
+                        - This endpoint may be public or restricted depending on your system configuration.
+                        - Data shown includes only active packages (`status = ACTIVE`).
+                    """
     )
     @GetMapping("/active")
     public ResponseEntity<?> getActivePackages(
@@ -67,32 +67,32 @@ public class SubscriptionPackageController {
     @Operation(
             summary = "Register or subscribe to a seller package",
             description = """
-        Allows a seller to register (sign) for an active subscription package.  
-        The system validates the seller’s wallet balance, deducts the required amount, 
-        and activates the selected package upon successful payment.
-
-        **Workflow:**
-        1. The seller selects an active subscription package from the available list.
-        2. The frontend sends a `SignPackageRequest` containing the package ID and optional payment details.
-        3. The system checks the seller’s wallet balance:
-           - If sufficient funds exist, the package is activated and wallet balance is deducted.
-           - If funds are insufficient, the system returns an error response.
-        4. A transaction record is saved, and the subscription is linked to the seller’s account.
-
-        **Use cases:**
-        - Sellers subscribing to premium plans for additional posting limits or advanced features.
-        - Enabling monetization via recurring or one-time package purchases.
-
-        **Security Notes:**
-        - Requires JWT authentication (`ROLE_SELLER`).
-        - The authenticated seller can only register packages for their own account.
-    """
+                        Allows a seller to register (sign) for an active subscription package.  
+                        The system validates the seller’s wallet balance, deducts the required amount, 
+                        and activates the selected package upon successful payment.
+                    
+                        **Workflow:**
+                        1. The seller selects an active subscription package from the available list.
+                        2. The frontend sends a `SignPackageRequest` containing the package ID and optional payment details.
+                        3. The system checks the seller’s wallet balance:
+                           - If sufficient funds exist, the package is activated and wallet balance is deducted.
+                           - If funds are insufficient, the system returns an error response.
+                        4. A transaction record is saved, and the subscription is linked to the seller’s account.
+                    
+                        **Use cases:**
+                        - Sellers subscribing to premium plans for additional posting limits or advanced features.
+                        - Enabling monetization via recurring or one-time package purchases.
+                    
+                        **Security Notes:**
+                        - Requires JWT authentication (`ROLE_SELLER`).
+                        - The authenticated seller can only register packages for their own account.
+                    """
     )
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @PostMapping("/sign-package")
     public ResponseEntity<?> signPackage(@RequestBody SignPackageRequest request) {
         Map<String, Object> ans = subscriptionPackageService.handlesignPackage(request);
-        if(true == (Boolean) ans.get("success")) {
+        if (true == (Boolean) ans.get("success")) {
             return ResponseEntity.ok(responseMapper.toDto(true,
                     "Đăng kí gói người bán thành công.",
                     ans, null));
@@ -107,29 +107,29 @@ public class SubscriptionPackageController {
     @Operation(
             summary = "Cancel current seller subscription package",
             description = """
-        Allows an authenticated seller to cancel their active subscription package.  
-        Once this endpoint is called, the seller's current package will be marked as canceled, 
-        and no further benefits or billing will be applied after the current billing cycle.  
-        
-        **Access control:** Only users with the `ROLE_SELLER` authority can call this API.  
-        
-        **Example use case:**  
-        A seller wants to stop their current premium plan and revert to a basic account.  
-        They trigger this endpoint to mark the package as canceled.
-        """
+                    Allows an authenticated seller to cancel their active subscription package.  
+                    Once this endpoint is called, the seller's current package will be marked as canceled, 
+                    and no further benefits or billing will be applied after the current billing cycle.  
+                    
+                    **Access control:** Only users with the `ROLE_SELLER` authority can call this API.  
+                    
+                    **Example use case:**  
+                    A seller wants to stop their current premium plan and revert to a basic account.  
+                    They trigger this endpoint to mark the package as canceled.
+                    """
     )
     @PostMapping("/cancel")
     public ResponseEntity<?> cancelSubscription() {
         try {
             Seller seller = sellerService.getCurrentUser();
             subscriptionPackageService.cancelSubscription(seller);
-            return  ResponseEntity.ok(responseMapper.toDto(
+            return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "CANCEL SUBSCRIPTION PACKAGE SUCCESSFULLY.",
                     null, null
             ));
         } catch (Exception e) {
-            return  ResponseEntity.ok(responseMapper.toDto(
+            return ResponseEntity.ok(responseMapper.toDto(
                     false,
                     "CANCEL SUBSCRIPTION PACKAGE FAILED.",
                     null, e.getMessage()
@@ -140,17 +140,17 @@ public class SubscriptionPackageController {
     @Operation(
             summary = "Get current active subscription package",
             description = """
-        Retrieve the seller's currently active subscription package.  
-        This endpoint returns detailed information about the seller's current plan, including 
-        its type, status, start date, end date, and any remaining duration or benefits.  
-
-        **Access control:**  
-        - Only authenticated users with the role `ROLE_SELLER` can call this endpoint.  
-
-        **Example use case:**  
-        A seller opens their account dashboard and wants to view details of their current 
-        subscription plan — for example, to see when it expires or whether auto-renewal is active.
-        """
+                    Retrieve the seller's currently active subscription package.  
+                    This endpoint returns detailed information about the seller's current plan, including 
+                    its type, status, start date, end date, and any remaining duration or benefits.  
+                    
+                    **Access control:**  
+                    - Only authenticated users with the role `ROLE_SELLER` can call this endpoint.  
+                    
+                    **Example use case:**  
+                    A seller opens their account dashboard and wants to view details of their current 
+                    subscription plan — for example, to see when it expires or whether auto-renewal is active.
+                    """
     )
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @GetMapping("current-subscription")

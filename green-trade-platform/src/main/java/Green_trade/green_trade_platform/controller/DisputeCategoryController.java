@@ -34,18 +34,18 @@ public class DisputeCategoryController {
     @Operation(
             summary = "Get all dispute categories",
             description = """
-        Retrieves a list of available dispute categories that users can select when submitting 
-        a complaint, issue, or support request.  
-
-        **Workflow:**
-        1. The system fetches all active dispute categories from the database.
-        2. Each category includes an ID, name, and description.
-        3. The response returns the full list, which can be displayed in dropdown menus or forms on the frontend.
-
-        **Use cases:**
-        - Allowing customers to choose a category when opening a dispute (e.g., "Product not delivered", "Damaged item").
-        - Used by admin or customer service tools to classify dispute reports.
-    """
+                        Retrieves a list of available dispute categories that users can select when submitting 
+                        a complaint, issue, or support request.  
+                    
+                        **Workflow:**
+                        1. The system fetches all active dispute categories from the database.
+                        2. Each category includes an ID, name, and description.
+                        3. The response returns the full list, which can be displayed in dropdown menus or forms on the frontend.
+                    
+                        **Use cases:**
+                        - Allowing customers to choose a category when opening a dispute (e.g., "Product not delivered", "Damaged item").
+                        - Used by admin or customer service tools to classify dispute reports.
+                    """
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @GetMapping("/dispute-categories")

@@ -64,13 +64,13 @@ public class SellerServiceImpl implements SellerService {
         try {
             Buyer buyer = buyerRepository.findByUsername(username).orElseThrow(() -> new ProfileException("Profile is not existed"));
             Optional<Seller> sellerOpt = sellerRepository.findByBuyer(buyer);
-            if(sellerOpt.isEmpty()) {
+            if (sellerOpt.isEmpty()) {
                 throw new ProfileException("Seller is not existed");
             }
 
             Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(sellerOpt.get().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
 
-            if(LocalDateTime.now().isAfter(subscription.getEndDay())) {
+            if (LocalDateTime.now().isAfter(subscription.getEndDay())) {
                 throw new SubscriptionExpiredException();
             }
 
@@ -108,7 +108,7 @@ public class SellerServiceImpl implements SellerService {
                 .decidedAt(LocalDateTime.now())
                 .build();
 
-        if(request.getDecision().equals(VerifiedDecisionStatus.APPROVED)) {
+        if (request.getDecision().equals(VerifiedDecisionStatus.APPROVED)) {
             seller.setAdmin(admin);
             seller.setStatus(SellerStatus.ACCEPTED);
             Seller tempSeller = sellerRepository.save(seller);
@@ -116,7 +116,7 @@ public class SellerServiceImpl implements SellerService {
             tempSeller = createShippingShop(ghnService.registerShop(ghnBody), seller);
             tempSeller = sellerRepository.save(seller);
 
-            notice =  Notification.builder()
+            notice = Notification.builder()
                     .receiverId(seller.getSellerId())
                     .type(AccountType.SELLER)
                     .title("UPGRADE ACCOUNT INFORMATION RESULT")

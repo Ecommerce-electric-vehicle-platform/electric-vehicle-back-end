@@ -24,7 +24,7 @@ public class RedisOtpService {
             Map<String, String> data = Map.of("username", username,
                     "email", email,
                     "otp", otp
-                    );
+            );
             String json = objectMapper.writeValueAsString(data);
             String key = "pending:email:" + email;
             stringRedisTemplate.opsForValue().set(key, json, Duration.ofMinutes(10));

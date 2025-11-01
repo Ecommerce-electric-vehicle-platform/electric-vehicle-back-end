@@ -65,7 +65,7 @@ public class WalletServiceImpl {
 
     public Wallet getWalletWithVnPayRequest(String params) {
         Buyer buyer = buyerService.getBuyerFromVnPayRequest(params);
-        return  walletRepository.findByBuyer(buyer).orElseThrow(() -> new WalletNotFoundException("Người dùng chưa được tạo ví."));
+        return walletRepository.findByBuyer(buyer).orElseThrow(() -> new WalletNotFoundException("Người dùng chưa được tạo ví."));
     }
 
     public Map<String, Object> handleSignPackageForSeller(Buyer buyer, double amount) {
@@ -87,7 +87,7 @@ public class WalletServiceImpl {
     public boolean isBuyerHasWallet(Buyer buyer) {
         boolean result = false;
         Optional<Wallet> walletOpt = walletRepository.findByBuyer(buyer);
-        if(walletOpt.isPresent()) {
+        if (walletOpt.isPresent()) {
             result = true;
         }
         return result;
@@ -98,7 +98,7 @@ public class WalletServiceImpl {
         BigDecimal money = systemBalance
                 .multiply(BigDecimal.valueOf(refundPercent))
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-        if(!isSeller) {
+        if (!isSeller) {
             WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, true, "Refund money from dispute");
             log.info(">>> [Wallet Service] Balance before refunding money for buyer: {}", wallet.getBalance());
             wallet.setBalance(wallet.getBalance().add(money));

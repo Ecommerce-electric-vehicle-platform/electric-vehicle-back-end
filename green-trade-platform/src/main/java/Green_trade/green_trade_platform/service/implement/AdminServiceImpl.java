@@ -36,15 +36,15 @@ public class AdminServiceImpl {
     }
 
     public Admin handleCreateAdminAccount(MultipartFile avatarFile, CreateAdminRequest request) throws IOException {
-        if(adminRepository.existsByEmployeeNumber(request.getEmployeeNumber())) {
+        if (adminRepository.existsByEmployeeNumber(request.getEmployeeNumber())) {
             throw new IllegalArgumentException("Duplicate employee number.");
         }
 
-        if(adminRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+        if (adminRepository.existsByPhoneNumber(request.getPhoneNumber())) {
             throw new IllegalArgumentException("This phone number is already in use. PLease try another phone number.");
         }
 
-        if(adminRepository.existsByEmail(request.getEmail())) {
+        if (adminRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("This email is already in use. Please try another email.");
         }
 

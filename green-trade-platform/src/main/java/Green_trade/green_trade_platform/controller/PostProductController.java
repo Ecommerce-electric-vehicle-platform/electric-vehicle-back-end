@@ -51,29 +51,29 @@ public class PostProductController {
     @Operation(
             summary = "Get all available product posts with pagination and sorting",
             description = """
-        This endpoint retrieves a paginated list of all product posts that are currently available for purchase
-        (i.e., not sold yet). It is typically used on the product listing page of the buyer interface.
-
-        **Usage:**
-        - When a buyer navigates to the product listing page, the frontend should send the `page` and `size` parameters to the backend.
-        - The backend returns a paginated response containing product details (title, brand, model, price, etc.).
-        - By default, results are **sorted by creation date in descending order**, so the newest products appear first.
-
-        **Query Parameters:**
-        - `page` *(integer, optional)* — Index of the page to retrieve (0-based). Default value is **0**.
-        - `size` *(integer, optional)* — Number of products per page. Default value is **10**.
-        - `sort` *(string, optional)* — Field to sort by (default: `"createdAt"`). Can be combined with direction (e.g., `"price,asc"` or `"price,desc"`).
-
-        **Filters (optional):**
-        - Future enhancements may include filters by category, price range, brand, or location.
-        - Example: `/api/posts?page=1&size=12&category=Electronics&minPrice=100&maxPrice=500`
-
-        **Example Request:**
-        GET /api/posts?page=0&size=10
-
-
-        **Authentication:** Not required for browsing public product listings.
-        """
+                    This endpoint retrieves a paginated list of all product posts that are currently available for purchase
+                    (i.e., not sold yet). It is typically used on the product listing page of the buyer interface.
+                    
+                    **Usage:**
+                    - When a buyer navigates to the product listing page, the frontend should send the `page` and `size` parameters to the backend.
+                    - The backend returns a paginated response containing product details (title, brand, model, price, etc.).
+                    - By default, results are **sorted by creation date in descending order**, so the newest products appear first.
+                    
+                    **Query Parameters:**
+                    - `page` *(integer, optional)* — Index of the page to retrieve (0-based). Default value is **0**.
+                    - `size` *(integer, optional)* — Number of products per page. Default value is **10**.
+                    - `sort` *(string, optional)* — Field to sort by (default: `"createdAt"`). Can be combined with direction (e.g., `"price,asc"` or `"price,desc"`).
+                    
+                    **Filters (optional):**
+                    - Future enhancements may include filters by category, price range, brand, or location.
+                    - Example: `/api/posts?page=1&size=12&category=Electronics&minPrice=100&maxPrice=500`
+                    
+                    **Example Request:**
+                    GET /api/posts?page=0&size=10
+                    
+                    
+                    **Authentication:** Not required for browsing public product listings.
+                    """
     )
     @GetMapping("")
     public ResponseEntity<RestResponse<PostProductListResponse, Object>> getAllProduct(
@@ -114,29 +114,29 @@ public class PostProductController {
     @Operation(
             summary = "Get seller information by post product ID",
             description = """
-        Retrieves detailed information about the seller associated with a specific post product.  
-        The client provides a `postId`, and the system returns the corresponding seller’s profile and business details.
-
-        **Workflow:**
-        1. The system locates the post product using the provided `postId`.
-        2. If found, it retrieves the seller linked to that post.
-        3. The endpoint returns seller details such as store name, contact info, and verification status.
-        4. If the post product is not found, a `404` error is thrown.
-
-        **Use cases:**
-        - Displaying seller information on a product detail page.
-        - Showing seller ratings, verification status, or contact details alongside their listings.
-        - Allowing buyers to view who owns a particular product post.
-
-        **Security Notes:**
-        - This endpoint may be publicly accessible or protected depending on platform policy.
-        - Sensitive seller data (like private contact info) should only be returned to authorized users.
-    """
+                        Retrieves detailed information about the seller associated with a specific post product.  
+                        The client provides a `postId`, and the system returns the corresponding seller’s profile and business details.
+                    
+                        **Workflow:**
+                        1. The system locates the post product using the provided `postId`.
+                        2. If found, it retrieves the seller linked to that post.
+                        3. The endpoint returns seller details such as store name, contact info, and verification status.
+                        4. If the post product is not found, a `404` error is thrown.
+                    
+                        **Use cases:**
+                        - Displaying seller information on a product detail page.
+                        - Showing seller ratings, verification status, or contact details alongside their listings.
+                        - Allowing buyers to view who owns a particular product post.
+                    
+                        **Security Notes:**
+                        - This endpoint may be publicly accessible or protected depending on platform policy.
+                        - Sensitive seller data (like private contact info) should only be returned to authorized users.
+                    """
     )
     @GetMapping("/{postId}/seller")
     public ResponseEntity<RestResponse<SellerResponse, Object>> getSellerByPostId(@PathVariable(name = "postId") Long id) {
         PostProduct postProduct = postProductService.findPostProductById(id);
-        if(postProduct == null) {
+        if (postProduct == null) {
             throw new PostProductNotFound();
         }
         Seller seller = postProduct.getSeller();
@@ -154,27 +154,25 @@ public class PostProductController {
     @Operation(
             summary = "Hide or unhide a post product by ID",
             description = """
-        Allows a **seller** to hide (deactivate) or unhide (reactivate) a specific post product 
-        from the platform by toggling its `active` status.
-
-        **Workflow:**
-        1. The client sends a request with the `postId` of the product and the desired `is_hide` flag.
-        2. The system verifies ownership or admin privileges.
-        3. The product’s `active` field is updated:
-           - `is_hide = true` → `active = false` (hidden)
-           - `is_hide = false` → `active = true` (visible)
-        4. The updated product information is returned.
-
-        **Use cases:**
-        - **Seller:** Temporarily hides a product that is out of stock, being edited, or under maintenance.
-        - **Admin:** Can also moderate or disable posts violating content or policy rules.
-        
-        **Security Notes:**
-        - Requires JWT authentication.
-        - Accessible to roles: `ROLE_SELLER`, `ROLE_ADMIN`.
-        - Operation is **idempotent** — hiding an already hidden product (or unhiding an already active one) 
-          will not cause errors.
-    """
+                        Hides (deactivates) a specific post product from the platform by setting its `active` status to `false`.  
+                        The product remains stored in the database but will no longer be visible to buyers or appear in public listings.
+                    
+                        **Workflow:**
+                        1. The client sends a request with the `postId` of the product to hide.
+                        2. The system verifies ownership or admin privileges.
+                        3. The product’s `active` flag is updated to `false`.
+                        4. A confirmation response is returned with the updated product details.
+                    
+                        **Use cases:**
+                        - **Seller:** Temporarily hides a product that is out of stock or under maintenance.
+                        - **Admin:** Moderates or disables posts violating policies.
+                        - **Buyer (optional):** Typically not allowed; only for viewing hidden-state results if permitted.
+                    
+                        **Security Notes:**
+                        - Requires authentication via JWT.
+                        - Accessible to roles: `ROLE_SELLER`, `ROLE_ADMIN`.
+                        - The request is **idempotent** — hiding an already hidden product returns the same result.
+                    """
     )
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @PostMapping("/hide/{postId}")
@@ -234,11 +232,11 @@ public class PostProductController {
     @Operation(
             summary = "Update an existing post product",
             description = """
-        Allows a seller to update details of an existing product post.
-        Only users with the role **ROLE_SELLER** can perform this operation.
-        The post cannot be modified if the product has already been sold.
-        """,
-            security = { @SecurityRequirement(name = "bearerAuth") },
+                    Allows a seller to update details of an existing product post.
+                    Only users with the role **ROLE_SELLER** can perform this operation.
+                    The post cannot be modified if the product has already been sold.
+                    """,
+            security = {@SecurityRequirement(name = "bearerAuth")},
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -263,7 +261,7 @@ public class PostProductController {
                 throw new PostProductNotFound();
             }
 
-            if(foundPostProduct.isSold()) {
+            if (foundPostProduct.isSold()) {
                 throw new Exception("Sold product's post cannot be changed the content");
             }
 

@@ -30,8 +30,8 @@ public class OrderServiceImpl implements OrderService {
     private final WalletServiceImpl walletService;
 
     public OrderServiceImpl(OrderRepository orderRepository, TransactionServiceImpl transactionService,
-            GhnServiceImpl ghnServiceImpl, WalletTransactionServiceImpl walletTransactionServiceImpl,
-            WalletServiceImpl walletService) {
+                            GhnServiceImpl ghnServiceImpl, WalletTransactionServiceImpl walletTransactionServiceImpl,
+                            WalletServiceImpl walletService) {
         this.orderRepository = orderRepository;
         this.transactionService = transactionService;
         this.ghnServiceImpl = ghnServiceImpl;
@@ -129,7 +129,7 @@ public class OrderServiceImpl implements OrderService {
     public Order getOrderById(Long orderId) {
         Order result = null;
         Optional<Order> orderOpt = orderRepository.findOrderById(orderId);
-        if(orderOpt.isPresent()) {
+        if (orderOpt.isPresent()) {
             result = orderOpt.get();
         }
         return result;

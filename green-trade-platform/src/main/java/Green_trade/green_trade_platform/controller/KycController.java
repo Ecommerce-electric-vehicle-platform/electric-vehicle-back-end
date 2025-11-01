@@ -25,7 +25,7 @@ public class KycController {
     private final KycService kycService;
     private final ResponseMapper responseMapper;
 
-    public KycController (KycService kycService, ResponseMapper responseMapper) {
+    public KycController(KycService kycService, ResponseMapper responseMapper) {
         this.kycService = kycService;
         this.responseMapper = responseMapper;
     }
@@ -33,25 +33,25 @@ public class KycController {
     @Operation(
             summary = "Verify buyer KYC (Know Your Customer)",
             description = """
-        Allows a verified buyer to submit identity verification (KYC) documents and personal details 
-        for upgrading their account to a seller or verified buyer status.  
-        This endpoint accepts multiple file uploads and textual information in multipart/form-data format.
-
-        **Workflow:**
-        1. The buyer submits the required KYC information, including identity documents and personal data.
-        2. The system validates and stores the uploaded files (ID cards, licenses, selfies, etc.).
-        3. The submitted KYC data is reviewed and verified by an administrator.
-        4. On successful upload, a confirmation response is returned.
-
-        **Use cases:**
-        - Buyers applying to become verified sellers.
-        - KYC verification for compliance or fraud prevention.
-        - Identity and business verification before account upgrades.
-
-        **Security Notes:**
-        - Requires authentication via JWT token with `ROLE_BUYER`.
-        - Uploaded files must meet allowed formats (e.g., JPG, PNG, PDF) and size limits.
-    """
+                        Allows a verified buyer to submit identity verification (KYC) documents and personal details 
+                        for upgrading their account to a seller or verified buyer status.  
+                        This endpoint accepts multiple file uploads and textual information in multipart/form-data format.
+                    
+                        **Workflow:**
+                        1. The buyer submits the required KYC information, including identity documents and personal data.
+                        2. The system validates and stores the uploaded files (ID cards, licenses, selfies, etc.).
+                        3. The submitted KYC data is reviewed and verified by an administrator.
+                        4. On successful upload, a confirmation response is returned.
+                    
+                        **Use cases:**
+                        - Buyers applying to become verified sellers.
+                        - KYC verification for compliance or fraud prevention.
+                        - Identity and business verification before account upgrades.
+                    
+                        **Security Notes:**
+                        - Requires authentication via JWT token with `ROLE_BUYER`.
+                        - Uploaded files must meet allowed formats (e.g., JPG, PNG, PDF) and size limits.
+                    """
     )
     @PostMapping(
             value = "/verify-kyc",
@@ -60,11 +60,11 @@ public class KycController {
     @PreAuthorize("hasRole('ROLE_BUYER')")
     public ResponseEntity<?> verifyKyc(
             @ModelAttribute UpgradeAccountRequest request,
-            @RequestPart("front of identity")MultipartFile fronOfIdentity,
-            @RequestPart("back of identity")MultipartFile backOfIdentity,
-            @RequestPart("business license")MultipartFile license,
-            @RequestPart("store policy")MultipartFile policy,
-            @RequestPart("selfie")MultipartFile selfie
+            @RequestPart("front of identity") MultipartFile fronOfIdentity,
+            @RequestPart("back of identity") MultipartFile backOfIdentity,
+            @RequestPart("business license") MultipartFile license,
+            @RequestPart("store policy") MultipartFile policy,
+            @RequestPart("selfie") MultipartFile selfie
     ) {
         try {
             KycResponse response = kycService.verify(
@@ -130,24 +130,24 @@ public class KycController {
     @Operation(
             summary = "Update seller KYC or store information",
             description = """
-        Allows a verified seller to update their store or business information after initial KYC verification.  
-        This includes updating the store name, replacing a business license file, or modifying the store policy document.  
-
-        **Workflow:**
-        1. The seller submits new KYC-related data (e.g., store name, license, or policy).
-        2. The system updates the seller's profile and overwrites any existing files if new ones are uploaded.
-        3. The updated KYC record is stored and marked for review or approval if required.
-        4. The endpoint returns the updated KYC response object.
-
-        **Use cases:**
-        - Sellers updating business license or store policy due to renewal or changes.
-        - Modifying store display name for branding purposes.
-        - Updating documentation for compliance.
-
-        **Security Notes:**
-        - Requires a valid JWT token with `ROLE_SELLER` authority.
-        - All uploaded files must follow allowed format (PDF, JPG, PNG) and size limits.
-    """
+                        Allows a verified seller to update their store or business information after initial KYC verification.  
+                        This includes updating the store name, replacing a business license file, or modifying the store policy document.  
+                    
+                        **Workflow:**
+                        1. The seller submits new KYC-related data (e.g., store name, license, or policy).
+                        2. The system updates the seller's profile and overwrites any existing files if new ones are uploaded.
+                        3. The updated KYC record is stored and marked for review or approval if required.
+                        4. The endpoint returns the updated KYC response object.
+                    
+                        **Use cases:**
+                        - Sellers updating business license or store policy due to renewal or changes.
+                        - Modifying store display name for branding purposes.
+                        - Updating documentation for compliance.
+                    
+                        **Security Notes:**
+                        - Requires a valid JWT token with `ROLE_SELLER` authority.
+                        - All uploaded files must follow allowed format (PDF, JPG, PNG) and size limits.
+                    """
     )
     @PostMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ROLE_SELLER')")

@@ -17,6 +17,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.Map;
 import java.util.Random;
 
@@ -33,7 +34,7 @@ public class SignUpServiceImpl implements SignUpService {
     private WalletServiceImpl walletServiceImpl;
     private OtpServiceImpl otpService;
 
-    public SignUpServiceImpl (
+    public SignUpServiceImpl(
             BuyerRepository buyerRepository,
             RedisOtpService redisOtpService,
             BuyerMapper buyerMapper,
@@ -54,10 +55,10 @@ public class SignUpServiceImpl implements SignUpService {
     // Starting sign up: saving buyer to redis and sending otp
     @Override
     public void startSignUp(SignUpRequest request) {
-        if(repository.existsByEmail(request.getEmail())) {
+        if (repository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already exits.");
         }
-        if(repository.existsByUsername(request.getUsername())) {
+        if (repository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Username already exits.");
         }
         // Create OTP
@@ -78,7 +79,7 @@ public class SignUpServiceImpl implements SignUpService {
     public Buyer verifyOtp(VerifyOtpRequest request) {
         // Get pending buyer in Redis
         Map<String, String> pending = redisOtpService.getPendingBuyer(request.getEmail());
-        if(pending == null) {
+        if (pending == null) {
             throw new IllegalArgumentException("Invalid email or user did not sign up yet!");
         }
         log.info(">>> Passed pending: {}", pending);
@@ -86,7 +87,7 @@ public class SignUpServiceImpl implements SignUpService {
         String otp = pending.get("otp");
         log.info(">>> Otp from request: {}", request.getOtp());
         log.info(">>> Otp from pending: {}", otp);
-        if(!request.getOtp().equals(otp)) {
+        if (!request.getOtp().equals(otp)) {
             throw new IllegalArgumentException("Otp are not the same!");
         }
         log.info(">>> Passed OTP matched");
