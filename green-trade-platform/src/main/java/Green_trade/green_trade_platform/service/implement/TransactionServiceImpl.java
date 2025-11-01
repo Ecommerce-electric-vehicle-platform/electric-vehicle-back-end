@@ -145,6 +145,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     public Transaction createTransaction(Order order, TransactionStatus status, Payment payment) {
+        log.info(">>> [TransactionServiceImpl] came createTransaction");
         Transaction transaction = Transaction.builder()
                 .amount(order.getPrice())
                 .currency("VND")
@@ -153,6 +154,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .order(order)
                 .payment(payment)
                 .build();
+        log.info(">>> [TransactionServiceImpl] created transaction successfully");
         return transactionRepository.save(transaction);
     }
 }

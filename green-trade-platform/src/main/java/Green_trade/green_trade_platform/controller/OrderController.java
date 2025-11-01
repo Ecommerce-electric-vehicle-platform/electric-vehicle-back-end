@@ -123,15 +123,20 @@ public class OrderController {
     )
     @PostMapping("/cancel/{id}")
     public ResponseEntity<RestResponse<OrderResponse, Object>> cancelOrder(@PathVariable Long id) throws Exception {
+        log.info(">>> [OrderController] came cancelOrder");
         Order canceledOrder = orderService.cancelOrder(id);
+        log.info(">>> [OrderController] cancelOrder pass");
         ghnService.createCancelOrderShippingServiceResponseToDto(canceledOrder.getOrderCode(), canceledOrder.getPostProduct().getSeller().getGhnShopId());
+        log.info(">>> [OrderController] cancel order ghn successfully");
         OrderResponse responseData = orderMapper.toDto(canceledOrder);
+        log.info(">>> [OrderController] created responseData successfully");
         RestResponse<OrderResponse, Object> response = responseMapper.toDto(
                 true,
                 "CANCELED ORDER SUCCESSFULLY",
                 responseData,
                 null
         );
+        log.info(">>> [OrderController] created response successfully");
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 

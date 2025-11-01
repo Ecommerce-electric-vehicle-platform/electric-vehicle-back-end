@@ -32,6 +32,7 @@ public class Transaction {
     private String currency;
 
     @Column(name = "status", nullable = false, unique = false)
+    @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
     @Column(name = "payment_method", nullable = false, unique = false)
