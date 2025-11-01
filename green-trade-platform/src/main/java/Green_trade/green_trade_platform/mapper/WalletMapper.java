@@ -23,6 +23,7 @@ public class WalletMapper {
                 .balanceBefore(walletTransaction.getBalanceBefore())
                 .status(walletTransaction.getStatus())
                 .description(walletTransaction.getDescription())
+                .createdAt(walletTransaction.getCreatedAt())
                 .build();
     }
 }

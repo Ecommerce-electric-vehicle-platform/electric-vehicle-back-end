@@ -230,6 +230,15 @@ VALUES
 (1200000.00, 'VND', 'VNPay', NOW(), 3);
 
 -- =========================================================
+-- 🏪 WALLET TRANSACTION
+-- =========================================================
+INSERT INTO wallet_transaction(amount, balance_before, created_at, description, status, type, wallet_id)
+VALUES
+(10000000.00, 0.00,NOW(), 'Nap tien vao vi nguoi dung', 'SUCCESS', 'DEPOSIT', 1),
+(10000000.00, 0.00,NOW(), 'Nap tien vao vi nguoi dung', 'SUCCESS', 'DEPOSIT', 2),
+(10000000.00, 0.00,NOW(), 'Nap tien vao vi nguoi dung', 'SUCCESS', 'DEPOSIT', 3);
+
+-- =========================================================
 -- 🏪 SELLER
 -- =========================================================
 INSERT INTO seller(
