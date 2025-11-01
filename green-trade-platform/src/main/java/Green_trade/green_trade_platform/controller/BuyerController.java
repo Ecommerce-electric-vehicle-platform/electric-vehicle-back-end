@@ -36,7 +36,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/buyer")
 @Slf4j
-@AllArgsConstructor
 public class BuyerController {
     private final BuyerServiceImpl buyerService;
     private final ResponseMapper responseMapper;
@@ -57,6 +56,48 @@ public class BuyerController {
     private final WalletServiceImpl walletService;
     private final WishListMapper wishListMapper;
     private final WishListingServiceImpl wishListingService;
+
+    public BuyerController(
+            BuyerServiceImpl buyerService,
+            ResponseMapper responseMapper,
+            BuyerMapper buyerMapper,
+            WalletMapper walletMapper,
+            PaymentRepository paymentRepository,
+            TransactionServiceImpl transactionService,
+            OrderMapper orderMapper,
+            GhnServiceImpl ghnService,
+            BuyerRepository buyerRepository,
+            PostProductRepository postProductRepository,
+            TransactionRepository transactionRepository,
+            OrderRepository orderRepository,
+            OrderServiceImpl orderService,
+            PostProductServiceImpl postProductService,
+            PaymentServiceImpl paymentService,
+            SystemWalletServiceImpl systemWalletService,
+            WalletServiceImpl walletService,
+            WishListMapper wishListMapper,
+            WishListingServiceImpl wishListingService
+    ) {
+        this.buyerService = buyerService;
+        this.responseMapper = responseMapper;
+        this.buyerMapper = buyerMapper;
+        this.walletMapper = walletMapper;
+        this.paymentRepository = paymentRepository;
+        this.transactionService = transactionService;
+        this.orderMapper = orderMapper;
+        this.ghnService = ghnService;
+        this.buyerRepository = buyerRepository;
+        this.postProductRepository = postProductRepository;
+        this.transactionRepository = transactionRepository;
+        this.orderRepository = orderRepository;
+        this.orderService = orderService;
+        this.postProductService = postProductService;
+        this.paymentService = paymentService;
+        this.systemWalletService = systemWalletService;
+        this.walletService = walletService;
+        this.wishListMapper = wishListMapper;
+        this.wishListingService = wishListingService;
+    }
 
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @Operation(

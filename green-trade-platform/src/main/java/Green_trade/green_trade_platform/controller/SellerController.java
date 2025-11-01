@@ -38,7 +38,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/seller")
 @Slf4j
-@RequiredArgsConstructor
 public class SellerController {
 
     private final ResponseMapper responseMapper;
@@ -48,6 +47,24 @@ public class SellerController {
     private final PostProductMapper postProductMapper;
     private final OrderServiceImpl orderService;
     private final OrderMapper orderMapper;
+
+    public SellerController(
+            ResponseMapper responseMapper,
+            SellerServiceImpl sellerService,
+            SellerMapper sellerMapper,
+            PostProductServiceImpl postProductService,
+            PostProductMapper postProductMapper,
+            OrderServiceImpl orderService,
+            OrderMapper orderMapper
+    ) {
+        this.responseMapper = responseMapper;
+        this.sellerService = sellerService;
+        this.sellerMapper = sellerMapper;
+        this.postProductService = postProductService;
+        this.postProductMapper = postProductMapper;
+        this.orderService = orderService;
+        this.orderMapper = orderMapper;
+    }
 
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(
