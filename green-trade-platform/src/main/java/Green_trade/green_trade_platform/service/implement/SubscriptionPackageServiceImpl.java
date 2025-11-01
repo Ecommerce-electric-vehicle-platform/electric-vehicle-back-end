@@ -58,12 +58,12 @@ public class SubscriptionPackageServiceImpl {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói người bán với id " + request.getPackageId()));
 
         Optional<Subscription> exitsSubscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(seller.getSellerId());
-        if(exitsSubscription.isPresent() && exitsSubscription.get().getIsActive() == true) {
+        if (exitsSubscription.isPresent() && exitsSubscription.get().getIsActive() == true) {
             throw new IllegalArgumentException("Bạn đã đăng kí gói. Vui lòng hủy gói để đăng kí gói mới.");
         }
 
         boolean isValidBalance = isValidWalletBalance(request);
-        if(!isValidBalance) {
+        if (!isValidBalance) {
             result.put("success", false);
             result.put("data", null);
             return result;
@@ -82,7 +82,7 @@ public class SubscriptionPackageServiceImpl {
 
         Subscription temp = subscriptionRepository.save(subscription);
         SignPackageResponse signPackageResponse = subscriptionMapper.
-                        toSignPackageResponse(subscriptionPackages.getName(),
+                toSignPackageResponse(subscriptionPackages.getName(),
                         buyer.getFullName(),
                         request.getPrice(), ChronoUnit.DAYS.between(startDate, endDate),
                         startDate,
@@ -106,7 +106,7 @@ public class SubscriptionPackageServiceImpl {
                 () -> new IllegalArgumentException("This seller has not been sign any packages yet.")
         );
 
-        if(subscription.getIsActive() == true) {
+        if (subscription.getIsActive() == true) {
             subscription.setIsActive(false);
         } else {
             throw new IllegalArgumentException("This seller has not been sign any packages yet.");
@@ -121,7 +121,7 @@ public class SubscriptionPackageServiceImpl {
                 () -> new IllegalArgumentException("This seller has not been sign any packages yet.")
         );
 
-        if(subscription.getIsActive() == false) {
+        if (subscription.getIsActive() == false) {
             throw new IllegalArgumentException("The current subscription is out of date.");
         }
 

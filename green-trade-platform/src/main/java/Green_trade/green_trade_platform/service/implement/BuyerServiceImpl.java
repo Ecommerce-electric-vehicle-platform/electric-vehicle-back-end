@@ -278,7 +278,7 @@ public class BuyerServiceImpl {
     public Buyer findBuyerByUsername(String username) {
         Buyer foundBuyer = null;
         Optional<Buyer> buyerOpt = buyerRepository.findByUsername(username);
-        if(buyerOpt.isPresent()) {
+        if (buyerOpt.isPresent()) {
             foundBuyer = buyerOpt.get();
         }
         return foundBuyer;

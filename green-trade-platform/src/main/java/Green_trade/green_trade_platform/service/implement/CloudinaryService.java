@@ -19,13 +19,14 @@ public class CloudinaryService {
 
     /**
      * Upload file lên Cloudinary, trả về secure_url (String).
-     * @param file MultipartFile từ request
+     *
+     * @param file   MultipartFile từ request
      * @param folder folder trên Cloudinary (ví dụ: "sellers/123")
      * @return secure_url
      */
     public Map<String, String> upload(MultipartFile file, String folder) throws IOException {
         String publicId = UUID.randomUUID().toString();
-        Map<?,?> res = cloudinary.uploader().upload(
+        Map<?, ?> res = cloudinary.uploader().upload(
                 file.getBytes(),
                 ObjectUtils.asMap(
                         "folder", folder,
@@ -52,7 +53,7 @@ public class CloudinaryService {
                     ? folder + "/" + publicId
                     : publicId;
 
-            Map<?,?> res = cloudinary.uploader().destroy(
+            Map<?, ?> res = cloudinary.uploader().destroy(
                     fullPublicId,
                     ObjectUtils.asMap("resource_type", "image")
             );

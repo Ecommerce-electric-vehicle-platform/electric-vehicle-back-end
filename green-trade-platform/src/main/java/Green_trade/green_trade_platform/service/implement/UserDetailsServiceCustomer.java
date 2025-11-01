@@ -29,9 +29,9 @@ public class UserDetailsServiceCustomer implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // Check admin
-        if(username.matches(regex)) {
+        if (username.matches(regex)) {
             Optional<Admin> admin = adminRepository.findByEmployeeNumber(username);
-            if(admin.isPresent()) {
+            if (admin.isPresent()) {
                 return new org.springframework.security.core.userdetails.User(
                         admin.get().getEmployeeNumber(),
                         admin.get().getPassword(),
@@ -44,7 +44,7 @@ public class UserDetailsServiceCustomer implements UserDetailsService {
         Optional<Buyer> buyer = buyerRepository.findByUsername(username);
         if (buyer.isPresent()) {
             Optional<Seller> seller = sellerRepository.findByBuyer(buyer.get());
-            if(seller.isPresent() && seller.get().getStatus() == SellerStatus.ACCEPTED) {
+            if (seller.isPresent() && seller.get().getStatus() == SellerStatus.ACCEPTED) {
                 return new org.springframework.security.core.userdetails.User(
                         buyer.get().getUsername(),
                         buyer.get().getPassword(),

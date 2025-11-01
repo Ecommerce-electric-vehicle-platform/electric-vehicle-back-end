@@ -62,7 +62,7 @@ public class KycService {
         log.info(">>> [KYC service] username: {}", buyer.getUsername());
 
         // Check buyer profile
-        if(buyer.getFullName() == null) {
+        if (buyer.getFullName() == null) {
             throw new ProfileException("Hoàn tất hồ sơ người dùng trước khi nâng cáp tài khoản");
         }
 
@@ -94,7 +94,7 @@ public class KycService {
 
         // Check face
         boolean isMatchFace = callFaceCompareApi(frontImageUrl, selfieUrl);
-        if(!isMatchFace) {
+        if (!isMatchFace) {
             return new KycResponse(false, "Face not matched", "REJECTED", "Face verification failed");
         }
 
@@ -280,13 +280,13 @@ public class KycService {
                 "&image_url2=" + selfieUrl;
 
         // Gửi dữ liệu POST
-        try(OutputStream os = conn.getOutputStream()) {
+        try (OutputStream os = conn.getOutputStream()) {
             os.write(data.getBytes(StandardCharsets.UTF_8));
         }
 
         // Đọc response
         StringBuilder response = new StringBuilder();
-        try(BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 response.append(line);

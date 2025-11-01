@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class SystemWalletServiceImpl {
     private final SystemWalletRepossitory systemWalletRepossitory;
+
     public void handleRefund(SystemWallet systemWallet) {
         systemWallet.setStatus(SystemWalletStatus.IS_SOLVED);
         systemWallet.setEndAt(LocalDateTime.now());
@@ -43,7 +44,7 @@ public class SystemWalletServiceImpl {
                     .build();
             log.info(">>> [SystemWalletServiceImpl] create new escrowRecord");
             return systemWalletRepossitory.save(escrowRecord);
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.info(">>> [SystemWalletServiceImpl] Error at createEscrowRecord: {}", e.getMessage());
             throw new SystemWalletException();
         }

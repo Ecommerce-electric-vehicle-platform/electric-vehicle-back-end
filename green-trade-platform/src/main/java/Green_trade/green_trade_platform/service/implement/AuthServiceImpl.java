@@ -41,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
         try {
             log.info(">>> username from request: {}", username);
             Optional<Buyer> buyerOpt = buyerRepository.findByUsername(username);
-            if(buyerOpt.isEmpty()) {
+            if (buyerOpt.isEmpty()) {
                 throw new UsernameException("Username is not existed");
             }
             log.info(">>> Username is existed");
@@ -69,7 +69,7 @@ public class AuthServiceImpl implements AuthService {
 
     public void verifyOtpForgotPassword(VerifyOtpForgotPasswordRequest request) {
         Map<String, String> pending = redisOtpService.getPending(request.getEmail());
-        if(pending == null) {
+        if (pending == null) {
             throw new IllegalArgumentException("Invalid email or user did not forget password yet!");
         }
         log.info(">>> Passed pending is not null");
@@ -77,7 +77,7 @@ public class AuthServiceImpl implements AuthService {
         String otp = pending.get("otp");
         log.info(">>> Otp From User: {}", request.getOtp());
         log.info(">>> Otp Redis: {}", otp);
-        if(!request.getOtp().equals(otp)) {
+        if (!request.getOtp().equals(otp)) {
             throw new IllegalArgumentException("Otp are not the same!");
         }
         log.info(">>> Passed Otp matched");
@@ -89,12 +89,12 @@ public class AuthServiceImpl implements AuthService {
         try {
             log.info(">>> Executed forgotPassword");
             Optional<Buyer> buyerOpt = buyerRepository.findByUsername(request.getUsername());
-            if(buyerOpt.isEmpty()) {
+            if (buyerOpt.isEmpty()) {
                 throw new UsernameException("Username is not existed");
             }
             log.info(">>> Username is existed");
 
-            if(!request.getNewPassword().equals(request.getConfirmPassword())) {
+            if (!request.getNewPassword().equals(request.getConfirmPassword())) {
                 throw new PasswordMismatchException();
             }
             log.info(">>> Password and Confirm Password is matched");
@@ -117,12 +117,12 @@ public class AuthServiceImpl implements AuthService {
             );
 
             boolean isPasswordMatched = passwordEncoder.matches(request.getOldPassword(), buyer.getPassword());
-            if(!isPasswordMatched) {
+            if (!isPasswordMatched) {
                 throw new Exception("Password is incorrect");
             }
 
             boolean isConfirmPasswordMatched = request.getNewPassword().equals(request.getConfirmPassword());
-            if(!isConfirmPasswordMatched) {
+            if (!isConfirmPasswordMatched) {
                 throw new PasswordMismatchException();
             }
 
@@ -141,19 +141,19 @@ public class AuthServiceImpl implements AuthService {
     public Map<String, Object> refreshToken(HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
         String authHeader = request.getHeader("Authorization");
-        if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw new AuthException("Unauthorized account.");
         }
 
         String refreshToken = authHeader.substring(7);
         result.put("refresh_token", refreshToken);
 
-        if(!jwtUtils.verifyToken(refreshToken)) {
+        if (!jwtUtils.verifyToken(refreshToken)) {
             throw new AuthException("Invalid refresh token, sign in to get new one");
         }
 
         String username = jwtUtils.getUsernameFromToken(refreshToken);
-        if(username.matches("^\\d{10}$")) {
+        if (username.matches("^\\d{10}$")) {
             Admin admin = adminRepository.findByEmployeeNumber(username).orElseThrow(
                     () -> new UsernameNotFoundException("Can not find user with this refresh token.")
             );

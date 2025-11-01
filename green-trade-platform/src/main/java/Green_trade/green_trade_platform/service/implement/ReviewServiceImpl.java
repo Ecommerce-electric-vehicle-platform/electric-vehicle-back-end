@@ -61,7 +61,7 @@ public class ReviewServiceImpl {
 
         log.info(">>> [Review Service] Create Review: Ended.");
         Review savedReview = reviewRepository.save(review);
-        for(ReviewImage i : reviewImageEntities) {
+        for (ReviewImage i : reviewImageEntities) {
             i.setReview(savedReview);
             reviewImagesRepository.save(i);
         }
