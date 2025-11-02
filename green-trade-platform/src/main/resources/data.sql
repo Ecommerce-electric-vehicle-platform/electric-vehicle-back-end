@@ -852,6 +852,19 @@ VALUES (NOW(), 'NOT_HAVE_YET', 'PENDING', 1, 1);
 ---- 🖼 EVIDENCE - ẢNH MINH CHỨNG CHO TRANH CHẤP
 ---- =========================================================
 
+
+---- =========================================================
+---- CANCEL ORDER REASON - LẤY DANH SÁCH CÁC LÝ DO HUỶ ĐƠN
+---- =========================================================
+INSERT INTO cancel_order_reason (cancel_reason_name)
+VALUES ('Người mua thay đổi ý định'),
+       ('Khách phát hiện pin không đúng dung lượng mô tả'),
+       ('Bên vận chuyển báo mất hàng'),
+       ('Khách hàng tìm được sản phẩm tương tự với giá tốt hơn'),
+       ('Người bán muốn cập nhật lại thông tin sản phẩm'),
+       ('Pin không tương thích với dòng xe của khách'),
+       ('Khách hàng nhập sai địa chỉ giao hàng'),
+       ('Thay đổi phương thức thanh toán');
 -- =========================================================
 -- ✅ KẾT THÚC FILE DATA.SQL
 -- =========================================================
