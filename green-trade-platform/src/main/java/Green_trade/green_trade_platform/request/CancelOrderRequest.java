@@ -12,5 +12,5 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CancelOrderRequest {
-    private List<String> orderCodes;
+    private Long cancelReasonId;
 }

@@ -1,7 +1,6 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.model.*;
-import Green_trade.green_trade_platform.request.CancelOrderRequest;
 import Green_trade.green_trade_platform.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -12,7 +11,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.sql.Array;
 import java.util.*;
 
 @Service

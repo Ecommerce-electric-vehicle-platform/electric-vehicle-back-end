@@ -7,6 +7,7 @@ import Green_trade.green_trade_platform.mapper.OrderMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.mapper.ReviewMapper;
 import Green_trade.green_trade_platform.model.*;
+import Green_trade.green_trade_platform.request.CancelOrderRequest;
 import Green_trade.green_trade_platform.request.ReviewRequest;
 import Green_trade.green_trade_platform.response.OrderListResponse;
 import Green_trade.green_trade_platform.response.OrderResponse;
@@ -124,9 +125,9 @@ public class OrderController {
                     """
     )
     @PostMapping("/cancel/{id}")
-    public ResponseEntity<RestResponse<OrderResponse, Object>> cancelOrder(@PathVariable Long id) throws Exception {
+    public ResponseEntity<RestResponse<OrderResponse, Object>> cancelOrder(@PathVariable Long id, @RequestBody CancelOrderRequest request) throws Exception {
         log.info(">>> [OrderController] came cancelOrder");
-        Order canceledOrder = orderService.cancelOrder(id);
+        Order canceledOrder = orderService.cancelOrder(id, request);
         log.info(">>> [OrderController] cancelOrder pass");
         systemWalletService.updateEscrowRecordStatus(canceledOrder.getSystemWallet(), SystemWalletStatus.REFUNDED);
         log.info(">>> [OrderController] update system wallet status successfully");

@@ -3,12 +3,11 @@ package Green_trade.green_trade_platform.service.implement;
 import Green_trade.green_trade_platform.enumerate.OrderStatus;
 import Green_trade.green_trade_platform.enumerate.TransactionStatus;
 import Green_trade.green_trade_platform.exception.OrderNotFound;
-import Green_trade.green_trade_platform.model.Buyer;
-import Green_trade.green_trade_platform.model.Order;
-import Green_trade.green_trade_platform.model.Seller;
-import Green_trade.green_trade_platform.model.Transaction;
+import Green_trade.green_trade_platform.model.*;
+import Green_trade.green_trade_platform.repository.CancelOrderReasonRepository;
 import Green_trade.green_trade_platform.repository.OrderRepository;
 import Green_trade.green_trade_platform.repository.TransactionRepository;
+import Green_trade.green_trade_platform.request.CancelOrderRequest;
 import Green_trade.green_trade_platform.service.OrderService;
 import Green_trade.green_trade_platform.service.TransactionService;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,6 +32,7 @@ public class OrderServiceImpl implements OrderService {
     private final WalletTransactionServiceImpl walletTransactionServiceImpl;
     private final WalletServiceImpl walletService;
     private final TransactionRepository transactionRepository;
+    private final CancelOrderReasonRepository cancelOrderReasonRepository;
 
     public Page<Order> getOrdersOfCurrentUserPaging(int size, int page, Buyer buyer) {
         try {
@@ -76,7 +76,7 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.save(order);
     }
 
-    public Order cancelOrder(Long id) throws Exception {
+    public Order cancelOrder(Long id, CancelOrderRequest request) throws Exception {
         try {
             log.info(">>> [OrderServiceImpl] came cancelOrder");
             Optional<Order> orderOpt = orderRepository.findOrderById((id));
@@ -84,6 +84,11 @@ public class OrderServiceImpl implements OrderService {
                 throw new OrderNotFound();
             }
             log.info(">>> [OrderServiceImpl] found order successfully");
+
+            CancelOrderReason cancelOrderReason = cancelOrderReasonRepository.findById(request.getCancelReasonId())
+                    .orElseThrow(
+                            () -> new Exception("Cancel Order Reason Not found")
+                    );
 
             Order orderFound = orderOpt.get();
 
@@ -96,6 +101,8 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] update order status to canceled successfully");
                 orderFound.getPostProduct().setSold(false);
                 log.info(">>> [OrderServiceImpl] update order sold successfully");
+                orderFound.setCancelReason(cancelOrderReason.getCancelReasonName());
+                log.info(">>> [OrderServiceImpl] update cancel order reason successfully");
             } else if (orderFound.getStatus().equals(OrderStatus.PAID)) {
                 log.info(">>> [OrderServiceImpl] order paid status");
                 Transaction transaction = transactionService.createTransaction(orderFound, TransactionStatus.CANCELED,
@@ -107,6 +114,8 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] refund successfully");
                 orderFound.getPostProduct().setSold(false);
                 log.info(">>> [OrderServiceImpl] update order sold successfully");
+                orderFound.setCancelReason(cancelOrderReason.getCancelReasonName());
+                log.info(">>> [OrderServiceImpl] update cancel order reason successfully");
             } else {
                 throw new Exception("Cannot cancel order");
             }
