@@ -6,6 +6,9 @@ import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.response.ConversationResponse;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class ConversationMapper {
     public Conversation toEntity(Buyer buyer, PostProduct postProduct) {
@@ -23,4 +26,10 @@ public class ConversationMapper {
                 .createdAt(conversation.getCreatedAt())
                 .build();
     }
+    public List<ConversationResponse> toDtoList(List<Conversation> conversations) {
+        return conversations.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
 }

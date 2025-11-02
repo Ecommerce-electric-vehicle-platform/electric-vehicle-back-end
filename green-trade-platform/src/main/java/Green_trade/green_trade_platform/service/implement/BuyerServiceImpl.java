@@ -13,6 +13,7 @@ import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.util.DateUtils;
 import Green_trade.green_trade_platform.util.FileUtils;
 import Green_trade.green_trade_platform.util.StringUtils;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -149,6 +150,12 @@ public class BuyerServiceImpl {
 
         return buyerRepository.findByUsername(username)
                 .orElseThrow(() -> new ProfileException("User is not existed: " + username));
+    }
+
+    public Buyer findBuyerById(Long id) {
+        return buyerRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Can not find buyer with this id: " + id)
+        );
     }
 
     public Buyer getBuyerFromVnPayRequest(String vnpOtherType) {

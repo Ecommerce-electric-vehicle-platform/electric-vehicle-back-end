@@ -26,25 +26,32 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
     @EqualsAndHashCode.Include
+    @ToString.Include
     private Long id;
 
     @Column(name = "order_code", nullable = true, unique = true)
+    @ToString.Include
     private String orderCode;
 
     @Column(name = "shipping_address", nullable = true, unique = false)
+    @ToString.Include
     private String shippingAddress;
 
     @Column(name = "phone_number", nullable = true, unique = false)
+    @ToString.Include
     private String phoneNumber;
 
-    @Column(name = "price", nullable = true, unique = false)
+    @Column(name = "price",  nullable = true, unique = false)
+    @ToString.Include
     private BigDecimal price;
 
     @Column(name = "shipping_fee", nullable = true, unique = false)
+    @ToString.Include
     private BigDecimal shippingFee;
 
     @Column(name = "status", nullable = true, unique = false, length = 15)
     @Enumerated(EnumType.STRING)
+    @ToString.Include
     private OrderStatus status;
 
     @Column(name = "created_at", nullable = true, unique = false)

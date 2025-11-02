@@ -12,6 +12,7 @@ import Green_trade.green_trade_platform.request.VerifiedPostProductRequest;
 import Green_trade.green_trade_platform.response.SellerResponse;
 import Green_trade.green_trade_platform.service.PostProductService;
 import Green_trade.green_trade_platform.util.FileUtils;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -351,5 +352,12 @@ public class PostProductServiceImpl implements PostProductService {
             log.info(">>> [PostProductServiceImpl] error at updatePostProduct: {}", e.getMessage());
             throw e;
         }
+    }
+
+    public Seller findSellerByPostId(Long id) {
+        PostProduct postProduct = postProductRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Can not find post product with id: " + id)
+        );
+        return postProduct.getSeller();
     }
 }

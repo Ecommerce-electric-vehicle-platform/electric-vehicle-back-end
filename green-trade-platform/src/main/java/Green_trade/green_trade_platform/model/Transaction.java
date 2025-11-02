@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.model;
 
+import Green_trade.green_trade_platform.enumerate.PaymentMethod;
 import Green_trade.green_trade_platform.enumerate.SellerStatus;
 import Green_trade.green_trade_platform.enumerate.TransactionStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;

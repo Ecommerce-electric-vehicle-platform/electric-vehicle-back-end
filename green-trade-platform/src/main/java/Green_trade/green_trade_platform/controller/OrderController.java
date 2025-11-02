@@ -5,9 +5,7 @@ import Green_trade.green_trade_platform.mapper.OrderListMapper;
 import Green_trade.green_trade_platform.mapper.OrderMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.mapper.ReviewMapper;
-import Green_trade.green_trade_platform.model.Buyer;
-import Green_trade.green_trade_platform.model.Order;
-import Green_trade.green_trade_platform.model.Review;
+import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.request.ReviewRequest;
 import Green_trade.green_trade_platform.response.OrderListResponse;
 import Green_trade.green_trade_platform.response.OrderResponse;
@@ -25,6 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -212,6 +211,33 @@ public class OrderController {
         }
     }
 
+    @Operation(
+
+    )
+    @GetMapping("/payment/{orderId}")
+    public ResponseEntity<?> getPayment(@PathVariable(name = "orderId") long id) {
+        log.info(">>> [Order Controller] Get payment: Started.");
+        try {
+            Transaction transaction = orderService.getTransactionByOrderId(id);
+            log.info(">>> [Order Controller] Get transaction: {}", transaction);
+            Payment payment = transaction.getPayment();
+            log.info(">>> [Order Controller] Get payment: {}", payment);
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", payment.getId());
+            data.put("description", payment.getDescription());
+            data.put("gatewayName", payment.getGatewayName());
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ORDER PAYMENT SUCCESSFULLY.",
+                    data, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET ORDER PAYMENT FAILED.",
+                    null, e.getMessage()
+            ));
+        }
     @GetMapping("/{orderId}")
     public ResponseEntity<RestResponse<OrderResponse, Object>> getOrderDetailByOrderId(@PathVariable Long orderId) {
         Order foundOrder = orderService.getOrderById(orderId);

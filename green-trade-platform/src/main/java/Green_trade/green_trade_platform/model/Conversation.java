@@ -3,10 +3,7 @@ package Green_trade.green_trade_platform.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +22,7 @@ import java.util.List;
                 )
         }
 )
+@ToString(exclude = {"messages"})
 public class Conversation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,7 +42,7 @@ public class Conversation {
     private PostProduct postProduct;
 
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL)
-    @JsonBackReference
+    @JsonManagedReference
     private List<Message> messages;
 
     @PrePersist

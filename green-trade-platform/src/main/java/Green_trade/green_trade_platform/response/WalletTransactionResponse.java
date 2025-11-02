@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -20,4 +21,5 @@ public class WalletTransactionResponse {
     private BigDecimal balanceBefore;
     private TransactionStatus status;
     private String description;
+    private LocalDateTime createdAt;
 }
