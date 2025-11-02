@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.enumerate.TransactionStatus;
+import Green_trade.green_trade_platform.enumerate.TransactionType;
 import Green_trade.green_trade_platform.exception.PaymentMethodNotSupportedException;
 import Green_trade.green_trade_platform.exception.PostProductNotFound;
 import Green_trade.green_trade_platform.exception.ProfileException;
@@ -8,6 +9,7 @@ import Green_trade.green_trade_platform.exception.WalletNotFoundException;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.service.TransactionService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
     private final WalletServiceImpl walletService;
@@ -27,23 +30,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final WalletRepository walletRepository;
     private final PaymentRepository paymentRepository;
     private final TransactionRepository transactionRepository;
-
-    public TransactionServiceImpl(
-            WalletServiceImpl walletService,
-            BuyerServiceImpl buyerService,
-            BuyerRepository buyerRepository,
-            PostProductRepository postProductRepository,
-            PostProductServiceImpl postProductService,
-            WalletRepository walletRepository, PaymentRepository paymentRepository, TransactionRepository transactionRepository) {
-        this.walletService = walletService;
-        this.buyerService = buyerService;
-        this.buyerRepository = buyerRepository;
-        this.postProductRepository = postProductRepository;
-        this.postProductService = postProductService;
-        this.walletRepository = walletRepository;
-        this.paymentRepository = paymentRepository;
-        this.transactionRepository = transactionRepository;
-    }
+    private final WalletTransactionRepository walletTransactionRepository;
 
     public List<Transaction> getTransactionsOfOrder(Order order) {
         List<Transaction> transactions = transactionRepository.findAllByOrder(order);
@@ -95,6 +82,17 @@ public class TransactionServiceImpl implements TransactionService {
             }
             wallet.setBalance(moneyHandler);
             walletRepository.save(wallet);
+            // Create a wallet transaction
+            WalletTransaction walletTransaction = WalletTransaction.builder()
+                    .type(TransactionType.PLACE_ORDER)
+                    .amount(order.getPrice())
+                    .balanceBefore(wallet.getBalance())
+                    .status(TransactionStatus.SUCCESS)
+                    .description("Đặt hàng cho đơn " + order.getId())
+                    .wallet(wallet)
+                    .build();
+            walletTransactionRepository.save(walletTransaction);
+
             Transaction newTransaction = Transaction.builder()
                     .order(order)
                     .payment(paymentOpt.get())

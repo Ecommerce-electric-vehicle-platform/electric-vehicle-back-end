@@ -218,7 +218,7 @@ INSERT INTO buyer (
 )
 VALUES
 ('ae8ed05a-6eef-4f3c-ae27-63b6c8c04314', 'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761368550/buyers/1:doanvien/avatar/ed4086f1-9cf3-48ae-8cac-3f493f07f9e7.jpg', NOW(), '129 Nguyễn Văn Cừ', NULL, 'Quận 5', '2005-11-19', 'vientruongdoan@gmail.com', 'Truong Doan Vien', 'MALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', '0792043114', 'Hồ Chí Minh', NULL, 'doanvien', 'Phường 7'),
-(NULL, NULL, NOW(), NULL, NULL, NULL, NULL, 'kimthuydoan22082005@gmail.com', NULL, 'FEMALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', NULL, NULL, NULL, 'kimthuydoan', NULL),
+('fee6981f-33a2-4208-978c-b5c8ffaad9ba', 'https://res.cloudinary.com/dzhxwm90k/image/upload/v1762071147/buyers/2:kimthuydoan/avatar/fee6981f-33a2-4208-978c-b5c8ffaad9ba.jpg', NOW(), '123', NULL, 'Thành phố Dĩ An', '2004-11-19', 'kimthuydoan22082005@gmail.com', 'Đoàn Thị Kim Thúy', 'FEMALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', '0780453118', 'Bình Dương', NULL, 'kimthuydoan', 'Phường Bình An'),
 (NULL, NULL, NOW(), NULL, NULL, NULL, NULL, 'hanhtransdr@gmail.com', NULL, 'FEMALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', NULL, NULL, NULL, 'tranthihanh', NULL);
 
 -- =========================================================
@@ -227,9 +227,9 @@ VALUES
 
 INSERT INTO wallet (balance, concurrency, provider, created_at, buyer_id)
 VALUES
-(10000000.00, 'VND', 'VNPay', NOW(), 1),
-(1100000.00, 'VND', 'VNPay', NOW(), 2),
-(1200000.00, 'VND', 'VNPay', NOW(), 3);
+(1000000000.00, 'VND', 'VNPay', NOW(), 1),
+(1100000000.00, 'VND', 'VNPay', NOW(), 2),
+(1200000000.00, 'VND', 'VNPay', NOW(), 3);
 
 -- =========================================================
 -- 🏪 WALLET TRANSACTION
@@ -315,11 +315,11 @@ VALUES
 INSERT INTO post_product
 (title, brand, model, manufacture_year, used_duration, rejected_reason, condition_level, price, width, height, length, weight, description, location_trading, is_sold, active, verified_decision_status, verified, created_at, updated_at, deleted_at, category_id, admin_id, seller_id)
 VALUES
-    ('Xe đạp điện Pega Aura 2022 - còn mới 90%', 'Pega', 'Aura', 2022, '18 tháng', NULL, 'Good', 8900000, '68', '105', '148', '28000', 'Xe đạp điện chạy êm, pin thay gần đây, phanh còn tốt, đi học đi làm ổn định.', 'Quận 7, TP.HCM', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-30 10:15:00', '2025-10-10 08:40:00', NULL, 1, NULL, 1),
-    ('Pin LFP 60V 20Ah cho xe điện - đã test dung lượng', 'CATL', 'LFP-60V-20Ah', 2023, '6 tháng', NULL, 'Like New', 4200000, '18', '20', '35', '7200', 'Pin LiFePO4 60V 20Ah, đã test nội trở, còn ~92% dung lượng, dùng cho nhiều dòng xe điện.', 'Cầu Giấy, Hà Nội', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-01 09:00:00', '2025-10-15 11:20:00', NULL, 2, NULL, 1),
-    ('Xe máy điện VinFast Feliz S 2022 - pin thuê', 'VinFast', 'Feliz S', 2022, '20 tháng', NULL, 'Good', 16500000, '70', '112', '150', '47000', 'Bản S, đi lại hằng ngày, khung vỏ còn đẹp, pin đang thuê VinFast (không kèm pin).', 'Thanh Khê, Đà Nẵng', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-05 14:05:00', '2025-10-20 09:30:00', NULL, 1, NULL, 1),
-    ('Pin NMC 72V 30Ah tháo xe - còn 85% SOH', 'EVE', 'NMC-72V-30Ah', 2021, '24 tháng', NULL, 'Fair', 5500000, '20', '22', '42', '12500', 'Pack NMC 72V 30Ah, đã cân bằng cell, còn ~85% SOH, phù hợp xe máy điện công suất trung bình.', 'Thủ Đức, TP.HCM', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-25 16:00:00', '2025-10-12 13:10:00', NULL, 2, NULL, 1),
-    ('Xe đạp điện Giant M3 cũ - bảo dưỡng định kỳ', 'Giant', 'M3', 2020, '3 năm', NULL, 'Fair', 6500000, '66', '103', '145', '30000', 'Đã thay lốp và phanh, pin còn dùng tốt ~70-75%, có trầy nhẹ theo thời gian.', 'Biên Hòa, Đồng Nai', FALSE, TRUE, 'PENDING', FALSE, '2025-10-18 10:45:00', '2025-10-18 10:45:00', NULL, 1, NULL, 1),
+    ('Xe đạp điện Pega Aura 2022 - còn mới 90%', 'Pega', 'Aura', 2022, '18 tháng', NULL, 'Good', 8900000, '68', '105', '148', '28000', 'Xe đạp điện chạy êm, pin thay gần đây, phanh còn tốt, đi học đi làm ổn định.', 'Quận 7, TP.HCM', TRUE, FALSE, 'APPROVED', TRUE, '2025-09-30 10:15:00', '2025-10-10 08:40:00', NULL, 1, NULL, 1),
+    ('Pin LFP 60V 20Ah cho xe điện - đã test dung lượng', 'CATL', 'LFP-60V-20Ah', 2023, '6 tháng', NULL, 'Like New', 4200000, '18', '20', '35', '7200', 'Pin LiFePO4 60V 20Ah, đã test nội trở, còn ~92% dung lượng, dùng cho nhiều dòng xe điện.', 'Cầu Giấy, Hà Nội', TRUE, FALSE, 'APPROVED', TRUE, '2025-10-01 09:00:00', '2025-10-15 11:20:00', NULL, 2, NULL, 1),
+    ('Xe máy điện VinFast Feliz S 2022 - pin thuê', 'VinFast', 'Feliz S', 2022, '20 tháng', NULL, 'Good', 16500000, '70', '112', '150', '47000', 'Bản S, đi lại hằng ngày, khung vỏ còn đẹp, pin đang thuê VinFast (không kèm pin).', 'Thanh Khê, Đà Nẵng', TRUE, FALSE, 'APPROVED', TRUE, '2025-10-05 14:05:00', '2025-10-20 09:30:00', NULL, 1, NULL, 1),
+    ('Pin NMC 72V 30Ah tháo xe - còn 85% SOH', 'EVE', 'NMC-72V-30Ah', 2021, '24 tháng', NULL, 'Fair', 5500000, '20', '22', '42', '12500', 'Pack NMC 72V 30Ah, đã cân bằng cell, còn ~85% SOH, phù hợp xe máy điện công suất trung bình.', 'Thủ Đức, TP.HCM', TRUE, FALSE, 'APPROVED', TRUE, '2025-09-25 16:00:00', '2025-10-12 13:10:00', NULL, 2, NULL, 1),
+    ('Xe đạp điện Giant M3 cũ - bảo dưỡng định kỳ', 'Giant', 'M3', 2020, '3 năm', NULL, 'Fair', 6500000, '66', '103', '145', '30000', 'Đã thay lốp và phanh, pin còn dùng tốt ~70-75%, có trầy nhẹ theo thời gian.', 'Biên Hòa, Đồng Nai', TRUE, FALSE, 'PENDING', FALSE, '2025-10-18 10:45:00', '2025-10-18 10:45:00', NULL, 1, NULL, 1),
     ('Pin LFP 48V 12Ah cho xe đạp điện - nhẹ, bền', 'Gotion', 'LFP-48V-12Ah', 2024, '4 tháng', NULL, 'Like New', 1900000, '15', '16', '32', '5200', 'Pin LiFePO4 an toàn, vòng sạc thấp, phù hợp xe đạp điện học sinh.', 'Nha Trang, Khánh Hòa', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-02 08:00:00', '2025-10-22 17:25:00', NULL, 2, NULL, 1),
     ('Xe máy điện Pega eSH 2021 - đã thay pin', 'Pega', 'eSH', 2021, '30 tháng', NULL, 'Good', 13900000, '69', '110', '149', '48000', 'Động cơ mạnh, pin thay 2024 (LFP 60V 24Ah), bô phận điện ổn định, hình thức đẹp.', 'Hải Châu, Đà Nẵng', FALSE, TRUE, 'PENDING', FALSE, '2025-10-19 12:10:00', '2025-10-21 09:50:00', NULL, 1, NULL, 1),
     ('Pack pin ioni 60V 30Ah tháo VinFast Klara - còn 88%', 'VinFast', 'Klara-Pack-60V30Ah', 2022, '16 tháng', NULL, 'Good', 6200000, '19', '21', '40', '11800', 'Pack tháo xe, đã kiểm thử SoH 88%, thích hợp retrofit/độ xe điện.', 'Thủ Dầu Một, Bình Dương', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-06 15:35:00', '2025-10-16 09:05:00', NULL, 2, NULL, 1),
@@ -533,10 +533,10 @@ INSERT INTO orders (
     order_code, shipping_address, phone_number, price, shipping_fee, status, created_at, buyer_id, post_id, shipping_partner_id
 ) VALUES
 ('XYZ123@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'PENDING', NOW(), 2, 1, 1),
-('XYZ133@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'PENDING', NOW(), 2, 10, 1),
+('XYZ133@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'PENDING', NOW(), 2, 2, 1),
 ('XYZ143@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'COMPLETED', NOW(), 2, 3, 1),
-('XYZ153@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'PENDING', NOW(), 2, 7, 1),
-('XYZ163@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'COMPLETED', NOW(), 2, 2, 1);
+('XYZ153@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'PENDING', NOW(), 2, 4, 1),
+('XYZ163@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'COMPLETED', NOW(), 2, 5, 1);
 
 -- ================= Payment Data =================
 INSERT INTO payment (description, gateway_name)

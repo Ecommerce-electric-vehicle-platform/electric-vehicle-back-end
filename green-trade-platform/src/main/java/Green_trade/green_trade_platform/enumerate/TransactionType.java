@@ -4,5 +4,6 @@ public enum TransactionType {
     DEPOSIT,
     WITHDRAW,
     REFUND,
-    SIGN_PACKAGE
+    SIGN_PACKAGE,
+    PLACE_ORDER
 }
