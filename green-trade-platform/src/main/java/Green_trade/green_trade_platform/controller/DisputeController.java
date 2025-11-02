@@ -82,20 +82,20 @@ public class DisputeController {
     @Operation(
             summary = "Retrieve pending disputes for decision-making",
             description = """
-        This endpoint returns a list of disputes that are currently pending review. 
-        Each dispute contains relevant information such as dispute ID, order details, 
-        evidence, and submission date.
-
-        The retrieved disputes are those that have not yet been decided (accepted or rejected). 
-        Authorized users can review these disputes and proceed to make a decision 
-        by calling the corresponding Accept or Reject endpoints.
-
-        Typical use cases:
-        - Admin dashboard fetching disputes awaiting approval
-        - Automated workflow checking pending disputes for manual intervention
-
-        **Permissions:** Requires admin or dispute-manager role.
-    """
+                        This endpoint returns a list of disputes that are currently pending review. 
+                        Each dispute contains relevant information such as dispute ID, order details, 
+                        evidence, and submission date.
+                    
+                        The retrieved disputes are those that have not yet been decided (accepted or rejected). 
+                        Authorized users can review these disputes and proceed to make a decision 
+                        by calling the corresponding Accept or Reject endpoints.
+                    
+                        Typical use cases:
+                        - Admin dashboard fetching disputes awaiting approval
+                        - Automated workflow checking pending disputes for manual intervention
+                    
+                        **Permissions:** Requires admin or dispute-manager role.
+                    """
     )
     @GetMapping("")
     public ResponseEntity<?> getDisputes(
@@ -107,7 +107,7 @@ public class DisputeController {
             Page<DisputeResponse> disputes = disputeService.getAllDispute(page, size);
             Map<String, Object> data = new HashMap<>();
             data.put("dispute", disputes.getContent());
-            data.put("currentPage",disputes.getNumber());
+            data.put("currentPage", disputes.getNumber());
             data.put("totalElements", disputes.getTotalElements());
             data.put("totalPages", disputes.getTotalPages());
             log.info(">>> Get disputes successfully: {}", disputes.getTotalElements());
@@ -128,31 +128,31 @@ public class DisputeController {
     @Operation(
             summary = "Admin makes a decision for a specific dispute",
             description = """
-        Allows an administrator or dispute manager to make a final decision on a dispute case.
-
-        The frontend sends a request containing the following parameters:
-        - **disputeId** *(Long)* – Unique identifier of the dispute to be resolved.
-        - **decision** *(Enum (ACCEPTED or REJECTED))* – The final decision.
-        - **resolution** *(Description for resolving a dispute)* – Description or reasoning provided by the admin for the decision.
-        - **resolutionType** *(Enum (REFUND or REJECTED(in case the dispute is rejected)))* – Category or type of resolution.
-        - **refundPercent** *(double)* – Percentage of refund to be issued (if applicable).
-
-        This endpoint updates the dispute status and triggers the corresponding 
-        post-decision workflow such as refund processing or notification dispatch.
-
-        **Permissions:** Admin or dispute-manager role required.
-        **Example:** 
-        ```
-        POST /api/disputes/decision
-        {
-            "disputeId": "1",
-            "decision": "ACCEPTED",
-            "resolution": "Customer provided valid proof; refund approved.",
-            "resolutionType": "REFUND",
-            "refundPercent": 80
-        }
-        ```
-    """
+                        Allows an administrator or dispute manager to make a final decision on a dispute case.
+                    
+                        The frontend sends a request containing the following parameters:
+                        - **disputeId** *(Long)* – Unique identifier of the dispute to be resolved.
+                        - **decision** *(Enum (ACCEPTED or REJECTED))* – The final decision.
+                        - **resolution** *(Description for resolving a dispute)* – Description or reasoning provided by the admin for the decision.
+                        - **resolutionType** *(Enum (REFUND or REJECTED(in case the dispute is rejected)))* – Category or type of resolution.
+                        - **refundPercent** *(double)* – Percentage of refund to be issued (if applicable).
+                    
+                        This endpoint updates the dispute status and triggers the corresponding 
+                        post-decision workflow such as refund processing or notification dispatch.
+                    
+                        **Permissions:** Admin or dispute-manager role required.
+                        **Example:** 
+                        ```
+                        POST /api/disputes/decision
+                        {
+                            "disputeId": "1",
+                            "decision": "ACCEPTED",
+                            "resolution": "Customer provided valid proof; refund approved.",
+                            "resolutionType": "REFUND",
+                            "refundPercent": 80
+                        }
+                        ```
+                    """
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/resolve")
@@ -167,7 +167,7 @@ public class DisputeController {
             SystemWallet systemWallet = systemWalletService.getSystemWalletByOrder(order);
             log.info(">>> [Dispute Controller] System wallet information: {}", systemWallet);
 
-            if(request.getDecision() == DisputeDecision.ACCEPTED) {
+            if (request.getDecision() == DisputeDecision.ACCEPTED) {
                 Wallet buyerWallet = walletService.findWalletById(systemWallet.getBuyerWalletId());
                 Wallet sellerWallet = walletService.findWalletById(systemWallet.getSellerWalletId());
 
@@ -187,19 +187,19 @@ public class DisputeController {
     @Operation(
             summary = "Get detailed information of a specific dispute",
             description = """
-        Retrieves complete details of a dispute based on its unique identifier.
-
-        The response includes:
-        - Dispute metadata (ID, status, creation date)
-        - Related order and transaction details
-        - Evidence and comments provided by buyer
-
-        This endpoint is typically used by administrators 
-        to review the full context of a dispute before making a resolution decision.
-
-        **Permissions:** Requires admin or dispute-manager privileges.
-        **Example:** GET /api/disputes/{disputeId}
-    """
+                        Retrieves complete details of a dispute based on its unique identifier.
+                    
+                        The response includes:
+                        - Dispute metadata (ID, status, creation date)
+                        - Related order and transaction details
+                        - Evidence and comments provided by buyer
+                    
+                        This endpoint is typically used by administrators 
+                        to review the full context of a dispute before making a resolution decision.
+                    
+                        **Permissions:** Requires admin or dispute-manager privileges.
+                        **Example:** GET /api/disputes/{disputeId}
+                    """
     )
     @GetMapping("/{disputeId}")
     public ResponseEntity<?> getDisputeInfo(@PathVariable(name = "disputeId") long disputeId) {

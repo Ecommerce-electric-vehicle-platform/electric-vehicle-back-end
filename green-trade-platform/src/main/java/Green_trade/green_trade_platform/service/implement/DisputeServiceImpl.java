@@ -43,14 +43,14 @@ public class DisputeServiceImpl implements DisputeService {
         try {
             DisputeCategory disputeCategory = disputeCategoryRepository.findById(request.getDisputeCategoryId())
                     .orElseThrow(() ->
-                        new Exception("Dispute Category is not supported")
+                            new Exception("Dispute Category is not supported")
                     );
             Order disputedOrder = orderRepository.findById(request.getOrderId())
                     .orElseThrow(
                             () -> new OrderNotFound()
                     );
 //            log.info(">>> disputedOrder: {}", disputedOrder.toString());
-            if(!disputedOrder.getStatus().equals(OrderStatus.COMPLETED)) {
+            if (!disputedOrder.getStatus().equals(OrderStatus.COMPLETED)) {
                 throw new Exception("Only completed order can be dispute");
             }
             Dispute newDispute = Dispute.builder()
@@ -95,7 +95,7 @@ public class DisputeServiceImpl implements DisputeService {
         log.info(">>> user id: {}", order.getBuyer().getBuyerId());
         Notification notification = null;
 
-        if(request.getDecision() == DisputeDecision.REJECTED) {
+        if (request.getDecision() == DisputeDecision.REJECTED) {
             dispute.setStatus(DisputeStatus.REJECTED);
             dispute.setResolutionType(ResolutionType.REJECTED);
             dispute.setResolution(request.getResolution());
@@ -109,7 +109,7 @@ public class DisputeServiceImpl implements DisputeService {
                     .content(request.getResolution())
                     .createdAt(LocalDateTime.now())
                     .build();
-        } else if(request.getDecision() == DisputeDecision.ACCEPTED) {
+        } else if (request.getDecision() == DisputeDecision.ACCEPTED) {
             dispute.setStatus(DisputeStatus.ACCEPTED);
             dispute.setResolutionType(ResolutionType.REFUND);
             dispute.setResolution(request.getResolution());

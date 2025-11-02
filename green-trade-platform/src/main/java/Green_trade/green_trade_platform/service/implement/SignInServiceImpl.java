@@ -59,7 +59,7 @@ public class SignInServiceImpl implements SignInService {
     public Admin startSignInAdmin(SignInAdminRequest request) {
         try {
             log.info(">>> startSignInAdmin of SignInServiceImpl: started");
-            String employeeNumber= request.getEmployeeNumber();
+            String employeeNumber = request.getEmployeeNumber();
             String password = request.getPassword();
 
             Optional<Admin> adminOpt = adminRepository.findByEmployeeNumber(employeeNumber);

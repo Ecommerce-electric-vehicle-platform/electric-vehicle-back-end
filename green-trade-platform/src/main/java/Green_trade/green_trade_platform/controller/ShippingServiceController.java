@@ -64,18 +64,18 @@ public class ShippingServiceController {
     @Operation(
             summary = "Fetch list of provinces",
             description = """
-        Retrieves a list of provinces available from the GHN (Giao Hàng Nhanh) shipping service.  
-        This data is often used to populate province dropdowns during address creation or checkout.
-
-        **Workflow:**
-        1. The system calls the GHN API to retrieve the list of supported provinces.
-        2. The response is mapped into a key-value structure (province code → province name).
-        3. The endpoint returns a JSON object containing all provinces supported for shipping.
-
-        **Use cases:**
-        - Displaying a list of provinces when users fill out shipping or billing addresses.
-        - Fetching location data dynamically from the GHN logistics API.
-    """
+                        Retrieves a list of provinces available from the GHN (Giao Hàng Nhanh) shipping service.  
+                        This data is often used to populate province dropdowns during address creation or checkout.
+                    
+                        **Workflow:**
+                        1. The system calls the GHN API to retrieve the list of supported provinces.
+                        2. The response is mapped into a key-value structure (province code → province name).
+                        3. The endpoint returns a JSON object containing all provinces supported for shipping.
+                    
+                        **Use cases:**
+                        - Displaying a list of provinces when users fill out shipping or billing addresses.
+                        - Fetching location data dynamically from the GHN logistics API.
+                    """
     )
     @GetMapping("/provinces")
     public ResponseEntity<?> getProvinces() throws JsonProcessingException {
@@ -93,20 +93,20 @@ public class ShippingServiceController {
     @Operation(
             summary = "Fetch list of districts by province ID",
             description = """
-        Retrieves a list of districts for a specified province using the GHN (Giao Hàng Nhanh) shipping service.  
-        This endpoint is typically used when the user selects a province, and the frontend needs to load 
-        all districts under that province dynamically.
-
-        **Workflow:**
-        1. The client provides a `provinceId` as a request parameter.
-        2. The system sends a request to the GHN API to fetch districts belonging to that province.
-        3. The districts are mapped into a key-value format (district code → district name).
-        4. The endpoint returns the resulting district list.
-
-        **Use cases:**
-        - Displaying available districts when users select a province during checkout or address creation.
-        - Dynamically populating location dropdowns in registration or shipping forms.
-    """
+                        Retrieves a list of districts for a specified province using the GHN (Giao Hàng Nhanh) shipping service.  
+                        This endpoint is typically used when the user selects a province, and the frontend needs to load 
+                        all districts under that province dynamically.
+                    
+                        **Workflow:**
+                        1. The client provides a `provinceId` as a request parameter.
+                        2. The system sends a request to the GHN API to fetch districts belonging to that province.
+                        3. The districts are mapped into a key-value format (district code → district name).
+                        4. The endpoint returns the resulting district list.
+                    
+                        **Use cases:**
+                        - Displaying available districts when users select a province during checkout or address creation.
+                        - Dynamically populating location dropdowns in registration or shipping forms.
+                    """
     )
     @GetMapping("/districts")
     public ResponseEntity<?> getDistricts(
@@ -126,20 +126,20 @@ public class ShippingServiceController {
     @Operation(
             summary = "Fetch list of wards by district ID",
             description = """
-        Retrieves a list of wards (subdistricts) for a specific district using the GHN (Giao Hàng Nhanh) shipping service.  
-        This endpoint is usually called after a district is selected, allowing the frontend to dynamically display 
-        all available wards under that district.
-
-        **Workflow:**
-        1. The client provides a `districtId` as a request parameter.
-        2. The system calls the GHN API to fetch wards corresponding to the given district.
-        3. The ward data is formatted as a key-value map (ward code → ward name).
-        4. The formatted list is returned to the client.
-
-        **Use cases:**
-        - Displaying available wards when users select a district during checkout or address creation.
-        - Completing address selection for shipping, billing, or delivery purposes.
-    """
+                        Retrieves a list of wards (subdistricts) for a specific district using the GHN (Giao Hàng Nhanh) shipping service.  
+                        This endpoint is usually called after a district is selected, allowing the frontend to dynamically display 
+                        all available wards under that district.
+                    
+                        **Workflow:**
+                        1. The client provides a `districtId` as a request parameter.
+                        2. The system calls the GHN API to fetch wards corresponding to the given district.
+                        3. The ward data is formatted as a key-value map (ward code → ward name).
+                        4. The formatted list is returned to the client.
+                    
+                        **Use cases:**
+                        - Displaying available wards when users select a district during checkout or address creation.
+                        - Completing address selection for shipping, billing, or delivery purposes.
+                    """
     )
     @GetMapping("/wards")
     public ResponseEntity<?> getWards(
@@ -159,25 +159,25 @@ public class ShippingServiceController {
     @Operation(
             summary = "Fetch shipping fee for a specific order",
             description = """
-        Retrieves the shipping fee for a given order using the GHN (Giao Hàng Nhanh) shipping service.  
-        The system uses order details (such as delivery address, package weight, and dimensions) to query 
-        GHN's API and return the calculated shipping cost.
-
-        **Workflow:**
-        1. The client sends an `orderId` as a path variable.
-        2. The system validates that the order exists.
-        3. The GHN API is called with the order’s delivery information.
-        4. The calculated shipping fee and related details (service type, estimated delivery time, etc.) are returned.
-
-        **Use cases:**
-        - Displaying the estimated or actual shipping fee on the order details page.
-        - Allowing sellers or admins to verify delivery costs before fulfillment.
-        - Showing buyers the delivery cost breakdown in checkout or order tracking screens.
-
-        **Security Notes:**
-        - Requires a valid JWT token (`ROLE_BUYER`, `ROLE_SELLER`, or `ROLE_ADMIN`).
-        - A user can only access shipping fee information for orders they own.
-    """
+                        Retrieves the shipping fee for a given order using the GHN (Giao Hàng Nhanh) shipping service.  
+                        The system uses order details (such as delivery address, package weight, and dimensions) to query 
+                        GHN's API and return the calculated shipping cost.
+                    
+                        **Workflow:**
+                        1. The client sends an `orderId` as a path variable.
+                        2. The system validates that the order exists.
+                        3. The GHN API is called with the order’s delivery information.
+                        4. The calculated shipping fee and related details (service type, estimated delivery time, etc.) are returned.
+                    
+                        **Use cases:**
+                        - Displaying the estimated or actual shipping fee on the order details page.
+                        - Allowing sellers or admins to verify delivery costs before fulfillment.
+                        - Showing buyers the delivery cost breakdown in checkout or order tracking screens.
+                    
+                        **Security Notes:**
+                        - Requires a valid JWT token (`ROLE_BUYER`, `ROLE_SELLER`, or `ROLE_ADMIN`).
+                        - A user can only access shipping fee information for orders they own.
+                    """
     )
     @GetMapping("/shipping-fee/{orderId}")
     public ResponseEntity<?> getShippingFee(
@@ -213,13 +213,13 @@ public class ShippingServiceController {
 
         Payment payment = paymentService.findPaymentMethodById(request.getPaymentId());
 
-        if(payment == null) {
+        if (payment == null) {
             throw new PaymentMethodNotSupportedException();
         }
         log.info(">>> [ShippingServiceController] in getShippingFee: Payment is supported");
 
 
-        if(payment.getGatewayName().equalsIgnoreCase("COD")) {
+        if (payment.getGatewayName().equalsIgnoreCase("COD")) {
             log.info(">>> [ShippingServiceController] in getShippingFee: COD payment");
             codValue = postProduct.getPrice().intValue();
         }
@@ -241,7 +241,7 @@ public class ShippingServiceController {
     public ResponseEntity<RestResponse<?, ?>> getOrderStatus(@PathVariable Long orderId) {
         Order foundOrder = orderService.getOrderById(orderId);
 
-        if(foundOrder == null) {
+        if (foundOrder == null) {
             throw new OrderNotFound();
         }
 

@@ -16,13 +16,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     ) {
         this.subscriptionRepository = subscriptionRepository;
     }
+
     public boolean isServicePackageExpired(Long sellerId) throws Exception {
         boolean result = false;
         Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(sellerId)
                 .orElseThrow(
                         () -> new Exception("Seller doesn't subscribe any service")
                 );
-        if(LocalDateTime.now().isAfter(subscription.getEndDay())) {
+        if (LocalDateTime.now().isAfter(subscription.getEndDay())) {
             result = true;
         }
         return result;

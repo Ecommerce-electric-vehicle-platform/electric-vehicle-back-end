@@ -14,6 +14,7 @@ import java.util.Optional;
 
 public interface WishListingRepository extends JpaRepository<WishListing, Long> {
     Page<WishListing> findByBuyer_BuyerId(Long buyerId, Pageable pageable);
+
     Page<WishListing> findByBuyer_BuyerIdAndPriority(Long buyerId, WishListPriority priority, Pageable pageable);
 
     @Query("SELECT w.postProduct FROM WishListing w WHERE w.id = :wishId")

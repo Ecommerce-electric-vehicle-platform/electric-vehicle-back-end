@@ -18,7 +18,7 @@ public class PaymentServiceImpl {
     public Payment findPaymentMethodById(Long id) {
         Payment paymentFound = null;
         Optional<Payment> paymentOpt = paymentRepository.findById(id);
-        if(paymentOpt.isPresent()) {
+        if (paymentOpt.isPresent()) {
             paymentFound = paymentOpt.get();
         }
         return paymentFound;

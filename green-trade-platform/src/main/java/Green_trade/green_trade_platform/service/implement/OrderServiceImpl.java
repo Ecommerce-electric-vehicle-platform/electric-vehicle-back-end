@@ -78,25 +78,35 @@ public class OrderServiceImpl implements OrderService {
 
     public Order cancelOrder(Long id) throws Exception {
         try {
+            log.info(">>> [OrderServiceImpl] came cancelOrder");
             Optional<Order> orderOpt = orderRepository.findOrderById((id));
             if (orderOpt.isEmpty()) {
                 throw new OrderNotFound();
             }
+            log.info(">>> [OrderServiceImpl] found order successfully");
 
             Order orderFound = orderOpt.get();
 
             if (orderFound.getStatus().equals(OrderStatus.PENDING)) {
+                log.info(">>> [OrderServiceImpl] order pending status");
                 Transaction transaction = transactionService.createTransaction(orderFound, TransactionStatus.CANCELED,
-                        orderFound.getTransactions().getLast().getPayment());
+                        orderFound.getTransactions().getLast().getPayment()); //transaction không có thì sẽ lỗi, nên lưu ý
+                log.info(">>> [OrderServiceImpl] created transaction successfully");
                 orderFound = updateOrderStatus(orderFound, OrderStatus.CANCELED);
+                log.info(">>> [OrderServiceImpl] update order status to canceled successfully");
             } else if (orderFound.getStatus().equals(OrderStatus.PAID)) {
+                log.info(">>> [OrderServiceImpl] order paid status");
                 Transaction transaction = transactionService.createTransaction(orderFound, TransactionStatus.CANCELED,
                         orderFound.getTransactions().getLast().getPayment());
+                log.info(">>> [OrderServiceImpl] created transaction successfully");
                 orderFound = updateOrderStatus(orderFound, OrderStatus.CANCELED);
+                log.info(">>> [OrderServiceImpl] update order status to canceled successfully");
                 walletTransactionServiceImpl.handleRefundMoney(orderFound.getBuyer().getWallet(), orderFound.getPrice(),
                         true, "REFUNDED FROM CANCELED ORDER");
+                log.info(">>> [OrderServiceImpl] created wallet transaction successfully");
                 walletService.handleBuyerRefund(orderFound.getSystemWallet(), 100, orderFound.getBuyer().getWallet(),
                         false);
+                log.info(">>> [OrderServiceImpl] refund successfully");
             } else {
                 throw new Exception("Cannot cancel order");
             }
@@ -124,7 +134,7 @@ public class OrderServiceImpl implements OrderService {
     public Order getOrderById(Long orderId) {
         Order result = null;
         Optional<Order> orderOpt = orderRepository.findOrderById(orderId);
-        if(orderOpt.isPresent()) {
+        if (orderOpt.isPresent()) {
             result = orderOpt.get();
         }
         return result;

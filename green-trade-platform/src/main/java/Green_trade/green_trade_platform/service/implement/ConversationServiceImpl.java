@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ConversationServiceImpl {
     private final ConversationRepository conversationRepository;
+
     public Conversation createConversation(Conversation conversation) {
         return conversationRepository.save(conversation);
     }

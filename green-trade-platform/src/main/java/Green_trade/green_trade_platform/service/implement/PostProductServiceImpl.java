@@ -57,7 +57,7 @@ public class PostProductServiceImpl implements PostProductService {
             if (subscription.getEndDay().isBefore(LocalDateTime.now())) {
                 throw new SubscriptionExpiredException();
             }
-            if(files.size() > maxImg) {
+            if (files.size() > maxImg) {
                 throw new ImageUploadLimitExceededException("Your subscription only allowed " + maxImg + "per post");
             }
 
@@ -104,9 +104,10 @@ public class PostProductServiceImpl implements PostProductService {
             });
             newPost = postProductRepository.save(newPost);
 
-            for(int i = 0; i <= files.size() - 1; i++) {
+            for (int i = 0; i <= files.size() - 1; i++) {
                 Map<String, String> uploadResult = cloudinaryService.upload(files.get(i), "PostImages/" + newPost.getId() + ":" + seller.getBuyer().getUsername() + "/product_image_" + i);
-                String imageUrl =uploadResult.get("fileUrl");
+                String imageUrl = uploadResult.get("fileUrl");
+                String publicId = uploadResult.get("publicId");
                 log.info(">>> Passed uploaded picture {}", i);
                 ProductImage productImage = ProductImage.builder()
                         .imageUrl(imageUrl)
@@ -132,10 +133,10 @@ public class PostProductServiceImpl implements PostProductService {
             List<PostProduct> postProducts = postProductRepository.findAll();
             PostProduct newPost = postProductRepository.findById(id).orElseThrow(() -> new ProfileException("Post Product is not existed"));
             postProducts.forEach((postProduct) -> {
-                for(int i = 0; i <= files.size() - 1; i++) {
+                for (int i = 0; i <= files.size() - 1; i++) {
                     try {
                         Map<String, String> uploadResult = cloudinaryService.upload(files.get(i), "PostImages/" + postProduct.getId() + ":" + postProduct.getSeller().getBuyer().getUsername() + "/product_image_" + i);
-                        String imageUrl =uploadResult.get("fileUrl");
+                        String imageUrl = uploadResult.get("fileUrl");
                         log.info(">>> Passed uploaded picture {}", i);
                         ProductImage productImage = ProductImage.builder()
                                 .imageUrl(imageUrl)
@@ -158,10 +159,9 @@ public class PostProductServiceImpl implements PostProductService {
     }
 
 
-
     public Page<PostProduct> getAllProductPaging(int page, int size, String sortedBy, boolean isAsc) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortedBy).ascending());
-        if(!isAsc) {
+        if (!isAsc) {
             pageable = PageRequest.of(page, size, Sort.by(sortedBy).descending());
         }
         Page<PostProduct> postProductsPaging = postProductRepository.findAllBySoldFalseAndActiveTrue(pageable);
@@ -178,12 +178,12 @@ public class PostProductServiceImpl implements PostProductService {
             Page<PostProduct> postProductsPaging = postProductRepository.findAll(pageable);
             List<PostProduct> postProducts = postProductsPaging.getContent();
             List<PostProduct> result = new ArrayList<>();
-            for(int i = 0; i <= postProducts.size() - 1; i++) {
+            for (int i = 0; i <= postProducts.size() - 1; i++) {
                 PostProduct postProduct = postProducts.get(i);
                 Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(postProduct.getSeller().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
                 log.info(">>> subscription package id: {}", subscription.getSubscriptionPackage().getId());
                 log.info(">>> postProduct verified status: {}", postProduct.getVerifiedDecisionstatus().toString());
-                if(subscription.getSubscriptionPackage().getId() >= 2 && postProduct.getVerifiedDecisionstatus().equals(VerifiedDecisionStatus.PENDING)) {
+                if (subscription.getSubscriptionPackage().getId() >= 2 && postProduct.getVerifiedDecisionstatus().equals(VerifiedDecisionStatus.PENDING)) {
                     log.info(">>> result add: {} and {}", postProduct.getVerifiedDecisionstatus(), subscription.getSubscriptionPackage().getId());
                     result.add(postProduct);
                 }
@@ -217,7 +217,7 @@ public class PostProductServiceImpl implements PostProductService {
                     request.getPostProductId()).orElseThrow(() -> new PostProductNotFound()
             );
 
-            if(!request.getPassed()) {
+            if (!request.getPassed()) {
                 postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.REJECTED);
                 postProduct.setVerified(false);
                 postProduct.setAdmin(admin);
@@ -231,7 +231,7 @@ public class PostProductServiceImpl implements PostProductService {
             postProductRepository.save(postProduct);
 
             return postProductRepository.save(postProduct);
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.info(">>> Error at decidePostContentValidation: {}", e.getMessage());
             throw e;
         }
@@ -240,7 +240,7 @@ public class PostProductServiceImpl implements PostProductService {
     public PostProduct postProductVerifiedRequest(VerifiedPostProductRequest request) throws Exception {
         PostProduct postProduct = postProductRepository.findById(request.getPostId()).orElseThrow(() -> new Exception("Post is not existed"));
         Long sellerId = postProduct.getSeller().getSellerId();
-        if(subscriptionService.isServicePackageExpired(sellerId)) {
+        if (subscriptionService.isServicePackageExpired(sellerId)) {
             throw new SubscriptionExpiredException();
         }
         postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.PENDING);
@@ -256,7 +256,7 @@ public class PostProductServiceImpl implements PostProductService {
         log.info(">>> [Post Product Service] Find post product by id: Started.");
         PostProduct foundPostProduct = null;
         Optional<PostProduct> postProductOpt = postProductRepository.findById(id);
-        if(postProductOpt.isPresent()) {
+        if (postProductOpt.isPresent()) {
             foundPostProduct = postProductOpt.get();
         }
         log.info(">>> [Post Product Service] Post product info: {}", foundPostProduct);
@@ -304,21 +304,20 @@ public class PostProductServiceImpl implements PostProductService {
             postProduct.setLocationTrading(request.getLocationTrading());
 
 
-
             postProduct.setVerified(false);
             postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.PENDING);
 
             List<ProductImage> productImages = productImageRepository.findAllByPostProduct(postProduct);
 
-            for(int i = 0; i <= productImages.size() - 1; i++) {
+            for (int i = 0; i <= productImages.size() - 1; i++) {
                 String imagePublicId = productImages.get(i).getImagePublicId();
                 String folder = "PostImages/" + postProduct.getId() + ":" + postProduct.getSeller().getBuyer().getUsername() + "/product_image_" + i;
-                if(
+                if (
                         (!(imagePublicId == null)) && (!imagePublicId.equalsIgnoreCase(""))
                 ) {
                     boolean isDeleted = cloudinaryService.delete(imagePublicId, folder);
 
-                    if(!isDeleted) {
+                    if (!isDeleted) {
                         throw new Exception("Delete product image failed");
                     }
                 }
@@ -326,16 +325,16 @@ public class PostProductServiceImpl implements PostProductService {
 
             productImageRepository.deleteAllInBatch(productImages);
 
-            if(files != null && files.size() > 0) {
+            if (files != null && files.size() > 0) {
                 log.info(">>> files data: {}", files);
 //                files.forEach((file) -> {
 //                    fileUtils.validateFile(file);
 //                    log.info(">>> Checked File name: {}", file.toString());
 //                });
 
-                for(int i = 0; i <= files.size() - 1; i++) {
+                for (int i = 0; i <= files.size() - 1; i++) {
                     Map<String, String> uploadResult = cloudinaryService.upload(files.get(i), "PostImages/" + postProduct.getId() + ":" + postProduct.getSeller().getBuyer().getUsername() + "/product_image_" + i);
-                    String imageUrl =uploadResult.get("fileUrl");
+                    String imageUrl = uploadResult.get("fileUrl");
                     String imagePublicId = uploadResult.get("publicId");
                     log.info(">>> Passed uploaded picture {}", i);
                     ProductImage productImage = ProductImage.builder()
@@ -349,7 +348,7 @@ public class PostProductServiceImpl implements PostProductService {
                 log.info(">>> Passed uploaded file");
             }
             return postProductRepository.save(postProduct);
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.info(">>> [PostProductServiceImpl] error at updatePostProduct: {}", e.getMessage());
             throw e;
         }

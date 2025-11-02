@@ -37,29 +37,29 @@ public class TransactionServiceImpl implements TransactionService {
         return transactions;
     }
 
-    public Transaction checkoutWalletPayment (String username, Long postProductId, Long paymentId, Order order) throws Exception {
+    public Transaction checkoutWalletPayment(String username, Long postProductId, Long paymentId, Order order) throws Exception {
         try {
             Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
-            if(paymentOpt.isEmpty()) {
+            if (paymentOpt.isEmpty()) {
                 throw new PaymentMethodNotSupportedException();
             }
 
             Buyer buyer = buyerService.findBuyerByUsername(username);
 
-            if(buyer == null) {
+            if (buyer == null) {
                 throw new ProfileException("Buyer with Username: " + username + "is not existed");
             }
 
-            if(!walletService.isBuyerHasWallet(buyer)) {
+            if (!walletService.isBuyerHasWallet(buyer)) {
                 throw new WalletNotFoundException("The wallet of Buyer is not existed");
             }
 
             Optional<PostProduct> postProductOpt = postProductRepository.findById(postProductId);
-            if(postProductOpt.isEmpty()) {
+            if (postProductOpt.isEmpty()) {
                 throw new PostProductNotFound();
             }
 
-            if(postProductOpt.get().isSold()) {
+            if (postProductOpt.get().isSold()) {
                 throw new Exception("The product is unavailable");
             }
 
@@ -68,7 +68,7 @@ public class TransactionServiceImpl implements TransactionService {
             log.info(">>> order total price: {}", order.getPrice());
             BigDecimal moneyHandler = wallet.getBalance().subtract(order.getPrice());
             log.info(">>> moneyHandler: {}", moneyHandler);
-            if(moneyHandler.compareTo(new BigDecimal("0")) < 0) {
+            if (moneyHandler.compareTo(new BigDecimal("0")) < 0) {
                 Transaction newTransaction = Transaction.builder()
                         .order(order)
                         .payment(paymentOpt.get())
@@ -108,13 +108,13 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
-    public Transaction checkoutCODPayment (String username, Long postProductId, Long paymentId, Order order) throws Exception {
+    public Transaction checkoutCODPayment(String username, Long postProductId, Long paymentId, Order order) throws Exception {
         try {
             Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
-            if(paymentOpt.isEmpty()) {
+            if (paymentOpt.isEmpty()) {
                 throw new PaymentMethodNotSupportedException();
             }
-            if(!buyerService.isBuyerExisted(username)) {
+            if (!buyerService.isBuyerExisted(username)) {
                 throw new ProfileException("Buyer is not existed");
             }
 
@@ -122,7 +122,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .orElseThrow(() -> new ProfileException("Buyer is not existed"));
 
             Optional<PostProduct> postProductOpt = postProductRepository.findById(paymentId);
-            if(postProductOpt.isEmpty()) {
+            if (postProductOpt.isEmpty()) {
                 throw new PostProductNotFound();
             }
 
@@ -143,6 +143,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     public Transaction createTransaction(Order order, TransactionStatus status, Payment payment) {
+        log.info(">>> [TransactionServiceImpl] came createTransaction");
         Transaction transaction = Transaction.builder()
                 .amount(order.getPrice())
                 .currency("VND")
@@ -151,6 +152,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .order(order)
                 .payment(payment)
                 .build();
+        log.info(">>> [TransactionServiceImpl] created transaction successfully");
         return transactionRepository.save(transaction);
     }
 }

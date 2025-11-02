@@ -36,10 +36,9 @@ public class EvidenceServiceImpl implements EvidenceService {
         });
 
 
-
-        for(int i = 0; i <= files.size() - 1; i++) {
+        for (int i = 0; i <= files.size() - 1; i++) {
             Map<String, String> uploadResult = cloudinaryService.upload(files.get(i), "Evidences/" + "DisputeId" + ":" + dispute.getId() + "/evidences_image_" + i);
-            String imageUrl =uploadResult.get("fileUrl");
+            String imageUrl = uploadResult.get("fileUrl");
             log.info(">>> Passed uploaded picture {}", i);
             Evidence evidenceImage = Evidence.builder()
                     .imageUrl(imageUrl)

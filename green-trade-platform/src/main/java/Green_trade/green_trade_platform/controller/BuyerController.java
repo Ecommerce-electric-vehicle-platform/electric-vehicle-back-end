@@ -36,7 +36,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/buyer")
 @Slf4j
-@AllArgsConstructor
 public class BuyerController {
     private final BuyerServiceImpl buyerService;
     private final ResponseMapper responseMapper;
@@ -58,28 +57,70 @@ public class BuyerController {
     private final WishListMapper wishListMapper;
     private final WishListingServiceImpl wishListingService;
 
+    public BuyerController(
+            BuyerServiceImpl buyerService,
+            ResponseMapper responseMapper,
+            BuyerMapper buyerMapper,
+            WalletMapper walletMapper,
+            PaymentRepository paymentRepository,
+            TransactionServiceImpl transactionService,
+            OrderMapper orderMapper,
+            GhnServiceImpl ghnService,
+            BuyerRepository buyerRepository,
+            PostProductRepository postProductRepository,
+            TransactionRepository transactionRepository,
+            OrderRepository orderRepository,
+            OrderServiceImpl orderService,
+            PostProductServiceImpl postProductService,
+            PaymentServiceImpl paymentService,
+            SystemWalletServiceImpl systemWalletService,
+            WalletServiceImpl walletService,
+            WishListMapper wishListMapper,
+            WishListingServiceImpl wishListingService
+    ) {
+        this.buyerService = buyerService;
+        this.responseMapper = responseMapper;
+        this.buyerMapper = buyerMapper;
+        this.walletMapper = walletMapper;
+        this.paymentRepository = paymentRepository;
+        this.transactionService = transactionService;
+        this.orderMapper = orderMapper;
+        this.ghnService = ghnService;
+        this.buyerRepository = buyerRepository;
+        this.postProductRepository = postProductRepository;
+        this.transactionRepository = transactionRepository;
+        this.orderRepository = orderRepository;
+        this.orderService = orderService;
+        this.postProductService = postProductService;
+        this.paymentService = paymentService;
+        this.systemWalletService = systemWalletService;
+        this.walletService = walletService;
+        this.wishListMapper = wishListMapper;
+        this.wishListingService = wishListingService;
+    }
+
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @Operation(
             summary = "Upload buyer profile",
             description = """
-        Allows a buyer to upload or update their profile information including full name,
-        shipping address, contact details, and avatar image.  
-        This endpoint accepts multipart form data containing both profile fields and an image file.
-
-        **Workflow:**
-        1. The buyer submits profile data (name, address, etc.) and an avatar image via multipart form.
-        2. The system uploads the avatar file, updates the buyer's profile in the database, 
-           and returns the updated profile data.
-        3. Only authenticated buyers (ROLE_BUYER) can access this endpoint.
-
-        **Use cases:**
-        - Buyers updating their account profile for the first time.
-        - Allowing users to change their avatar or update shipping address information.
-
-        **Security Notes:**
-        - Requires valid JWT token with `ROLE_BUYER` authority.
-        - The uploaded image must comply with allowed size and format restrictions.
-    """
+                        Allows a buyer to upload or update their profile information including full name,
+                        shipping address, contact details, and avatar image.  
+                        This endpoint accepts multipart form data containing both profile fields and an image file.
+                    
+                        **Workflow:**
+                        1. The buyer submits profile data (name, address, etc.) and an avatar image via multipart form.
+                        2. The system uploads the avatar file, updates the buyer's profile in the database, 
+                           and returns the updated profile data.
+                        3. Only authenticated buyers (ROLE_BUYER) can access this endpoint.
+                    
+                        **Use cases:**
+                        - Buyers updating their account profile for the first time.
+                        - Allowing users to change their avatar or update shipping address information.
+                    
+                        **Security Notes:**
+                        - Requires valid JWT token with `ROLE_BUYER` authority.
+                        - The uploaded image must comply with allowed size and format restrictions.
+                    """
     )
     @PostMapping(
             value = "/upload-profile",
@@ -101,24 +142,24 @@ public class BuyerController {
     @Operation(
             summary = "Update Buyer Profile",
             description = """
-        Allows a buyer to update their existing profile information, including full name, 
-        contact details, shipping address, and optionally their avatar image.  
-        This endpoint accepts multipart/form-data requests where both text fields and a file may be included.
-
-        **Workflow:**
-        1. The buyer submits updated profile details and, optionally, a new avatar image.
-        2. The system updates the corresponding fields in the buyer’s profile.
-        3. If a new avatar is provided, the image is uploaded and replaces the previous one.
-        4. The response returns the updated buyer profile information.
-
-        **Use cases:**
-        - Buyers updating their personal information such as name, phone number, or address.
-        - Changing or removing an avatar profile picture.
-        
-        **Security Notes:**
-        - Requires authentication via JWT token (ROLE_BUYER).
-        - Only the owner of the account can update their own profile.
-    """
+                        Allows a buyer to update their existing profile information, including full name, 
+                        contact details, shipping address, and optionally their avatar image.  
+                        This endpoint accepts multipart/form-data requests where both text fields and a file may be included.
+                    
+                        **Workflow:**
+                        1. The buyer submits updated profile details and, optionally, a new avatar image.
+                        2. The system updates the corresponding fields in the buyer’s profile.
+                        3. If a new avatar is provided, the image is uploaded and replaces the previous one.
+                        4. The response returns the updated buyer profile information.
+                    
+                        **Use cases:**
+                        - Buyers updating their personal information such as name, phone number, or address.
+                        - Changing or removing an avatar profile picture.
+                    
+                        **Security Notes:**
+                        - Requires authentication via JWT token (ROLE_BUYER).
+                        - Only the owner of the account can update their own profile.
+                    """
     )
     @PutMapping(
             value = "/update-profile",
@@ -138,7 +179,7 @@ public class BuyerController {
 
         return ResponseEntity.status(HttpStatus.OK.value()).body(
                 responseMapper.toDto(
-                true,
+                        true,
                         "UPDATED PROFILE SUCCESSFULLY",
                         responseData,
                         null
@@ -149,25 +190,25 @@ public class BuyerController {
     @Operation(
             summary = "Get buyer profile",
             description = """
-        Retrieves the profile information of the currently authenticated buyer.  
-        The client must include a valid JWT access token in the `Authorization` header.  
-        The system will decode the token, identify the buyer, and return their corresponding profile details.
-
-        **Workflow:**
-        1. The client sends a `GET /profile` request with an Authorization header:  
-           `Authorization: Bearer <access_token>`
-        2. The system validates the access token.
-        3. The system identifies the buyer associated with the token.
-        4. The buyer’s profile is fetched and returned as a response.
-
-        **Use cases:**
-        - Retrieving current logged-in buyer’s profile for display in their dashboard.
-        - Ensuring front-end applications can show user-specific information without manually passing user IDs.
-
-        **Security Notes:**
-        - Requires a valid access token (`ROLE_BUYER`).
-        - Access is limited to the authenticated buyer’s own profile.
-    """
+                        Retrieves the profile information of the currently authenticated buyer.  
+                        The client must include a valid JWT access token in the `Authorization` header.  
+                        The system will decode the token, identify the buyer, and return their corresponding profile details.
+                    
+                        **Workflow:**
+                        1. The client sends a `GET /profile` request with an Authorization header:  
+                           `Authorization: Bearer <access_token>`
+                        2. The system validates the access token.
+                        3. The system identifies the buyer associated with the token.
+                        4. The buyer’s profile is fetched and returned as a response.
+                    
+                        **Use cases:**
+                        - Retrieving current logged-in buyer’s profile for display in their dashboard.
+                        - Ensuring front-end applications can show user-specific information without manually passing user IDs.
+                    
+                        **Security Notes:**
+                        - Requires a valid access token (`ROLE_BUYER`).
+                        - Access is limited to the authenticated buyer’s own profile.
+                    """
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @GetMapping("/profile")
@@ -208,18 +249,18 @@ public class BuyerController {
     @Operation(
             summary = "Place a new order",
             description = """
-                This endpoint allows a buyer to place a new order in the Green Trade platform.
-                <br><br>
-                Workflow:
-                <ul>
-                    <li>Validate the payment method and buyer information.</li>
-                    <li>Fetch the product and verify its availability.</li>
-                    <li>Reject the request if the buyer attempts to purchase their own product.</li>
-                    <li>Calculate the shipping fee through the GHN API (depending on COD or online payment).</li>
-                    <li>Create a new order, transaction, and GHN shipping order.</li>
-                    <li>Return a response containing the new order details and GHN order code.</li>
-                </ul>
-                """
+                    This endpoint allows a buyer to place a new order in the Green Trade platform.
+                    <br><br>
+                    Workflow:
+                    <ul>
+                        <li>Validate the payment method and buyer information.</li>
+                        <li>Fetch the product and verify its availability.</li>
+                        <li>Reject the request if the buyer attempts to purchase their own product.</li>
+                        <li>Calculate the shipping fee through the GHN API (depending on COD or online payment).</li>
+                        <li>Create a new order, transaction, and GHN shipping order.</li>
+                        <li>Return a response containing the new order details and GHN order code.</li>
+                    </ul>
+                    """
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/place-order")
@@ -233,19 +274,19 @@ public class BuyerController {
 
         log.info(">>> Fetch payment");
         Payment payment = paymentService.findPaymentMethodById(request.getPaymentId());
-        if(payment == null) {
+        if (payment == null) {
             throw new PaymentMethodNotSupportedException();
         }
 
         log.info(">>> Fetch buyer");
         Buyer buyer = buyerService.findBuyerByUsername(request.getUsername());
-        if(buyer == null) {
+        if (buyer == null) {
             throw new ProfileException("Buyer with Username: " + request.getUsername() + "is not existed");
         }
 
         log.info(">>> Fetch post product");
         PostProduct postProduct = postProductService.findPostProductById(request.getPostProductId());
-        if(postProduct == null) {
+        if (postProduct == null) {
             throw new PostProductNotFound();
         }
 
@@ -333,17 +374,17 @@ public class BuyerController {
     @Operation(
             summary = "Get wallet transaction history",
             description = """
-        Retrieves a paginated list of wallet transactions for the currently authenticated user.
-        This endpoint supports pagination through 'page' and 'size' query parameters.
-        Each record in the result includes transaction details such as:
-        - Transaction ID
-        - Type (credit/debit)
-        - Amount
-        - Status
-        - Timestamp
-        - ...
-        Use this API to display a user's transaction history in their dashboard or account page.
-    """
+                        Retrieves a paginated list of wallet transactions for the currently authenticated user.
+                        This endpoint supports pagination through 'page' and 'size' query parameters.
+                        Each record in the result includes transaction details such as:
+                        - Transaction ID
+                        - Type (credit/debit)
+                        - Amount
+                        - Status
+                        - Timestamp
+                        - ...
+                        Use this API to display a user's transaction history in their dashboard or account page.
+                    """
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @GetMapping("/transaction-history")
@@ -374,17 +415,17 @@ public class BuyerController {
     @Operation(
             summary = "Add a product post to the buyer's wish-list",
             description = """
-        This endpoint allows an authenticated **buyer** to add a product post 
-        (`PostProduct`) to their personal wish-list.
-
-        - The buyer must be logged in.
-        - The product (`PostProduct`) must exist and be active.
-        - A seller **cannot** add their own product to their own wish-list (for fairness and data integrity).
-        - If the product is already in the buyer's wish-list, the service may prevent duplication or update the record, depending on business logic.
-
-        **Use case:**  
-        Buyers use this API to save or bookmark products they are interested in purchasing later.
-        """
+                    This endpoint allows an authenticated **buyer** to add a product post 
+                    (`PostProduct`) to their personal wish-list.
+                    
+                    - The buyer must be logged in.
+                    - The product (`PostProduct`) must exist and be active.
+                    - A seller **cannot** add their own product to their own wish-list (for fairness and data integrity).
+                    - If the product is already in the buyer's wish-list, the service may prevent duplication or update the record, depending on business logic.
+                    
+                    **Use case:**  
+                    Buyers use this API to save or bookmark products they are interested in purchasing later.
+                    """
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/wish-list")
@@ -398,7 +439,7 @@ public class BuyerController {
             PostProduct postProduct = postProductService.getPostProductById(request.getPostId());
             log.info(">>> [Buyer Controller] Post product: {}", postProduct);
 
-            if(buyer.getSeller() == postProduct.getSeller()) {
+            if (buyer.getSeller() == postProduct.getSeller()) {
                 throw new IllegalArgumentException("Seller can not add your product into your wish-listing.");
             }
 
@@ -423,16 +464,16 @@ public class BuyerController {
     @Operation(
             summary = "Remove a product from the buyer's wish list",
             description = """
-        This endpoint allows an authenticated **buyer** to remove a product post 
-        from their personal wish list.
-
-        - The `wishId` must correspond to an existing wish-list entry.
-        - The buyer must own the wish-list entry; otherwise, access will be denied.
-        - If the wish-list item does not exist or has already been removed, the API will return an appropriate error message.
-
-        **Use case:**  
-        Buyers use this endpoint when they no longer wish to keep a product in their saved wish-list.
-        """
+                    This endpoint allows an authenticated **buyer** to remove a product post 
+                    from their personal wish list.
+                    
+                    - The `wishId` must correspond to an existing wish-list entry.
+                    - The buyer must own the wish-list entry; otherwise, access will be denied.
+                    - If the wish-list item does not exist or has already been removed, the API will return an appropriate error message.
+                    
+                    **Use case:**  
+                    Buyers use this endpoint when they no longer wish to keep a product in their saved wish-list.
+                    """
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/remove-wish-list/{wishId}")
@@ -456,16 +497,16 @@ public class BuyerController {
     @Operation(
             summary = "Retrieve the buyer's wish list",
             description = """
-        This endpoint returns a paginated list of the buyer's wish-list items.
-
-        - The buyer must be logged in.
-        - Results can be optionally filtered by **priority** (e.g., HIGH, MEDIUM, LOW).
-        - If no priority is specified, all wish-list items are returned.
-        - Supports pagination via `page` and `size` parameters.
-
-        **Use case:**  
-        Buyers use this endpoint to view and manage the list of product posts they have added to their wish-list.
-        """
+                    This endpoint returns a paginated list of the buyer's wish-list items.
+                    
+                    - The buyer must be logged in.
+                    - Results can be optionally filtered by **priority** (e.g., HIGH, MEDIUM, LOW).
+                    - If no priority is specified, all wish-list items are returned.
+                    - Supports pagination via `page` and `size` parameters.
+                    
+                    **Use case:**  
+                    Buyers use this endpoint to view and manage the list of product posts they have added to their wish-list.
+                    """
     )
     @GetMapping("/wish-list")
     public ResponseEntity<?> getWishList(

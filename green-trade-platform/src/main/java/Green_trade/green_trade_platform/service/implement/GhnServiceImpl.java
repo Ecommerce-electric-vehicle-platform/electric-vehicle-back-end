@@ -501,7 +501,7 @@ public class GhnServiceImpl {
     }
 
     public Map<String, Object> getShippingFeeServiceBodyRequest(Buyer buyer, Seller seller, PostProduct postProduct,
-            int codValue) throws JsonProcessingException {
+                                                                int codValue) throws JsonProcessingException {
         String sellerProvinceId = findProvinceCodeByProvinceName(seller.getBuyer().getProvinceName());
         log.info(">>> [GhnServiceImpl] seller province id: {}", sellerProvinceId);
         String sellerDistrictId = findDistrictCodeByDistrictName(Integer.parseInt(sellerProvinceId),

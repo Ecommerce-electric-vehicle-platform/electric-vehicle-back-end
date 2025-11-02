@@ -1,7 +1,6 @@
 package Green_trade.green_trade_platform.repository;
 
 
-
 import Green_trade.green_trade_platform.model.SubscriptionPackages;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;

@@ -268,7 +268,7 @@ public class BuyerServiceImpl {
                 .shippingPartner(shippingPartner)
                 .shippingFee(new BigDecimal(shippingFee))
                 .transactions(null)
-                .price(postProductOpt.get().getPrice().add(new BigDecimal(shippingFee)))
+                .price(postProductOpt.get().getPrice())
                 .status(OrderStatus.PENDING)
                 .cancelReason("Not Canceled Yet")
                 .canceledAt(null)
@@ -285,7 +285,7 @@ public class BuyerServiceImpl {
     public Buyer findBuyerByUsername(String username) {
         Buyer foundBuyer = null;
         Optional<Buyer> buyerOpt = buyerRepository.findByUsername(username);
-        if(buyerOpt.isPresent()) {
+        if (buyerOpt.isPresent()) {
             foundBuyer = buyerOpt.get();
         }
         return foundBuyer;

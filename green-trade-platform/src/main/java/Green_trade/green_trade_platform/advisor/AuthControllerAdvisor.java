@@ -35,7 +35,7 @@ public class AuthControllerAdvisor {
         RestResponse<Object, Map<String, String>> response = responseMapper.toDto(
                 false,
                 "Unauthorized",
-                null ,
+                null,
                 Map.of(
                         "errorType", e.getClass().getSimpleName(),
                         "message", e.getMessage(),
