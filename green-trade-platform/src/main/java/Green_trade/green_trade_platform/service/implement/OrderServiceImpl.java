@@ -94,6 +94,8 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] created transaction successfully");
                 orderFound = updateOrderStatus(orderFound, OrderStatus.CANCELED);
                 log.info(">>> [OrderServiceImpl] update order status to canceled successfully");
+                orderFound.getPostProduct().setSold(false);
+                log.info(">>> [OrderServiceImpl] update order sold successfully");
             } else if (orderFound.getStatus().equals(OrderStatus.PAID)) {
                 log.info(">>> [OrderServiceImpl] order paid status");
                 Transaction transaction = transactionService.createTransaction(orderFound, TransactionStatus.CANCELED,
@@ -101,12 +103,10 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] created transaction successfully");
                 orderFound = updateOrderStatus(orderFound, OrderStatus.CANCELED);
                 log.info(">>> [OrderServiceImpl] update order status to canceled successfully");
-                walletTransactionServiceImpl.handleRefundMoney(orderFound.getBuyer().getWallet(), orderFound.getPrice(),
-                        true, "REFUNDED FROM CANCELED ORDER");
-                log.info(">>> [OrderServiceImpl] created wallet transaction successfully");
-                walletService.handleBuyerRefund(orderFound.getSystemWallet(), 100, orderFound.getBuyer().getWallet(),
-                        false);
+                walletService.handleBuyerRefundForCancelledOrder(orderFound.getSystemWallet(), 100, orderFound.getBuyer().getWallet());
                 log.info(">>> [OrderServiceImpl] refund successfully");
+                orderFound.getPostProduct().setSold(false);
+                log.info(">>> [OrderServiceImpl] update order sold successfully");
             } else {
                 throw new Exception("Cannot cancel order");
             }

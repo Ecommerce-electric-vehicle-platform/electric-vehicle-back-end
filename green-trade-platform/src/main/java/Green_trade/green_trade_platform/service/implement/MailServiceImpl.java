@@ -35,38 +35,38 @@ public class MailServiceImpl {
 
     private String buildBeautifulHtml(MailRequest req) {
         return """
-            <div style="font-family: 'Segoe UI', Tahoma, sans-serif;
-                        background-color: #f4f4f9;
-                        padding: 30px;
-                        border-radius: 12px;
-                        max-width: 650px;
-                        margin: auto;
-                        box-shadow: 0 0 12px rgba(0,0,0,0.1);">
+                    <div style="font-family: 'Segoe UI', Tahoma, sans-serif;
+                                background-color: #f4f4f9;
+                                padding: 30px;
+                                border-radius: 12px;
+                                max-width: 650px;
+                                margin: auto;
+                                box-shadow: 0 0 12px rgba(0,0,0,0.1);">
                 
-                <div style="background-color: #4CAF50; color: white; 
-                            padding: 18px; border-radius: 8px 8px 0 0;
-                            text-align: center;">
-                    <h2 style="margin: 0;">🌿 Green Trade Platform</h2>
-                </div>
-
-                <div style="background: white; padding: 25px 30px; border-radius: 0 0 8px 8px;">
-                    <p style="font-size: 16px; color: #333;">Xin chào,</p>
-                    
-                    <div style="font-size: 15px; color: #444; line-height: 1.6;">
-                        %s
+                        <div style="background-color: #4CAF50; color: white; 
+                                    padding: 18px; border-radius: 8px 8px 0 0;
+                                    text-align: center;">
+                            <h2 style="margin: 0;">🌿 Green Trade Platform</h2>
+                        </div>
+                
+                        <div style="background: white; padding: 25px 30px; border-radius: 0 0 8px 8px;">
+                            <p style="font-size: 16px; color: #333;">Xin chào,</p>
+                
+                            <div style="font-size: 15px; color: #444; line-height: 1.6;">
+                                %s
+                            </div>
+                
+                            <br/>
+                            <p style="font-size: 14px; color: #777;">
+                                Trân trọng,<br/>
+                                <strong>Đội ngũ Green Trade 💚</strong>
+                            </p>
+                        </div>
+                
+                        <footer style="margin-top: 20px; text-align: center; font-size: 12px; color: #999;">
+                            © 2025 Green Trade Platform. All rights reserved.
+                        </footer>
                     </div>
-                    
-                    <br/>
-                    <p style="font-size: 14px; color: #777;">
-                        Trân trọng,<br/>
-                        <strong>Đội ngũ Green Trade 💚</strong>
-                    </p>
-                </div>
-
-                <footer style="margin-top: 20px; text-align: center; font-size: 12px; color: #999;">
-                    © 2025 Green Trade Platform. All rights reserved.
-                </footer>
-            </div>
-        """.formatted(req.getMessage());
+                """.formatted(req.getMessage());
     }
 }

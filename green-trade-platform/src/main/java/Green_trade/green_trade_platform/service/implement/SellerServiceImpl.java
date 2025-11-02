@@ -144,17 +144,17 @@ public class SellerServiceImpl implements SellerService {
         } else {
             String reason = request.getMessage();
             mailRequest.setMessage("""
-        ⚠️ <strong>Rất tiếc!</strong><br><br>
-        Yêu cầu nâng cấp tài khoản lên Seller của bạn hiện chưa được phê duyệt.<br>
-        Nguyên nhân có thể do thông tin cung cấp chưa đầy đủ hoặc chưa đáp ứng điều kiện của nền tảng.<br><br>
-        <strong>Lý do cụ thể:</strong> %s<br><br>
-        Vui lòng kiểm tra lại hồ sơ và gửi yêu cầu mới sau khi hoàn thiện thông tin cần thiết.<br><br>
-        Nếu cần hỗ trợ, hãy liên hệ 
-        <a href='mailto:green.trade.platform.391@gmail.com' style='color:#4CAF50;font-weight:bold;'>
-            đội ngũ hỗ trợ Green Trade
-        </a> để được giúp đỡ.<br><br>
-        💚 Cảm ơn bạn đã quan tâm đến Green Trade Platform!
-        """.formatted(reason));
+                    ⚠️ <strong>Rất tiếc!</strong><br><br>
+                    Yêu cầu nâng cấp tài khoản lên Seller của bạn hiện chưa được phê duyệt.<br>
+                    Nguyên nhân có thể do thông tin cung cấp chưa đầy đủ hoặc chưa đáp ứng điều kiện của nền tảng.<br><br>
+                    <strong>Lý do cụ thể:</strong> %s<br><br>
+                    Vui lòng kiểm tra lại hồ sơ và gửi yêu cầu mới sau khi hoàn thiện thông tin cần thiết.<br><br>
+                    Nếu cần hỗ trợ, hãy liên hệ 
+                    <a href='mailto:green.trade.platform.391@gmail.com' style='color:#4CAF50;font-weight:bold;'>
+                        đội ngũ hỗ trợ Green Trade
+                    </a> để được giúp đỡ.<br><br>
+                    💚 Cảm ơn bạn đã quan tâm đến Green Trade Platform!
+                    """.formatted(reason));
 
             sellerRepository.delete(seller);
             notice = Notification.builder()

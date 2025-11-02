@@ -265,110 +265,114 @@ public class BuyerController {
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/place-order")
     public ResponseEntity<RestResponse<OrderResponse, Object>> placeOrder(@Valid @RequestBody PlaceOrderRequest request) throws Exception {
-        log.info(">>> [START] placeOrder");
-
         Order newOrder = null;
         RestResponse<OrderResponse, Object> response = null;
         OrderResponse responseData = null;
         String shippingFee = "0";
+        try {
+            log.info(">>> [START] placeOrder");
 
-        log.info(">>> Fetch payment");
-        Payment payment = paymentService.findPaymentMethodById(request.getPaymentId());
-        if (payment == null) {
-            throw new PaymentMethodNotSupportedException();
-        }
+            log.info(">>> Fetch payment");
+            Payment payment = paymentService.findPaymentMethodById(request.getPaymentId());
+            if (payment == null) {
+                throw new PaymentMethodNotSupportedException();
+            }
 
-        log.info(">>> Fetch buyer");
-        Buyer buyer = buyerService.findBuyerByUsername(request.getUsername());
-        if (buyer == null) {
-            throw new ProfileException("Buyer with Username: " + request.getUsername() + "is not existed");
-        }
+            log.info(">>> Fetch buyer");
+            Buyer buyer = buyerService.findBuyerByUsername(request.getUsername());
+            if (buyer == null) {
+                throw new ProfileException("Buyer with Username: " + request.getUsername() + "is not existed");
+            }
 
-        log.info(">>> Fetch post product");
-        PostProduct postProduct = postProductService.findPostProductById(request.getPostProductId());
-        if (postProduct == null) {
-            throw new PostProductNotFound();
-        }
+            log.info(">>> Fetch post product");
+            PostProduct postProduct = postProductService.findPostProductById(request.getPostProductId());
+            if (postProduct == null) {
+                throw new PostProductNotFound();
+            }
 
-        if (buyer.getBuyerId() == postProduct.getSeller().getBuyer().getBuyerId()) {
-            throw new SelfPurchaseNotAllowedException();
-        }
+            if (buyer.getBuyerId() == postProduct.getSeller().getBuyer().getBuyerId()) {
+                throw new SelfPurchaseNotAllowedException();
+            }
 
-        log.info(">>> Calculate shipping fee");
-        if (payment.getGatewayName().equals("COD")) {
-            log.info(">>> Calculate shipping fee COD");
-            shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, postProduct.getPrice().intValue()).get("total");
-        } else {
-            log.info(">>> Calculate shipping fee Online Payment");
-            shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, 0).get("total");
-        }
+            log.info(">>> Calculate shipping fee");
+            if (payment.getGatewayName().equals("COD")) {
+                log.info(">>> Calculate shipping fee COD");
+                shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, postProduct.getPrice().intValue()).get("total");
+            } else {
+                log.info(">>> Calculate shipping fee Online Payment");
+                shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, 0).get("total");
+            }
 
-        log.info(">>> Place new order");
-        newOrder = buyerService.placeOrder(request, shippingFee);
+            log.info(">>> Place new order");
+            newOrder = buyerService.placeOrder(request, shippingFee);
 
-        if ("COD".equalsIgnoreCase(payment.getGatewayName())) {
-            log.info(">>> COD payment flow");
-            Transaction transaction = transactionService.checkoutCODPayment(
-                    request.getUsername(),
-                    request.getPostProductId(),
-                    request.getPaymentId(),
-                    newOrder
+            if ("COD".equalsIgnoreCase(payment.getGatewayName())) {
+                log.info(">>> COD payment flow");
+                Transaction transaction = transactionService.checkoutCODPayment(
+                        request.getUsername(),
+                        request.getPostProductId(),
+                        request.getPaymentId(),
+                        newOrder
+                );
+                SystemWallet systemWallet = systemWalletService.createEscrowRecord(newOrder);
+                List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
+                log.info(">>> Passed get transactions");
+
+                newOrder = orderService.updateOrderTransactions(newOrder, transactions);
+                log.info(">>> Passed update transactions");
+
+                String orderShippingCode = ghnService.createOrderShippingResponseToDto(
+                        newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
+                ).get("orderCode");
+                log.info(">>> Passed get orderShippingCode");
+                log.info(">>> orderShippingCode: {}", orderShippingCode);
+
+                newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
+                log.info(">>> Passed set Order Code");
+            } else {
+                log.info(">>> Wallet payment flow");
+                Transaction transaction = transactionService.checkoutWalletPayment(
+                        request.getUsername(),
+                        request.getPostProductId(),
+                        request.getPaymentId(),
+                        newOrder
+                );
+                SystemWallet systemWallet = systemWalletService.createEscrowRecord(newOrder);
+                List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
+                log.info(">>> Passed get transactions");
+
+                newOrder = orderService.updateOrderTransactions(newOrder, transactions);
+                log.info(">>> Passed update transactions for order");
+
+                newOrder = orderService.updateOrderStatus(newOrder, OrderStatus.PAID);
+                log.info(">>> Passed update order status");
+
+                String orderShippingCode = ghnService.createOrderShippingResponseToDto(
+                        newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()).get("orderCode");
+                log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
+
+                newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
+                log.info(">>> Passed set Order Code");
+            }
+            responseData = orderMapper.toDto(newOrder);
+            log.info(">>> Passed created response");
+
+            postProductService.updateSoldStatus(true, postProduct);
+
+            log.info(">>> Build response");
+            response = responseMapper.toDto(
+                    true,
+                    "PLACE ORDERED SUCCESS",
+                    responseData,
+                    null
             );
 
-            List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
-            log.info(">>> Passed get transactions");
-
-            newOrder = orderService.updateOrderTransactions(newOrder, transactions);
-            log.info(">>> Passed update transactions");
-
-            String orderShippingCode = ghnService.createOrderShippingResponseToDto(
-                    newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
-            ).get("orderCode");
-            log.info(">>> Passed get orderShippingCode");
-            log.info(">>> orderShippingCode: {}", orderShippingCode);
-
-            newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
-            log.info(">>> Passed set Order Code");
-        } else {
-            log.info(">>> Wallet payment flow");
-            Transaction transaction = transactionService.checkoutWalletPayment(
-                    request.getUsername(),
-                    request.getPostProductId(),
-                    request.getPaymentId(),
-                    newOrder
-            );
-            SystemWallet systemWallet = systemWalletService.createEscrowRecord(newOrder);
-            List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
-            log.info(">>> Passed get transactions");
-
-            newOrder = orderService.updateOrderTransactions(newOrder, transactions);
-            log.info(">>> Passed update transactions for order");
-
-            newOrder = orderService.updateOrderStatus(newOrder, OrderStatus.PAID);
-            log.info(">>> Passed update order status");
-
-            String orderShippingCode = ghnService.createOrderShippingResponseToDto(
-                    newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()).get("orderCode");
-            log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
-
-            newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
-            log.info(">>> Passed set Order Code");
+            log.info(">>> [END] placeOrder success");
+            return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        } catch (Exception e) {
+//            newOrder.getPostProduct().setSold(false);
+            throw e;
         }
-        responseData = orderMapper.toDto(newOrder);
-        log.info(">>> Passed created response");
-
-        postProductService.updateSoldStatus(true, postProduct);
-
-        log.info(">>> Build response");
-        response = responseMapper.toDto(
-                true,
-                "PLACE ORDERED SUCCESS",
-                responseData,
-                null
-        );
-
-        log.info(">>> [END] placeOrder success");
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
     @Operation(

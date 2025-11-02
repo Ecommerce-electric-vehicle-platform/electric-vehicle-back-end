@@ -232,24 +232,26 @@ public class BuyerServiceImpl {
         if (!isBuyerExisted(request.getUsername())) {
             throw new ProfileException("User is not existed");
         }
-
+        log.info(">>> [BuyerServiceImpl] checked buyer existed passed");
         Optional<Buyer> buyerOpt = buyerRepository.findByUsername(request.getUsername());
         if (!walletService.isBuyerHasWallet(buyerOpt.get())) {
             throw new WalletNotFoundException("The wallet of User is not existed");
         }
-
+        log.info(">>> [BuyerServiceImpl] checked buyer wallet existed passed");
         Optional<PostProduct> postProductOpt = postProductRepository.findById(request.getPostProductId());
         if (postProductOpt.isEmpty()) {
             throw new PostProductNotFound();
         }
-
+        log.info(">>> [BuyerServiceImpl] checked post product existed passed");
         if (postProductOpt.get().isSold()) {
             throw new ProductSoldOutException();
         }
+        log.info(">>> [BuyerServiceImpl] get post product passed");
 
         ShippingPartner shippingPartner = shippingPartnerRepository.findById(request.getShippingPartnerId())
                 .orElseThrow(
                         () -> new Exception("Shipping Partner is not existed"));
+        log.info(">>> [BuyerServiceImpl] checked shipping partner existed passed");
 
         // tạo mới một đơn hàng
         Order newOrder = Order.builder()
@@ -273,6 +275,7 @@ public class BuyerServiceImpl {
                 .cancelReason("Not Canceled Yet")
                 .canceledAt(null)
                 .build();
+        log.info(">>> [BuyerServiceImpl] checked post product existed passed");
 
         return orderRepository.save(newOrder);
     }

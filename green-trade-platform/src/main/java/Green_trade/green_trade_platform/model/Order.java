@@ -29,7 +29,7 @@ public class Order {
     @ToString.Include
     private Long id;
 
-    @Column(name = "order_code", nullable = true, unique = true)
+    @Column(name = "order_code", nullable = true, unique = false)
     @ToString.Include
     private String orderCode;
 
@@ -41,7 +41,7 @@ public class Order {
     @ToString.Include
     private String phoneNumber;
 
-    @Column(name = "price",  nullable = true, unique = false)
+    @Column(name = "price", nullable = true, unique = false)
     @ToString.Include
     private BigDecimal price;
 
@@ -77,7 +77,7 @@ public class Order {
     @ToString.Exclude
     private List<Review> reviews;
 
-    @OneToOne()
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false, unique = false)
     @JsonBackReference
     @ToString.Exclude
