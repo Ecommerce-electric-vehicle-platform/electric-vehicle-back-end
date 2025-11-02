@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.controller;
 
+import Green_trade.green_trade_platform.exception.OrderNotFound;
 import Green_trade.green_trade_platform.mapper.OrderListMapper;
 import Green_trade.green_trade_platform.mapper.OrderMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
@@ -209,5 +210,23 @@ public class OrderController {
                     e.getMessage()
             ));
         }
+    }
+
+    @GetMapping("/{orderId}")
+    public ResponseEntity<RestResponse<OrderResponse, Object>> getOrderDetailByOrderId(@PathVariable Long orderId) {
+        Order foundOrder = orderService.getOrderById(orderId);
+        if (foundOrder == null) {
+            throw new OrderNotFound();
+        }
+
+        OrderResponse responseData = orderMapper.toDto(foundOrder);
+
+        RestResponse<OrderResponse, Object> response = responseMapper.toDto(
+                true,
+                "FETCH ORDER DETAIL SUCCESSFULLY",
+                responseData,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 }
