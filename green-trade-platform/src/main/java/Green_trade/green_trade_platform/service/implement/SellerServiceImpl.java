@@ -12,6 +12,7 @@ import Green_trade.green_trade_platform.mapper.SubscriptionMapper;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.*;
 import Green_trade.green_trade_platform.request.ApproveSellerRequest;
+import Green_trade.green_trade_platform.request.MailRequest;
 import Green_trade.green_trade_platform.response.ApproveSellerResponse;
 import Green_trade.green_trade_platform.response.SellerResponse;
 import Green_trade.green_trade_platform.response.SubscriptionResponse;
@@ -45,6 +46,7 @@ public class SellerServiceImpl implements SellerService {
     private final RegisterShopShippingServiceMapper registerShopShippingServiceMapper;
     private final BuyerRepository buyerRepository;
     private final PostProductRepository postProductRepository;
+    private final MailServiceImpl mailService;
 
     public Seller createShippingShop(String dataRaw, Seller seller) throws JsonProcessingException {
         try {
@@ -99,6 +101,13 @@ public class SellerServiceImpl implements SellerService {
                 .orElseThrow(() -> new ProfileException("Không tìm thấy hồ sơ seller này: " + request.getSellerId())
                 );
 
+        // Create mail request to send to seller
+        MailRequest mailRequest = MailRequest.builder()
+                .from("green.trade.platform.391@gmail.com")
+                .to(seller.getBuyer().getEmail())
+                .subject("UPGRADE ACCOUNT RESULT")
+                .build();
+
         Admin admin = adminService.getCurrentUser();
         Notification notice = null;
         ApproveSellerResponse response = ApproveSellerResponse.builder()
@@ -124,7 +133,29 @@ public class SellerServiceImpl implements SellerService {
                     .createdAt(LocalDateTime.now())
                     .build();
 
+            mailRequest.setMessage("""
+                    🎉 <strong>Chúc mừng bạn!</strong><br><br>" +
+                    "Yêu cầu nâng cấp tài khoản của bạn đã được <strong>Green Trade</strong> phê duyệt thành công.<br>" +
+                    "Từ bây giờ, bạn có thể đăng bán sản phẩm, quản lý đơn hàng và giao dịch trực tiếp với khách hàng.<br><br>" +
+                    "Vui lòng tuân thủ <a href='https://green-trade-platform.com/policies' style='color:#4CAF50;font-weight:bold;'>chính sách người bán</a> " +
+                    "để đảm bảo môi trường kinh doanh minh bạch và bền vững.<br><br>" +
+                    "💚 Chúc bạn kinh doanh thuận lợi cùng Green Trade!""");
+
         } else {
+            String reason = request.getMessage();
+            mailRequest.setMessage("""
+        ⚠️ <strong>Rất tiếc!</strong><br><br>
+        Yêu cầu nâng cấp tài khoản lên Seller của bạn hiện chưa được phê duyệt.<br>
+        Nguyên nhân có thể do thông tin cung cấp chưa đầy đủ hoặc chưa đáp ứng điều kiện của nền tảng.<br><br>
+        <strong>Lý do cụ thể:</strong> %s<br><br>
+        Vui lòng kiểm tra lại hồ sơ và gửi yêu cầu mới sau khi hoàn thiện thông tin cần thiết.<br><br>
+        Nếu cần hỗ trợ, hãy liên hệ 
+        <a href='mailto:green.trade.platform.391@gmail.com' style='color:#4CAF50;font-weight:bold;'>
+            đội ngũ hỗ trợ Green Trade
+        </a> để được giúp đỡ.<br><br>
+        💚 Cảm ơn bạn đã quan tâm đến Green Trade Platform!
+        """.formatted(reason));
+
             sellerRepository.delete(seller);
             notice = Notification.builder()
                     .receiverId(seller.getBuyer().getBuyerId())
@@ -136,6 +167,7 @@ public class SellerServiceImpl implements SellerService {
         }
         notificationRepository.save(notice);
         response.setNotification(notice);
+        mailService.sendBeautifulMail(mailRequest);
         return response;
     }
 
