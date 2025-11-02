@@ -90,10 +90,10 @@ public class PostProduct {
     @Column(name = "deleted_at", nullable = true, unique = false)
     private LocalDateTime deletedAt;
 
-    @OneToOne(mappedBy = "postProduct", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "postProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @ToString.Exclude
-    private Order order;
+    private List<Order> order;
 
     @OneToMany(mappedBy = "postProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude

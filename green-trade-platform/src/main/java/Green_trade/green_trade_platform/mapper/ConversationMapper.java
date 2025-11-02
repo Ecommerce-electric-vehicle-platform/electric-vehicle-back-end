@@ -26,6 +26,7 @@ public class ConversationMapper {
                 .createdAt(conversation.getCreatedAt())
                 .build();
     }
+
     public List<ConversationResponse> toDtoList(List<Conversation> conversations) {
         return conversations.stream()
                 .map(this::toDto)

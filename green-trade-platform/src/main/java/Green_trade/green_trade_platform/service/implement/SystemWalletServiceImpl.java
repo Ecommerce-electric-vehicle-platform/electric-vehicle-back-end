@@ -35,6 +35,7 @@ public class SystemWalletServiceImpl {
             log.info(">>> [SystemWalletServiceImpl] the system came createEscrowRecord");
             SystemWallet escrowRecord = SystemWallet.builder()
                     .admin(null)
+                    .order(order)
                     .buyerWalletId(order.getBuyer().getWallet().getWalletId())
                     .sellerWalletId(order.getPostProduct().getSeller().getBuyer().getWallet().getWalletId())
                     .concurrency("VND")
@@ -48,5 +49,10 @@ public class SystemWalletServiceImpl {
             log.info(">>> [SystemWalletServiceImpl] Error at createEscrowRecord: {}", e.getMessage());
             throw new SystemWalletException();
         }
+    }
+
+    public SystemWallet updateEscrowRecordStatus(SystemWallet escrowRecord, SystemWalletStatus status) {
+        escrowRecord.setStatus(status);
+        return systemWalletRepossitory.save(escrowRecord);
     }
 }

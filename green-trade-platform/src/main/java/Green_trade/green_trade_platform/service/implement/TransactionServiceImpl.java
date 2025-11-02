@@ -66,13 +66,13 @@ public class TransactionServiceImpl implements TransactionService {
             Wallet wallet = buyerService.getWallet();
             log.info(">>> wallet balance: {}", wallet.getBalance());
             log.info(">>> order total price: {}", order.getPrice());
-            BigDecimal moneyHandler = wallet.getBalance().subtract(order.getPrice());
+            BigDecimal moneyHandler = wallet.getBalance().subtract(order.getPrice().add(order.getShippingFee()));
             log.info(">>> moneyHandler: {}", moneyHandler);
             if (moneyHandler.compareTo(new BigDecimal("0")) < 0) {
                 Transaction newTransaction = Transaction.builder()
                         .order(order)
                         .payment(paymentOpt.get())
-                        .amount(order.getPrice())
+                        .amount(order.getPrice().add(order.getShippingFee()))
                         .currency("VND")
                         .paymentMethod(paymentOpt.get().getGatewayName())
                         .status(TransactionStatus.FAIL)
@@ -85,7 +85,7 @@ public class TransactionServiceImpl implements TransactionService {
             // Create a wallet transaction
             WalletTransaction walletTransaction = WalletTransaction.builder()
                     .type(TransactionType.PLACE_ORDER)
-                    .amount(order.getPrice())
+                    .amount(order.getPrice().add(order.getShippingFee()))
                     .balanceBefore(wallet.getBalance())
                     .status(TransactionStatus.SUCCESS)
                     .description("Đặt hàng cho đơn " + order.getId())
@@ -96,7 +96,7 @@ public class TransactionServiceImpl implements TransactionService {
             Transaction newTransaction = Transaction.builder()
                     .order(order)
                     .payment(paymentOpt.get())
-                    .amount(postProductOpt.get().getPrice())
+                    .amount(postProductOpt.get().getPrice().add(order.getShippingFee()))
                     .currency("VND")
                     .paymentMethod(paymentOpt.get().getGatewayName())
                     .status(TransactionStatus.SUCCESS)
@@ -129,7 +129,7 @@ public class TransactionServiceImpl implements TransactionService {
             Transaction newTransaction = Transaction.builder()
                     .order(order)
                     .payment(paymentOpt.get())
-                    .amount(order.getPrice())
+                    .amount(order.getPrice().add(order.getShippingFee()))
                     .currency("VND")
                     .paymentMethod(paymentOpt.get().getGatewayName())
                     .status(TransactionStatus.PENDING)

@@ -114,6 +114,19 @@ public class WalletServiceImpl {
         return wallet;
     }
 
+    public Wallet handleBuyerRefundForCancelledOrder(SystemWallet systemWallet, double refundPercent, Wallet wallet) {
+        BigDecimal systemBalance = systemWallet.getBalance();
+        BigDecimal money = systemBalance
+                .multiply(BigDecimal.valueOf(refundPercent))
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, true, "REFUNDED FROM CANCELED ORDER");
+        log.info(">>> [Wallet Service] Balance before refunding money for buyer: {}", wallet.getBalance());
+        wallet.setBalance(wallet.getBalance().add(money));
+        wallet = walletRepository.save(wallet);
+        log.info(">>> [Wallet Service] Balance after refunding money for buyer: {}", wallet.getBalance());
+        return wallet;
+    }
+
     public Wallet findWalletById(Long buyerWalletId) {
         return walletRepository.findByWalletId(buyerWalletId).orElseThrow(
                 () -> new IllegalArgumentException("Can not find wallet with this wallet id: " + buyerWalletId)

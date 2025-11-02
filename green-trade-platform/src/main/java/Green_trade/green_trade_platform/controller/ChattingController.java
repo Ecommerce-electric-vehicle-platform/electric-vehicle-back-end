@@ -86,13 +86,13 @@ public class ChattingController {
     @Operation(
             summary = "Retrieve all conversations of the current buyer",
             description = """
-        This API retrieves all conversations belonging to the currently logged-in buyer.  
-        The system identifies the current user through the authentication context (session or token) 
-        and fetches all related conversation records.
-
-        - If successful: returns a list of conversations for the buyer.  
-        - If failed: returns an error message with details in the `message` field.
-        """
+                    This API retrieves all conversations belonging to the currently logged-in buyer.  
+                    The system identifies the current user through the authentication context (session or token) 
+                    and fetches all related conversation records.
+                    
+                    - If successful: returns a list of conversations for the buyer.  
+                    - If failed: returns an error message with details in the `message` field.
+                    """
     )
     @GetMapping("/conversation")
     public ResponseEntity<?> getConservation() {
@@ -117,32 +117,32 @@ public class ChattingController {
     @Operation(
             summary = "Send a new chat message (text or image)",
             description = """
-        This API creates and sends a new message within an existing conversation 
-        between a buyer and a seller.  
-
-        The message can be of two types:
-        - **Text message:** provided in the `content` field.
-        - **Image message:** uploaded through the `picture` field as multipart form data.  
-
-        Once the message is successfully created, it will be:
-        1. Saved in the database (associated with the given conversation).
-        2. Broadcast in real-time via WebSocket using `ChattingSocketController`, 
-           allowing the receiver to receive it instantly.
-
-        **Notes:**
-        - The sender and receiver are determined automatically based on the current logged-in user.
-        - Either `content` or `picture` must be provided.
-        - This endpoint consumes `multipart/form-data`.
-
-        **Example use cases:**
-        - A buyer sends a text or image to the seller of a product post.
-        - A seller replies with a message or image in the same conversation.
-        """
+                    This API creates and sends a new message within an existing conversation 
+                    between a buyer and a seller.  
+                    
+                    The message can be of two types:
+                    - **Text message:** provided in the `content` field.
+                    - **Image message:** uploaded through the `picture` field as multipart form data.  
+                    
+                    Once the message is successfully created, it will be:
+                    1. Saved in the database (associated with the given conversation).
+                    2. Broadcast in real-time via WebSocket using `ChattingSocketController`, 
+                       allowing the receiver to receive it instantly.
+                    
+                    **Notes:**
+                    - The sender and receiver are determined automatically based on the current logged-in user.
+                    - Either `content` or `picture` must be provided.
+                    - This endpoint consumes `multipart/form-data`.
+                    
+                    **Example use cases:**
+                    - A buyer sends a text or image to the seller of a product post.
+                    - A seller replies with a message or image in the same conversation.
+                    """
     )
     @PostMapping("/create-message")
     public ResponseEntity<?> createMessage(
             @ModelAttribute MessageRequest request,
-            @RequestPart(name = "picture", required = false)MultipartFile picture) throws IOException {
+            @RequestPart(name = "picture", required = false) MultipartFile picture) throws IOException {
         log.info(">>> [Chatting Controller] Create message: Started.");
         try {
             Message message = messageMapper.toEntity(request);
@@ -163,7 +163,7 @@ public class ChattingController {
             message.setConversation(conversation);
 
             // Determine sender and receiver
-            if(currentUser == buyer) {
+            if (currentUser == buyer) {
                 message.setSenderId(buyer.getBuyerId());
                 message.setReceiverId(seller.getBuyer().getBuyerId());
             } else {
@@ -173,7 +173,7 @@ public class ChattingController {
 
             Message savedMessage = null;
             // Determine what type of message
-            if(picture != null) {
+            if (picture != null) {
                 savedMessage = messageService.handleImageMessage(message, picture);
             } else {
                 message.setContent(request.getContent());
@@ -190,7 +190,7 @@ public class ChattingController {
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "SEND MESSAGE FAILED.",
-                   null, e.getMessage()
+                    null, e.getMessage()
             ));
         }
     }

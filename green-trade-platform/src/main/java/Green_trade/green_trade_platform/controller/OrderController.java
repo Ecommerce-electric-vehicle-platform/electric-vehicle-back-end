@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.controller;
 
+import Green_trade.green_trade_platform.enumerate.SystemWalletStatus;
 import Green_trade.green_trade_platform.exception.OrderNotFound;
 import Green_trade.green_trade_platform.mapper.OrderListMapper;
 import Green_trade.green_trade_platform.mapper.OrderMapper;
@@ -41,6 +42,7 @@ public class OrderController {
     private final OrderMapper orderMapper;
     private final ReviewServiceImpl reviewService;
     private final ReviewMapper reviewMapper;
+    private final SystemWalletServiceImpl systemWalletService;
 
     @Operation(
             summary = "Get order history of current user",
@@ -126,6 +128,8 @@ public class OrderController {
         log.info(">>> [OrderController] came cancelOrder");
         Order canceledOrder = orderService.cancelOrder(id);
         log.info(">>> [OrderController] cancelOrder pass");
+        systemWalletService.updateEscrowRecordStatus(canceledOrder.getSystemWallet(), SystemWalletStatus.REFUNDED);
+        log.info(">>> [OrderController] update system wallet status successfully");
         ghnService.createCancelOrderShippingServiceResponseToDto(canceledOrder.getOrderCode(), canceledOrder.getPostProduct().getSeller().getGhnShopId());
         log.info(">>> [OrderController] cancel order ghn successfully");
         OrderResponse responseData = orderMapper.toDto(canceledOrder);
@@ -214,10 +218,10 @@ public class OrderController {
     @Operation(
             summary = "Get payment information by order ID",
             description = """
-        This endpoint retrieves the payment details associated with a specific order. 
-        It returns the payment ID, description, and gateway name linked to that order.
-        If the order or transaction does not exist, an error message will be returned.
-        """
+                    This endpoint retrieves the payment details associated with a specific order. 
+                    It returns the payment ID, description, and gateway name linked to that order.
+                    If the order or transaction does not exist, an error message will be returned.
+                    """
     )
     @GetMapping("/payment/{orderId}")
     public ResponseEntity<?> getPayment(@PathVariable(name = "orderId") long id) {

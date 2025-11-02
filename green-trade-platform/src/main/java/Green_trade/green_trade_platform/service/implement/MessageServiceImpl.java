@@ -29,7 +29,7 @@ public class MessageServiceImpl {
         Message response = messageRepository.save(message);
         log.info(">>> [Message Service] Image message: {}", message);
         chattingSocketController.sendMessage(response);
-        return  response;
+        return response;
     }
 
     public Message handleTextmessage(Message message) {
