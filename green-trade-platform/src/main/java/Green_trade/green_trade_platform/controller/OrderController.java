@@ -212,7 +212,12 @@ public class OrderController {
     }
 
     @Operation(
-
+            summary = "Get payment information by order ID",
+            description = """
+        This endpoint retrieves the payment details associated with a specific order. 
+        It returns the payment ID, description, and gateway name linked to that order.
+        If the order or transaction does not exist, an error message will be returned.
+        """
     )
     @GetMapping("/payment/{orderId}")
     public ResponseEntity<?> getPayment(@PathVariable(name = "orderId") long id) {
@@ -238,6 +243,9 @@ public class OrderController {
                     null, e.getMessage()
             ));
         }
+
+    }
+
     @GetMapping("/{orderId}")
     public ResponseEntity<RestResponse<OrderResponse, Object>> getOrderDetailByOrderId(@PathVariable Long orderId) {
         Order foundOrder = orderService.getOrderById(orderId);
