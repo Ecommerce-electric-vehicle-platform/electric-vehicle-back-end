@@ -19,7 +19,7 @@ import java.util.Map;
 public class AuthEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
-            AuthenticationException authException) throws IOException, ServletException {
+                         AuthenticationException authException) throws IOException, ServletException {
         log.info("Authentication errors: {}", authException.getMessage());
         log.info("Exception: ", authException);
 
