@@ -297,10 +297,10 @@ public class BuyerController {
             log.info(">>> Calculate shipping fee");
             if (payment.getGatewayName().equals("COD")) {
                 log.info(">>> Calculate shipping fee COD");
-                shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, postProduct.getPrice().intValue()).get("total");
+                shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, postProduct.getPrice().intValue()).get("service_fee");
             } else {
                 log.info(">>> Calculate shipping fee Online Payment");
-                shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, 0).get("total");
+                shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, 0).get("service_fee");
             }
 
             log.info(">>> Place new order");
