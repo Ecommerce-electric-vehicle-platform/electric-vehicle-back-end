@@ -261,7 +261,7 @@ public class BuyerServiceImpl {
                 .shippingPartner(shippingPartner)
                 .shippingFee(new BigDecimal(shippingFee))
                 .transactions(null)
-                .price(postProductOpt.get().getPrice().add(new BigDecimal(shippingFee)))
+                .price(postProductOpt.get().getPrice())
                 .status(OrderStatus.PENDING)
                 .cancelReason("Not Canceled Yet")
                 .canceledAt(null)
