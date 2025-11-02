@@ -22,5 +22,5 @@ public class DisputeResponse {
     private DisputeDecision decision;
     private String resolution;
     private DisputeStatus status;
-    private List<Evidence> evidences;
+    private List<EvidenceResponse> evidences;
 }

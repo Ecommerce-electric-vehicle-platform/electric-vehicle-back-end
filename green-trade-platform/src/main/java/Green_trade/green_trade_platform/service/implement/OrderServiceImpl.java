@@ -8,8 +8,11 @@ import Green_trade.green_trade_platform.model.Order;
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.model.Transaction;
 import Green_trade.green_trade_platform.repository.OrderRepository;
+import Green_trade.green_trade_platform.repository.TransactionRepository;
 import Green_trade.green_trade_platform.service.OrderService;
 import Green_trade.green_trade_platform.service.TransactionService;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
@@ -28,16 +32,7 @@ public class OrderServiceImpl implements OrderService {
     private final GhnServiceImpl ghnServiceImpl;
     private final WalletTransactionServiceImpl walletTransactionServiceImpl;
     private final WalletServiceImpl walletService;
-
-    public OrderServiceImpl(OrderRepository orderRepository, TransactionServiceImpl transactionService,
-            GhnServiceImpl ghnServiceImpl, WalletTransactionServiceImpl walletTransactionServiceImpl,
-            WalletServiceImpl walletService) {
-        this.orderRepository = orderRepository;
-        this.transactionService = transactionService;
-        this.ghnServiceImpl = ghnServiceImpl;
-        this.walletTransactionServiceImpl = walletTransactionServiceImpl;
-        this.walletService = walletService;
-    }
+    private final TransactionRepository transactionRepository;
 
     public Page<Order> getOrdersOfCurrentUserPaging(int size, int page, Buyer buyer) {
         try {
@@ -133,5 +128,17 @@ public class OrderServiceImpl implements OrderService {
             result = orderOpt.get();
         }
         return result;
+    }
+
+    public Transaction getTransactionByOrderId(long id) {
+        log.info(">>> [Order Service] Get transaction by order id: Started.");
+        Order order = getOrderById(id);
+        log.info(">>> [Order Service] Order info: {}", order);
+
+        Transaction transaction = transactionRepository.findValidTransactionsByOrderId(order, TransactionStatus.FAIL).orElseThrow(
+                () -> new EntityNotFoundException("Can not find transaction with this order id: " + id)
+        );
+        log.info(">>> [Order Service] Transaction info: {}", transaction);
+        return transaction;
     }
 }

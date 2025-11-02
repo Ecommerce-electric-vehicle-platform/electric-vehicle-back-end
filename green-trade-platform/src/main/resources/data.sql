@@ -31,8 +31,10 @@ DELETE FROM wish_listing;
 DELETE FROM reviews;
 DELETE FROM product_image;
 DELETE FROM review_image;
+DELETE FROM transactions;
 DROP EVENT IF EXISTS auto_resolve_escrow;
 
+ALTER TABLE transactions AUTO_INCREMENT = 1;
 ALTER TABLE review_image AUTO_INCREMENT = 1;
 ALTER TABLE product_image AUTO_INCREMENT = 1;
 ALTER TABLE conservation AUTO_INCREMENT = 1;
@@ -536,10 +538,21 @@ INSERT INTO orders (
 ('XYZ153@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'PENDING', NOW(), 2, 7, 1),
 ('XYZ163@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'COMPLETED', NOW(), 2, 2, 1);
 
-
+-- ================= Payment Data =================
+INSERT INTO payment (description, gateway_name)
+VALUES
+    ('Thanh toán khi nhận hàng (COD)', 'COD'),
+    ('Thanh toán trực tuyến qua VNPay', 'VNPay');
 
 -- =========================================================
--- ORDERS
+-- TRANSACTION
+-- =========================================================
+INSERT INTO transactions(amount, created_at, currency, payment_method, status, order_id, payment_id)
+VALUES
+(40000000.00, NOW(), 'VND', 'VNPAY', 'SUCCESS', 1, 2);
+
+-- =========================================================
+-- SYSTEM WALLET
 -- =========================================================
 INSERT INTO system_wallet(
     balance, buyer_wallet_id, concurrency, created_at, seller_wallet_id, status, admin_id, order_id
@@ -563,12 +576,6 @@ VALUES
     ('Khiếu nại khác','Khác (yêu cầu đặc biệt)','Các loại khiếu nại khác.')
     ON DUPLICATE KEY UPDATE title = VALUES(title);
 
--- ================= Payment Data =================
-INSERT INTO payment (description, gateway_name)
-VALUES
-    ('Thanh toán khi nhận hàng (COD)', 'COD'),
-    ('Thanh toán trực tuyến qua VNPay', 'VNPay');
-
 -- =========================================================
 -- ⚖️ DISPUTE - MẪU TRANH CHẤP / KHIẾU NẠI
 -- =========================================================
@@ -581,7 +588,11 @@ INSERT INTO dispute(
 ---- =========================================================
 ---- 🖼 EVIDENCE - ẢNH MINH CHỨNG CHO TRANH CHẤP
 ---- =========================================================
-
+INSERT INTO evidence(image_url, order_image, dispute_id)
+VALUES
+('https://media-cdn-v2.laodong.vn/storage/newsportal/2025/9/25/1580851/Xe-Dien-Khong-Giay-9.jpg', 1, 1),
+('https://media-cdn-v2.laodong.vn/storage/newsportal/2025/9/25/1580851/Xe-Dien-Khong-Giay-9.jpg', 2, 1),
+('https://thegioixedien.com.vn/datafiles/img_data/images/news/canh-bao-tinh-trang-lay-anh-xe-dien-xe-dap-dien-chinh-hang-de-ban-hang-fake.jpg', 3, 1);
 -- =========================================================
 -- ✅ KẾT THÚC FILE DATA.SQL
 -- =========================================================
