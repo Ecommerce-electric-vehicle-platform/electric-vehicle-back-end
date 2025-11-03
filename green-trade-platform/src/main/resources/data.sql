@@ -61,6 +61,8 @@ DELETE
 FROM review_image;
 DELETE
 FROM transactions;
+DELETE
+FROM cancel_order_reason;
 DROP
 EVENT IF EXISTS auto_resolve_escrow;
 
