@@ -51,6 +51,27 @@ public class SystemWalletServiceImpl {
         }
     }
 
+    public SystemWallet createEscrowRecordAfterReduceFee(Order order, Map) {
+        try {
+            log.info(">>> [SystemWalletServiceImpl] the system came createEscrowRecord");
+            SystemWallet escrowRecord = SystemWallet.builder()
+                    .admin(null)
+                    .order(order)
+                    .buyerWalletId(order.getBuyer().getWallet().getWalletId())
+                    .sellerWalletId(order.getPostProduct().getSeller().getBuyer().getWallet().getWalletId())
+                    .concurrency("VND")
+                    .balance(order.getPrice())
+                    .status(SystemWalletStatus.ESCROW_HOLD)
+                    .endAt(LocalDateTime.now().plusWeeks(2))
+                    .build();
+            log.info(">>> [SystemWalletServiceImpl] create new escrowRecord");
+            return systemWalletRepossitory.save(escrowRecord);
+        } catch (Exception e) {
+            log.info(">>> [SystemWalletServiceImpl] Error at createEscrowRecord: {}", e.getMessage());
+            throw new SystemWalletException();
+        }
+    }
+
     public SystemWallet updateEscrowRecordStatus(SystemWallet escrowRecord, SystemWalletStatus status) {
         escrowRecord.setStatus(status);
         return systemWalletRepossitory.save(escrowRecord);
