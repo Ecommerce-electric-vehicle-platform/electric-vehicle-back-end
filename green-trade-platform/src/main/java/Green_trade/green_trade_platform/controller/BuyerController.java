@@ -324,6 +324,10 @@ public class BuyerController {
                 String orderShippingCode = ghnService.createOrderShippingResponseToDto(
                         newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
                 ).get("orderCode");
+
+                String totalServiceFee = ghnService.createOrderShippingResponseToDto(
+                        newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
+                ).get("total");
                 log.info(">>> Passed get orderShippingCode");
                 log.info(">>> orderShippingCode: {}", orderShippingCode);
 

@@ -1,38 +1,68 @@
 -- =========================================================
 -- 🚀 RESET DATABASE DỮ LIỆU DEMO
 -- =========================================================
-SET GLOBAL time_zone = 'Asia/Ho_Chi_Minh';
-SET FOREIGN_KEY_CHECKS = 0;
-SET GLOBAL event_scheduler = ON;
+SET
+GLOBAL time_zone = 'Asia/Ho_Chi_Minh';
+SET
+FOREIGN_KEY_CHECKS = 0;
+SET
+GLOBAL event_scheduler = ON;
 
 
-DELETE FROM product_image;
-DELETE FROM post_product;
-DELETE FROM wallet;
-DELETE FROM seller;
-DELETE FROM buyer;
-DELETE FROM admin;
-DELETE FROM subscription_packages;
-DELETE FROM package_price;
-DELETE FROM category;
-DELETE FROM system_policy;
-DELETE FROM subscription;
-DELETE FROM shipping_partner;
-DELETE FROM dispute_category;
-DELETE FROM orders;
-DELETE FROM payment;
-DELETE FROM dispute;
-DELETE FROM evidence;
-DELETE FROM notification;
-DELETE FROM system_wallet;
-DELETE FROM wallet_transaction;
-DELETE FROM conservation;
-DELETE FROM wish_listing;
-DELETE FROM reviews;
-DELETE FROM product_image;
-DELETE FROM review_image;
-DELETE FROM transactions;
-DROP EVENT IF EXISTS auto_resolve_escrow;
+DELETE
+FROM product_image;
+DELETE
+FROM post_product;
+DELETE
+FROM wallet;
+DELETE
+FROM seller;
+DELETE
+FROM buyer;
+DELETE
+FROM admin;
+DELETE
+FROM subscription_packages;
+DELETE
+FROM package_price;
+DELETE
+FROM category;
+DELETE
+FROM system_policy;
+DELETE
+FROM subscription;
+DELETE
+FROM shipping_partner;
+DELETE
+FROM dispute_category;
+DELETE
+FROM orders;
+DELETE
+FROM payment;
+DELETE
+FROM dispute;
+DELETE
+FROM evidence;
+DELETE
+FROM notification;
+DELETE
+FROM system_wallet;
+DELETE
+FROM wallet_transaction;
+DELETE
+FROM conservation;
+DELETE
+FROM wish_listing;
+DELETE
+FROM reviews;
+DELETE
+FROM product_image;
+DELETE
+FROM review_image;
+DELETE
+FROM transactions;
+DROP
+EVENT IF EXISTS auto_resolve_escrow;
 
 ALTER TABLE transactions AUTO_INCREMENT = 1;
 ALTER TABLE review_image AUTO_INCREMENT = 1;
@@ -186,48 +216,52 @@ VALUES ('https://cdn.example.com/avatar/admin1.png',
 -- SỬ DỤNG DEFAULT ACCOUNT DÙM CON NHA MẤY MÁ
 -- TẠI SEED DATA NÊN MỖI LẦN CHẠY LẠI LÀ CÁC ACCOUNT CŨ KHI SIGN UP ĐỒ NÀY NỌ LÀ NÓ SẼ BỊ MẤT NHA MẤY MẸ
 -- DEFAULT PASSWORD : Vien.123456@
-INSERT INTO buyer (
-   avatar_public_id,
-   avatar_url,
-   created_at,
-   street,
-   deleted_at,
-   district_name,
-   date_of_birth,
-   email,
-   full_name,
-   gender,
-   is_active,
-   password,
-   phone_number,
-   province_name,
-   updated_at,
-   username,
-   ward_name
-)
-VALUES
-('ae8ed05a-6eef-4f3c-ae27-63b6c8c04314', 'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761368550/buyers/1:doanvien/avatar/ed4086f1-9cf3-48ae-8cac-3f493f07f9e7.jpg', NOW(), '129 Nguyễn Văn Cừ', NULL, 'Quận 5', '2005-11-19', 'vientruongdoan@gmail.com', 'Truong Doan Vien', 'MALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', '0792043114', 'Hồ Chí Minh', NULL, 'doanvien', 'Phường 7'),
-('fee6981f-33a2-4208-978c-b5c8ffaad9ba', 'https://res.cloudinary.com/dzhxwm90k/image/upload/v1762071147/buyers/2:kimthuydoan/avatar/fee6981f-33a2-4208-978c-b5c8ffaad9ba.jpg', NOW(), '123', NULL, 'Thành phố Dĩ An', '2004-11-19', 'kimthuydoan22082005@gmail.com', 'Đoàn Thị Kim Thúy', 'FEMALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', '0780453118', 'Bình Dương', NULL, 'kimthuydoan', 'Phường Bình An'),
-(NULL, NULL, NOW(), NULL, NULL, NULL, NULL, 'hanhtransdr@gmail.com', NULL, 'FEMALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', NULL, NULL, NULL, 'tranthihanh', NULL);
+INSERT INTO buyer (avatar_public_id,
+                   avatar_url,
+                   created_at,
+                   street,
+                   deleted_at,
+                   district_name,
+                   date_of_birth,
+                   email,
+                   full_name,
+                   gender,
+                   is_active,
+                   password,
+                   phone_number,
+                   province_name,
+                   updated_at,
+                   username,
+                   ward_name)
+VALUES ('ae8ed05a-6eef-4f3c-ae27-63b6c8c04314',
+        'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761368550/buyers/1:doanvien/avatar/ed4086f1-9cf3-48ae-8cac-3f493f07f9e7.jpg',
+        NOW(), '129 Nguyễn Văn Cừ', NULL, 'Quận 5', '2005-11-19', 'vientruongdoan@gmail.com', 'Truong Doan Vien',
+        'MALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', '0792043114', 'Hồ Chí Minh',
+        NULL, 'doanvien', 'Phường 7'),
+       ('fee6981f-33a2-4208-978c-b5c8ffaad9ba',
+        'https://res.cloudinary.com/dzhxwm90k/image/upload/v1762071147/buyers/2:kimthuydoan/avatar/fee6981f-33a2-4208-978c-b5c8ffaad9ba.jpg',
+        NOW(), '123', NULL, 'Thành phố Dĩ An', '2004-11-19', 'kimthuydoan22082005@gmail.com', 'Đoàn Thị Kim Thúy',
+        'FEMALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', '0780453118', 'Bình Dương',
+        NULL, 'kimthuydoan', 'Phường Bình An'),
+       (NULL, NULL, NOW(), NULL, NULL, NULL, NULL, 'hanhtransdr@gmail.com', NULL, 'FEMALE', 1,
+        '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', NULL, NULL, NULL, 'tranthihanh', NULL);
 
 -- =========================================================
 -- 🏪 WALLET
 -- =========================================================
 
 INSERT INTO wallet (balance, concurrency, provider, created_at, buyer_id)
-VALUES
-(1000000000.00, 'VND', 'VNPay', NOW(), 1),
-(1100000000.00, 'VND', 'VNPay', NOW(), 2),
-(1200000000.00, 'VND', 'VNPay', NOW(), 3);
+VALUES (1000000000.00, 'VND', 'VNPay', NOW(), 1),
+       (1100000000.00, 'VND', 'VNPay', NOW(), 2),
+       (1200000000.00, 'VND', 'VNPay', NOW(), 3);
 
 -- =========================================================
 -- 🏪 WALLET TRANSACTION
 -- =========================================================
 INSERT INTO wallet_transaction(amount, balance_before, created_at, description, status, type, wallet_id)
-VALUES
-(10000000.00, 0.00,NOW(), 'Nap tien vao vi nguoi dung', 'SUCCESS', 'DEPOSIT', 1),
-(10000000.00, 0.00,NOW(), 'Nap tien vao vi nguoi dung', 'SUCCESS', 'DEPOSIT', 2),
-(10000000.00, 0.00,NOW(), 'Nap tien vao vi nguoi dung', 'SUCCESS', 'DEPOSIT', 3);
+VALUES (10000000.00, 0.00, NOW(), 'Nap tien vao vi nguoi dung', 'SUCCESS', 'DEPOSIT', 1),
+       (10000000.00, 0.00, NOW(), 'Nap tien vao vi nguoi dung', 'SUCCESS', 'DEPOSIT', 2),
+       (10000000.00, 0.00, NOW(), 'Nap tien vao vi nguoi dung', 'SUCCESS', 'DEPOSIT', 3);
 
 -- =========================================================
 -- 🏪 SELLER
@@ -296,48 +330,156 @@ VALUES
 -- 🚗 POST_PRODUCT
 -- =========================================================
 INSERT INTO post_product
-(title, brand, model, manufacture_year, used_duration, rejected_reason, condition_level, price, width, height, length, weight, description, location_trading, is_sold, active, verified_decision_status, verified, created_at, updated_at, deleted_at, category_id, admin_id, seller_id)
-VALUES
-    ('Xe đạp điện Pega Aura 2022 - còn mới 90%', 'Pega', 'Aura', 2022, '18 tháng', NULL, 'Good', 8900000, '68', '105', '148', '28000', 'Xe đạp điện chạy êm, pin thay gần đây, phanh còn tốt, đi học đi làm ổn định.', 'Quận 7, TP.HCM', TRUE, FALSE, 'APPROVED', TRUE, '2025-09-30 10:15:00', '2025-10-10 08:40:00', NULL, 1, NULL, 1),
-    ('Pin LFP 60V 20Ah cho xe điện - đã test dung lượng', 'CATL', 'LFP-60V-20Ah', 2023, '6 tháng', NULL, 'Like New', 4200000, '18', '20', '35', '7200', 'Pin LiFePO4 60V 20Ah, đã test nội trở, còn ~92% dung lượng, dùng cho nhiều dòng xe điện.', 'Cầu Giấy, Hà Nội', TRUE, FALSE, 'APPROVED', TRUE, '2025-10-01 09:00:00', '2025-10-15 11:20:00', NULL, 2, NULL, 1),
-    ('Xe máy điện VinFast Feliz S 2022 - pin thuê', 'VinFast', 'Feliz S', 2022, '20 tháng', NULL, 'Good', 16500000, '70', '112', '150', '47000', 'Bản S, đi lại hằng ngày, khung vỏ còn đẹp, pin đang thuê VinFast (không kèm pin).', 'Thanh Khê, Đà Nẵng', TRUE, FALSE, 'APPROVED', TRUE, '2025-10-05 14:05:00', '2025-10-20 09:30:00', NULL, 1, NULL, 1),
-    ('Pin NMC 72V 30Ah tháo xe - còn 85% SOH', 'EVE', 'NMC-72V-30Ah', 2021, '24 tháng', NULL, 'Fair', 5500000, '20', '22', '42', '12500', 'Pack NMC 72V 30Ah, đã cân bằng cell, còn ~85% SOH, phù hợp xe máy điện công suất trung bình.', 'Thủ Đức, TP.HCM', TRUE, FALSE, 'APPROVED', TRUE, '2025-09-25 16:00:00', '2025-10-12 13:10:00', NULL, 2, NULL, 1),
-    ('Xe đạp điện Giant M3 cũ - bảo dưỡng định kỳ', 'Giant', 'M3', 2020, '3 năm', NULL, 'Fair', 6500000, '66', '103', '145', '30000', 'Đã thay lốp và phanh, pin còn dùng tốt ~70-75%, có trầy nhẹ theo thời gian.', 'Biên Hòa, Đồng Nai', TRUE, FALSE, 'PENDING', FALSE, '2025-10-18 10:45:00', '2025-10-18 10:45:00', NULL, 1, NULL, 1),
-    ('Pin LFP 48V 12Ah cho xe đạp điện - nhẹ, bền', 'Gotion', 'LFP-48V-12Ah', 2024, '4 tháng', NULL, 'Like New', 1900000, '15', '16', '32', '5200', 'Pin LiFePO4 an toàn, vòng sạc thấp, phù hợp xe đạp điện học sinh.', 'Nha Trang, Khánh Hòa', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-02 08:00:00', '2025-10-22 17:25:00', NULL, 2, NULL, 1),
-    ('Xe máy điện Pega eSH 2021 - đã thay pin', 'Pega', 'eSH', 2021, '30 tháng', NULL, 'Good', 13900000, '69', '110', '149', '48000', 'Động cơ mạnh, pin thay 2024 (LFP 60V 24Ah), bô phận điện ổn định, hình thức đẹp.', 'Hải Châu, Đà Nẵng', FALSE, TRUE, 'PENDING', FALSE, '2025-10-19 12:10:00', '2025-10-21 09:50:00', NULL, 1, NULL, 1),
-    ('Pack pin ioni 60V 30Ah tháo VinFast Klara - còn 88%', 'VinFast', 'Klara-Pack-60V30Ah', 2022, '16 tháng', NULL, 'Good', 6200000, '19', '21', '40', '11800', 'Pack tháo xe, đã kiểm thử SoH 88%, thích hợp retrofit/độ xe điện.', 'Thủ Dầu Một, Bình Dương', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-06 15:35:00', '2025-10-16 09:05:00', NULL, 2, NULL, 1),
-    ('Xe đạp điện Xiaomi HIMO C20 2023 - gấp gọn', 'Xiaomi', 'HIMO C20', 2023, '10 tháng', NULL, 'Like New', 12500000, '58', '102', '145', '21800', 'Bản gấp gọn tiện mang đi chung cư/xe hơi, pin tháo rời, odo ~800 km.', 'Quận 3, TP.HCM', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-09 19:00:00', '2025-10-23 10:15:00', NULL, 1, NULL, 1),
-    ('Pin thay thế 72V 20Ah cho xe máy điện - BMS thông minh', 'LG Energy', 'NMC-72V-20Ah-SmartBMS', 2024, '3 tháng', 'Ảnh chụp mờ, yêu cầu bổ sung ảnh rõ hơn', 'Like New', 4800000, '18', '19', '38', '9800', 'Pack cell LG, BMS cân bằng chủ động, cổng giao tiếp UART, còn tem bảo hành.', 'Cần Thơ', FALSE, TRUE, 'REJECTED', FALSE, '2025-10-11 11:45:00', '2025-10-11 11:45:00', NULL, 2, NULL, 1),
-    ('Xe máy điện Dibao Pansy S 2021 - màu đỏ đô', 'Dibao', 'Pansy S', 2021, '28 tháng', NULL, 'Good', 11900000, '68', '108', '145', '43000', 'Xe máy điện Dibao bản S, chạy ổn định, pin còn tốt, có trầy nhẹ ở yếm.', 'Hoàng Mai, Hà Nội', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-28 08:45:00', '2025-10-20 10:00:00', NULL, 1, NULL, 1),
-    ('Pin Li-ion 48V 20Ah tháo xe - dùng được 85%', 'Samsung SDI', '48V-20Ah', 2022, '15 tháng', NULL, 'Fair', 2100000, '16', '18', '30', '8000', 'Pack pin 48V 20Ah, đo dung lượng còn ~85%, phù hợp xe đạp điện phổ thông.', 'Bắc Từ Liêm, Hà Nội', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-03 09:10:00', '2025-10-15 14:30:00', NULL, 2, NULL, 1),
-    ('Xe đạp điện Yadea iGo 2023 - mới 95%', 'Yadea', 'iGo', 2023, '8 tháng', NULL, 'Like New', 9800000, '66', '105', '140', '26500', 'Xe đạp điện gọn nhẹ, pin tháo rời, khung nhôm, phù hợp học sinh và dân văn phòng.', 'Hà Đông, Hà Nội', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-29 11:25:00', '2025-10-12 15:00:00', NULL, 1, NULL, 1),
-    ('Pin LFP 60V 24Ah - pin xe máy điện cũ còn tốt', 'CATL', 'LFP-60V-24Ah', 2022, '12 tháng', NULL, 'Good', 3900000, '19', '21', '36', '9500', 'Pin LiFePO4 60V 24Ah, an toàn, dòng xả cao, đã test dung lượng thực tế còn 93%.', 'Long Biên, Hà Nội', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-02 09:00:00', '2025-10-22 11:00:00', NULL, 2, NULL, 1),
-    ('Xe máy điện YADEA E3 2020 - pin còn dùng tốt', 'Yadea', 'E3', 2020, '36 tháng', NULL, 'Fair', 8500000, '70', '110', '147', '44000', 'Xe máy điện Yadea E3 bản thường, pin zin, động cơ êm, khung vững.', 'Thủ Dầu Một, Bình Dương', FALSE, TRUE, 'PENDING', FALSE, '2025-10-10 13:15:00', '2025-10-10 13:15:00', NULL, 1, NULL, 1),
-    ('Pin thay thế 72V 25Ah - cell LG, BMS mới', 'LG Chem', '72V-25Ah', 2024, '5 tháng', NULL, 'Like New', 5200000, '18', '19', '40', '10000', 'Pack pin LG Chem, mới 95%, có BMS mới, tương thích nhiều mẫu xe điện phổ biến.', 'TP. Pleiku, Gia Lai', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-04 10:45:00', '2025-10-18 17:50:00', NULL, 2, NULL, 1),
-    ('Xe máy điện DatBike Weaver++ 2023 - xe công ty test', 'DatBike', 'Weaver++', 2023, '10 tháng', NULL, 'Like New', 29000000, '72', '118', '150', '48000', 'Xe test nội bộ, odo ~1500 km, pin zin, động cơ mạnh, bảo dưỡng đầy đủ.', 'Tân Bình, TP.HCM', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-27 14:20:00', '2025-10-22 09:30:00', NULL, 1, NULL, 1),
-    ('Pin xe đạp điện 36V 12Ah - còn mới 90%', 'Gotion', '36V-12Ah', 2023, '8 tháng', NULL, 'Like New', 1300000, '12', '15', '28', '4200', 'Pin nhỏ gọn, thích hợp xe đạp điện mini, trọng lượng nhẹ, dễ tháo lắp.', 'Huế', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-09 08:00:00', '2025-10-18 19:00:00', NULL, 2, NULL, 1),
-    ('Xe đạp điện Suzika Eco 2022 - chính chủ', 'Suzika', 'Eco', 2022, '18 tháng', NULL, 'Good', 7500000, '65', '103', '142', '28000', 'Xe đi học, còn pin tốt, động cơ ổn định, chính chủ sang tay.', 'Ninh Kiều, Cần Thơ', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-06 07:40:00', '2025-10-20 10:10:00', NULL, 1, NULL, 1),
-    ('Pin NMC 60V 15Ah tháo xe VinFast - còn 88%', 'VinFast', '60V15Ah', 2022, '16 tháng', NULL, 'Good', 3100000, '17', '19', '33', '7600', 'Pack pin tháo xe Klara, còn dung lượng tốt, có BMS nguyên bản, chưa can thiệp.', 'Cẩm Lệ, Đà Nẵng', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-26 09:50:00', '2025-10-16 08:40:00', NULL, 2, NULL, 1),
-    ('Xe máy điện Pega Cap-A 2021 - pin thay mới 2024', 'Pega', 'Cap-A', 2021, '24 tháng', NULL, 'Good', 12500000, '70', '110', '145', '45000', 'Xe còn nguyên tem, pin thay mới đầu 2024, phanh đĩa, vận hành ổn định.', 'Quận 5, TP.HCM', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-29 09:00:00', '2025-10-20 15:45:00', NULL, 1, NULL, 1),
-    ('Pin LiFePO4 60V 30Ah tháo xe DatBike - còn 90%', 'CATL', 'LFP-60V-30Ah', 2023, '10 tháng', NULL, 'Like New', 4800000, '19', '21', '38', '9700', 'Pack pin CATL chuẩn, còn dung lượng cao, thích hợp xe máy điện hoặc DIY.', 'Tân Bình, TP.HCM', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-25 12:10:00', '2025-10-15 08:30:00', NULL, 2, NULL, 1),
-    ('Xe đạp điện Anbico AP1508 2022 - còn zin', 'Anbico', 'AP1508', 2022, '14 tháng', NULL, 'Good', 8300000, '67', '104', '145', '29000', 'Xe đạp điện Anbico, chạy nhẹ, tiết kiệm điện, pin sạc đầy đi được 40km.', 'Bình Thạnh, TP.HCM', FALSE, TRUE, 'PENDING', FALSE, '2025-10-02 10:45:00', '2025-10-19 09:20:00', NULL, 1, NULL, 1),
-    ('Pin 72V 32Ah tháo xe VinFast Evo200 - còn 85%', 'VinFast', '72V-32Ah', 2022, '18 tháng', NULL, 'Fair', 5900000, '20', '23', '44', '13500', 'Pin tháo xe VinFast Evo200, SoH ~85%, có thể sử dụng tiếp 2–3 năm.', 'Ninh Bình', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-27 14:30:00', '2025-10-18 13:00:00', NULL, 2, NULL, 1),
-    ('Xe máy điện YADEA BuyE 2023 - chính chủ', 'Yadea', 'BuyE', 2023, '9 tháng', NULL, 'Like New', 17500000, '71', '115', '148', '47000', 'Xe còn rất mới, odo 900km, pin zin, động cơ êm, chính chủ bán.', 'Hải Phòng', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-30 09:15:00', '2025-10-22 08:50:00', NULL, 1, NULL, 1),
-    ('Pin NMC 60V 24Ah tháo xe - còn 87% dung lượng', 'Samsung SDI', 'NMC-60V-24Ah', 2021, '20 tháng', NULL, 'Good', 3800000, '18', '20', '35', '9200', 'Pin tháo xe điện cao cấp, cell Samsung SDI, kiểm định dung lượng còn 87%.', 'Biên Hòa, Đồng Nai', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-06 07:50:00', '2025-10-19 17:10:00', NULL, 2, NULL, 1),
-    ('Xe máy điện VinFast Evo200 Lite 2023 - demo hãng', 'VinFast', 'Evo200 Lite', 2023, '6 tháng', NULL, 'Like New', 23900000, '72', '117', '150', '48000', 'Xe trưng bày, đi test 500km, bảo hành còn 2 năm.', 'Quận 2, TP.HCM', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-10 09:00:00', '2025-10-21 10:45:00', NULL, 1, NULL, 1),
-    ('Pin LFP 48V 15Ah - cell Gotion, dòng xả cao', 'Gotion', 'LFP-48V-15Ah', 2024, '4 tháng', NULL, 'Like New', 2200000, '14', '16', '33', '5800', 'Pin LFP cell Gotion, dùng cho xe đạp điện, dòng xả cao, an toàn.', 'Vinh, Nghệ An', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-03 08:10:00', '2025-10-16 13:00:00', NULL, 2, NULL, 1),
-    ('Xe máy điện Pega Aura S 2020 - đã thay pin', 'Pega', 'Aura S', 2020, '36 tháng', NULL, 'Fair', 9500000, '69', '110', '147', '46000', 'Xe đi học sinh viên, pin thay năm 2024, khung còn chắc, có xước nhẹ.', 'Bắc Giang', FALSE, TRUE, 'PENDING', FALSE, '2025-09-26 15:00:00', '2025-10-14 09:00:00', NULL, 1, NULL, 1),
-    ('Pin xe máy điện 60V 25Ah BMS thông minh - chưa dùng', 'LG Energy', '60V-25Ah-BMS', 2024, '1 tháng', 'Thiếu giấy kiểm định pin', 'Like New', 5000000, '19', '21', '36', '8900', 'Pack pin LG Energy mới 99%, có cổng giao tiếp CAN, thích hợp xe điện hiện đại.', 'Đà Lạt, Lâm Đồng', FALSE, TRUE, 'REJECTED', FALSE, '2025-10-12 11:00:00', '2025-10-12 11:00:00', NULL, 2, NULL, 1),
-    ('Xe máy điện Dibao Gogo SS 2022 - bản giới hạn', 'Dibao', 'Gogo SS', 2022, '16 tháng', NULL, 'Like New', 15500000, '70', '113', '148', '46500', 'Xe máy điện Dibao bản giới hạn, màu xanh ngọc, pin còn rất tốt.', 'Thanh Xuân, Hà Nội', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-01 09:20:00', '2025-10-23 09:00:00', NULL, 1, NULL, 1),
-    ('Pin LFP 60V 20Ah tháo xe Yadea - dung lượng 92%', 'CATL', 'LFP-60V-20Ah', 2023, '8 tháng', NULL, 'Good', 3500000, '18', '20', '35', '7200', 'Pin LFP chuẩn CATL, còn dung lượng 92%, thích hợp cho xe Yadea, VinFast.', 'Hòa Bình', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-29 10:15:00', '2025-10-18 08:30:00', NULL, 2, NULL, 1),
-    ('Xe đạp điện DK Bike Cap A 2021 - pin còn tốt', 'DK Bike', 'Cap A', 2021, '30 tháng', NULL, 'Fair', 7200000, '65', '103', '145', '29000', 'Xe đạp điện DK Bike chạy ổn định, có trầy nhẹ, pin còn đi được 35km.', 'Tân Phú, TP.HCM', FALSE, TRUE, 'PENDING', FALSE, '2025-09-30 11:00:00', '2025-10-10 10:10:00', NULL, 1, NULL, 1),
-    ('Pin NMC 72V 20Ah - cell LG tháo xe VinFast', 'LG Chem', 'NMC-72V-20Ah', 2022, '14 tháng', NULL, 'Good', 4600000, '19', '21', '38', '9800', 'Pack pin tháo xe VinFast Feliz, cell LG Chem, còn dung lượng 90%.', 'Hải Dương', TRUE, TRUE, 'APPROVED', TRUE, '2025-09-25 13:00:00', '2025-10-17 15:00:00', NULL, 2, NULL, 1),
-    ('Xe máy điện YADEA Xmen Neo 2023 - mới 98%', 'Yadea', 'Xmen Neo', 2023, '5 tháng', NULL, 'Like New', 18900000, '72', '115', '150', '48000', 'Xe mới sử dụng nhẹ, odo 700km, còn bảo hành chính hãng.', 'Nam Định', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-08 10:00:00', '2025-10-20 08:40:00', NULL, 1, NULL, 1),
-    ('Pin xe đạp điện 36V 15Ah - Gotion, dòng xả cao', 'Gotion', '36V-15Ah', 2024, '3 tháng', NULL, 'Like New', 1500000, '13', '14', '30', '4600', 'Pin Gotion LFP, mới 97%, dòng xả cao, an toàn, nhẹ.', 'Bình Thuận', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-06 09:10:00', '2025-10-17 11:20:00', NULL, 2, NULL, 1),
-    ('Xe đạp điện Pega Cap X 2020 - xe học sinh cũ', 'Pega', 'Cap X', 2020, '40 tháng', NULL, 'Fair', 5900000, '66', '104', '145', '28000', 'Xe học sinh, pin yếu còn đi được 20km, khung chắc chắn, giá rẻ.', 'Hà Đông, Hà Nội', TRUE, TRUE, 'APPROVED', TRUE, '2025-09-23 15:40:00', '2025-10-14 09:15:00', NULL, 1, NULL, 1),
-    ('Pin thay thế 60V 25Ah BMS bluetooth - hàng mới tháo', 'LG Energy', '60V-25Ah-BT', 2024, '2 tháng', NULL, 'Like New', 5200000, '18', '19', '37', '8800', 'Pin LG Energy, có Bluetooth BMS theo dõi pin qua app.', 'Huế', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-28 11:45:00', '2025-10-19 13:00:00', NULL, 2, NULL, 1),
-    ('Xe máy điện DatBike Weaver 200 2022 - pin zin', 'DatBike', 'Weaver 200', 2022, '18 tháng', NULL, 'Good', 25900000, '71', '115', '148', '47500', 'Xe chính chủ, pin zin 2022, động cơ mạnh, bảo dưỡng đều.', 'Cần Thơ', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-27 10:00:00', '2025-10-16 09:10:00', NULL, 1, NULL, 1),
-    ('Pin LFP 48V 20Ah - tháo xe học sinh, còn 88%', 'CATL', 'LFP-48V-20Ah', 2022, '20 tháng', 'Ảnh mờ, yêu cầu bổ sung ảnh', 'Good', 2300000, '16', '18', '34', '7100', 'Pin CATL còn dung lượng tốt, phù hợp xe đạp điện phổ thông.', 'Buôn Ma Thuột, Đắk Lắk', FALSE, TRUE, 'REJECTED', FALSE, '2025-10-07 10:40:00', '2025-10-07 10:40:00', NULL, 2, NULL, 1);
+(title, brand, model, manufacture_year, used_duration, rejected_reason, condition_level, price, width, height, length,
+ weight, description, location_trading, is_sold, active, verified_decision_status, verified, created_at, updated_at,
+ deleted_at, category_id, admin_id, seller_id)
+VALUES ('Xe đạp điện Pega Aura 2022 - còn mới 90%', 'Pega', 'Aura', 2022, '18 tháng', NULL, 'Good', 8900000, '68',
+        '105', '148', '28000', 'Xe đạp điện chạy êm, pin thay gần đây, phanh còn tốt, đi học đi làm ổn định.',
+        'Quận 7, TP.HCM', TRUE, FALSE, 'APPROVED', TRUE, '2025-09-30 10:15:00', '2025-10-10 08:40:00', NULL, 1, NULL,
+        1),
+       ('Pin LFP 60V 20Ah cho xe điện - đã test dung lượng', 'CATL', 'LFP-60V-20Ah', 2023, '6 tháng', NULL, 'Like New',
+        4200000, '18', '20', '35', '7200',
+        'Pin LiFePO4 60V 20Ah, đã test nội trở, còn ~92% dung lượng, dùng cho nhiều dòng xe điện.', 'Cầu Giấy, Hà Nội',
+        TRUE, FALSE, 'APPROVED', TRUE, '2025-10-01 09:00:00', '2025-10-15 11:20:00', NULL, 2, NULL, 1),
+       ('Xe máy điện VinFast Feliz S 2022 - pin thuê', 'VinFast', 'Feliz S', 2022, '20 tháng', NULL, 'Good', 16500000,
+        '70', '112', '150', '47000',
+        'Bản S, đi lại hằng ngày, khung vỏ còn đẹp, pin đang thuê VinFast (không kèm pin).', 'Thanh Khê, Đà Nẵng', TRUE,
+        FALSE, 'APPROVED', TRUE, '2025-10-05 14:05:00', '2025-10-20 09:30:00', NULL, 1, NULL, 1),
+       ('Pin NMC 72V 30Ah tháo xe - còn 85% SOH', 'EVE', 'NMC-72V-30Ah', 2021, '24 tháng', NULL, 'Fair', 5500000, '20',
+        '22', '42', '12500',
+        'Pack NMC 72V 30Ah, đã cân bằng cell, còn ~85% SOH, phù hợp xe máy điện công suất trung bình.',
+        'Thủ Đức, TP.HCM', TRUE, FALSE, 'APPROVED', TRUE, '2025-09-25 16:00:00', '2025-10-12 13:10:00', NULL, 2, NULL,
+        1),
+       ('Xe đạp điện Giant M3 cũ - bảo dưỡng định kỳ', 'Giant', 'M3', 2020, '3 năm', NULL, 'Fair', 6500000, '66', '103',
+        '145', '30000', 'Đã thay lốp và phanh, pin còn dùng tốt ~70-75%, có trầy nhẹ theo thời gian.',
+        'Biên Hòa, Đồng Nai', TRUE, FALSE, 'PENDING', FALSE, '2025-10-18 10:45:00', '2025-10-18 10:45:00', NULL, 1,
+        NULL, 1),
+       ('Pin LFP 48V 12Ah cho xe đạp điện - nhẹ, bền', 'Gotion', 'LFP-48V-12Ah', 2024, '4 tháng', NULL, 'Like New',
+        1900000, '15', '16', '32', '5200', 'Pin LiFePO4 an toàn, vòng sạc thấp, phù hợp xe đạp điện học sinh.',
+        'Nha Trang, Khánh Hòa', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-02 08:00:00', '2025-10-22 17:25:00', NULL, 2,
+        NULL, 1),
+       ('Xe máy điện Pega eSH 2021 - đã thay pin', 'Pega', 'eSH', 2021, '30 tháng', NULL, 'Good', 13900000, '69', '110',
+        '149', '48000', 'Động cơ mạnh, pin thay 2024 (LFP 60V 24Ah), bô phận điện ổn định, hình thức đẹp.',
+        'Hải Châu, Đà Nẵng', FALSE, TRUE, 'PENDING', FALSE, '2025-10-19 12:10:00', '2025-10-21 09:50:00', NULL, 1, NULL,
+        1),
+       ('Pack pin ioni 60V 30Ah tháo VinFast Klara - còn 88%', 'VinFast', 'Klara-Pack-60V30Ah', 2022, '16 tháng', NULL,
+        'Good', 6200000, '19', '21', '40', '11800', 'Pack tháo xe, đã kiểm thử SoH 88%, thích hợp retrofit/độ xe điện.',
+        'Thủ Dầu Một, Bình Dương', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-06 15:35:00', '2025-10-16 09:05:00', NULL, 2,
+        NULL, 1),
+       ('Xe đạp điện Xiaomi HIMO C20 2023 - gấp gọn', 'Xiaomi', 'HIMO C20', 2023, '10 tháng', NULL, 'Like New',
+        12500000, '58', '102', '145', '21800', 'Bản gấp gọn tiện mang đi chung cư/xe hơi, pin tháo rời, odo ~800 km.',
+        'Quận 3, TP.HCM', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-09 19:00:00', '2025-10-23 10:15:00', NULL, 1, NULL,
+        1),
+       ('Pin thay thế 72V 20Ah cho xe máy điện - BMS thông minh', 'LG Energy', 'NMC-72V-20Ah-SmartBMS', 2024, '3 tháng',
+        'Ảnh chụp mờ, yêu cầu bổ sung ảnh rõ hơn', 'Like New', 4800000, '18', '19', '38', '9800',
+        'Pack cell LG, BMS cân bằng chủ động, cổng giao tiếp UART, còn tem bảo hành.', 'Cần Thơ', FALSE, TRUE,
+        'REJECTED', FALSE, '2025-10-11 11:45:00', '2025-10-11 11:45:00', NULL, 2, NULL, 1),
+       ('Xe máy điện Dibao Pansy S 2021 - màu đỏ đô', 'Dibao', 'Pansy S', 2021, '28 tháng', NULL, 'Good', 11900000,
+        '68', '108', '145', '43000', 'Xe máy điện Dibao bản S, chạy ổn định, pin còn tốt, có trầy nhẹ ở yếm.',
+        'Hoàng Mai, Hà Nội', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-28 08:45:00', '2025-10-20 10:00:00', NULL, 1, NULL,
+        1),
+       ('Pin Li-ion 48V 20Ah tháo xe - dùng được 85%', 'Samsung SDI', '48V-20Ah', 2022, '15 tháng', NULL, 'Fair',
+        2100000, '16', '18', '30', '8000', 'Pack pin 48V 20Ah, đo dung lượng còn ~85%, phù hợp xe đạp điện phổ thông.',
+        'Bắc Từ Liêm, Hà Nội', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-03 09:10:00', '2025-10-15 14:30:00', NULL, 2,
+        NULL, 1),
+       ('Xe đạp điện Yadea iGo 2023 - mới 95%', 'Yadea', 'iGo', 2023, '8 tháng', NULL, 'Like New', 9800000, '66', '105',
+        '140', '26500', 'Xe đạp điện gọn nhẹ, pin tháo rời, khung nhôm, phù hợp học sinh và dân văn phòng.',
+        'Hà Đông, Hà Nội', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-29 11:25:00', '2025-10-12 15:00:00', NULL, 1, NULL,
+        1),
+       ('Pin LFP 60V 24Ah - pin xe máy điện cũ còn tốt', 'CATL', 'LFP-60V-24Ah', 2022, '12 tháng', NULL, 'Good',
+        3900000, '19', '21', '36', '9500',
+        'Pin LiFePO4 60V 24Ah, an toàn, dòng xả cao, đã test dung lượng thực tế còn 93%.', 'Long Biên, Hà Nội', FALSE,
+        TRUE, 'APPROVED', TRUE, '2025-10-02 09:00:00', '2025-10-22 11:00:00', NULL, 2, NULL, 1),
+       ('Xe máy điện YADEA E3 2020 - pin còn dùng tốt', 'Yadea', 'E3', 2020, '36 tháng', NULL, 'Fair', 8500000, '70',
+        '110', '147', '44000', 'Xe máy điện Yadea E3 bản thường, pin zin, động cơ êm, khung vững.',
+        'Thủ Dầu Một, Bình Dương', FALSE, TRUE, 'PENDING', FALSE, '2025-10-10 13:15:00', '2025-10-10 13:15:00', NULL, 1,
+        NULL, 1),
+       ('Pin thay thế 72V 25Ah - cell LG, BMS mới', 'LG Chem', '72V-25Ah', 2024, '5 tháng', NULL, 'Like New', 5200000,
+        '18', '19', '40', '10000', 'Pack pin LG Chem, mới 95%, có BMS mới, tương thích nhiều mẫu xe điện phổ biến.',
+        'TP. Pleiku, Gia Lai', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-04 10:45:00', '2025-10-18 17:50:00', NULL, 2,
+        NULL, 1),
+       ('Xe máy điện DatBike Weaver++ 2023 - xe công ty test', 'DatBike', 'Weaver++', 2023, '10 tháng', NULL,
+        'Like New', 29000000, '72', '118', '150', '48000',
+        'Xe test nội bộ, odo ~1500 km, pin zin, động cơ mạnh, bảo dưỡng đầy đủ.', 'Tân Bình, TP.HCM', FALSE, TRUE,
+        'APPROVED', TRUE, '2025-09-27 14:20:00', '2025-10-22 09:30:00', NULL, 1, NULL, 1),
+       ('Pin xe đạp điện 36V 12Ah - còn mới 90%', 'Gotion', '36V-12Ah', 2023, '8 tháng', NULL, 'Like New', 1300000,
+        '12', '15', '28', '4200', 'Pin nhỏ gọn, thích hợp xe đạp điện mini, trọng lượng nhẹ, dễ tháo lắp.', 'Huế',
+        FALSE, TRUE, 'APPROVED', TRUE, '2025-10-09 08:00:00', '2025-10-18 19:00:00', NULL, 2, NULL, 1),
+       ('Xe đạp điện Suzika Eco 2022 - chính chủ', 'Suzika', 'Eco', 2022, '18 tháng', NULL, 'Good', 7500000, '65',
+        '103', '142', '28000', 'Xe đi học, còn pin tốt, động cơ ổn định, chính chủ sang tay.', 'Ninh Kiều, Cần Thơ',
+        FALSE, TRUE, 'APPROVED', TRUE, '2025-10-06 07:40:00', '2025-10-20 10:10:00', NULL, 1, NULL, 1),
+       ('Pin NMC 60V 15Ah tháo xe VinFast - còn 88%', 'VinFast', '60V15Ah', 2022, '16 tháng', NULL, 'Good', 3100000,
+        '17', '19', '33', '7600', 'Pack pin tháo xe Klara, còn dung lượng tốt, có BMS nguyên bản, chưa can thiệp.',
+        'Cẩm Lệ, Đà Nẵng', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-26 09:50:00', '2025-10-16 08:40:00', NULL, 2, NULL,
+        1),
+       ('Xe máy điện Pega Cap-A 2021 - pin thay mới 2024', 'Pega', 'Cap-A', 2021, '24 tháng', NULL, 'Good', 12500000,
+        '70', '110', '145', '45000', 'Xe còn nguyên tem, pin thay mới đầu 2024, phanh đĩa, vận hành ổn định.',
+        'Quận 5, TP.HCM', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-29 09:00:00', '2025-10-20 15:45:00', NULL, 1, NULL,
+        1),
+       ('Pin LiFePO4 60V 30Ah tháo xe DatBike - còn 90%', 'CATL', 'LFP-60V-30Ah', 2023, '10 tháng', NULL, 'Like New',
+        4800000, '19', '21', '38', '9700', 'Pack pin CATL chuẩn, còn dung lượng cao, thích hợp xe máy điện hoặc DIY.',
+        'Tân Bình, TP.HCM', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-25 12:10:00', '2025-10-15 08:30:00', NULL, 2, NULL,
+        1),
+       ('Xe đạp điện Anbico AP1508 2022 - còn zin', 'Anbico', 'AP1508', 2022, '14 tháng', NULL, 'Good', 8300000, '67',
+        '104', '145', '29000', 'Xe đạp điện Anbico, chạy nhẹ, tiết kiệm điện, pin sạc đầy đi được 40km.',
+        'Bình Thạnh, TP.HCM', FALSE, TRUE, 'PENDING', FALSE, '2025-10-02 10:45:00', '2025-10-19 09:20:00', NULL, 1,
+        NULL, 1),
+       ('Pin 72V 32Ah tháo xe VinFast Evo200 - còn 85%', 'VinFast', '72V-32Ah', 2022, '18 tháng', NULL, 'Fair', 5900000,
+        '20', '23', '44', '13500', 'Pin tháo xe VinFast Evo200, SoH ~85%, có thể sử dụng tiếp 2–3 năm.', 'Ninh Bình',
+        FALSE, TRUE, 'APPROVED', TRUE, '2025-09-27 14:30:00', '2025-10-18 13:00:00', NULL, 2, NULL, 1),
+       ('Xe máy điện YADEA BuyE 2023 - chính chủ', 'Yadea', 'BuyE', 2023, '9 tháng', NULL, 'Like New', 17500000, '71',
+        '115', '148', '47000', 'Xe còn rất mới, odo 900km, pin zin, động cơ êm, chính chủ bán.', 'Hải Phòng', FALSE,
+        TRUE, 'APPROVED', TRUE, '2025-09-30 09:15:00', '2025-10-22 08:50:00', NULL, 1, NULL, 1),
+       ('Pin NMC 60V 24Ah tháo xe - còn 87% dung lượng', 'Samsung SDI', 'NMC-60V-24Ah', 2021, '20 tháng', NULL, 'Good',
+        3800000, '18', '20', '35', '9200', 'Pin tháo xe điện cao cấp, cell Samsung SDI, kiểm định dung lượng còn 87%.',
+        'Biên Hòa, Đồng Nai', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-06 07:50:00', '2025-10-19 17:10:00', NULL, 2,
+        NULL, 1),
+       ('Xe máy điện VinFast Evo200 Lite 2023 - demo hãng', 'VinFast', 'Evo200 Lite', 2023, '6 tháng', NULL, 'Like New',
+        23900000, '72', '117', '150', '48000', 'Xe trưng bày, đi test 500km, bảo hành còn 2 năm.', 'Quận 2, TP.HCM',
+        FALSE, TRUE, 'APPROVED', TRUE, '2025-10-10 09:00:00', '2025-10-21 10:45:00', NULL, 1, NULL, 1),
+       ('Pin LFP 48V 15Ah - cell Gotion, dòng xả cao', 'Gotion', 'LFP-48V-15Ah', 2024, '4 tháng', NULL, 'Like New',
+        2200000, '14', '16', '33', '5800', 'Pin LFP cell Gotion, dùng cho xe đạp điện, dòng xả cao, an toàn.',
+        'Vinh, Nghệ An', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-03 08:10:00', '2025-10-16 13:00:00', NULL, 2, NULL, 1),
+       ('Xe máy điện Pega Aura S 2020 - đã thay pin', 'Pega', 'Aura S', 2020, '36 tháng', NULL, 'Fair', 9500000, '69',
+        '110', '147', '46000', 'Xe đi học sinh viên, pin thay năm 2024, khung còn chắc, có xước nhẹ.', 'Bắc Giang',
+        FALSE, TRUE, 'PENDING', FALSE, '2025-09-26 15:00:00', '2025-10-14 09:00:00', NULL, 1, NULL, 1),
+       ('Pin xe máy điện 60V 25Ah BMS thông minh - chưa dùng', 'LG Energy', '60V-25Ah-BMS', 2024, '1 tháng',
+        'Thiếu giấy kiểm định pin', 'Like New', 5000000, '19', '21', '36', '8900',
+        'Pack pin LG Energy mới 99%, có cổng giao tiếp CAN, thích hợp xe điện hiện đại.', 'Đà Lạt, Lâm Đồng', FALSE,
+        TRUE, 'REJECTED', FALSE, '2025-10-12 11:00:00', '2025-10-12 11:00:00', NULL, 2, NULL, 1),
+       ('Xe máy điện Dibao Gogo SS 2022 - bản giới hạn', 'Dibao', 'Gogo SS', 2022, '16 tháng', NULL, 'Like New',
+        15500000, '70', '113', '148', '46500', 'Xe máy điện Dibao bản giới hạn, màu xanh ngọc, pin còn rất tốt.',
+        'Thanh Xuân, Hà Nội', FALSE, TRUE, 'APPROVED', TRUE, '2025-10-01 09:20:00', '2025-10-23 09:00:00', NULL, 1,
+        NULL, 1),
+       ('Pin LFP 60V 20Ah tháo xe Yadea - dung lượng 92%', 'CATL', 'LFP-60V-20Ah', 2023, '8 tháng', NULL, 'Good',
+        3500000, '18', '20', '35', '7200', 'Pin LFP chuẩn CATL, còn dung lượng 92%, thích hợp cho xe Yadea, VinFast.',
+        'Hòa Bình', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-29 10:15:00', '2025-10-18 08:30:00', NULL, 2, NULL, 1),
+       ('Xe đạp điện DK Bike Cap A 2021 - pin còn tốt', 'DK Bike', 'Cap A', 2021, '30 tháng', NULL, 'Fair', 7200000,
+        '65', '103', '145', '29000', 'Xe đạp điện DK Bike chạy ổn định, có trầy nhẹ, pin còn đi được 35km.',
+        'Tân Phú, TP.HCM', FALSE, TRUE, 'PENDING', FALSE, '2025-09-30 11:00:00', '2025-10-10 10:10:00', NULL, 1, NULL,
+        1),
+       ('Pin NMC 72V 20Ah - cell LG tháo xe VinFast', 'LG Chem', 'NMC-72V-20Ah', 2022, '14 tháng', NULL, 'Good',
+        4600000, '19', '21', '38', '9800', 'Pack pin tháo xe VinFast Feliz, cell LG Chem, còn dung lượng 90%.',
+        'Hải Dương', TRUE, TRUE, 'APPROVED', TRUE, '2025-09-25 13:00:00', '2025-10-17 15:00:00', NULL, 2, NULL, 1),
+       ('Xe máy điện YADEA Xmen Neo 2023 - mới 98%', 'Yadea', 'Xmen Neo', 2023, '5 tháng', NULL, 'Like New', 18900000,
+        '72', '115', '150', '48000', 'Xe mới sử dụng nhẹ, odo 700km, còn bảo hành chính hãng.', 'Nam Định', FALSE, TRUE,
+        'APPROVED', TRUE, '2025-10-08 10:00:00', '2025-10-20 08:40:00', NULL, 1, NULL, 1),
+       ('Pin xe đạp điện 36V 15Ah - Gotion, dòng xả cao', 'Gotion', '36V-15Ah', 2024, '3 tháng', NULL, 'Like New',
+        1500000, '13', '14', '30', '4600', 'Pin Gotion LFP, mới 97%, dòng xả cao, an toàn, nhẹ.', 'Bình Thuận', FALSE,
+        TRUE, 'APPROVED', TRUE, '2025-10-06 09:10:00', '2025-10-17 11:20:00', NULL, 2, NULL, 1),
+       ('Xe đạp điện Pega Cap X 2020 - xe học sinh cũ', 'Pega', 'Cap X', 2020, '40 tháng', NULL, 'Fair', 5900000, '66',
+        '104', '145', '28000', 'Xe học sinh, pin yếu còn đi được 20km, khung chắc chắn, giá rẻ.', 'Hà Đông, Hà Nội',
+        TRUE, TRUE, 'APPROVED', TRUE, '2025-09-23 15:40:00', '2025-10-14 09:15:00', NULL, 1, NULL, 1),
+       ('Pin thay thế 60V 25Ah BMS bluetooth - hàng mới tháo', 'LG Energy', '60V-25Ah-BT', 2024, '2 tháng', NULL,
+        'Like New', 5200000, '18', '19', '37', '8800', 'Pin LG Energy, có Bluetooth BMS theo dõi pin qua app.', 'Huế',
+        FALSE, TRUE, 'APPROVED', TRUE, '2025-09-28 11:45:00', '2025-10-19 13:00:00', NULL, 2, NULL, 1),
+       ('Xe máy điện DatBike Weaver 200 2022 - pin zin', 'DatBike', 'Weaver 200', 2022, '18 tháng', NULL, 'Good',
+        25900000, '71', '115', '148', '47500', 'Xe chính chủ, pin zin 2022, động cơ mạnh, bảo dưỡng đều.', 'Cần Thơ',
+        FALSE, TRUE, 'APPROVED', TRUE, '2025-09-27 10:00:00', '2025-10-16 09:10:00', NULL, 1, NULL, 1),
+       ('Pin LFP 48V 20Ah - tháo xe học sinh, còn 88%', 'CATL', 'LFP-48V-20Ah', 2022, '20 tháng',
+        'Ảnh mờ, yêu cầu bổ sung ảnh', 'Good', 2300000, '16', '18', '34', '7100',
+        'Pin CATL còn dung lượng tốt, phù hợp xe đạp điện phổ thông.', 'Buôn Ma Thuột, Đắk Lắk', FALSE, TRUE,
+        'REJECTED', FALSE, '2025-10-07 10:40:00', '2025-10-07 10:40:00', NULL, 2, NULL, 1);
 
 ---- =========================================================
 ---- 🖼 PRODUCT_IMAGE
@@ -671,27 +813,29 @@ VALUES (partner_name);
 -- =========================================================
 -- ORDERS
 -- =========================================================
-INSERT INTO orders (
-    order_code, shipping_address, phone_number, price, shipping_fee, status, created_at, buyer_id, post_id, shipping_partner_id
-) VALUES
-('XYZ123@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'PENDING', NOW(), 2, 1, 1),
-('XYZ133@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'PENDING', NOW(), 2, 2, 1),
-('XYZ143@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'COMPLETED', NOW(), 2, 3, 1),
-('XYZ153@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'PENDING', NOW(), 2, 4, 1),
-('XYZ163@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000, 1000000.000, 'COMPLETED', NOW(), 2, 5, 1);
+INSERT INTO orders (order_code, shipping_address, phone_number, price, shipping_fee, status, created_at, buyer_id,
+                    post_id, shipping_partner_id)
+VALUES ('XYZ123@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000,
+        1000000.000, 'PENDING', NOW(), 2, 1, 1),
+       ('XYZ133@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000,
+        1000000.000, 'PENDING', NOW(), 2, 2, 1),
+       ('XYZ143@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000,
+        1000000.000, 'COMPLETED', NOW(), 2, 3, 1),
+       ('XYZ153@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000,
+        1000000.000, 'PENDING', NOW(), 2, 4, 1),
+       ('XYZ163@', 'Ấp Ngô Quyền, xã Bàu Hàm 2, huyện Thống Nhất, tỉnh Đồng Nai', '0796051911', 30000000.000,
+        1000000.000, 'COMPLETED', NOW(), 2, 5, 1);
 
 -- ================= Payment Data =================
 INSERT INTO payment (description, gateway_name)
-VALUES
-    ('Thanh toán khi nhận hàng (COD)', 'COD'),
-    ('Thanh toán trực tuyến qua VNPay', 'VNPay');
+VALUES ('Thanh toán khi nhận hàng (COD)', 'COD'),
+       ('Thanh toán trực tuyến qua VNPay', 'VNPay');
 
 -- =========================================================
 -- TRANSACTION
 -- =========================================================
 INSERT INTO transactions(amount, created_at, currency, payment_method, status, order_id, payment_id)
-VALUES
-(40000000.00, NOW(), 'VND', 'VNPAY', 'SUCCESS', 1, 2);
+VALUES (40000000.00, NOW(), 'VND', 'VNPAY', 'SUCCESS', 1, 2);
 
 -- =========================================================
 -- SYSTEM WALLET
@@ -726,10 +870,23 @@ VALUES (NOW(), 'NOT_HAVE_YET', 'PENDING', 1, 1);
 ---- 🖼 EVIDENCE - ẢNH MINH CHỨNG CHO TRANH CHẤP
 ---- =========================================================
 INSERT INTO evidence(image_url, order_image, dispute_id)
-VALUES
-('https://media-cdn-v2.laodong.vn/storage/newsportal/2025/9/25/1580851/Xe-Dien-Khong-Giay-9.jpg', 1, 1),
-('https://media-cdn-v2.laodong.vn/storage/newsportal/2025/9/25/1580851/Xe-Dien-Khong-Giay-9.jpg', 2, 1),
-('https://thegioixedien.com.vn/datafiles/img_data/images/news/canh-bao-tinh-trang-lay-anh-xe-dien-xe-dap-dien-chinh-hang-de-ban-hang-fake.jpg', 3, 1);
+VALUES ('https://media-cdn-v2.laodong.vn/storage/newsportal/2025/9/25/1580851/Xe-Dien-Khong-Giay-9.jpg', 1, 1),
+       ('https://media-cdn-v2.laodong.vn/storage/newsportal/2025/9/25/1580851/Xe-Dien-Khong-Giay-9.jpg', 2, 1),
+       ('https://thegioixedien.com.vn/datafiles/img_data/images/news/canh-bao-tinh-trang-lay-anh-xe-dien-xe-dap-dien-chinh-hang-de-ban-hang-fake.jpg',
+        3, 1);
+
+---- =========================================================
+---- CANCEL ORDER REASON
+---- =========================================================
+INSERT INTO cancel_order_reason (cancel_reason_name)
+VALUES ('Người mua thay đổi ý định'),
+       ('Giá bán không đúng so với thông tin đăng tải'),
+       ('Không thể liên hệ với người mua'),
+       ('Người mua yêu cầu huỷ vì giao hàng chậm'),
+       ('Khách phát hiện pin không đúng dung lượng mô tả'),
+       ('Khách hàng tìm được sản phẩm tương tự với giá tốt hơn'),
+       ('Pin không tương thích với dòng xe của khách'),
+       ('Khách hàng nhập sai địa chỉ giao hàng'),
 -- =========================================================
 -- ✅ KẾT THÚC FILE DATA.SQL
 -- =========================================================
