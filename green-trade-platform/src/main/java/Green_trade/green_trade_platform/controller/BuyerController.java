@@ -332,7 +332,7 @@ public class BuyerController {
 
                 newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
                 log.info(">>> Passed set Order Code");
-                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFee(newOrder, totalServiceFee);
+                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(newOrder, totalServiceFee);
             } else {
                 log.info(">>> Wallet payment flow");
                 Transaction transaction = transactionService.checkoutWalletPayment(
@@ -341,7 +341,6 @@ public class BuyerController {
                         request.getPaymentId(),
                         newOrder
                 );
-                SystemWallet systemWallet = systemWalletService.createEscrowRecord(newOrder);
                 List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
                 log.info(">>> Passed get transactions");
 
@@ -354,9 +353,13 @@ public class BuyerController {
                 String orderShippingCode = ghnService.createOrderShippingResponseToDto(
                         newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()).get("orderCode");
                 log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
+                String totalServiceFee = ghnService.createOrderShippingResponseToDto(
+                        newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
+                ).get("totalFee");
 
                 newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
                 log.info(">>> Passed set Order Code");
+                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeWalletPayment(newOrder, totalServiceFee);
             }
             Invoice newInvoice = Invoice.builder().build();
             responseData = orderMapper.toDto(newOrder);
