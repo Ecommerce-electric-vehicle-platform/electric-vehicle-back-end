@@ -314,7 +314,6 @@ public class BuyerController {
                         request.getPaymentId(),
                         newOrder
                 );
-                SystemWallet systemWallet = systemWalletService.createEscrowRecord(newOrder);
                 List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
                 log.info(">>> Passed get transactions");
 
@@ -333,6 +332,7 @@ public class BuyerController {
 
                 newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
                 log.info(">>> Passed set Order Code");
+                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFee(newOrder, totalServiceFee);
             } else {
                 log.info(">>> Wallet payment flow");
                 Transaction transaction = transactionService.checkoutWalletPayment(

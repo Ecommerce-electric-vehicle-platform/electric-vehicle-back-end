@@ -10,7 +10,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -51,8 +53,12 @@ public class SystemWalletServiceImpl {
         }
     }
 
-    public SystemWallet createEscrowRecordAfterReduceFee(Order order, Map) {
+    public SystemWallet createEscrowRecordAfterReduceFee(Order order, String totalFee) {
         try {
+            BigDecimal productPrice = order.getPrice();
+            BigDecimal shippingFee = order.getShippingFee();
+            BigDecimal totalFeeInNumber = new BigDecimal(totalFee);
+            BigDecimal actualReceivedMoney = productPrice.subtract(totalFeeInNumber.subtract(shippingFee).subtract(productPrice));
             log.info(">>> [SystemWalletServiceImpl] the system came createEscrowRecord");
             SystemWallet escrowRecord = SystemWallet.builder()
                     .admin(null)
@@ -60,7 +66,7 @@ public class SystemWalletServiceImpl {
                     .buyerWalletId(order.getBuyer().getWallet().getWalletId())
                     .sellerWalletId(order.getPostProduct().getSeller().getBuyer().getWallet().getWalletId())
                     .concurrency("VND")
-                    .balance(order.getPrice())
+                    .balance(actualReceivedMoney)
                     .status(SystemWalletStatus.ESCROW_HOLD)
                     .endAt(LocalDateTime.now().plusWeeks(2))
                     .build();
