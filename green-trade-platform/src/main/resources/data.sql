@@ -888,7 +888,7 @@ VALUES ('Người mua thay đổi ý định'),
        ('Khách phát hiện pin không đúng dung lượng mô tả'),
        ('Khách hàng tìm được sản phẩm tương tự với giá tốt hơn'),
        ('Pin không tương thích với dòng xe của khách'),
-       ('Khách hàng nhập sai địa chỉ giao hàng'),
+       ('Khách hàng nhập sai địa chỉ giao hàng');
 -- =========================================================
 -- ✅ KẾT THÚC FILE DATA.SQL
 -- =========================================================

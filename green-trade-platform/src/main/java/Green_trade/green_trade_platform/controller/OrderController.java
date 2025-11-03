@@ -125,7 +125,10 @@ public class OrderController {
                     """
     )
     @PostMapping("/cancel/{id}")
-    public ResponseEntity<RestResponse<OrderResponse, Object>> cancelOrder(@PathVariable Long id, @RequestBody CancelOrderRequest request) throws Exception {
+    public ResponseEntity<RestResponse<OrderResponse, Object>> cancelOrder(
+            @PathVariable Long id,
+            @RequestBody CancelOrderRequest request
+    ) throws Exception {
         log.info(">>> [OrderController] came cancelOrder");
         Order canceledOrder = orderService.cancelOrder(id, request);
         log.info(">>> [OrderController] cancelOrder pass");

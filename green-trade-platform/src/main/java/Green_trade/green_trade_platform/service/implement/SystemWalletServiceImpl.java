@@ -53,13 +53,43 @@ public class SystemWalletServiceImpl {
         }
     }
 
-    public SystemWallet createEscrowRecordAfterReduceFee(Order order, String totalFee) {
+    public SystemWallet createEscrowRecordAfterReduceFeeCOD(Order order, String totalFee) {
         try {
             BigDecimal productPrice = order.getPrice();
             BigDecimal shippingFee = order.getShippingFee();
             BigDecimal totalFeeInNumber = new BigDecimal(totalFee);
             BigDecimal actualReceivedMoney = productPrice.subtract(totalFeeInNumber.subtract(shippingFee).subtract(productPrice));
-            log.info(">>> [SystemWalletServiceImpl] the system came createEscrowRecord");
+            log.info(">>> [SystemWalletServiceImpl] the system came createEscrowRecordAfterReduceFeeCOD");
+            SystemWallet escrowRecord = SystemWallet.builder()
+                    .admin(null)
+                    .order(order)
+                    .buyerWalletId(order.getBuyer().getWallet().getWalletId())
+                    .sellerWalletId(order.getPostProduct().getSeller().getBuyer().getWallet().getWalletId())
+                    .concurrency("VND")
+                    .balance(actualReceivedMoney)
+                    .status(SystemWalletStatus.ESCROW_HOLD)
+                    .endAt(LocalDateTime.now().plusWeeks(2))
+                    .build();
+            log.info(">>> [SystemWalletServiceImpl] create new escrowRecord");
+            return systemWalletRepossitory.save(escrowRecord);
+        } catch (Exception e) {
+            log.info(">>> [SystemWalletServiceImpl] Error at createEscrowRecord: {}", e.getMessage());
+            throw new SystemWalletException();
+        }
+    }
+
+    public SystemWallet createEscrowRecordAfterReduceFeeWalletPayment(Order order, String totalFee) {
+        try {
+            log.info(">>> 1 ");
+            BigDecimal productPrice = order.getPrice();
+            log.info(">>> 1 ");
+            BigDecimal shippingFee = order.getShippingFee();
+            log.info(">>> 1 ");
+            BigDecimal totalFeeInNumber = new BigDecimal(totalFee);
+            log.info(">>> 1 ");
+            BigDecimal actualReceivedMoney = productPrice.subtract(totalFeeInNumber.subtract(shippingFee));
+            log.info(">>> 1 ");
+            log.info(">>> [SystemWalletServiceImpl] the system came createEscrowRecordAfterReduceFeeWalletPayment");
             SystemWallet escrowRecord = SystemWallet.builder()
                     .admin(null)
                     .order(order)

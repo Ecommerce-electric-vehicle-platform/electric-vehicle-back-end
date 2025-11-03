@@ -79,6 +79,7 @@ public class OrderServiceImpl implements OrderService {
     public Order cancelOrder(Long id, CancelOrderRequest request) throws Exception {
         try {
             log.info(">>> [OrderServiceImpl] came cancelOrder");
+            log.info(">>> request: {}", request);
             Optional<Order> orderOpt = orderRepository.findOrderById((id));
             if (orderOpt.isEmpty()) {
                 throw new OrderNotFound();
