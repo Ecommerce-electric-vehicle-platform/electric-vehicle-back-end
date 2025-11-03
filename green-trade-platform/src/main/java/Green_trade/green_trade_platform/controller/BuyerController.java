@@ -354,6 +354,7 @@ public class BuyerController {
                 newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
                 log.info(">>> Passed set Order Code");
             }
+            Invoice newInvoice = Invoice.builder().build();
             responseData = orderMapper.toDto(newOrder);
             log.info(">>> Passed created response");
 
