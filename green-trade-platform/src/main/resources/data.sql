@@ -9,63 +9,39 @@ SET
 GLOBAL event_scheduler = ON;
 
 
-DELETE
-FROM product_image;
-DELETE
-FROM post_product;
-DELETE
-FROM wallet;
-DELETE
-FROM seller;
-DELETE
-FROM buyer;
-DELETE
-FROM admin;
-DELETE
-FROM subscription_packages;
-DELETE
-FROM package_price;
-DELETE
-FROM category;
-DELETE
-FROM system_policy;
-DELETE
-FROM subscription;
-DELETE
-FROM shipping_partner;
-DELETE
-FROM dispute_category;
-DELETE
-FROM orders;
-DELETE
-FROM payment;
-DELETE
-FROM dispute;
-DELETE
-FROM evidence;
-DELETE
-FROM notification;
-DELETE
-FROM system_wallet;
-DELETE
-FROM wallet_transaction;
-DELETE
-FROM conservation;
-DELETE
-FROM wish_listing;
-DELETE
-FROM reviews;
-DELETE
-FROM product_image;
-DELETE
-FROM review_image;
-DELETE
-FROM transactions;
-DELETE
-FROM cancel_order_reason;
-DROP
-EVENT IF EXISTS auto_resolve_escrow;
+DELETE FROM product_image;
+DELETE FROM post_product;
+DELETE FROM wallet;
+DELETE FROM seller;
+DELETE FROM buyer;
+DELETE FROM admin;
+DELETE FROM subscription_packages;
+DELETE FROM package_price;
+DELETE FROM category;
+DELETE FROM system_policy;
+DELETE FROM subscription;
+DELETE FROM shipping_partner;
+DELETE FROM dispute_category;
+DELETE FROM orders;
+DELETE FROM payment;
+DELETE FROM dispute;
+DELETE FROM evidence;
+DELETE FROM notification;
+DELETE FROM system_wallet;
+DELETE FROM wallet_transaction;
+DELETE FROM conservation;
+DELETE FROM wish_listing;
+DELETE FROM reviews;
+DELETE FROM product_image;
+DELETE FROM review_image;
+DELETE FROM transactions;
+DELETE FROM cancel_order_reason;
+DELETE FROM conservation;
+DELETE FROM message;
+DROP EVENT IF EXISTS auto_resolve_escrow;
 
+ALTER TABLE message AUTO_INCREMENT = 1;
+ALTER TABLE conservation AUTO_INCREMENT = 1;
 ALTER TABLE transactions AUTO_INCREMENT = 1;
 ALTER TABLE review_image AUTO_INCREMENT = 1;
 ALTER TABLE product_image AUTO_INCREMENT = 1;
@@ -899,6 +875,20 @@ VALUES ('Người mua thay đổi ý định'),
        ('Khách hàng tìm được sản phẩm tương tự với giá tốt hơn'),
        ('Pin không tương thích với dòng xe của khách'),
        ('Khách hàng nhập sai địa chỉ giao hàng');
+
+---- =========================================================
+---- CONVERSATION
+---- =========================================================
+INSERT INTO conservation(created_at, buyer_id, post_id)
+VALUES (NOW(), 2, 1);
+
+---- =========================================================
+---- CANCEL ORDER REASON
+---- =========================================================
+INSERT INTO message(
+    attached_url, content, type, public_image_id, read_at, receiver_id, sender_id, sent_at, status, conversation_id
+) VALUES
+(NULL, 'Đây là context', 'TEXT', NULL, NULL, 1, 2, NOW(), 'NOT_READ_YET', 1);
 -- =========================================================
 -- ✅ KẾT THÚC FILE DATA.SQL
 -- =========================================================

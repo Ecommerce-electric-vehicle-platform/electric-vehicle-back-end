@@ -14,13 +14,8 @@ import Green_trade.green_trade_platform.service.implement.OrderServiceImpl;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -36,6 +31,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/seller")
 @Slf4j
+@AllArgsConstructor
 public class SellerController {
 
     private final ResponseMapper responseMapper;
@@ -45,24 +41,6 @@ public class SellerController {
     private final PostProductMapper postProductMapper;
     private final OrderServiceImpl orderService;
     private final OrderMapper orderMapper;
-
-    public SellerController(
-            ResponseMapper responseMapper,
-            SellerServiceImpl sellerService,
-            SellerMapper sellerMapper,
-            PostProductServiceImpl postProductService,
-            PostProductMapper postProductMapper,
-            OrderServiceImpl orderService,
-            OrderMapper orderMapper
-    ) {
-        this.responseMapper = responseMapper;
-        this.sellerService = sellerService;
-        this.sellerMapper = sellerMapper;
-        this.postProductService = postProductService;
-        this.postProductMapper = postProductMapper;
-        this.orderService = orderService;
-        this.orderMapper = orderMapper;
-    }
 
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(

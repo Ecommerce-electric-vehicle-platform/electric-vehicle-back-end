@@ -74,7 +74,7 @@ public class SellerServiceImpl implements SellerService {
 
             Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(sellerOpt.get().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
 
-            if (LocalDateTime.now().isAfter(subscription.getEndDay())) {
+            if (LocalDateTime.now().isAfter(subscription.getEndDay()) || subscription.getIsActive() == false) {
                 throw new SubscriptionExpiredException();
             }
 
