@@ -54,7 +54,7 @@ public class Message {
     private MessageType messageType;
 
     @ManyToOne
-    @JoinColumn(name = "conservation")
+    @JoinColumn(name = "conversation_id")
     @JsonBackReference
     private Conversation conversation;
 

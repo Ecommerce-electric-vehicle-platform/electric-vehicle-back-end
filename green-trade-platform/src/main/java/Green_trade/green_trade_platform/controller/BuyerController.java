@@ -56,6 +56,7 @@ public class BuyerController {
     private final WalletServiceImpl walletService;
     private final WishListMapper wishListMapper;
     private final WishListingServiceImpl wishListingService;
+    private final InvoiceServiceImpl invoiceService;
 
     public BuyerController(
             BuyerServiceImpl buyerService,
@@ -76,8 +77,8 @@ public class BuyerController {
             SystemWalletServiceImpl systemWalletService,
             WalletServiceImpl walletService,
             WishListMapper wishListMapper,
-            WishListingServiceImpl wishListingService
-    ) {
+            WishListingServiceImpl wishListingService,
+            InvoiceServiceImpl invoiceService) {
         this.buyerService = buyerService;
         this.responseMapper = responseMapper;
         this.buyerMapper = buyerMapper;
@@ -97,6 +98,7 @@ public class BuyerController {
         this.walletService = walletService;
         this.wishListMapper = wishListMapper;
         this.wishListingService = wishListingService;
+        this.invoiceService = invoiceService;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
@@ -333,6 +335,7 @@ public class BuyerController {
                 newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
                 log.info(">>> Passed set Order Code");
                 SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(newOrder, totalServiceFee);
+                newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
             } else {
                 log.info(">>> Wallet payment flow");
                 Transaction transaction = transactionService.checkoutWalletPayment(
@@ -360,8 +363,10 @@ public class BuyerController {
                 newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
                 log.info(">>> Passed set Order Code");
                 SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeWalletPayment(newOrder, totalServiceFee);
+                newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
             }
-            Invoice newInvoice = Invoice.builder().build();
+            Invoice newInvoice = invoiceService.createInvoiceInstance(newOrder, "", 0);
+            invoiceService.generateInvoice(newInvoice.getId());
             responseData = orderMapper.toDto(newOrder);
             log.info(">>> Passed created response");
 

@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 public class Announcement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "announcement_id")
     private Long id;
 
     @Column(name = "title", nullable = false, unique = false)

@@ -66,6 +66,11 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.save(order);
     }
 
+    public Order updateSystemWallet(SystemWallet systemWallet, Order order) {
+        order.setSystemWallet(systemWallet);
+        return orderRepository.save(order);
+    }
+
     public Order updateOrderTransactions(Order order, List<Transaction> transactions) {
         order.setTransactions(transactions);
         return orderRepository.save(order);
@@ -102,7 +107,7 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] update order status to canceled successfully");
                 orderFound.getPostProduct().setSold(false);
                 log.info(">>> [OrderServiceImpl] update order sold successfully");
-                orderFound.setCancelReason(cancelOrderReason.getCancelReasonName());
+                orderFound.setCancelOrderReason(cancelOrderReason);
                 log.info(">>> [OrderServiceImpl] update cancel order reason successfully");
             } else if (orderFound.getStatus().equals(OrderStatus.PAID)) {
                 log.info(">>> [OrderServiceImpl] order paid status");
@@ -115,7 +120,7 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] refund successfully");
                 orderFound.getPostProduct().setSold(false);
                 log.info(">>> [OrderServiceImpl] update order sold successfully");
-                orderFound.setCancelReason(cancelOrderReason.getCancelReasonName());
+                orderFound.setCancelOrderReason(cancelOrderReason);
                 log.info(">>> [OrderServiceImpl] update cancel order reason successfully");
             } else {
                 throw new Exception("Cannot cancel order");

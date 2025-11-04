@@ -18,7 +18,7 @@ public class OrderMapper {
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
                 .canceledAt(order.getCanceledAt())
-                .cancelReason(order.getCancelReason())
+                .cancelReason(order.getCancelOrderReason())
                 .build();
     }
 }

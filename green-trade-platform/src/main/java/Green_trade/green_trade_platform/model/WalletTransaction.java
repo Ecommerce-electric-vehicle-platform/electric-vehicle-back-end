@@ -52,6 +52,10 @@ public class WalletTransaction {
     @JoinColumn(name = "wallet_id")
     private Wallet wallet;
 
+    @ManyToOne()
+    @JoinColumn(name = "order_id")
+    private Order order;
+
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
