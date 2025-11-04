@@ -6,6 +6,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OrderMapper {
+    private final CancelOrderReasonMapper cancelOrderReasonMapper;
+
+    public OrderMapper(CancelOrderReasonMapper cancelOrderReasonMapper) {
+        this.cancelOrderReasonMapper = cancelOrderReasonMapper;
+    }
+
     public OrderResponse toDto(Order order) {
         return OrderResponse.builder()
                 .id(order.getId())
@@ -18,7 +24,7 @@ public class OrderMapper {
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
                 .canceledAt(order.getCanceledAt())
-                .cancelReason(order.getCancelOrderReason())
+                .cancelOrderReasonResponse(cancelOrderReasonMapper.toDto(order.getCancelOrderReason()))
                 .build();
     }
 }

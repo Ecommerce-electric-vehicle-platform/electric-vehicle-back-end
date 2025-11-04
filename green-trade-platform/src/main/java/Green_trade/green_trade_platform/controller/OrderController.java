@@ -72,16 +72,20 @@ public class OrderController {
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         try {
+            log.info(">>> [OrderController] came history");
             Buyer buyer = buyerService.getCurrentUser();
+            log.info(">>> [OrderController] get current buyer successfully");
             Page<Order> orderPaging = orderService.getOrdersOfCurrentUserPaging(size, page, buyer);
-
+            log.info(">>> [OrderController] get paging with order successfully");
             Map<String, Object> meta = Map.of(
                     "currentPage", orderPaging.getNumber(),
                     "totalElements", orderPaging.getTotalElements(),
                     "totalPage", orderPaging.getTotalPages()
             );
+            log.info(">>> [OrderController] created meta data successfully");
 
             OrderListResponse orderListResponse = orderListMapper.toDto(orderPaging.toList(), meta);
+            log.info(">>> [OrderController] created orderListResponse successfully");
 
             RestResponse<OrderListResponse, Object> response = responseMapper.toDto(
                     true,
@@ -89,6 +93,7 @@ public class OrderController {
                     orderListResponse,
                     null
             );
+            log.info(">>> [OrderController] created response successfully");
 
             return ResponseEntity.status(HttpStatus.OK.value()).body(response);
         } catch (Exception e) {
