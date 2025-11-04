@@ -20,6 +20,7 @@ import java.util.List;
 public class ShippingPartner {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "shipping_partner_id")
     private Long id;
 
     @Column(name = "email", nullable = false, unique = true)

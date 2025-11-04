@@ -24,16 +24,16 @@ public class Seller {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sellerId;
 
-    @Column(name = "identity_front_image_url", nullable = false, unique = true)
+    @Column(name = "front_of_identity_url", nullable = false, unique = true)
     private String identityFrontImageUrl;
 
-    @Column(name = "identity_back_image_url", nullable = false, unique = true)
+    @Column(name = "back_of_identity_url", nullable = false, unique = true)
     private String identityBackImageUrl;
 
     @Column(name = "business_license_url", nullable = false, unique = true)
     private String businessLicenseUrl;
 
-    @Column(name = "selfie_url", nullable = false, unique = true)
+    @Column(name = "selfie_image_url", nullable = false, unique = true)
     private String selfieUrl;
 
     @Column(name = "status", nullable = false)

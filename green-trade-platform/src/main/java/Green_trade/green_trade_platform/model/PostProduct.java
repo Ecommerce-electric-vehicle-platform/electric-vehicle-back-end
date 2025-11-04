@@ -71,14 +71,14 @@ public class PostProduct {
     @Column(name = "is_sold", nullable = false, unique = false)
     private boolean sold;
 
-    @Column(name = "active", nullable = false, unique = false)
+    @Column(name = "is_active", nullable = false, unique = false)
     private boolean active;
 
     @Column(name = "verified_decision_status", nullable = false, unique = false)
     @Enumerated(EnumType.STRING)
     private VerifiedDecisionStatus verifiedDecisionstatus;
 
-    @Column(name = "verified", nullable = false, unique = false)
+    @Column(name = "is_verified", nullable = false, unique = false)
     private boolean verified;
 
     @Column(name = "created_at", nullable = true, unique = false)

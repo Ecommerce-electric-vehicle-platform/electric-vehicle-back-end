@@ -220,7 +220,7 @@ public class BuyerServiceImpl {
                 .transactions(null)
                 .price(postProductOpt.get().getPrice())
                 .status(OrderStatus.PENDING)
-                .cancelReason("Not Canceled Yet")
+                .cancelOrderReason(null)
                 .canceledAt(null)
                 .build();
 
@@ -272,7 +272,7 @@ public class BuyerServiceImpl {
                 .transactions(null)
                 .price(postProductOpt.get().getPrice())
                 .status(OrderStatus.PENDING)
-                .cancelReason("Not Canceled Yet")
+                .cancelOrderReason(null)
                 .canceledAt(null)
                 .build();
         log.info(">>> [BuyerServiceImpl] checked post product existed passed");

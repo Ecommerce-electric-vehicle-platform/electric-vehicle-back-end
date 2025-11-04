@@ -268,11 +268,10 @@ VALUES (10000000.00, 0.00, NOW(), 'Nap tien vao vi nguoi dung', 'SUCCESS', 'DEPO
 -- =========================================================
 -- 🏪 SELLER
 -- =========================================================
-INSERT INTO seller(identity_front_image_url,
-                   identity_back_image_url,
+INSERT INTO seller(front_of_identity_url,
+                   back_of_identity_url,
                    business_license_url,
-                   created_at,
-                   selfie_url,
+                   selfie_image_url,
                    status,
                    store_name,
                    ghn_shop_id,
@@ -282,19 +281,30 @@ INSERT INTO seller(identity_front_image_url,
                    seller_name,
                    nationality,
                    home,
-                   admin_id,
                    buyer_id,
+                   admin_id,
+                   created_at,
                    updated_at,
                    deleted_at)
 VALUES ('https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369239/sellers/1:doanvien/identity_front_image/8141997c-cf68-43ff-bfbd-c54534be6372.jpg',
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369244/sellers/1:doanvien/identity_back_image/551938c5-7612-464e-94b8-1eaf453085e9.jpg',
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369242/sellers/1:doanvien/business_license_image/521e8ddf-e05a-41a8-af94-fbb4b89a0655.jpg',
-        NOW(),
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369246/sellers/1:doanvien/selfie_image/d3953b0b-8423-47c0-864c-2e4bd4f2d2d9.jpg',
-        'ACCEPTED', 'Chuyên xe máy, phụ tùng xe điện Đoàn Viên', 197764,
+        'PENDING',
+        'Chuyên xe máy, phụ tùng xe điện Đoàn Viên',
+        '197764',
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369249/sellers/1:doanvien/policy_image/96443852-fe1c-419b-bf60-8197d48f29ea.jpg',
-        '0751487961', '075205014623', 'TRƯƠNG ĐOÀN VIÊN', 'VIỆT NAM', 'MỸ LỢI, PHÙ MỸ, BÌNH ĐỊNH',
-        1, 1, NULL, NULL);
+        '0751487961',
+        '075205014623',
+        'TRƯƠNG ĐOÀN VIÊN',
+        'VIỆT NAM',
+        'MỸ LỢI, PHÙ MỸ, BÌNH ĐỊNH',
+        1,
+        1,
+        NOW(), -- ✅ giá trị thời gian cho created_at
+        NULL,
+        NULL);
+
 -- ghn_id : 197764
 -- =========================================================
 -- 🧾 SUBSCRIPTION - GÁN GÓI CHO SELLER
@@ -333,7 +343,7 @@ VALUES
 -- =========================================================
 INSERT INTO post_product
 (title, brand, model, manufacture_year, used_duration, rejected_reason, condition_level, price, width, height, length,
- weight, description, location_trading, is_sold, active, verified_decision_status, verified, created_at, updated_at,
+ weight, description, location_trading, is_sold, is_active, verified_decision_status, is_verified, created_at, updated_at,
  deleted_at, category_id, admin_id, seller_id)
 VALUES ('Xe đạp điện Pega Aura 2022 - còn mới 90%', 'Pega', 'Aura', 2022, '18 tháng', NULL, 'Good', 8900000, '68',
         '105', '148', '28000', 'Xe đạp điện chạy êm, pin thay gần đây, phanh còn tốt, đi học đi làm ổn định.',

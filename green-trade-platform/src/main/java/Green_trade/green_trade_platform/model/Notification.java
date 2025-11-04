@@ -20,7 +20,7 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long notificationId;
 
-    @Column(name = "receiver", nullable = false)
+    @Column(name = "receiver_id", nullable = false)
     private Long receiverId;
 
     @Column(name = "account_type", nullable = false)

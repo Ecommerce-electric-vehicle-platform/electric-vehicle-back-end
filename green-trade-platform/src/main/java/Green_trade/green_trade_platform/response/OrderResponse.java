@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.response;
 
 import Green_trade.green_trade_platform.enumerate.OrderStatus;
+import Green_trade.green_trade_platform.model.CancelOrderReason;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,5 +36,5 @@ public class OrderResponse {
 
     private LocalDateTime canceledAt;
 
-    private String cancelReason;
+    private CancelOrderReason cancelReason;
 }

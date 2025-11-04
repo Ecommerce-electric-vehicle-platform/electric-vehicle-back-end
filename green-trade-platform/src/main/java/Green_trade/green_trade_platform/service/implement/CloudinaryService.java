@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
@@ -65,5 +66,33 @@ public class CloudinaryService {
             return false;
         }
     }
+
+    public Map<String, String> uploadFile(File file, String folder) {
+        try {
+            Map<?, ?> res = cloudinary.uploader().upload(
+                    file,
+                    ObjectUtils.asMap(
+                            "folder", folder,
+                            "resource_type", "raw" // cho phép PDF, ZIP, JSON,...
+                    )
+            );
+
+            String fileUrl = res.get("secure_url") != null
+                    ? res.get("secure_url").toString()
+                    : res.get("url") != null
+                    ? res.get("url").toString()
+                    : null;
+
+            return fileUrl != null ? Map.of(
+                    "fileUrl", fileUrl,
+                    "publicId", res.get("public_id").toString()
+            ) : null;
+
+        } catch (Exception e) {
+            log.error("Upload file to Cloudinary failed: {}", e.getMessage());
+            return null;
+        }
+    }
+
 
 }

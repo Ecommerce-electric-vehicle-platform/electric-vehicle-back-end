@@ -63,8 +63,11 @@ public class Order {
     @Column(name = "canceled_at", nullable = true, unique = false)
     private LocalDateTime canceledAt;
 
-    @Column(name = "cancel_reason", nullable = true, unique = false)
-    private String cancelReason;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cancel_reason_id")
+    @JsonManagedReference
+    @ToString.Exclude
+    private CancelOrderReason cancelOrderReason;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id")
@@ -97,6 +100,11 @@ public class Order {
     @JsonBackReference
     @ToString.Exclude
     private List<Transaction> transactions;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
+    @ToString.Exclude
+    private List<WalletTransaction> walletTransactions;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipping_partner_id")
