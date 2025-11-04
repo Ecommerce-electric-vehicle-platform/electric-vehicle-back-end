@@ -73,9 +73,15 @@ public class CloudinaryService {
                     file,
                     ObjectUtils.asMap(
                             "folder", folder,
-                            "resource_type", "raw" // cho phép PDF, ZIP, JSON,...
+                            "resource_type", "auto",  // ✅ đổi từ "raw" sang "auto" để Cloudinary tự nhận PDF
+                            "type", "upload",          // giữ nguyên: upload trực tiếp
+                            "access_mode", "public",   // cho phép truy cập công khai
+                            "use_filename", true,      // dùng tên file gốc
+                            "unique_filename", false   // không thêm hậu tố ngẫu nhiên
                     )
             );
+
+            log.info("📤 Cloudinary upload result: {}", res);
 
             String fileUrl = res.get("secure_url") != null
                     ? res.get("secure_url").toString()
@@ -89,7 +95,7 @@ public class CloudinaryService {
             ) : null;
 
         } catch (Exception e) {
-            log.error("Upload file to Cloudinary failed: {}", e.getMessage());
+            log.error("❌ Upload file to Cloudinary failed: {}", e.getMessage(), e);
             return null;
         }
     }
