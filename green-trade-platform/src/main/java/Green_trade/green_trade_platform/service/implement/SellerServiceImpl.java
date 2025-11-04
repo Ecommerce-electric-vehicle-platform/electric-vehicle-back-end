@@ -20,6 +20,7 @@ import Green_trade.green_trade_platform.service.SellerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,7 +48,7 @@ public class SellerServiceImpl implements SellerService {
     private final RegisterShopShippingServiceMapper registerShopShippingServiceMapper;
     private final BuyerRepository buyerRepository;
     private final PostProductRepository postProductRepository;
-    private final MailServiceImpl mailService;
+    private final MailServiceImpl mailSender;
 
     public Seller createShippingShop(String dataRaw, Seller seller) throws JsonProcessingException {
         try {
@@ -167,7 +169,7 @@ public class SellerServiceImpl implements SellerService {
         }
         notificationRepository.save(notice);
         response.setNotification(notice);
-        mailService.sendBeautifulMail(mailRequest);
+        mailSender.sendBeautifulMail(mailRequest);
         return response;
     }
 
@@ -176,5 +178,51 @@ public class SellerServiceImpl implements SellerService {
         Buyer buyer = buyerService.getCurrentUser();
         return sellerRepository.findByBuyer(buyer).orElseThrow(
                 () -> new AuthException("User not existed."));
+    }
+
+    public Page<Seller> getSellerList(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("sellerId").ascending());
+        return sellerRepository.findAllByStatus(SellerStatus.ACCEPTED, pageable);
+    }
+
+    public void blockAccount(long id, String message, String activity) {
+        log.info(">>> [Seller Service] Block account: Started.");
+        Buyer buyer = buyerRepository.findBySeller_SellerId(id).orElseThrow(
+                () -> new EntityNotFoundException("Can not find seller with this seller id: " + id)
+        );
+        log.info(">>> [Seller Service] Buyer info: {}", buyer.getFullName());
+        buyer.setActive(false);
+        buyerRepository.save(buyer);
+        // ✅ Soạn nội dung email HTML
+        String action = activity.equalsIgnoreCase("block") ? "bị khóa" : "được mở khóa";
+        String htmlMessage = """
+            <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+                <h2 style='color: #4CAF50;'>🌿 Thông báo từ Green Trade Platform</h2>
+                <p>Xin chào <strong>%s</strong>,</p>
+                <p>Tài khoản của bạn đã <strong style='color:%s;'>%s</strong> bởi hệ thống quản trị.</p>
+                <p><strong>Lý do:</strong> %s</p>
+                <hr style='border: none; border-top: 1px solid #ccc;'/>
+                <p>Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ 
+                <a href='mailto:green.trade.platform.391@gmail.com' style='color:#4CAF50;font-weight:bold;'>
+                    đội ngũ hỗ trợ Green Trade
+                </a> để được giúp đỡ.</p>
+                <p>💚 Cảm ơn bạn đã tin tưởng sử dụng nền tảng Green Trade!</p>
+            </div>
+            """.formatted(
+                buyer.getFullName(),
+                activity.equalsIgnoreCase("block") ? "#e74c3c" : "#4CAF50",
+                action.toUpperCase(),
+                message
+        );
+
+        // ✅ Gửi mail đẹp
+        MailRequest mailRequest = MailRequest.builder()
+                .from("green.trade.platform.391@gmail.com")
+                .to(buyer.getEmail())
+                .subject("Green Trade - Thông báo " + (activity.equalsIgnoreCase("block") ? "Khóa tài khoản" : "Mở khóa tài khoản"))
+                .message(htmlMessage)
+                .build();
+
+        mailSender.sendBeautifulMail(mailRequest);
     }
 }

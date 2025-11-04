@@ -9,10 +9,7 @@ import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
 import Green_trade.green_trade_platform.request.VerifiedPostProductRequest;
-import Green_trade.green_trade_platform.response.OrderResponse;
-import Green_trade.green_trade_platform.response.PostProductResponse;
-import Green_trade.green_trade_platform.response.RestResponse;
-import Green_trade.green_trade_platform.response.SubscriptionResponse;
+import Green_trade.green_trade_platform.response.*;
 import Green_trade.green_trade_platform.service.implement.OrderServiceImpl;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
@@ -34,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/seller")
@@ -350,6 +348,42 @@ public class SellerController {
             return ResponseEntity.ok(responseMapper.toDto(
                     false,
                     "VERIFY ORDER FAILED",
+                    null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Retrieve paginated list of sellers",
+            description = """
+        This endpoint allows a **seller** to retrieve a paginated list of all sellers registered on the platform. 
+        It supports pagination parameters (`page`, `size`) to manage large data sets efficiently.
+
+        **Access Control:** Only users with the role `ROLE_SELLER` are authorized to access this endpoint.
+
+        **Response:**
+        - On success: Returns a paginated list of `SellerResponse` objects containing seller details.
+        - On failure: Returns an error response with a failure message and exception details.
+        """
+    )
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/list")
+    public ResponseEntity<?> getSellerList(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            Page<Seller> sellers = sellerService.getSellerList(page, size);
+            Page<SellerResponse> response = sellers.map(sellerMapper::toDto);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET SELLER LIST SUCCESSFULLY.",
+                    response, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET SELLER LIST FAILED.",
                     null, e.getMessage()
             ));
         }
