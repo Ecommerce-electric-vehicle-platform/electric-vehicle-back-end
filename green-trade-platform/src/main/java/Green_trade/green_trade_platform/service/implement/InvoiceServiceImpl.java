@@ -26,6 +26,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .note(note)
                 .concurrency("VND")
                 .taxRate(taxRate)
+                .order(order)
                 .pdfUrl("")
                 .build();
         return invoiceRepository.save(newInvoice);

@@ -6,17 +6,20 @@ import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @Component
+@Slf4j
 public class InvoiceUtils {
 
     private final CloudinaryService cloudinaryService;
@@ -35,20 +38,23 @@ public class InvoiceUtils {
             String fileName = "invoice_" + invoice.getInvoiceNumber() + ".pdf";
             String filePath = TEMP_DIR + fileName;
 
+            Path tempDirPath = Paths.get(TEMP_DIR).toAbsolutePath();
+            log.info("📂 Đường dẫn tuyệt đối tới thư mục hóa đơn: {}", tempDirPath);
+
             // 2️⃣ Sinh file PDF cục bộ
             Document document = new Document(PageSize.A4, 36, 36, 72, 36);
             PdfWriter.getInstance(document, new FileOutputStream(filePath));
             document.open();
 
             Font titleFont = new Font(Font.HELVETICA, 20, Font.BOLD);
-            Paragraph header = new Paragraph("SHINE SHOP - HÓA ĐƠN BÁN HÀNG", titleFont);
+            Paragraph header = new Paragraph("GREEN TRADING PLATFORM - HÓA ĐƠN MUA BÁN", titleFont);
             header.setAlignment(Element.ALIGN_CENTER);
             document.add(header);
             document.add(new Paragraph(" "));
 
             document.add(new Paragraph("Mã hóa đơn: " + invoice.getInvoiceNumber()));
             document.add(new Paragraph("Ngày lập: " +
-                    invoice.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))));
+                    invoice.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
             document.add(new Paragraph(" "));
 
             // === Người mua ===
@@ -116,15 +122,17 @@ public class InvoiceUtils {
             document.add(priceTable);
             document.add(new Paragraph(" "));
 
-            document.add(new Paragraph("Cảm ơn quý khách đã mua hàng tại SHINE SHOP!",
+            document.add(new Paragraph("CẢM ƠN ĐÃ TIN TƯỞNG LỰA CHỌN GREEN TRADE PLATFORM",
                     new Font(Font.HELVETICA, 12, Font.ITALIC)));
             document.close();
 
             // 3️⃣ Upload trực tiếp file PDF lên Cloudinary (không cần MultipartFile)
             File pdfFile = new File(filePath);
             Map<String, String> uploadResult = cloudinaryService.uploadFile(pdfFile, "invoices/" + invoice.getInvoiceNumber() + "-" + invoice.getOrder().getOrderCode());
+            log.info(">>> [InvoiceUtils] uploadResult: {}", uploadResult);
 
-            String cloudUrl = (String) uploadResult.get("secure_url");
+
+            String cloudUrl = (String) uploadResult.get("fileUrl");
 
             // 4️⃣ Cập nhật lại Invoice
             invoice.setPdfUrl(cloudUrl);
