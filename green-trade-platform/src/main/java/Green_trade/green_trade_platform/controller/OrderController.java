@@ -2,17 +2,11 @@ package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.enumerate.SystemWalletStatus;
 import Green_trade.green_trade_platform.exception.OrderNotFound;
-import Green_trade.green_trade_platform.mapper.OrderListMapper;
-import Green_trade.green_trade_platform.mapper.OrderMapper;
-import Green_trade.green_trade_platform.mapper.ResponseMapper;
-import Green_trade.green_trade_platform.mapper.ReviewMapper;
+import Green_trade.green_trade_platform.mapper.*;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.request.CancelOrderRequest;
 import Green_trade.green_trade_platform.request.ReviewRequest;
-import Green_trade.green_trade_platform.response.OrderListResponse;
-import Green_trade.green_trade_platform.response.OrderResponse;
-import Green_trade.green_trade_platform.response.RestResponse;
-import Green_trade.green_trade_platform.response.ReviewResponse;
+import Green_trade.green_trade_platform.response.*;
 import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
@@ -44,6 +38,10 @@ public class OrderController {
     private final ReviewServiceImpl reviewService;
     private final ReviewMapper reviewMapper;
     private final SystemWalletServiceImpl systemWalletService;
+    private final ShippingPartnerMapper shippingPartnerMapper;
+    private final PaymentMapper paymentMapper;
+    private final PostProductMapper postProductMapper;
+    private final BuyerMapper buyerMapper;
 
     @Operation(
             summary = "Get order history of current user",
@@ -255,15 +253,28 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<RestResponse<OrderResponse, Object>> getOrderDetailByOrderId(@PathVariable Long orderId) {
+    public ResponseEntity<RestResponse<Map<String, Object>, Object>> getOrderDetailByOrderId(@PathVariable Long orderId) {
         Order foundOrder = orderService.getOrderById(orderId);
         if (foundOrder == null) {
             throw new OrderNotFound();
         }
 
-        OrderResponse responseData = orderMapper.toDto(foundOrder);
+        OrderResponse orderResponse = orderMapper.toDto(foundOrder);
+        PaymentResponse paymentResponse = paymentMapper.toDto(foundOrder.getTransactions().getLast().getPayment());
+        ShippingPartnerResponse shippingPartnerResponse = shippingPartnerMapper.toDto(foundOrder.getShippingPartner());
+        PostProductResponse productResponse = postProductMapper.toDto(foundOrder.getPostProduct());
+        BuyerResponse buyerResponse = buyerMapper.toDto(foundOrder.getBuyer());
 
-        RestResponse<OrderResponse, Object> response = responseMapper.toDto(
+
+        Map<String, Object> responseData = Map.of(
+                "order", orderResponse,
+                "product", productResponse,
+                "buyer", buyerResponse,
+                "payment", paymentResponse,
+                "shippingPartner", shippingPartnerResponse
+        );
+
+        RestResponse<Map<String, Object>, Object> response = responseMapper.toDto(
                 true,
                 "FETCH ORDER DETAIL SUCCESSFULLY",
                 responseData,
