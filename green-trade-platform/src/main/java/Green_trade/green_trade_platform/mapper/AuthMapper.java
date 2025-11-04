@@ -2,6 +2,7 @@ package Green_trade.green_trade_platform.mapper;
 
 import Green_trade.green_trade_platform.model.Admin;
 import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.response.AdminResponse;
 import Green_trade.green_trade_platform.response.AuthResponse;
 import Green_trade.green_trade_platform.response.BuyerResponse;
 import org.springframework.stereotype.Component;
@@ -17,13 +18,17 @@ public class AuthMapper {
                 .build();
     }
 
-    public AuthResponse toDto(Admin admin, String accessToken, String refreshToken) {
-        return AuthResponse.builder()
-                .username(admin.getEmployeeNumber())
+    public AdminResponse toDto(Admin admin, String accessToken, String refreshToken) {
+        return AdminResponse.builder()
+                .employeeNumber(admin.getEmployeeNumber())
+                .fullName(admin.getFullName())
+                .phoneNumber(admin.getPhoneNumber())
                 .email(admin.getEmail())
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .employeeId(admin.getEmployeeNumber())
+                .gender(admin.getGender())
+                .id(admin.getId())
+                .avatarUrl(admin.getAvatarUrl())
+                .isSuperAdmin(admin.isSuperAdmin())
+                .status(admin.getStatus())
                 .build();
     }
 
