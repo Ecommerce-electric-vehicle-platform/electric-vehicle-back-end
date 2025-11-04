@@ -73,22 +73,22 @@ public class KycService {
         String frontImageUrl = uploadResult.get("fileUrl");
 
         uploadResult = cloudinaryService.upload(
-                identityFrontImageUrl, "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/business_license_image"
+                businessLicenseUrl, "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/business_license_image"
         );
         String license = uploadResult.get("fileUrl");
 
         uploadResult = cloudinaryService.upload(
-                identityFrontImageUrl, "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/identity_back_image"
+                identityBackImageUrl, "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/identity_back_image"
         );
         String backImageUrl = uploadResult.get("fileUrl");
 
         uploadResult = cloudinaryService.upload(
-                identityFrontImageUrl, "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/selfie_image"
+                selfieImageUrl, "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/selfie_image"
         );
         String selfieUrl = uploadResult.get("fileUrl");
 
         uploadResult = cloudinaryService.upload(
-                identityFrontImageUrl, "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/policy_image"
+                storePolicyUrl, "sellers/" + buyer.getBuyerId() + ":" + buyer.getUsername() + "/policy_image"
         );
         String policyUrl = uploadResult.get("fileUrl");
 
