@@ -562,4 +562,41 @@ public class BuyerController {
             ));
         }
     }
+
+    @Operation(
+            summary = "Retrieve paginated list of buyers",
+            description = """
+        This endpoint allows an **administrator** to retrieve a paginated list of all registered buyers in the system. 
+        The request supports pagination parameters (`page`, `size`) and returns a structured response containing 
+        buyer information and metadata.
+
+        **Access Control:** Only users with the role `ROLE_ADMIN` can access this endpoint.
+
+        **Response:**
+        - On success: returns a paginated list of `BuyerResponse` objects with a success message.
+        - On failure: returns an error response with failure status and message details.
+        """
+    )
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/list")
+    public ResponseEntity<?> getBuyerList(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            Page<Buyer> listBuyer = buyerService.getListBuyers(page, size);
+            Page<BuyerResponse> response = listBuyer.map(buyerMapper::toDto);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET LIST BUYERS SUCCESSFULLY.",
+                    response, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET LIST BUYERS FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
 }

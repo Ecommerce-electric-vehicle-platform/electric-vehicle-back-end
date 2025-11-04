@@ -4,16 +4,14 @@ import Green_trade.green_trade_platform.mapper.AdminMapper;
 import Green_trade.green_trade_platform.mapper.PostProductListMapper;
 import Green_trade.green_trade_platform.mapper.PostProductMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
-import Green_trade.green_trade_platform.model.Admin;
-import Green_trade.green_trade_platform.model.Notification;
-import Green_trade.green_trade_platform.model.PostProduct;
-import Green_trade.green_trade_platform.model.Seller;
+import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.request.ApproveSellerRequest;
 import Green_trade.green_trade_platform.request.CreateAdminRequest;
 import Green_trade.green_trade_platform.request.NeedVerifyPostRequest;
 import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
 import Green_trade.green_trade_platform.response.*;
 import Green_trade.green_trade_platform.service.implement.AdminServiceImpl;
+import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -45,6 +43,7 @@ public class AdminController {
     private final PostProductMapper postProductMapper;
     private final PostProductListMapper postProductListMapper;
     private final NotificationSocketController socketController;
+    private final BuyerServiceImpl buyerService;
 
     @Operation(
             summary = "Get all pending seller accounts",
@@ -269,5 +268,169 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
+    @Operation(
+            summary = "Block or unblock user account (buyer, seller, or admin)",
+            description = """
+        This endpoint allows an **administrator** to block or unblock a user account based on its type and ID.  
+        Supported account types include **buyer**, **seller**, and **admin**.
 
+        The action performed (block or unblock) depends on the provided `activity` parameter.  
+        A message explaining the reason for the action can also be passed.
+
+        - For **buyer** and **seller** accounts: the platform will call their respective services to perform the action.  
+        - For **admin** accounts: only a **super admin** can perform block or unblock operations.  
+        - If an invalid account type is provided, the system returns a **400 Bad Request** response.
+
+        **Access Control:** Only users with the role `ROLE_ADMIN` are authorized to use this API.
+
+        **Path Parameters:**
+        - `accountId` – The ID of the account to block or unblock.  
+        - `accountType` – The type of the account (`buyer`, `seller`, or `admin`).  
+        - `message` – A short explanation or note about the action (e.g., "Violation of policy").  
+        - `activity` – Defines the action to perform: `"block"` or `"unblock"`.
+
+        **Response:**
+        - **Success:** Returns a message confirming that the account was blocked or unblocked successfully.  
+        - **Failure:** Returns an error message describing the issue (e.g., invalid type, insufficient permission, or internal error).
+        """
+    )
+    @PreAuthorize(("hasRole('ROLE_ADMIN')"))
+    @PostMapping("/block-account/{accountId}/{accountType}/{message}/{activity}")
+    public ResponseEntity<?> blockAccount(
+            @PathVariable(name = "accountId") long id,
+            @PathVariable(name = "accountType") String type,
+            @PathVariable(name = "message") String message,
+            @PathVariable(name = "activity") String activity
+    ) {
+        try {
+            String successMessage;
+            String actionText;
+
+            // ✅ Xác định hành động (Block hoặc Unblock)
+            if ("block".equalsIgnoreCase(activity)) {
+                actionText = "BLOCK";
+            } else if ("unblock".equalsIgnoreCase(activity)) {
+                actionText = "UNBLOCK";
+            } else {
+                return ResponseEntity.badRequest().body(responseMapper.toDto(
+                        false,
+                        "INVALID ACTIVITY.",
+                        null,
+                        "Activity must be either 'block' or 'unblock'."
+                ));
+            }
+
+            // ✅ Xử lý theo loại tài khoản
+            if ("buyer".equalsIgnoreCase(type)) {
+                buyerService.blockAccount(id, message, activity);
+                successMessage = String.format("%s BUYER ACCOUNT SUCCESSFULLY.", actionText);
+            }
+            else if ("seller".equalsIgnoreCase(type)) {
+                sellerService.blockAccount(id, message, activity);
+                successMessage = String.format("%s SELLER ACCOUNT SUCCESSFULLY.", actionText);
+            }
+            else if ("admin".equalsIgnoreCase(type)) {
+                Admin admin = adminService.getCurrentUser();
+                if (!admin.isSuperAdmin()) {
+                    throw new IllegalArgumentException("You do not have permission to block or unblock admin accounts.");
+                }
+                adminService.blockAccount(id, message, activity);
+                successMessage = String.format("%s ADMIN ACCOUNT SUCCESSFULLY.", actionText);
+            }
+            else {
+                return ResponseEntity.badRequest().body(responseMapper.toDto(
+                        false,
+                        "INVALID ACCOUNT TYPE.",
+                        null,
+                        "Type must be either 'buyer', 'seller', or 'admin'."
+                ));
+            }
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    successMessage,
+                    null,
+                    null
+            ));
+
+        } catch (Exception e) {
+            String actionText = activity.equalsIgnoreCase("unblock") ? "UNBLOCK" : "BLOCK";
+
+            String errorMsg = switch (type.toLowerCase()) {
+                case "buyer" -> String.format("%s BUYER ACCOUNT FAILED.", actionText);
+                case "seller" -> String.format("%s SELLER ACCOUNT FAILED.", actionText);
+                case "admin" -> String.format("%s ADMIN ACCOUNT FAILED.", actionText);
+                default -> String.format("%s ACCOUNT FAILED.", actionText);
+            };
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    errorMsg,
+                    null,
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Retrieve paginated list of admin accounts",
+            description = """
+        This endpoint allows an **administrator** to retrieve a paginated list of all admin accounts in the system.  
+        It supports pagination parameters (`page`, `size`) to efficiently navigate large datasets.
+        
+        **Access Control:** Only users with the role `ROLE_ADMIN` are authorized to access this endpoint.
+        
+        **Query Parameters:**
+        - `page` – (optional) The page number to retrieve, default is `0`.
+        - `size` – (optional) The number of records per page, default is `10`.
+        
+        **Response:**
+        - On success: Returns a paginated list of `AdminResponse` objects containing admin details.
+        - On failure: Returns an error message and exception details if the retrieval fails.
+        """
+    )
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/list")
+    public ResponseEntity<?> getAdminList(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            Page<Admin> admins = adminService.getAdminList(page, size);
+            Page<AdminResponse> responses = admins.map(adminMapper::toDto);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET LIST ADMIN ACCOUNT SUCCESSFULLY.",
+                    responses, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET LIST ADMIN ACCOUNT FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation()
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/profile/{accountId}")
+    public ResponseEntity<?> getProfile(
+            @PathVariable(name = "accountId") long id
+    ) {
+        try {
+            Admin admin = adminService.getAdminProfile(id);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ADMIN PROFILE SUCCESSFULLY.",
+                    adminMapper.toDto(admin), null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET ADMIN PROFILE FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
 }
