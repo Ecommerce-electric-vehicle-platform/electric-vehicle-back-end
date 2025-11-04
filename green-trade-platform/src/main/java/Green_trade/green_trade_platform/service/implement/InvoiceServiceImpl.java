@@ -28,7 +28,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .taxRate(taxRate)
                 .pdfUrl("")
                 .build();
-        return null;
+        return invoiceRepository.save(newInvoice);
     }
 
     public String generateInvoice(Long invoiceId) {
