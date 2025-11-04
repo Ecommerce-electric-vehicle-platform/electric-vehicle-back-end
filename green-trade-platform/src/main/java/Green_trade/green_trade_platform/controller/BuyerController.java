@@ -328,7 +328,7 @@ public class BuyerController {
 
                 String totalServiceFee = ghnService.createOrderShippingResponseToDto(
                         newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
-                ).get("total");
+                ).get("totalFee");
                 log.info(">>> Passed get orderShippingCode");
                 log.info(">>> orderShippingCode: {}", orderShippingCode);
 

@@ -22,26 +22,31 @@ public class Invoice {
     @Column(name = "invoice_id")
     private Long id;
 
-    @Column(name = "invoice_number", nullable = false, unique = true)
+    @Column(name = "invoice_number", nullable = true, unique = true)
     private String invoiceNumber;
 
     @Column(name = "note", nullable = true, unique = false)
     private String note;
 
-    @Column(name = "created_at", nullable = false, unique = false)
+    @Column(name = "created_at", nullable = true, unique = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "concurrency", nullable = false, unique = false)
+    @Column(name = "concurrency", nullable = true, unique = false)
     private String concurrency;
 
-    @Column(name = "tax_rate", nullable = false, unique = false)
+    @Column(name = "tax_rate", nullable = true, unique = false)
     private double taxRate;
 
-    @Column(name = "pdf_url", nullable = false, unique = false)
+    @Column(name = "pdf_url", nullable = true, unique = false)
     private String pdfUrl;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     @JsonManagedReference
     private Order order;
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
