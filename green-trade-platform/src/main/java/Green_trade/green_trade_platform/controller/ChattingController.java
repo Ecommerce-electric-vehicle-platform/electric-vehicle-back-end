@@ -6,6 +6,7 @@ import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.request.MessageRequest;
 import Green_trade.green_trade_platform.response.ConversationResponse;
+import Green_trade.green_trade_platform.response.MessageResponse;
 import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
 import Green_trade.green_trade_platform.service.implement.ConversationServiceImpl;
 import Green_trade.green_trade_platform.service.implement.MessageServiceImpl;
@@ -13,6 +14,7 @@ import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -195,4 +197,27 @@ public class ChattingController {
         }
     }
 
+    @GetMapping("/conversation-messages")
+    public ResponseEntity<?> getListMessage(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "conversationId", required = true) long id
+    ) {
+        try {
+            Conversation conversation = conversationService.findById(id);
+            Page<Message> messages = messageService.getConversationMessages(page, size, conversation);
+            Page<MessageResponse> response = messages.map(messageMapper::toDto);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET MESSAGES OF CONVERSATION SUCCESSFULLY.",
+                    response, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET MESSAGES OF CONVERSATION FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
 }

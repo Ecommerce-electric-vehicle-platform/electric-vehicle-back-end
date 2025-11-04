@@ -2,10 +2,15 @@ package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.controller.ChattingSocketController;
 import Green_trade.green_trade_platform.enumerate.MessageType;
+import Green_trade.green_trade_platform.model.Conversation;
 import Green_trade.green_trade_platform.model.Message;
 import Green_trade.green_trade_platform.repository.MessageRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,5 +44,11 @@ public class MessageServiceImpl {
         log.info(">>> [Message Service] Text message: {}", message);
         chattingSocketController.sendMessage(response);
         return response;
+    }
+
+
+    public Page<Message> getConversationMessages(int page, int size, Conversation conversation) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("sentAt").descending());
+        return messageRepository.findAllByConversation(conversation, pageable);
     }
 }
