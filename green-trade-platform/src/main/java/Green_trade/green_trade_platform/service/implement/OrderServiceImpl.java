@@ -36,8 +36,11 @@ public class OrderServiceImpl implements OrderService {
 
     public Page<Order> getOrdersOfCurrentUserPaging(int size, int page, Buyer buyer) {
         try {
+            log.info(">>> [OrderServiceImpl] camed getOrdersOfCurrentUserPaging");
             Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
+            log.info(">>> [OrderServiceImpl] created pageable successfully");
             Page<Order> ordersPage = orderRepository.findAllByBuyer(buyer, pageable);
+            log.info(">>> [OrderServiceImpl] created orderPage successfully");
             return new PageImpl<>(ordersPage.getContent(), pageable, ordersPage.getTotalElements());
         } catch (Exception e) {
             log.info(">>> Error at getOrdersOfCurrentUserPaging: {}", e.getMessage());

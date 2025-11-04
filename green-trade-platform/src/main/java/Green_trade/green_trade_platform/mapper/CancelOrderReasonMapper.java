@@ -8,9 +8,13 @@ import org.springframework.stereotype.Component;
 public class CancelOrderReasonMapper {
 
     public CancelOrderReasonResponse toDto(CancelOrderReason cancelOrderReason) {
-        return CancelOrderReasonResponse.builder()
-                .id(cancelOrderReason.getId())
-                .cancelOrderReasonName(cancelOrderReason.getCancelReasonName())
-                .build();
+        CancelOrderReasonResponse result = null;
+        if (cancelOrderReason != null) {
+            result = CancelOrderReasonResponse.builder()
+                    .id(cancelOrderReason.getId())
+                    .cancelOrderReasonName(cancelOrderReason.getCancelReasonName())
+                    .build();
+        }
+        return result;
     }
 }

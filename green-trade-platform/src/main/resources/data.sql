@@ -63,6 +63,8 @@ DELETE
 FROM transactions;
 DELETE
 FROM cancel_order_reason;
+DELETE
+FROM invoice;
 DROP
 EVENT IF EXISTS auto_resolve_escrow;
 

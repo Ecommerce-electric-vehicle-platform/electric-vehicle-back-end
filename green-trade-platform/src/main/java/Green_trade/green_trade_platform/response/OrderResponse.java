@@ -36,5 +36,5 @@ public class OrderResponse {
 
     private LocalDateTime canceledAt;
 
-    private CancelOrderReason cancelReason;
+    private CancelOrderReasonResponse cancelOrderReasonResponse;
 }
