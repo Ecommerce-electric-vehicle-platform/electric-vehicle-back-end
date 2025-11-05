@@ -412,7 +412,17 @@ public class AdminController {
         }
     }
 
-    @Operation()
+    @Operation(
+            summary = "Get admin profile by account ID",
+            description = """
+        Retrieve the detailed profile information of an admin by their account ID.
+        Only users with the role ROLE_ADMIN can access this endpoint.
+        
+        Example:
+        GET /profile/5
+        Requires Authorization header with a valid JWT token.
+        """
+    )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/profile/{accountId}")
     public ResponseEntity<?> getProfile(
