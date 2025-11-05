@@ -266,7 +266,7 @@ VALUES ('https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369239/sellers/1
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369244/sellers/1:doanvien/identity_back_image/551938c5-7612-464e-94b8-1eaf453085e9.jpg',
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369242/sellers/1:doanvien/business_license_image/521e8ddf-e05a-41a8-af94-fbb4b89a0655.jpg',
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369246/sellers/1:doanvien/selfie_image/d3953b0b-8423-47c0-864c-2e4bd4f2d2d9.jpg',
-        'PENDING',
+        'ACCEPTED',
         'Chuyên xe máy, phụ tùng xe điện Đoàn Viên',
         '197764',
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369249/sellers/1:doanvien/policy_image/96443852-fe1c-419b-bf60-8197d48f29ea.jpg',
@@ -285,8 +285,8 @@ VALUES ('https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369239/sellers/1
 -- =========================================================
 -- 🧾 SUBSCRIPTION - GÁN GÓI CHO SELLER
 -- =========================================================
-INSERT INTO subscription (seller_id, subscription_package_id, is_active, start_day, end_day)
-VALUES (1, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY));
+INSERT INTO subscription (seller_id, subscription_package_id, is_active, start_day, end_day, remain_post)
+VALUES (1, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 100);
 
 
 -- =========================================================
