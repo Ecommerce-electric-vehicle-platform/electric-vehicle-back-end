@@ -238,7 +238,7 @@ public class ShippingServiceController {
     }
 
     @GetMapping("/order/{orderId}/status")
-    public ResponseEntity<RestResponse<?, ?>> getOrderStatus(@PathVariable Long orderId) {
+    public ResponseEntity<RestResponse<Map<String, Object>, Object>> getOrderStatus(@PathVariable Long orderId) {
         Order foundOrder = orderService.getOrderById(orderId);
 
         if (foundOrder == null) {

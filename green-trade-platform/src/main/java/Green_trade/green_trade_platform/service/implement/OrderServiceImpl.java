@@ -113,6 +113,8 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] update order sold successfully");
                 orderFound.setCancelOrderReason(cancelOrderReason);
                 log.info(">>> [OrderServiceImpl] update cancel order reason successfully");
+                orderFound.setCanceledAt(LocalDateTime.now());
+                log.info(">>> [OrderServiceImpl] update canceled at successfully");
             } else if (orderFound.getStatus().equals(OrderStatus.PAID)) {
                 log.info(">>> [OrderServiceImpl] order paid status");
                 Transaction transaction = transactionService.createTransaction(orderFound, TransactionStatus.CANCELED,
@@ -131,7 +133,7 @@ public class OrderServiceImpl implements OrderService {
             } else {
                 throw new Exception("Cannot cancel order");
             }
-            return orderFound;
+            return orderRepository.save(orderFound);
         } catch (Exception e) {
             log.info(">>> [OrderServiceImpl] Error at cancelOrder: {}", e.getMessage());
             throw e;
