@@ -50,7 +50,7 @@ FROM system_wallet;
 DELETE
 FROM wallet_transaction;
 DELETE
-FROM conservation;
+FROM conversation;
 DELETE
 FROM wish_listing;
 DELETE
@@ -71,7 +71,7 @@ EVENT IF EXISTS auto_resolve_escrow;
 ALTER TABLE transactions AUTO_INCREMENT = 1;
 ALTER TABLE review_image AUTO_INCREMENT = 1;
 ALTER TABLE product_image AUTO_INCREMENT = 1;
-ALTER TABLE conservation AUTO_INCREMENT = 1;
+ALTER TABLE conversation AUTO_INCREMENT = 1;
 ALTER TABLE wish_listing AUTO_INCREMENT = 1;
 ALTER TABLE reviews AUTO_INCREMENT = 1;
 ALTER TABLE product_image AUTO_INCREMENT = 1;

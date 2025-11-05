@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,6 +126,8 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] update order sold successfully");
                 orderFound.setCancelOrderReason(cancelOrderReason);
                 log.info(">>> [OrderServiceImpl] update cancel order reason successfully");
+                orderFound.setCanceledAt(LocalDateTime.now());
+                log.info(">>> [OrderServiceImpl] update canceled at successfully");
             } else {
                 throw new Exception("Cannot cancel order");
             }
