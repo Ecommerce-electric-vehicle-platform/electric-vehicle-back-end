@@ -282,4 +282,42 @@ public class OrderController {
         );
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
+
+    @Operation(
+            summary = "Get all orders of current seller",
+            description = """
+        Retrieve all orders associated with the current logged-in seller.
+        The result is paginated using 'page' and 'size' query parameters.
+        
+        Requirements:
+        - User must have ROLE_SELLER
+        - Authorization header with a valid JWT token is required
+        
+        Example:
+        GET /api/orders?page=0&size=10
+        """
+    )
+    @PreAuthorize("hasRole('ROLE_SELLER')")
+    @GetMapping("")
+    public ResponseEntity<?> getAllOrders(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            Seller seller = buyerService.getCurrentUser().getSeller();
+            Page<Order> orders = orderService.getAllOrders(page, size, seller);
+            Page<OrderResponse> orderResponses = orders.map(orderMapper::toDto);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ALL ORDER SUCCESSFULLY.",
+                    orderResponses, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ALL ORDER FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
 }
