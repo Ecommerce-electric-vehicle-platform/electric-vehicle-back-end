@@ -334,15 +334,15 @@ public class SellerController {
     @Operation(
             summary = "Retrieve paginated list of sellers",
             description = """
-        This endpoint allows a **seller** to retrieve a paginated list of all sellers registered on the platform. 
-        It supports pagination parameters (`page`, `size`) to manage large data sets efficiently.
-
-        **Access Control:** Only users with the role `ROLE_SELLER` are authorized to access this endpoint.
-
-        **Response:**
-        - On success: Returns a paginated list of `SellerResponse` objects containing seller details.
-        - On failure: Returns an error response with a failure message and exception details.
-        """
+                    This endpoint allows a **seller** to retrieve a paginated list of all sellers registered on the platform. 
+                    It supports pagination parameters (`page`, `size`) to manage large data sets efficiently.
+                    
+                    **Access Control:** Only users with the role `ROLE_SELLER` are authorized to access this endpoint.
+                    
+                    **Response:**
+                    - On success: Returns a paginated list of `SellerResponse` objects containing seller details.
+                    - On failure: Returns an error response with a failure message and exception details.
+                    """
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/list")

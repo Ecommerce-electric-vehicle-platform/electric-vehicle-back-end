@@ -196,19 +196,19 @@ public class SellerServiceImpl implements SellerService {
         // ✅ Soạn nội dung email HTML
         String action = activity.equalsIgnoreCase("block") ? "bị khóa" : "được mở khóa";
         String htmlMessage = """
-            <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
-                <h2 style='color: #4CAF50;'>🌿 Thông báo từ Green Trade Platform</h2>
-                <p>Xin chào <strong>%s</strong>,</p>
-                <p>Tài khoản của bạn đã <strong style='color:%s;'>%s</strong> bởi hệ thống quản trị.</p>
-                <p><strong>Lý do:</strong> %s</p>
-                <hr style='border: none; border-top: 1px solid #ccc;'/>
-                <p>Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ 
-                <a href='mailto:green.trade.platform.391@gmail.com' style='color:#4CAF50;font-weight:bold;'>
-                    đội ngũ hỗ trợ Green Trade
-                </a> để được giúp đỡ.</p>
-                <p>💚 Cảm ơn bạn đã tin tưởng sử dụng nền tảng Green Trade!</p>
-            </div>
-            """.formatted(
+                <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+                    <h2 style='color: #4CAF50;'>🌿 Thông báo từ Green Trade Platform</h2>
+                    <p>Xin chào <strong>%s</strong>,</p>
+                    <p>Tài khoản của bạn đã <strong style='color:%s;'>%s</strong> bởi hệ thống quản trị.</p>
+                    <p><strong>Lý do:</strong> %s</p>
+                    <hr style='border: none; border-top: 1px solid #ccc;'/>
+                    <p>Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ 
+                    <a href='mailto:green.trade.platform.391@gmail.com' style='color:#4CAF50;font-weight:bold;'>
+                        đội ngũ hỗ trợ Green Trade
+                    </a> để được giúp đỡ.</p>
+                    <p>💚 Cảm ơn bạn đã tin tưởng sử dụng nền tảng Green Trade!</p>
+                </div>
+                """.formatted(
                 buyer.getFullName(),
                 activity.equalsIgnoreCase("block") ? "#e74c3c" : "#4CAF50",
                 action.toUpperCase(),

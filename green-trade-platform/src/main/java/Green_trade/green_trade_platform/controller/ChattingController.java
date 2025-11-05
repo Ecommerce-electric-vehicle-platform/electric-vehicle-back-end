@@ -44,12 +44,12 @@ public class ChattingController {
             """, description = """
             This endpoint allows an authenticated **buyer** to initiate a new conversation
             with the **seller** who owns the specified product post (`PostProduct`).
-
+            
             - The buyer must be logged in.
             - The `postId` must correspond to an existing and active post.
             - A conversation will only be created **if it does not already exist** between the buyer and seller for this post.
             - Once created, the conversation can be used to exchange chat messages.
-
+            
             **Use case:**
             Buyers use this API to start chatting with the seller about a specific product they are interested in.
             """)
@@ -84,7 +84,7 @@ public class ChattingController {
             This API retrieves all conversations belonging to the currently logged-in buyer.
             The system identifies the current user through the authentication context (session or token)
             and fetches all related conversation records.
-
+            
             - If successful: returns a list of conversations for the buyer.
             - If failed: returns an error message with details in the `message` field.
             """)
@@ -109,21 +109,21 @@ public class ChattingController {
     @Operation(summary = "Send a new chat message (text or image)", description = """
             This API creates and sends a new message within an existing conversation
             between a buyer and a seller.
-
+            
             The message can be of two types:
             - **Text message:** provided in the `content` field.
             - **Image message:** uploaded through the `picture` field as multipart form data.
-
+            
             Once the message is successfully created, it will be:
             1. Saved in the database (associated with the given conversation).
             2. Broadcast in real-time via WebSocket using `ChattingSocketController`,
                allowing the receiver to receive it instantly.
-
+            
             **Notes:**
             - The sender and receiver are determined automatically based on the current logged-in user.
             - Either `content` or `picture` must be provided.
             - This endpoint consumes `multipart/form-data`.
-
+            
             **Example use cases:**
             - A buyer sends a text or image to the seller of a product post.
             - A seller replies with a message or image in the same conversation.

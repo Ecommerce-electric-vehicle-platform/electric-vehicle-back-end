@@ -566,16 +566,16 @@ public class BuyerController {
     @Operation(
             summary = "Retrieve paginated list of buyers",
             description = """
-        This endpoint allows an **administrator** to retrieve a paginated list of all registered buyers in the system. 
-        The request supports pagination parameters (`page`, `size`) and returns a structured response containing 
-        buyer information and metadata.
-
-        **Access Control:** Only users with the role `ROLE_ADMIN` can access this endpoint.
-
-        **Response:**
-        - On success: returns a paginated list of `BuyerResponse` objects with a success message.
-        - On failure: returns an error response with failure status and message details.
-        """
+                    This endpoint allows an **administrator** to retrieve a paginated list of all registered buyers in the system. 
+                    The request supports pagination parameters (`page`, `size`) and returns a structured response containing 
+                    buyer information and metadata.
+                    
+                    **Access Control:** Only users with the role `ROLE_ADMIN` can access this endpoint.
+                    
+                    **Response:**
+                    - On success: returns a paginated list of `BuyerResponse` objects with a success message.
+                    - On failure: returns an error response with failure status and message details.
+                    """
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/list")
