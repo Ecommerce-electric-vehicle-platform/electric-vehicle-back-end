@@ -100,5 +100,4 @@ public class Admin {
         this.createdAt = LocalDateTime.now();
     }
 
-
 }

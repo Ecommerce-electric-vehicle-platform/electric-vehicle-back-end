@@ -25,6 +25,10 @@ public class AdminMapper {
                 .phoneNumber(admin.getPhoneNumber())
                 .email(admin.getEmail())
                 .gender(admin.getGender())
+                .id(admin.getId())
+                .avatarUrl(admin.getAvatarUrl())
+                .isSuperAdmin(admin.isSuperAdmin())
+                .status(admin.getStatus())
                 .build();
     }
 }

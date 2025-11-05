@@ -2,7 +2,7 @@ package Green_trade.green_trade_platform.mapper;
 
 import Green_trade.green_trade_platform.model.Message;
 import Green_trade.green_trade_platform.request.MessageRequest;
-import Green_trade.green_trade_platform.response.MessageReponse;
+import Green_trade.green_trade_platform.response.MessageResponse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,8 +13,8 @@ public class MessageMapper {
                 .build();
     }
 
-    public MessageReponse toDto(Message message) {
-        return MessageReponse.builder()
+    public MessageResponse toDto(Message message) {
+        return MessageResponse.builder()
                 .id(message.getId())
                 .receiverId(message.getReceiverId())
                 .senderId(message.getSenderId())

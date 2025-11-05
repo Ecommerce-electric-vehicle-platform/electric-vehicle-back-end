@@ -65,13 +65,17 @@ DELETE
 FROM cancel_order_reason;
 DELETE
 FROM invoice;
+DELETE FROM conservation;
+DELETE FROM message;
 DROP
 EVENT IF EXISTS auto_resolve_escrow;
 
+ALTER TABLE message AUTO_INCREMENT = 1;
+ALTER TABLE conservation AUTO_INCREMENT = 1;
 ALTER TABLE transactions AUTO_INCREMENT = 1;
 ALTER TABLE review_image AUTO_INCREMENT = 1;
 ALTER TABLE product_image AUTO_INCREMENT = 1;
-ALTER TABLE conversation AUTO_INCREMENT = 1;
+ALTER TABLE conservation AUTO_INCREMENT = 1;
 ALTER TABLE wish_listing AUTO_INCREMENT = 1;
 ALTER TABLE reviews AUTO_INCREMENT = 1;
 ALTER TABLE product_image AUTO_INCREMENT = 1;

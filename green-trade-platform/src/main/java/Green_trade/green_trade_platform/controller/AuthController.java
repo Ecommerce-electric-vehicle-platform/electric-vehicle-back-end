@@ -1,6 +1,9 @@
 package Green_trade.green_trade_platform.controller;
 
+import Green_trade.green_trade_platform.enumerate.AccountStatus;
 import Green_trade.green_trade_platform.enumerate.SellerStatus;
+import Green_trade.green_trade_platform.exception.AuthException;
+import Green_trade.green_trade_platform.mapper.AdminMapper;
 import Green_trade.green_trade_platform.mapper.AuthMapper;
 import Green_trade.green_trade_platform.mapper.BuyerMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
@@ -9,6 +12,7 @@ import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.repository.SellerRepository;
 import Green_trade.green_trade_platform.request.*;
+import Green_trade.green_trade_platform.response.AdminAuthResponse;
 import Green_trade.green_trade_platform.response.AuthResponse;
 import Green_trade.green_trade_platform.response.BuyerResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
@@ -51,6 +55,7 @@ public class AuthController {
     private AuthServiceImpl authService;
     private AuthMapper authMapper;
     private SellerRepository sellerRepository;
+    private AdminMapper adminMapper;
 
     private final long REFRESH_EXPIRE_TIME = 7L * 24 * 60 * 60 * 1000; // 7 days
     private final long ACCESS_EXPIRE_TIME = 7L * 24 * 60 * 60 * 1000; // 15 * 60 * 1000; // 15 minutes
@@ -108,6 +113,11 @@ public class AuthController {
         try {
             log.info(">>> [Auth Controller] Starting sign in controller");
             Buyer user = signInService.startSignIn(req);
+            log.info(">>> [Auth Controller] User active: {}", user.isActive());
+
+            if(!user.isActive()) {
+                throw new AuthException("Account was be blocked.");
+            }
 
             log.info(">>> [Auth Controller] Generating tokens");
             String accessToken = jwtUtils.generateTokenFromUsername(user.getUsername(), ACCESS_EXPIRE_TIME);
@@ -135,7 +145,7 @@ public class AuthController {
         } catch (Exception e) {
             log.info(">>> [Auth Controller] Error occured in sign in controller");
             return ResponseEntity.ok(responseMapper.toDto(
-                    true,
+                    false,
                     "SIGN IN FAILED",
                     null, e.getMessage()
             ));
@@ -163,20 +173,36 @@ public class AuthController {
                     """
     )
     @PostMapping("/admin/signin")
-    public ResponseEntity<RestResponse<AuthResponse, Object>> signInAdmin(@Valid @RequestBody SignInAdminRequest req) {
-        Admin user = signInService.startSignInAdmin(req);
+    public ResponseEntity<?> signInAdmin(@Valid @RequestBody SignInAdminRequest req) {
+        try {
+            Admin user = signInService.startSignInAdmin(req);
+            if(user.getStatus() == AccountStatus.INACTIVE) {
+                throw new AuthException("This admin account was be blocked.");
+            }
 
-        String accessToken = jwtUtils.generateTokenFromUsername(user.getEmployeeNumber(), ACCESS_EXPIRE_TIME);
-        String refreshToken = jwtUtils.generateTokenFromUsername(user.getEmployeeNumber(), REFRESH_EXPIRE_TIME);
-        redisTokenService.saveTokenToRedis(user.getEmail(), refreshToken, REFRESH_EXPIRE_TIME);
+            String accessToken = jwtUtils.generateTokenFromUsername(user.getEmployeeNumber(), ACCESS_EXPIRE_TIME);
+            String refreshToken = jwtUtils.generateTokenFromUsername(user.getEmployeeNumber(), REFRESH_EXPIRE_TIME);
+            redisTokenService.saveTokenToRedis(user.getEmail(), refreshToken, REFRESH_EXPIRE_TIME);
 
-        AuthResponse authResponse = authMapper.toDto(user, accessToken, refreshToken);
-        authResponse.setRole("ROLE_ADMIN");
+            AdminAuthResponse authResponse = AdminAuthResponse.builder()
+                    .adminResponse(adminMapper.toDto(user))
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .role("ROLE_ADMIN")
+                    .build();
 
-        return ResponseEntity.status(HttpStatus.OK.value())
-                .body(responseMapper.toDto(
-                        true, "LOGIN SUCCESSFULLY", authResponse, null
-                ));
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "ADMIN SIGN IN SUCCESSFULLY.",
+                    authResponse, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "ADMIN SIGN IN FAILED.",
+                    null, e.getMessage()
+            ));
+        }
     }
 
     @Operation(
@@ -202,25 +228,35 @@ public class AuthController {
     )
     @PostMapping("/signin-google")
     public ResponseEntity<RestResponse<AuthResponse, Object>> loginWithGoogle(@RequestBody SignInGoogleRequest body) throws Exception {
-        Buyer user = signInService.startSignInWithGoogle(body);
+        try {
+            Buyer user = signInService.startSignInWithGoogle(body);
+            if(!user.isActive()) {
+                throw new AuthException("User was be blocked.");
+            }
 
-        String accessToken = jwtUtils.generateTokenFromUsername(user.getUsername(), ACCESS_EXPIRE_TIME);
-        String refreshToken = jwtUtils.generateTokenFromUsername(user.getUsername(), REFRESH_EXPIRE_TIME);
-        redisTokenService.saveTokenToRedis(user.getEmail(), refreshToken, REFRESH_EXPIRE_TIME);
+            String accessToken = jwtUtils.generateTokenFromUsername(user.getUsername(), ACCESS_EXPIRE_TIME);
+            String refreshToken = jwtUtils.generateTokenFromUsername(user.getUsername(), REFRESH_EXPIRE_TIME);
+            redisTokenService.saveTokenToRedis(user.getEmail(), refreshToken, REFRESH_EXPIRE_TIME);
 
-        AuthResponse authResponse = authMapper.toDto(user, accessToken, refreshToken);
-        Optional<Seller> seller = sellerRepository.findByBuyer(user);
-        if (seller.isPresent() && seller.get().getStatus() == SellerStatus.ACCEPTED) {
-            authResponse.setRole("ROLE_SELLER");
-        } else {
-            authResponse.setRole("ROLE_BUYER");
+            AuthResponse authResponse = authMapper.toDto(user, accessToken, refreshToken);
+            Optional<Seller> seller = sellerRepository.findByBuyer(user);
+            if (seller.isPresent() && seller.get().getStatus() == SellerStatus.ACCEPTED) {
+                authResponse.setRole("ROLE_SELLER");
+            } else {
+                authResponse.setRole("ROLE_BUYER");
+            }
+            authResponse.setBuyerId(user.getBuyerId());
+
+            return ResponseEntity.status(HttpStatus.OK.value())
+                    .body(responseMapper.toDto(
+                            true, "SIGN IN SUCCESSFULLY", authResponse, null
+                    ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.OK.value())
+                    .body(responseMapper.toDto(
+                            false, "SIGN IN FAILED", null, e.getMessage()
+                    ));
         }
-        authResponse.setBuyerId(user.getBuyerId());
-
-        return ResponseEntity.status(HttpStatus.OK.value())
-                .body(responseMapper.toDto(
-                        true, "SIGN IN SUCCESSFULLY", authResponse, null
-                ));
     }
 
     @Operation(
