@@ -115,7 +115,7 @@ public class AuthController {
             Buyer user = signInService.startSignIn(req);
             log.info(">>> [Auth Controller] User active: {}", user.isActive());
 
-            if(!user.isActive()) {
+            if (!user.isActive()) {
                 throw new AuthException("Account was be blocked.");
             }
 
@@ -176,7 +176,7 @@ public class AuthController {
     public ResponseEntity<?> signInAdmin(@Valid @RequestBody SignInAdminRequest req) {
         try {
             Admin user = signInService.startSignInAdmin(req);
-            if(user.getStatus() == AccountStatus.INACTIVE) {
+            if (user.getStatus() == AccountStatus.INACTIVE) {
                 throw new AuthException("This admin account was be blocked.");
             }
 
@@ -230,7 +230,7 @@ public class AuthController {
     public ResponseEntity<RestResponse<AuthResponse, Object>> loginWithGoogle(@RequestBody SignInGoogleRequest body) throws Exception {
         try {
             Buyer user = signInService.startSignInWithGoogle(body);
-            if(!user.isActive()) {
+            if (!user.isActive()) {
                 throw new AuthException("User was be blocked.");
             }
 

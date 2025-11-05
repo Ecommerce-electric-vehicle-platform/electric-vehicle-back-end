@@ -13,15 +13,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(
-        name = "conservation",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "UK_conversation_buyer_post",
-                        columnNames = {"buyer_id", "post_id"}
-                )
-        }
-)
+@Table(name = "conversation", uniqueConstraints = {
+        @UniqueConstraint(name = "UK_conversation_buyer_post", columnNames = {"buyer_id", "post_id"})
+})
 @ToString(exclude = {"messages"})
 public class Conversation {
     @Id

@@ -89,6 +89,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .balanceBefore(wallet.getBalance())
                     .status(TransactionStatus.SUCCESS)
                     .description("Đặt hàng cho đơn " + order.getId())
+                    .order(order)
                     .wallet(wallet)
                     .build();
             walletTransactionRepository.save(walletTransaction);
