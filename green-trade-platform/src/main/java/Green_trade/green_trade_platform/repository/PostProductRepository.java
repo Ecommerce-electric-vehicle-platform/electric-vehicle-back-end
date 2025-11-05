@@ -17,4 +17,6 @@ public interface PostProductRepository extends JpaRepository<PostProduct, Long> 
     Page<PostProduct> findAllBySoldFalseAndActiveTrue(Pageable pageable);
 
     Page<PostProduct> findAllByVerifiedDecisionstatus(VerifiedDecisionStatus status, Pageable pageable);
+
+    List<PostProduct> findAllBySeller(Seller seller);
 }
