@@ -19,4 +19,10 @@ public interface PostProductRepository extends JpaRepository<PostProduct, Long> 
     Page<PostProduct> findAllByVerifiedDecisionstatus(VerifiedDecisionStatus status, Pageable pageable);
 
     List<PostProduct> findAllBySeller(Seller seller);
+
+    Page<PostProduct> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+    Page<PostProduct> findByBrandContainingIgnoreCase(String brand, Pageable pageable);
+    Page<PostProduct> findByModelContainingIgnoreCase(String model, Pageable pageable);
+    Page<PostProduct> findByConditionLevelContainingIgnoreCase(String conditionLevel, Pageable pageable);
+    Page<PostProduct> findByLocationTradingContainingIgnoreCase(String locationTrading, Pageable pageable);
 }

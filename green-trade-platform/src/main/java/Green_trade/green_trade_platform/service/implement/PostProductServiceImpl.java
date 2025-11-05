@@ -361,4 +361,17 @@ public class PostProductServiceImpl implements PostProductService {
         );
         return postProduct.getSeller();
     }
+
+    public Page<PostProduct> searchProduct(String type, String value, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        return switch (type.toLowerCase()) {
+            case "title" -> postProductRepository.findByTitleContainingIgnoreCase(value, pageable);
+            case "brand" -> postProductRepository.findByBrandContainingIgnoreCase(value, pageable);
+            case "model" -> postProductRepository.findByModelContainingIgnoreCase(value, pageable);
+            case "conditionlevel" -> postProductRepository.findByConditionLevelContainingIgnoreCase(value, pageable);
+            case "locationtrading" -> postProductRepository.findByLocationTradingContainingIgnoreCase(value, pageable);
+            default -> throw new IllegalArgumentException("Invalid search type: " + type);
+        };
+    }
 }
