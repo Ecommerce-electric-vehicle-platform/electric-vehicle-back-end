@@ -160,7 +160,7 @@ public class PostProductServiceImpl implements PostProductService {
 
 
     public Page<PostProduct> getAllProductPaging(int page, int size, String sortedBy, boolean isAsc) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortedBy).ascending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortedBy).descending());
         if (!isAsc) {
             pageable = PageRequest.of(page, size, Sort.by(sortedBy).descending());
         }
@@ -175,20 +175,21 @@ public class PostProductServiceImpl implements PostProductService {
     public Page<PostProduct> getAllPostProductForVerifiedReview(int size, int page) throws Exception {
         try {
             Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
-            Page<PostProduct> postProductsPaging = postProductRepository.findAll(pageable);
-            List<PostProduct> postProducts = postProductsPaging.getContent();
-            List<PostProduct> result = new ArrayList<>();
-            for (int i = 0; i <= postProducts.size() - 1; i++) {
-                PostProduct postProduct = postProducts.get(i);
-                Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(postProduct.getSeller().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
-                log.info(">>> subscription package id: {}", subscription.getSubscriptionPackage().getId());
-                log.info(">>> postProduct verified status: {}", postProduct.getVerifiedDecisionstatus().toString());
-                if (subscription.getSubscriptionPackage().getId() >= 2 && postProduct.getVerifiedDecisionstatus().equals(VerifiedDecisionStatus.PENDING)) {
-                    log.info(">>> result add: {} and {}", postProduct.getVerifiedDecisionstatus(), subscription.getSubscriptionPackage().getId());
-                    result.add(postProduct);
-                }
-            }
-            return new PageImpl<>(result, pageable, result.size());
+//            Page<PostProduct> postProductsPaging = postProductRepository.findAll(pageable);
+//            List<PostProduct> postProducts = postProductsPaging.getContent();
+//            List<PostProduct> result = new ArrayList<>();
+//            for (int i = 0; i <= postProducts.size() - 1; i++) {
+//                PostProduct postProduct = postProducts.get(i);
+//                Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(postProduct.getSeller().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
+//                log.info(">>> subscription package id: {}", subscription.getSubscriptionPackage().getId());
+//                log.info(">>> postProduct verified status: {}", postProduct.getVerifiedDecisionstatus().toString());
+//                if (subscription.getSubscriptionPackage().getId() >= 2 && postProduct.getVerifiedDecisionstatus().equals(VerifiedDecisionStatus.PENDING)) {
+//                    log.info(">>> result add: {} and {}", postProduct.getVerifiedDecisionstatus(), subscription.getSubscriptionPackage().getId());
+//                    result.add(postProduct);
+//                }
+//            }
+//            return new PageImpl<>(result, pageable, result.size());
+            return postProductRepository.findAllByVerifiedDecisionstatus(VerifiedDecisionStatus.PENDING, pageable);
         } catch (Exception e) {
             log.info(">>> Error at PostProductServiceImpl: {}", e.getMessage());
             throw e;

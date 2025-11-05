@@ -57,6 +57,8 @@ public class SubscriptionPackageServiceImpl {
         SubscriptionPackages subscriptionPackages = subscriptionPackageRepository.findById(request.getPackageId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói người bán với id " + request.getPackageId()));
 
+
+
         Optional<Subscription> exitsSubscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(seller.getSellerId());
         if (exitsSubscription.isPresent() && exitsSubscription.get().getIsActive() == true) {
             throw new IllegalArgumentException("Bạn đã đăng kí gói. Vui lòng hủy gói để đăng kí gói mới.");
@@ -78,6 +80,7 @@ public class SubscriptionPackageServiceImpl {
                 .subscriptionPackage(subscriptionPackages)
                 .startDay(startDate)
                 .endDay(endDate)
+                .remainPost(subscriptionPackages.getMaxProduct())
                 .build();
 
         Subscription temp = subscriptionRepository.save(subscription);
@@ -108,6 +111,7 @@ public class SubscriptionPackageServiceImpl {
 
         if (subscription.getIsActive() == true) {
             subscription.setIsActive(false);
+            subscription.setEndDay(LocalDateTime.now());
         } else {
             throw new IllegalArgumentException("This seller has not been sign any packages yet.");
         }
@@ -127,5 +131,12 @@ public class SubscriptionPackageServiceImpl {
 
         log.info(">>> [Subscription service] Ended");
         return subscription;
+    }
+
+    public Subscription updateRemainPost(Seller seller) {
+        Subscription subscription = getCurrentSubscription(seller);
+        long remainPost = subscription.getRemainPost();
+        subscription.setRemainPost(remainPost--);
+        return subscriptionRepository.save(subscription);
     }
 }
