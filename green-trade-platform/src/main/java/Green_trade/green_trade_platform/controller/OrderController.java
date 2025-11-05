@@ -19,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,8 @@ public class OrderController {
     private final PaymentMapper paymentMapper;
     private final PostProductMapper postProductMapper;
     private final BuyerMapper buyerMapper;
+    private final OrderHistoryMapper orderHistoryMapper;
+    private final OrderHistoryListMapper orderHistoryListMapper;
 
     @Operation(
             summary = "Get order history of current user",
@@ -67,7 +70,7 @@ public class OrderController {
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @GetMapping("/history")
-    public ResponseEntity<RestResponse<OrderListResponse, Object>> getOrdersHistoryOfCurrentUser(
+    public ResponseEntity<RestResponse<OrderHistoryListResponse, Object>> getOrdersHistoryOfCurrentUser(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
@@ -84,13 +87,13 @@ public class OrderController {
             );
             log.info(">>> [OrderController] created meta data successfully");
 
-            OrderListResponse orderListResponse = orderListMapper.toDto(orderPaging.toList(), meta);
-            log.info(">>> [OrderController] created orderListResponse successfully");
+            OrderHistoryListResponse orderHistoryListResponse = orderHistoryListMapper.toDto(orderPaging, meta);
 
-            RestResponse<OrderListResponse, Object> response = responseMapper.toDto(
+
+            RestResponse<OrderHistoryListResponse, Object> response = responseMapper.toDto(
                     true,
                     "FETCH ORDER HISTORY SUCCESSFULLY",
-                    orderListResponse,
+                    orderHistoryListResponse,
                     null
             );
             log.info(">>> [OrderController] created response successfully");
@@ -291,16 +294,16 @@ public class OrderController {
     @Operation(
             summary = "Get all orders of current seller",
             description = """
-        Retrieve all orders associated with the current logged-in seller.
-        The result is paginated using 'page' and 'size' query parameters.
-        
-        Requirements:
-        - User must have ROLE_SELLER
-        - Authorization header with a valid JWT token is required
-        
-        Example:
-        GET /api/orders?page=0&size=10
-        """
+                    Retrieve all orders associated with the current logged-in seller.
+                    The result is paginated using 'page' and 'size' query parameters.
+                    
+                    Requirements:
+                    - User must have ROLE_SELLER
+                    - Authorization header with a valid JWT token is required
+                    
+                    Example:
+                    GET /api/orders?page=0&size=10
+                    """
     )
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @GetMapping("")
