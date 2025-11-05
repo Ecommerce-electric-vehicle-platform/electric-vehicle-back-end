@@ -7,10 +7,7 @@ import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.request.MessageRequest;
 import Green_trade.green_trade_platform.response.ConversationResponse;
 import Green_trade.green_trade_platform.response.MessageResponse;
-import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
-import Green_trade.green_trade_platform.service.implement.ConversationServiceImpl;
-import Green_trade.green_trade_platform.service.implement.MessageServiceImpl;
-import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
+import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -37,6 +35,7 @@ public class ChattingController {
     private final ChattingSocketController chattingSocketController;
     private final MessageMapper messageMapper;
     private final MessageServiceImpl messageService;
+    private final SellerServiceImpl sellerService;
 
     @Operation(
             summary = """
@@ -100,12 +99,32 @@ public class ChattingController {
     public ResponseEntity<?> getConservation() {
         try {
             Buyer buyer = buyerService.getCurrentUser();
-            List<Conversation> conversation = conversationService.getConversation(buyer);
+            List<Conversation> conversations = conversationService.getConversation(buyer);
+            List<ConversationResponse> result;
+
+            // Nếu buyer chưa có conversation
+            if (conversations.isEmpty()) {
+                Seller seller = buyer.getSeller();
+                List<PostProduct> postProducts = sellerService.getListPostProduct(seller);
+                List<Conversation> sellerConversations = new ArrayList<>();
+
+                for (PostProduct product : postProducts) {
+                    if (product.getConversations() != null && !product.getConversations().isEmpty()) {
+                        sellerConversations.addAll(product.getConversations());
+                    }
+                }
+
+                // Map sang DTO
+                result = conversationMapper.toDtoList(sellerConversations);
+            } else {
+                // Map sang DTO
+                result = conversationMapper.toDtoList(conversations);
+            }
 
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "GET CONVERSATION SUCCESSFULLY.",
-                    conversationMapper.toDtoList(conversation), null
+                    result, null
             ));
         } catch (Exception e) {
             return ResponseEntity.ok(responseMapper.toDto(

@@ -225,4 +225,8 @@ public class SellerServiceImpl implements SellerService {
 
         mailSender.sendBeautifulMail(mailRequest);
     }
+
+    public List<PostProduct> getListPostProduct(Seller seller) {
+        return postProductRepository.findAllBySeller(seller);
+    }
 }
