@@ -172,4 +172,9 @@ public class OrderServiceImpl implements OrderService {
         log.info(">>> [Order Service] Transaction info: {}", transaction);
         return transaction;
     }
+
+    public Page<Order> getAllOrders(int page, int size, Seller seller) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return orderRepository.findAllByPostProduct_Seller(seller, pageable);
+    }
 }

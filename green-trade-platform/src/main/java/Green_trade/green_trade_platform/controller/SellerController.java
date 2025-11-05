@@ -7,12 +7,14 @@ import Green_trade.green_trade_platform.mapper.SellerMapper;
 import Green_trade.green_trade_platform.model.Order;
 import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.model.Seller;
+import Green_trade.green_trade_platform.model.Subscription;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
 import Green_trade.green_trade_platform.request.VerifiedPostProductRequest;
 import Green_trade.green_trade_platform.response.*;
 import Green_trade.green_trade_platform.service.implement.OrderServiceImpl;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
+import Green_trade.green_trade_platform.service.implement.SubscriptionPackageServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -41,6 +43,7 @@ public class SellerController {
     private final PostProductMapper postProductMapper;
     private final OrderServiceImpl orderService;
     private final OrderMapper orderMapper;
+    private final SubscriptionPackageServiceImpl subscriptionPackageService;
 
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(
@@ -90,6 +93,8 @@ public class SellerController {
         log.info(">>> Passed mapped files data: {}", files);
         Seller seller = sellerService.getCurrentUser();
         request.setSellerId(seller.getSellerId());
+
+        Subscription subscription = subscriptionPackageService.updateRemainPost(seller);
 
         PostProduct newPostProduct = postProductService.createNewPostProduct(request, files);
 

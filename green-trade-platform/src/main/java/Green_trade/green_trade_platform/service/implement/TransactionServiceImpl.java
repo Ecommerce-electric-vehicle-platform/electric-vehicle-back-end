@@ -85,7 +85,7 @@ public class TransactionServiceImpl implements TransactionService {
             // Create a wallet transaction
             WalletTransaction walletTransaction = WalletTransaction.builder()
                     .type(TransactionType.PLACE_ORDER)
-                    .amount(order.getPrice().add(order.getShippingFee()))
+                    .amount((order.getPrice().add(order.getShippingFee()).negate()))
                     .balanceBefore(wallet.getBalance())
                     .status(TransactionStatus.SUCCESS)
                     .description("Đặt hàng cho đơn " + order.getId())

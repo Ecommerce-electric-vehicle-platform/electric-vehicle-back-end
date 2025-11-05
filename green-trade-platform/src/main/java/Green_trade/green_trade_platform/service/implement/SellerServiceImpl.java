@@ -74,7 +74,7 @@ public class SellerServiceImpl implements SellerService {
 
             Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(sellerOpt.get().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
 
-            if (LocalDateTime.now().isAfter(subscription.getEndDay()) || subscription.getIsActive() == false) {
+            if (LocalDateTime.now().isAfter(subscription.getEndDay()) || subscription.getIsActive() == false || subscription.getRemainPost() == 0) {
                 throw new SubscriptionExpiredException();
             }
 
@@ -224,5 +224,9 @@ public class SellerServiceImpl implements SellerService {
                 .build();
 
         mailSender.sendBeautifulMail(mailRequest);
+    }
+
+    public List<PostProduct> getListPostProduct(Seller seller) {
+        return postProductRepository.findAllBySeller(seller);
     }
 }

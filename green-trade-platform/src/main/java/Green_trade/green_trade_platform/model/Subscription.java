@@ -40,6 +40,9 @@ public class Subscription {
     @Column(name = "end_day", nullable = false)
     private LocalDateTime endDay;
 
+    @Column(name = "remain_post", nullable = false)
+    private long remainPost;
+
     @PrePersist
     public void onCreate() {
         this.isActive = true;

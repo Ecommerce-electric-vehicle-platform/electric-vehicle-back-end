@@ -51,7 +51,7 @@ public class WalletTransactionServiceImpl {
             WalletTransaction walletTransaction = WalletTransaction.builder()
                     .wallet(wallet)
                     .type(TransactionType.SIGN_PACKAGE)
-                    .amount(BigDecimal.valueOf(amount))
+                    .amount(BigDecimal.valueOf(amount).negate())
                     .balanceBefore(wallet.getBalance())
                     .status(TransactionStatus.SUCCESS)
                     .externalTransactionReference("None")
