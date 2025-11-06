@@ -20,8 +20,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
-//@EnableWebSecurity
-//@EnableMethodSecurity(prePostEnabled = true)
+@EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
     private final List<String> WHITE_LIST = List.of(
             "/api/v1/auth/**",
