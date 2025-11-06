@@ -322,15 +322,14 @@ public class BuyerController {
                 newOrder = orderService.updateOrderTransactions(newOrder, transactions);
                 log.info(">>> Passed update transactions");
 
-                String orderShippingCode = ghnService.createOrderShippingResponseToDto(
+                Map<String, String> createOrderShippingResponse = ghnService.createOrderShippingResponseToDto(
                         newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
-                ).get("orderCode");
+                );
 
-                String totalServiceFee = ghnService.createOrderShippingResponseToDto(
-                        newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
-                ).get("totalFee");
-                log.info(">>> Passed get orderShippingCode");
-                log.info(">>> orderShippingCode: {}", orderShippingCode);
+                String orderShippingCode = createOrderShippingResponse.get("orderCode");
+                log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
+                String totalServiceFee = createOrderShippingResponse.get("totalFee");
+                log.info(">>> Passed get totalServiceFee: {}", totalServiceFee);
 
                 newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
                 log.info(">>> Passed set Order Code");
@@ -353,12 +352,13 @@ public class BuyerController {
                 newOrder = orderService.updateOrderStatus(newOrder, OrderStatus.PAID);
                 log.info(">>> Passed update order status");
 
-                String orderShippingCode = ghnService.createOrderShippingResponseToDto(
-                        newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()).get("orderCode");
-                log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
-                String totalServiceFee = ghnService.createOrderShippingResponseToDto(
+                Map<String, String> createOrderShippingResponse = ghnService.createOrderShippingResponseToDto(
                         newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
-                ).get("totalFee");
+                );
+
+                String orderShippingCode = createOrderShippingResponse.get("orderCode");
+                log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
+                String totalServiceFee = createOrderShippingResponse.get("totalFee");
 
                 newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
                 log.info(">>> Passed set Order Code");
