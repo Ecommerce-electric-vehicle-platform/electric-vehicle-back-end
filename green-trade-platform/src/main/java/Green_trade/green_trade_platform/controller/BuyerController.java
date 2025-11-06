@@ -336,7 +336,7 @@ public class BuyerController {
 
                 log.info(">>> Passed set Order Code");
 
-                transactionService.updateAmount(transactions.getLast(), transactions.getLast().getAmount());
+                transactionService.updateAmount(transactions.getLast(), newOrder.getPrice().add(newOrder.getShippingFee()));
 
                 SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(newOrder, totalServiceFee);
                 newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
@@ -372,7 +372,7 @@ public class BuyerController {
                 newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
                 log.info(">>> Passed set Order Code");
 
-                transactionService.updateAmount(transactions.getLast(), transactions.getLast().getAmount());
+                transactionService.updateAmount(transactions.getLast(), newOrder.getPrice().add(newOrder.getShippingFee()));
 
                 SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeWalletPayment(newOrder, totalServiceFee);
                 newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
