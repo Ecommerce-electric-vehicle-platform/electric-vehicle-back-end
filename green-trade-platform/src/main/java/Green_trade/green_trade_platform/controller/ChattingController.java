@@ -37,24 +37,21 @@ public class ChattingController {
     private final MessageServiceImpl messageService;
     private final SellerServiceImpl sellerService;
 
-    @Operation(
-            summary = """
-                    Create a new conversation between the buyer and the seller of a post 
-                    One buyer just can create one conversation with a post.
-                    """,
-            description = """
-                    This endpoint allows an authenticated **buyer** to initiate a new conversation 
-                    with the **seller** who owns the specified product post (`PostProduct`).
-                    
-                    - The buyer must be logged in.
-                    - The `postId` must correspond to an existing and active post.
-                    - A conversation will only be created **if it does not already exist** between the buyer and seller for this post.
-                    - Once created, the conversation can be used to exchange chat messages.
-                    
-                    **Use case:**  
-                    Buyers use this API to start chatting with the seller about a specific product they are interested in.
-                    """
-    )
+    @Operation(summary = """
+            Create a new conversation between the buyer and the seller of a post
+            One buyer just can create one conversation with a post.
+            """, description = """
+            This endpoint allows an authenticated **buyer** to initiate a new conversation
+            with the **seller** who owns the specified product post (`PostProduct`).
+            
+            - The buyer must be logged in.
+            - The `postId` must correspond to an existing and active post.
+            - A conversation will only be created **if it does not already exist** between the buyer and seller for this post.
+            - Once created, the conversation can be used to exchange chat messages.
+            
+            **Use case:**
+            Buyers use this API to start chatting with the seller about a specific product they are interested in.
+            """)
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/create-conversation/{postId}")
     public ResponseEntity<?> createConversation(@PathVariable(name = "postId") long id) {
@@ -73,30 +70,25 @@ public class ChattingController {
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "CREATE CONVERSATION SUCCESSFULLY.",
-                    conversationMapper.toDto(conversation), null
-            ));
+                    conversationMapper.toDto(conversation), null));
         } catch (Exception e) {
             return ResponseEntity.ok(responseMapper.toDto(
                     false,
                     "CREATE CONVERSATION FAILED.",
-                    null, e.getMessage()
-            ));
+                    null, e.getMessage()));
         }
     }
 
-    @Operation(
-            summary = "Retrieve all conversations of the current buyer",
-            description = """
-                    This API retrieves all conversations belonging to the currently logged-in buyer.  
-                    The system identifies the current user through the authentication context (session or token) 
-                    and fetches all related conversation records.
-                    
-                    - If successful: returns a list of conversations for the buyer.  
-                    - If failed: returns an error message with details in the `message` field.
-                    """
-    )
+    @Operation(summary = "Retrieve all conversations of the current buyer", description = """
+            This API retrieves all conversations belonging to the currently logged-in buyer.
+            The system identifies the current user through the authentication context (session or token)
+            and fetches all related conversation records.
+            
+            - If successful: returns a list of conversations for the buyer.
+            - If failed: returns an error message with details in the `message` field.
+            """)
     @GetMapping("/conversation")
-    public ResponseEntity<?> getConservation() {
+    public ResponseEntity<?> getConversation() {
         try {
             Buyer buyer = buyerService.getCurrentUser();
             List<Conversation> conversations = conversationService.getConversation(buyer);
@@ -130,36 +122,32 @@ public class ChattingController {
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "GET CONVERSATION FAILED.",
-                    null, e.getMessage()
-            ));
+                    null, e.getMessage()));
         }
     }
 
-    @Operation(
-            summary = "Send a new chat message (text or image)",
-            description = """
-                    This API creates and sends a new message within an existing conversation 
-                    between a buyer and a seller.  
-                    
-                    The message can be of two types:
-                    - **Text message:** provided in the `content` field.
-                    - **Image message:** uploaded through the `picture` field as multipart form data.  
-                    
-                    Once the message is successfully created, it will be:
-                    1. Saved in the database (associated with the given conversation).
-                    2. Broadcast in real-time via WebSocket using `ChattingSocketController`, 
-                       allowing the receiver to receive it instantly.
-                    
-                    **Notes:**
-                    - The sender and receiver are determined automatically based on the current logged-in user.
-                    - Either `content` or `picture` must be provided.
-                    - This endpoint consumes `multipart/form-data`.
-                    
-                    **Example use cases:**
-                    - A buyer sends a text or image to the seller of a product post.
-                    - A seller replies with a message or image in the same conversation.
-                    """
-    )
+    @Operation(summary = "Send a new chat message (text or image)", description = """
+            This API creates and sends a new message within an existing conversation
+            between a buyer and a seller.
+            
+            The message can be of two types:
+            - **Text message:** provided in the `content` field.
+            - **Image message:** uploaded through the `picture` field as multipart form data.
+            
+            Once the message is successfully created, it will be:
+            1. Saved in the database (associated with the given conversation).
+            2. Broadcast in real-time via WebSocket using `ChattingSocketController`,
+               allowing the receiver to receive it instantly.
+            
+            **Notes:**
+            - The sender and receiver are determined automatically based on the current logged-in user.
+            - Either `content` or `picture` must be provided.
+            - This endpoint consumes `multipart/form-data`.
+            
+            **Example use cases:**
+            - A buyer sends a text or image to the seller of a product post.
+            - A seller replies with a message or image in the same conversation.
+            """)
     @PostMapping("/create-message")
     public ResponseEntity<?> createMessage(
             @ModelAttribute MessageRequest request,
@@ -205,27 +193,25 @@ public class ChattingController {
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "SEND MESSAGE SUCCESSFULLY.",
-                    messageMapper.toDto(savedMessage), null
-            ));
+                    messageMapper.toDto(savedMessage), null));
         } catch (Exception e) {
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "SEND MESSAGE FAILED.",
-                    null, e.getMessage()
-            ));
+                    null, e.getMessage()));
         }
     }
 
     @Operation(
             summary = "Get list of messages in a conversation",
             description = """
-        Retrieve all messages from a specific conversation.
-        You can specify pagination parameters (page, size) 
-        and must provide a valid conversationId.
-        
-        Example:
-        GET /conversation-messages?conversationId=1&page=0&size=10
-        """
+                    Retrieve all messages from a specific conversation.
+                    You can specify pagination parameters (page, size) 
+                    and must provide a valid conversationId.
+                    
+                    Example:
+                    GET /conversation-messages?conversationId=1&page=0&size=10
+                    """
     )
     @GetMapping("/conversation-messages")
     public ResponseEntity<?> getListMessage(

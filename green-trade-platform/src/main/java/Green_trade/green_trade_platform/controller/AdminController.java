@@ -271,28 +271,28 @@ public class AdminController {
     @Operation(
             summary = "Block or unblock user account (buyer, seller, or admin)",
             description = """
-        This endpoint allows an **administrator** to block or unblock a user account based on its type and ID.  
-        Supported account types include **buyer**, **seller**, and **admin**.
-
-        The action performed (block or unblock) depends on the provided `activity` parameter.  
-        A message explaining the reason for the action can also be passed.
-
-        - For **buyer** and **seller** accounts: the platform will call their respective services to perform the action.  
-        - For **admin** accounts: only a **super admin** can perform block or unblock operations.  
-        - If an invalid account type is provided, the system returns a **400 Bad Request** response.
-
-        **Access Control:** Only users with the role `ROLE_ADMIN` are authorized to use this API.
-
-        **Path Parameters:**
-        - `accountId` – The ID of the account to block or unblock.  
-        - `accountType` – The type of the account (`buyer`, `seller`, or `admin`).  
-        - `message` – A short explanation or note about the action (e.g., "Violation of policy").  
-        - `activity` – Defines the action to perform: `"block"` or `"unblock"`.
-
-        **Response:**
-        - **Success:** Returns a message confirming that the account was blocked or unblocked successfully.  
-        - **Failure:** Returns an error message describing the issue (e.g., invalid type, insufficient permission, or internal error).
-        """
+                    This endpoint allows an **administrator** to block or unblock a user account based on its type and ID.  
+                    Supported account types include **buyer**, **seller**, and **admin**.
+                    
+                    The action performed (block or unblock) depends on the provided `activity` parameter.  
+                    A message explaining the reason for the action can also be passed.
+                    
+                    - For **buyer** and **seller** accounts: the platform will call their respective services to perform the action.  
+                    - For **admin** accounts: only a **super admin** can perform block or unblock operations.  
+                    - If an invalid account type is provided, the system returns a **400 Bad Request** response.
+                    
+                    **Access Control:** Only users with the role `ROLE_ADMIN` are authorized to use this API.
+                    
+                    **Path Parameters:**
+                    - `accountId` – The ID of the account to block or unblock.  
+                    - `accountType` – The type of the account (`buyer`, `seller`, or `admin`).  
+                    - `message` – A short explanation or note about the action (e.g., "Violation of policy").  
+                    - `activity` – Defines the action to perform: `"block"` or `"unblock"`.
+                    
+                    **Response:**
+                    - **Success:** Returns a message confirming that the account was blocked or unblocked successfully.  
+                    - **Failure:** Returns an error message describing the issue (e.g., invalid type, insufficient permission, or internal error).
+                    """
     )
     @PreAuthorize(("hasRole('ROLE_ADMIN')"))
     @PostMapping("/block-account/{accountId}/{accountType}/{message}/{activity}")
@@ -324,20 +324,17 @@ public class AdminController {
             if ("buyer".equalsIgnoreCase(type)) {
                 buyerService.blockAccount(id, message, activity);
                 successMessage = String.format("%s BUYER ACCOUNT SUCCESSFULLY.", actionText);
-            }
-            else if ("seller".equalsIgnoreCase(type)) {
+            } else if ("seller".equalsIgnoreCase(type)) {
                 sellerService.blockAccount(id, message, activity);
                 successMessage = String.format("%s SELLER ACCOUNT SUCCESSFULLY.", actionText);
-            }
-            else if ("admin".equalsIgnoreCase(type)) {
+            } else if ("admin".equalsIgnoreCase(type)) {
                 Admin admin = adminService.getCurrentUser();
                 if (!admin.isSuperAdmin()) {
                     throw new IllegalArgumentException("You do not have permission to block or unblock admin accounts.");
                 }
                 adminService.blockAccount(id, message, activity);
                 successMessage = String.format("%s ADMIN ACCOUNT SUCCESSFULLY.", actionText);
-            }
-            else {
+            } else {
                 return ResponseEntity.badRequest().body(responseMapper.toDto(
                         false,
                         "INVALID ACCOUNT TYPE.",
@@ -375,19 +372,19 @@ public class AdminController {
     @Operation(
             summary = "Retrieve paginated list of admin accounts",
             description = """
-        This endpoint allows an **administrator** to retrieve a paginated list of all admin accounts in the system.  
-        It supports pagination parameters (`page`, `size`) to efficiently navigate large datasets.
-        
-        **Access Control:** Only users with the role `ROLE_ADMIN` are authorized to access this endpoint.
-        
-        **Query Parameters:**
-        - `page` – (optional) The page number to retrieve, default is `0`.
-        - `size` – (optional) The number of records per page, default is `10`.
-        
-        **Response:**
-        - On success: Returns a paginated list of `AdminResponse` objects containing admin details.
-        - On failure: Returns an error message and exception details if the retrieval fails.
-        """
+                    This endpoint allows an **administrator** to retrieve a paginated list of all admin accounts in the system.  
+                    It supports pagination parameters (`page`, `size`) to efficiently navigate large datasets.
+                    
+                    **Access Control:** Only users with the role `ROLE_ADMIN` are authorized to access this endpoint.
+                    
+                    **Query Parameters:**
+                    - `page` – (optional) The page number to retrieve, default is `0`.
+                    - `size` – (optional) The number of records per page, default is `10`.
+                    
+                    **Response:**
+                    - On success: Returns a paginated list of `AdminResponse` objects containing admin details.
+                    - On failure: Returns an error message and exception details if the retrieval fails.
+                    """
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/list")
@@ -415,13 +412,13 @@ public class AdminController {
     @Operation(
             summary = "Get admin profile by account ID",
             description = """
-        Retrieve the detailed profile information of an admin by their account ID.
-        Only users with the role ROLE_ADMIN can access this endpoint.
-        
-        Example:
-        GET /profile/5
-        Requires Authorization header with a valid JWT token.
-        """
+                    Retrieve the detailed profile information of an admin by their account ID.
+                    Only users with the role ROLE_ADMIN can access this endpoint.
+                    
+                    Example:
+                    GET /profile/5
+                    Requires Authorization header with a valid JWT token.
+                    """
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/profile/{accountId}")

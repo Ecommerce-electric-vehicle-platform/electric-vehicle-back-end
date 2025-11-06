@@ -4,6 +4,7 @@ import Green_trade.green_trade_platform.enumerate.SystemWalletStatus;
 import Green_trade.green_trade_platform.exception.OrderNotFound;
 import Green_trade.green_trade_platform.mapper.*;
 import Green_trade.green_trade_platform.model.*;
+import Green_trade.green_trade_platform.repository.OrderRepository;
 import Green_trade.green_trade_platform.request.CancelOrderRequest;
 import Green_trade.green_trade_platform.request.ReviewRequest;
 import Green_trade.green_trade_platform.response.*;
@@ -19,6 +20,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +45,9 @@ public class OrderController {
     private final PaymentMapper paymentMapper;
     private final PostProductMapper postProductMapper;
     private final BuyerMapper buyerMapper;
+    private final OrderHistoryMapper orderHistoryMapper;
+    private final OrderHistoryListMapper orderHistoryListMapper;
+    private final OrderRepository orderRepository;
 
     @Operation(
             summary = "Get order history of current user",
@@ -67,28 +73,33 @@ public class OrderController {
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @GetMapping("/history")
-    public ResponseEntity<RestResponse<OrderListResponse, Object>> getOrdersHistoryOfCurrentUser(
+    public ResponseEntity<RestResponse<OrderHistoryListResponse, Object>> getOrdersHistoryOfCurrentUser(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         try {
+            log.info(">>> [OrderController] came history");
             Buyer buyer = buyerService.getCurrentUser();
+            log.info(">>> [OrderController] get current buyer successfully");
             Page<Order> orderPaging = orderService.getOrdersOfCurrentUserPaging(size, page, buyer);
-
+            log.info(">>> [OrderController] get paging with order successfully");
             Map<String, Object> meta = Map.of(
                     "currentPage", orderPaging.getNumber(),
                     "totalElements", orderPaging.getTotalElements(),
                     "totalPage", orderPaging.getTotalPages()
             );
+            log.info(">>> [OrderController] created meta data successfully");
 
-            OrderListResponse orderListResponse = orderListMapper.toDto(orderPaging.toList(), meta);
+            OrderHistoryListResponse orderHistoryListResponse = orderHistoryListMapper.toDto(orderPaging, meta);
 
-            RestResponse<OrderListResponse, Object> response = responseMapper.toDto(
+
+            RestResponse<OrderHistoryListResponse, Object> response = responseMapper.toDto(
                     true,
                     "FETCH ORDER HISTORY SUCCESSFULLY",
-                    orderListResponse,
+                    orderHistoryListResponse,
                     null
             );
+            log.info(">>> [OrderController] created response successfully");
 
             return ResponseEntity.status(HttpStatus.OK.value()).body(response);
         } catch (Exception e) {
@@ -286,16 +297,16 @@ public class OrderController {
     @Operation(
             summary = "Get all orders of current seller",
             description = """
-        Retrieve all orders associated with the current logged-in seller.
-        The result is paginated using 'page' and 'size' query parameters.
-        
-        Requirements:
-        - User must have ROLE_SELLER
-        - Authorization header with a valid JWT token is required
-        
-        Example:
-        GET /api/orders?page=0&size=10
-        """
+                    Retrieve all orders associated with the current logged-in seller.
+                    The result is paginated using 'page' and 'size' query parameters.
+                    
+                    Requirements:
+                    - User must have ROLE_SELLER
+                    - Authorization header with a valid JWT token is required
+                    
+                    Example:
+                    GET /api/orders?page=0&size=10
+                    """
     )
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @GetMapping("")

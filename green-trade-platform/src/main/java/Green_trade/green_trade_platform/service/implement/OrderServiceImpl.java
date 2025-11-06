@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +38,11 @@ public class OrderServiceImpl implements OrderService {
 
     public Page<Order> getOrdersOfCurrentUserPaging(int size, int page, Buyer buyer) {
         try {
+            log.info(">>> [OrderServiceImpl] camed getOrdersOfCurrentUserPaging");
             Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
+            log.info(">>> [OrderServiceImpl] created pageable successfully");
             Page<Order> ordersPage = orderRepository.findAllByBuyer(buyer, pageable);
+            log.info(">>> [OrderServiceImpl] created orderPage successfully");
             return new PageImpl<>(ordersPage.getContent(), pageable, ordersPage.getTotalElements());
         } catch (Exception e) {
             log.info(">>> Error at getOrdersOfCurrentUserPaging: {}", e.getMessage());
@@ -109,6 +114,8 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] update order sold successfully");
                 orderFound.setCancelOrderReason(cancelOrderReason);
                 log.info(">>> [OrderServiceImpl] update cancel order reason successfully");
+                orderFound.setCanceledAt(LocalDateTime.now());
+                log.info(">>> [OrderServiceImpl] update canceled at successfully");
             } else if (orderFound.getStatus().equals(OrderStatus.PAID)) {
                 log.info(">>> [OrderServiceImpl] order paid status");
                 Transaction transaction = transactionService.createTransaction(orderFound, TransactionStatus.CANCELED,
@@ -122,10 +129,12 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] update order sold successfully");
                 orderFound.setCancelOrderReason(cancelOrderReason);
                 log.info(">>> [OrderServiceImpl] update cancel order reason successfully");
+                orderFound.setCanceledAt(LocalDateTime.now());
+                log.info(">>> [OrderServiceImpl] update canceled at successfully");
             } else {
                 throw new Exception("Cannot cancel order");
             }
-            return orderFound;
+            return orderRepository.save(orderFound);
         } catch (Exception e) {
             log.info(">>> [OrderServiceImpl] Error at cancelOrder: {}", e.getMessage());
             throw e;
@@ -170,5 +179,10 @@ public class OrderServiceImpl implements OrderService {
     public Page<Order> getAllOrders(int page, int size, Seller seller) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return orderRepository.findAllByPostProduct_Seller(seller, pageable);
+    }
+
+    public Order updateShippingFee(Order order, String shippingFee) {
+        order.setShippingFee(new BigDecimal(shippingFee));
+        return orderRepository.save(order);
     }
 }

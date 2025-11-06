@@ -322,28 +322,34 @@ public class BuyerController {
                 newOrder = orderService.updateOrderTransactions(newOrder, transactions);
                 log.info(">>> Passed update transactions");
 
-                String orderShippingCode = ghnService.createOrderShippingResponseToDto(
+                Map<String, String> createOrderShippingResponse = ghnService.createOrderShippingResponseToDto(
                         newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
-                ).get("orderCode");
+                );
 
-                String totalServiceFee = ghnService.createOrderShippingResponseToDto(
-                        newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
-                ).get("totalFee");
-                log.info(">>> Passed get orderShippingCode");
-                log.info(">>> orderShippingCode: {}", orderShippingCode);
-
+                String orderShippingCode = createOrderShippingResponse.get("orderCode");
+                log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
                 newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
+
+                String totalServiceFee = createOrderShippingResponse.get("totalFee");
+                log.info(">>> Passed get totalServiceFee: {}", totalServiceFee);
+                orderService.updateShippingFee(newOrder, totalServiceFee);
+
                 log.info(">>> Passed set Order Code");
+
+                transactionService.updateAmount(transactions.getLast(), transactions.getLast().getAmount());
+
                 SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(newOrder, totalServiceFee);
                 newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
             } else {
                 log.info(">>> Wallet payment flow");
+
                 Transaction transaction = transactionService.checkoutWalletPayment(
                         request.getUsername(),
                         request.getPostProductId(),
                         request.getPaymentId(),
                         newOrder
                 );
+
                 List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
                 log.info(">>> Passed get transactions");
 
@@ -353,15 +359,21 @@ public class BuyerController {
                 newOrder = orderService.updateOrderStatus(newOrder, OrderStatus.PAID);
                 log.info(">>> Passed update order status");
 
-                String orderShippingCode = ghnService.createOrderShippingResponseToDto(
-                        newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()).get("orderCode");
-                log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
-                String totalServiceFee = ghnService.createOrderShippingResponseToDto(
+                Map<String, String> createOrderShippingResponse = ghnService.createOrderShippingResponseToDto(
                         newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
-                ).get("totalFee");
+                );
+
+                String orderShippingCode = createOrderShippingResponse.get("orderCode");
+                log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
+                String totalServiceFee = createOrderShippingResponse.get("totalFee");
+                log.info(">>> Passed get totalServiceFee: {}", totalServiceFee);
+                orderService.updateShippingFee(newOrder, totalServiceFee);
 
                 newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
                 log.info(">>> Passed set Order Code");
+
+                transactionService.updateAmount(transactions.getLast(), transactions.getLast().getAmount());
+
                 SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeWalletPayment(newOrder, totalServiceFee);
                 newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
             }
@@ -566,16 +578,16 @@ public class BuyerController {
     @Operation(
             summary = "Retrieve paginated list of buyers",
             description = """
-        This endpoint allows an **administrator** to retrieve a paginated list of all registered buyers in the system. 
-        The request supports pagination parameters (`page`, `size`) and returns a structured response containing 
-        buyer information and metadata.
-
-        **Access Control:** Only users with the role `ROLE_ADMIN` can access this endpoint.
-
-        **Response:**
-        - On success: returns a paginated list of `BuyerResponse` objects with a success message.
-        - On failure: returns an error response with failure status and message details.
-        """
+                    This endpoint allows an **administrator** to retrieve a paginated list of all registered buyers in the system. 
+                    The request supports pagination parameters (`page`, `size`) and returns a structured response containing 
+                    buyer information and metadata.
+                    
+                    **Access Control:** Only users with the role `ROLE_ADMIN` can access this endpoint.
+                    
+                    **Response:**
+                    - On success: returns a paginated list of `BuyerResponse` objects with a success message.
+                    - On failure: returns an error response with failure status and message details.
+                    """
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/list")

@@ -89,6 +89,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .balanceBefore(wallet.getBalance())
                     .status(TransactionStatus.SUCCESS)
                     .description("Đặt hàng cho đơn " + order.getId())
+                    .order(order)
                     .wallet(wallet)
                     .build();
             walletTransactionRepository.save(walletTransaction);
@@ -154,5 +155,10 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
         log.info(">>> [TransactionServiceImpl] created transaction successfully");
         return transactionRepository.save(transaction);
+    }
+
+    public Transaction updateAmount(Transaction last, BigDecimal amount) {
+        last.setAmount(amount);
+        return transactionRepository.save(last);
     }
 }
