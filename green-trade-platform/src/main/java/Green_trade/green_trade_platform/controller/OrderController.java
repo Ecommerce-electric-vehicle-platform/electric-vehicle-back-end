@@ -4,6 +4,7 @@ import Green_trade.green_trade_platform.enumerate.SystemWalletStatus;
 import Green_trade.green_trade_platform.exception.OrderNotFound;
 import Green_trade.green_trade_platform.mapper.*;
 import Green_trade.green_trade_platform.model.*;
+import Green_trade.green_trade_platform.repository.OrderRepository;
 import Green_trade.green_trade_platform.request.CancelOrderRequest;
 import Green_trade.green_trade_platform.request.ReviewRequest;
 import Green_trade.green_trade_platform.response.*;
@@ -19,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +47,7 @@ public class OrderController {
     private final BuyerMapper buyerMapper;
     private final OrderHistoryMapper orderHistoryMapper;
     private final OrderHistoryListMapper orderHistoryListMapper;
+    private final OrderRepository orderRepository;
 
     @Operation(
             summary = "Get order history of current user",

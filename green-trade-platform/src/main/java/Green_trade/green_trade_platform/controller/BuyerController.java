@@ -310,6 +310,20 @@ public class BuyerController {
 
             if ("COD".equalsIgnoreCase(payment.getGatewayName())) {
                 log.info(">>> COD payment flow");
+
+                Map<String, String> createOrderShippingResponse = ghnService.createOrderShippingResponseToDto(
+                        newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
+                );
+
+                String orderShippingCode = createOrderShippingResponse.get("orderCode");
+                log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
+                newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
+                
+                String totalServiceFee = createOrderShippingResponse.get("totalFee");
+                log.info(">>> Passed get totalServiceFee: {}", totalServiceFee);
+                orderService.updateShippingFee(newOrder, totalServiceFee);
+
+                log.info(">>> Passed set Order Code");
                 Transaction transaction = transactionService.checkoutCODPayment(
                         request.getUsername(),
                         request.getPostProductId(),
@@ -322,33 +336,10 @@ public class BuyerController {
                 newOrder = orderService.updateOrderTransactions(newOrder, transactions);
                 log.info(">>> Passed update transactions");
 
-                Map<String, String> createOrderShippingResponse = ghnService.createOrderShippingResponseToDto(
-                        newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
-                );
-
-                String orderShippingCode = createOrderShippingResponse.get("orderCode");
-                log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
-                String totalServiceFee = createOrderShippingResponse.get("totalFee");
-                log.info(">>> Passed get totalServiceFee: {}", totalServiceFee);
-                buyerService.updateShippingFee(newOrder, totalServiceFee);
-
-                newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
-                log.info(">>> Passed set Order Code");
                 SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(newOrder, totalServiceFee);
                 newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
             } else {
                 log.info(">>> Wallet payment flow");
-                Transaction transaction = transactionService.checkoutWalletPayment(
-                        request.getUsername(),
-                        request.getPostProductId(),
-                        request.getPaymentId(),
-                        newOrder
-                );
-                List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
-                log.info(">>> Passed get transactions");
-
-                newOrder = orderService.updateOrderTransactions(newOrder, transactions);
-                log.info(">>> Passed update transactions for order");
 
                 newOrder = orderService.updateOrderStatus(newOrder, OrderStatus.PAID);
                 log.info(">>> Passed update order status");
@@ -361,10 +352,24 @@ public class BuyerController {
                 log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
                 String totalServiceFee = createOrderShippingResponse.get("totalFee");
                 log.info(">>> Passed get totalServiceFee: {}", totalServiceFee);
-                buyerService.updateShippingFee(newOrder, totalServiceFee);
+                orderService.updateShippingFee(newOrder, totalServiceFee);
 
                 newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
                 log.info(">>> Passed set Order Code");
+
+                Transaction transaction = transactionService.checkoutWalletPayment(
+                        request.getUsername(),
+                        request.getPostProductId(),
+                        request.getPaymentId(),
+                        newOrder
+                );
+
+                List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
+                log.info(">>> Passed get transactions");
+
+                newOrder = orderService.updateOrderTransactions(newOrder, transactions);
+                log.info(">>> Passed update transactions for order");
+
                 SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeWalletPayment(newOrder, totalServiceFee);
                 newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
             }

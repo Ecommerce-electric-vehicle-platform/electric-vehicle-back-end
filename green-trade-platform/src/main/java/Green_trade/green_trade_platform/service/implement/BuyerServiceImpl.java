@@ -364,9 +364,4 @@ public class BuyerServiceImpl {
 
         mailSender.sendBeautifulMail(mailRequest);
     }
-
-    public Order updateShippingFee(Order order, String shippingFee) {
-        order.setShippingFee(new BigDecimal(shippingFee));
-        return orderRepository.save(order);
-    }
 }

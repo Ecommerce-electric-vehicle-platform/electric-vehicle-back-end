@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -178,5 +179,10 @@ public class OrderServiceImpl implements OrderService {
     public Page<Order> getAllOrders(int page, int size, Seller seller) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return orderRepository.findAllByPostProduct_Seller(seller, pageable);
+    }
+
+    public Order updateShippingFee(Order order, String shippingFee) {
+        order.setShippingFee(new BigDecimal(shippingFee));
+        return orderRepository.save(order);
     }
 }
