@@ -205,13 +205,13 @@ public class ChattingController {
     @Operation(
             summary = "Get list of messages in a conversation",
             description = """
-        Retrieve all messages from a specific conversation.
-        You can specify pagination parameters (page, size) 
-        and must provide a valid conversationId.
-        
-        Example:
-        GET /conversation-messages?conversationId=1&page=0&size=10
-        """
+                    Retrieve all messages from a specific conversation.
+                    You can specify pagination parameters (page, size) 
+                    and must provide a valid conversationId.
+                    
+                    Example:
+                    GET /conversation-messages?conversationId=1&page=0&size=10
+                    """
     )
     @GetMapping("/conversation-messages")
     public ResponseEntity<?> getListMessage(
