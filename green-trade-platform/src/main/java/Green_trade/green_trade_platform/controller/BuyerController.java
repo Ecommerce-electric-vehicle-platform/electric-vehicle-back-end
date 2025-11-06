@@ -330,6 +330,7 @@ public class BuyerController {
                 log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
                 String totalServiceFee = createOrderShippingResponse.get("totalFee");
                 log.info(">>> Passed get totalServiceFee: {}", totalServiceFee);
+                buyerService.updateShippingFee(newOrder, totalServiceFee);
 
                 newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
                 log.info(">>> Passed set Order Code");
@@ -359,6 +360,8 @@ public class BuyerController {
                 String orderShippingCode = createOrderShippingResponse.get("orderCode");
                 log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
                 String totalServiceFee = createOrderShippingResponse.get("totalFee");
+                log.info(">>> Passed get totalServiceFee: {}", totalServiceFee);
+                buyerService.updateShippingFee(newOrder, totalServiceFee);
 
                 newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
                 log.info(">>> Passed set Order Code");
