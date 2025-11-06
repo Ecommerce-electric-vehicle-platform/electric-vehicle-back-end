@@ -156,4 +156,9 @@ public class TransactionServiceImpl implements TransactionService {
         log.info(">>> [TransactionServiceImpl] created transaction successfully");
         return transactionRepository.save(transaction);
     }
+
+    public Transaction updateAmount(Transaction last, BigDecimal amount) {
+        last.setAmount(amount);
+        return transactionRepository.save(last);
+    }
 }
