@@ -299,10 +299,10 @@ public class BuyerController {
             log.info(">>> Calculate shipping fee");
             if (payment.getGatewayName().equals("COD")) {
                 log.info(">>> Calculate shipping fee COD");
-                shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, postProduct.getPrice().intValue()).get("service_fee");
+                shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, postProduct.getPrice().intValue()).get("total");
             } else {
                 log.info(">>> Calculate shipping fee Online Payment");
-                shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, 0).get("service_fee");
+                shippingFee = ghnService.getShippingFeeDto(buyer, postProduct.getSeller(), postProduct, 0).get("total");
             }
 
             log.info(">>> Place new order");
@@ -334,14 +334,33 @@ public class BuyerController {
                 log.info(">>> Passed get totalServiceFee: {}", totalServiceFee);
                 orderService.updateShippingFee(newOrder, totalServiceFee);
 
+
                 log.info(">>> Passed set Order Code");
 
-                transactionService.updateAmount(transactions.getLast(), transactions.getLast().getAmount());
+                transactionService.updateAmount(transactions.getLast(), newOrder.getPrice().add(newOrder.getShippingFee()));
 
-                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(newOrder, totalServiceFee);
-                newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
+//                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(newOrder, totalServiceFee);
+//                newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
             } else {
                 log.info(">>> Wallet payment flow");
+                //tạo đơn hàng giả để lấy phí dịch vụ thật
+                Map<String, String> createOrderShippingResponseDemo = ghnService.createOrderShippingResponseToDto(
+                        newOrder, payment
+                );
+                //lưu lại orderCode để xoá đơn hàng giả
+                String orderShippingCodeDemo = createOrderShippingResponseDemo.get("orderCode");
+                log.info(">>> Passed get orderShippingCodeDemo: {}", orderShippingCodeDemo);
+
+                newOrder = orderService.updateOrderCode(orderShippingCodeDemo, newOrder);
+                log.info(">>> Passed set Order Code Demo");
+
+                //lưu phí dịch vụ thật
+                String totalServiceFeeDemo = createOrderShippingResponseDemo.get("totalFee");
+                log.info(">>> Passed get totalServiceFeeDemo: {}", totalServiceFeeDemo);
+                orderService.updateShippingFee(newOrder, totalServiceFeeDemo);
+
+                ghnService.createCancelOrderShippingServiceResponseToDto(newOrder.getOrderCode(), newOrder.getPostProduct().getSeller().getGhnShopId());
+                //vào flow chính sau khi đã có phí dịch vụ thật
 
                 Transaction transaction = transactionService.checkoutWalletPayment(
                         request.getUsername(),
@@ -350,35 +369,46 @@ public class BuyerController {
                         newOrder
                 );
 
+                //lấy danh sách transactions
                 List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
                 log.info(">>> Passed get transactions");
 
+                //cập nhật danh sách transactions cho đơn hàng
                 newOrder = orderService.updateOrderTransactions(newOrder, transactions);
                 log.info(">>> Passed update transactions for order");
 
                 newOrder = orderService.updateOrderStatus(newOrder, OrderStatus.PAID);
                 log.info(">>> Passed update order status");
 
+                //tạo đơn hàng thật ở trên giao hàng nhanh
                 Map<String, String> createOrderShippingResponse = ghnService.createOrderShippingResponseToDto(
                         newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
                 );
 
+                //lưu orderShippingCode vào đơn hàng
                 String orderShippingCode = createOrderShippingResponse.get("orderCode");
                 log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
+                newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
+                log.info(">>> Passed set Order Code");
+
+                //lưu phí dịch vụ vào đơn hàng
                 String totalServiceFee = createOrderShippingResponse.get("totalFee");
                 log.info(">>> Passed get totalServiceFee: {}", totalServiceFee);
                 orderService.updateShippingFee(newOrder, totalServiceFee);
 
-                newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
-                log.info(">>> Passed set Order Code");
+                //cập nhật lại tiền của transaction mới nhất
+                transactionService.updateAmount(transactions.getLast(), newOrder.getPrice().add(newOrder.getShippingFee()));
 
-                transactionService.updateAmount(transactions.getLast(), transactions.getLast().getAmount());
-
-                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeWalletPayment(newOrder, totalServiceFee);
-                newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
+//                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeWalletPayment(newOrder, totalServiceFee);
+//                newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
             }
+            //tạo hoá đơn
             Invoice newInvoice = invoiceService.createInvoiceInstance(newOrder, "", 0);
+
+            //tạo mã hoá đơn
             invoiceService.generateInvoice(newInvoice.getId());
+
+            //tạo response
             responseData = orderMapper.toDto(newOrder);
             log.info(">>> Passed created response");
 

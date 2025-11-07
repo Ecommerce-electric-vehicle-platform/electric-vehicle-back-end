@@ -1,5 +1,7 @@
 package Green_trade.green_trade_platform.controller;
 
+import Green_trade.green_trade_platform.enumerate.OrderStatus;
+import Green_trade.green_trade_platform.enumerate.TransactionStatus;
 import Green_trade.green_trade_platform.exception.OrderNotFound;
 import Green_trade.green_trade_platform.exception.PaymentMethodNotSupportedException;
 import Green_trade.green_trade_platform.exception.PostProductNotFound;
@@ -10,10 +12,7 @@ import Green_trade.green_trade_platform.repository.PostProductRepository;
 import Green_trade.green_trade_platform.request.ShippingFeeRequest;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.service.PostProductService;
-import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
-import Green_trade.green_trade_platform.service.implement.GhnServiceImpl;
-import Green_trade.green_trade_platform.service.implement.OrderServiceImpl;
-import Green_trade.green_trade_platform.service.implement.PaymentServiceImpl;
+import Green_trade.green_trade_platform.service.implement.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,6 +39,8 @@ public class ShippingServiceController {
     private final BuyerServiceImpl buyerService;
     private final PaymentServiceImpl paymentService;
     private final OrderServiceImpl orderService;
+    private final SystemWalletServiceImpl systemWalletService;
+    private final TransactionServiceImpl transactionService;
 
     public ShippingServiceController(
             GhnServiceImpl ghnService,
@@ -49,8 +50,9 @@ public class ShippingServiceController {
             PostProductRepository postProductRepository,
             BuyerServiceImpl buyerService,
             PaymentServiceImpl paymentService,
-            OrderServiceImpl orderService
-    ) {
+            OrderServiceImpl orderService,
+            SystemWalletServiceImpl systemWalletService,
+            TransactionServiceImpl transactionService) {
         this.ghnService = ghnService;
         this.responseMapper = responseMapper;
         this.orderRepository = orderRepository;
@@ -59,6 +61,8 @@ public class ShippingServiceController {
         this.buyerService = buyerService;
         this.paymentService = paymentService;
         this.orderService = orderService;
+        this.systemWalletService = systemWalletService;
+        this.transactionService = transactionService;
     }
 
     @Operation(
@@ -246,6 +250,27 @@ public class ShippingServiceController {
         }
 
         Map<String, Object> responseData = ghnService.getLastestOrderStatus(foundOrder.getOrderCode());
+        String status = responseData.get("status").toString();
+        if (status.equalsIgnoreCase("picked")) {
+            orderService.updateOrderStatus(foundOrder, OrderStatus.PICKED);
+        } else if (status.equalsIgnoreCase("delivering")) {
+            orderService.updateOrderStatus(foundOrder, OrderStatus.DELIVERING);
+        } else if (status.equalsIgnoreCase("delivered")) {
+            orderService.updateOrderStatus(foundOrder, OrderStatus.DELIVERED);
+            orderService.updateOrderStatus(foundOrder, OrderStatus.COMPLETED);
+            if ("COD".equalsIgnoreCase(foundOrder.getTransactions().getLast().getPayment().getGatewayName())) {
+                Transaction transaction = transactionService.createTransaction(foundOrder, TransactionStatus.SUCCESS, foundOrder.getTransactions().getLast().getPayment());
+                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(foundOrder, foundOrder.getShippingFee());
+                log.info(">>> pass create system wallet");
+                foundOrder = orderService.updateSystemWallet(systemWallet, foundOrder);
+                log.info(">>> pass update system wallet for order");
+            } else {
+                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(foundOrder, foundOrder.getShippingFee());
+                log.info(">>> pass create system wallet");
+                foundOrder = orderService.updateSystemWallet(systemWallet, foundOrder);
+                log.info(">>> pass update system wallet for order");
+            }
+        }
 
         RestResponse<Map<String, Object>, Object> response = responseMapper.toDto(
                 true,
