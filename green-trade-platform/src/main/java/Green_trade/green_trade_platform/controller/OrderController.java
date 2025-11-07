@@ -48,6 +48,8 @@ public class OrderController {
     private final OrderHistoryMapper orderHistoryMapper;
     private final OrderHistoryListMapper orderHistoryListMapper;
     private final OrderRepository orderRepository;
+    private final InvoiceServiceImpl invoiceService;
+    private final InvoiceMapper invoiceMapper;
 
     @Operation(
             summary = "Get order history of current user",
@@ -330,5 +332,23 @@ public class OrderController {
                     null, e.getMessage()
             ));
         }
+    }
+
+    @GetMapping("/{orderId}/invoice")
+    public ResponseEntity<RestResponse<InvoiceResponse, Object>> getInvoiceByOrderId(@PathVariable Long orderId) {
+        Order order = orderService.getOrderById(orderId);
+        Invoice invoice = order.getInvoice();
+        if (invoice == null) {
+            invoice = invoiceService.createInvoiceInstance(order, "", 0.0);
+            invoiceService.generateInvoice(invoice.getId());
+        }
+        InvoiceResponse invoiceResponse = invoiceMapper.toDto(invoice);
+        RestResponse<InvoiceResponse, Object> response = responseMapper.toDto(
+                true,
+                "FETCH INVOICE SUCCESSFULLY",
+                invoiceResponse,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 }

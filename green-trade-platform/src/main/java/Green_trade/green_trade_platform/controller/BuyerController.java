@@ -408,11 +408,11 @@ public class BuyerController {
             //tạo mã hoá đơn
             invoiceService.generateInvoice(newInvoice.getId());
 
+            postProductService.updateSoldStatus(true, postProduct);
+
             //tạo response
             responseData = orderMapper.toDto(newOrder);
             log.info(">>> Passed created response");
-
-            postProductService.updateSoldStatus(true, postProduct);
 
             log.info(">>> Build response");
             response = responseMapper.toDto(
