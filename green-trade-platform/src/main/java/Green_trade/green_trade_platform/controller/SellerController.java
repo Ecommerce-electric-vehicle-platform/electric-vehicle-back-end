@@ -153,7 +153,7 @@ public class SellerController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLER_SELLER')")
+    @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(
             summary = "Request verification for a post product",
             description = """
