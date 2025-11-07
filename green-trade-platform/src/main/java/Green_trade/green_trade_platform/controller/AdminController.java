@@ -20,12 +20,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +46,7 @@ public class AdminController {
     private final PostProductListMapper postProductListMapper;
     private final NotificationSocketController socketController;
     private final BuyerServiceImpl buyerService;
+    private final PostProductServiceImpl postProductService;
 
     @Operation(
             summary = "Get all pending seller accounts",
@@ -439,5 +442,30 @@ public class AdminController {
                     null, e.getMessage()
             ));
         }
+    }
+
+    @Operation(
+            summary = "Get total new post products within a date range",
+            description = """
+        This endpoint allows **administrators** to retrieve the total number of new post products 
+        created within a specific date range.  
+        
+        - Both `start_date` and `end_date` must be provided in ISO format (`yyyy-MM-dd`).  
+        - The result counts posts whose `createdAt` values fall within the given range.  
+        - Only users with role **ROLE_ADMIN** are authorized to access this endpoint.
+        """
+    )
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/total-new-post")
+    public ResponseEntity<?> getTotalNewPostInMonth(
+            @RequestParam("start_date") LocalDate startDate,
+            @RequestParam("end_date") LocalDate endDate
+    ) {
+        long totalPost = postProductService.getTotalNewPostInMonth(startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
+        return ResponseEntity.ok(responseMapper.toDto(
+                true,
+                "GET TOTAL NEW POST SUCCESSFULLY.",
+                totalPost, null
+        ));
     }
 }

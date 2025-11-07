@@ -315,8 +315,8 @@ VALUES ('https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369239/sellers/1
 -- =========================================================
 -- 🧾 SUBSCRIPTION - GÁN GÓI CHO SELLER
 -- =========================================================
-INSERT INTO subscription (seller_id, subscription_package_id, is_active, start_day, end_day, remain_post)
-VALUES (1, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 100);
+INSERT INTO subscription (seller_id, subscription_package_id, is_active, start_day, end_day, remain_post, price_at_purchase)
+VALUES (1, 3, TRUE, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 100, 5400000);
 
 
 -- =========================================================

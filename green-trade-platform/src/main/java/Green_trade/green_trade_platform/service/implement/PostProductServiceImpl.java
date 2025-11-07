@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -373,5 +374,9 @@ public class PostProductServiceImpl implements PostProductService {
             case "locationtrading" -> postProductRepository.findByLocationTradingContainingIgnoreCase(value, pageable);
             default -> throw new IllegalArgumentException("Invalid search type: " + type);
         };
+    }
+
+    public long getTotalNewPostInMonth(LocalDateTime startDate, LocalDateTime endDate) {
+        return postProductRepository.countNewPostsInMonth(startDate, endDate);
     }
 }

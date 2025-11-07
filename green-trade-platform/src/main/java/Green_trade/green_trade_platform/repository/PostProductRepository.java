@@ -6,7 +6,10 @@ import Green_trade.green_trade_platform.model.Seller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PostProductRepository extends JpaRepository<PostProduct, Long> {
@@ -25,4 +28,12 @@ public interface PostProductRepository extends JpaRepository<PostProduct, Long> 
     Page<PostProduct> findByModelContainingIgnoreCase(String model, Pageable pageable);
     Page<PostProduct> findByConditionLevelContainingIgnoreCase(String conditionLevel, Pageable pageable);
     Page<PostProduct> findByLocationTradingContainingIgnoreCase(String locationTrading, Pageable pageable);
+
+    @Query("""
+        SELECT COUNT(p)
+        FROM PostProduct p
+        WHERE p.createdAt BETWEEN :startDate AND :endDate
+          AND p.deletedAt IS NULL
+    """)
+    Long countNewPostsInMonth(LocalDateTime startDate, LocalDateTime endDate);
 }

@@ -372,4 +372,15 @@ public class SellerController {
         }
     }
 
+    @Operation()
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/total-sellers")
+    public ResponseEntity<?> getTotalSellers() {
+        return ResponseEntity.ok(responseMapper.toDto(
+                true,
+                "GET TOTAL SELLERS SUCCESSFULLY.",
+                sellerService.getTotalSellers(), null
+        ));
+    }
+
 }
