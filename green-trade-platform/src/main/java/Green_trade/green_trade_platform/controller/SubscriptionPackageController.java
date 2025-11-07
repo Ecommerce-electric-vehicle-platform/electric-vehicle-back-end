@@ -176,5 +176,14 @@ public class SubscriptionPackageController {
         }
     }
 
-
+    @Operation()
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/subscription-revenue")
+    public ResponseEntity<?> getTotalRevenue() {
+        return ResponseEntity.ok(responseMapper.toDto(
+                true,
+                "GET TOTAL REVENUE SUCCESSFULLY.",
+                subscriptionPackageService.getTotalRevenue(), null
+        ));
+    }
 }

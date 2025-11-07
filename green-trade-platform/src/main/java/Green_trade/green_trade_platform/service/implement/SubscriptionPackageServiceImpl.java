@@ -80,6 +80,7 @@ public class SubscriptionPackageServiceImpl {
                 .startDay(startDate)
                 .endDay(endDate)
                 .remainPost(subscriptionPackages.getMaxProduct())
+                .priceAtPurchase(request.getPrice())
                 .build();
 
         Subscription temp = subscriptionRepository.save(subscription);
@@ -137,5 +138,9 @@ public class SubscriptionPackageServiceImpl {
         long remainPost = subscription.getRemainPost();
         subscription.setRemainPost(remainPost--);
         return subscriptionRepository.save(subscription);
+    }
+
+    public double getTotalRevenue() {
+        return subscriptionRepository.getTotalRevenue();
     }
 }

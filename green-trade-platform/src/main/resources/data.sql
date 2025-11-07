@@ -248,11 +248,11 @@ VALUES ('ae8ed05a-6eef-4f3c-ae27-63b6c8c04314',
         NULL, 'doanvien', 'Phường 7'),
        ('fee6981f-33a2-4208-978c-b5c8ffaad9ba',
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1762071147/buyers/2:kimthuydoan/avatar/fee6981f-33a2-4208-978c-b5c8ffaad9ba.jpg',
-        NOW(), '123', NULL, 'Thành phố Dĩ An', '2004-11-19', 'kimthuydoan22082005@gmail.com', 'Đoàn Thị Kim Thúy',
+        NOW(), '123', NULL, 'Thành phố Dĩ An', '2004-11-19', 'kimthuydoan22082005temp@gmail.com', 'Đoàn Thị Kim Thúy',
         'FEMALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', '0780453118', 'Bình Dương',
-        NULL, 'kimthuydoan', 'Phường Bình An'),
-       (NULL, NULL, NOW(), NULL, NULL, NULL, NULL, 'hanhtransdr@gmail.com', NULL, 'FEMALE', 1,
-        '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', NULL, NULL, NULL, 'tranthihanh', NULL);
+        NULL, 'kimthuydoan', 'Phường Bình An');
+--       (NULL, NULL, NOW(), NULL, NULL, NULL, NULL, 'hanhtransdr@gmail.com', NULL, 'FEMALE', 1,
+--        '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', NULL, NULL, NULL, 'tranthihanh', NULL);
 
 -- =========================================================
 -- 🏪 WALLET
@@ -260,16 +260,16 @@ VALUES ('ae8ed05a-6eef-4f3c-ae27-63b6c8c04314',
 
 INSERT INTO wallet (balance, concurrency, provider, created_at, buyer_id)
 VALUES (1000000000.00, 'VND', 'VNPay', NOW(), 1),
-       (1100000000.00, 'VND', 'VNPay', NOW(), 2),
-       (1200000000.00, 'VND', 'VNPay', NOW(), 3);
+       (1100000000.00, 'VND', 'VNPay', NOW(), 2);
+--       (1200000000.00, 'VND', 'VNPay', NOW(), 3);
 
 -- =========================================================
 -- 🏪 WALLET TRANSACTION
 -- =========================================================
 INSERT INTO wallet_transaction(amount, balance_before, created_at, description, status, type, wallet_id)
 VALUES (10000000.00, 0.00, NOW(), 'Nap tien vao vi nguoi dung', 'SUCCESS', 'DEPOSIT', 1),
-       (10000000.00, 0.00, NOW(), 'Nap tien vao vi nguoi dung', 'SUCCESS', 'DEPOSIT', 2),
-       (10000000.00, 0.00, NOW(), 'Nap tien vao vi nguoi dung', 'SUCCESS', 'DEPOSIT', 3);
+       (10000000.00, 0.00, NOW(), 'Nap tien vao vi nguoi dung', 'SUCCESS', 'DEPOSIT', 2);
+--       (10000000.00, 0.00, NOW(), 'Nap tien vao vi nguoi dung', 'SUCCESS', 'DEPOSIT', 3);
 
 -- =========================================================
 -- 🏪 SELLER
@@ -296,7 +296,7 @@ VALUES ('https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369239/sellers/1
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369244/sellers/1:doanvien/identity_back_image/551938c5-7612-464e-94b8-1eaf453085e9.jpg',
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369242/sellers/1:doanvien/business_license_image/521e8ddf-e05a-41a8-af94-fbb4b89a0655.jpg',
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369246/sellers/1:doanvien/selfie_image/d3953b0b-8423-47c0-864c-2e4bd4f2d2d9.jpg',
-        'ACCEPTED',
+        'PENDING',
         'Chuyên xe máy, phụ tùng xe điện Đoàn Viên',
         '197764',
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761369249/sellers/1:doanvien/policy_image/96443852-fe1c-419b-bf60-8197d48f29ea.jpg',
