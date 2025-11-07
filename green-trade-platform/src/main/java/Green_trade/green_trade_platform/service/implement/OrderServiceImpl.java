@@ -6,6 +6,7 @@ import Green_trade.green_trade_platform.exception.OrderNotFound;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.CancelOrderReasonRepository;
 import Green_trade.green_trade_platform.repository.OrderRepository;
+import Green_trade.green_trade_platform.repository.PostProductRepository;
 import Green_trade.green_trade_platform.repository.TransactionRepository;
 import Green_trade.green_trade_platform.request.CancelOrderRequest;
 import Green_trade.green_trade_platform.service.OrderService;
@@ -35,6 +36,7 @@ public class OrderServiceImpl implements OrderService {
     private final WalletServiceImpl walletService;
     private final TransactionRepository transactionRepository;
     private final CancelOrderReasonRepository cancelOrderReasonRepository;
+    private final PostProductRepository postProductRepository;
 
     public Page<Order> getOrdersOfCurrentUserPaging(int size, int page, Buyer buyer) {
         try {
@@ -103,6 +105,7 @@ public class OrderServiceImpl implements OrderService {
 
             Order orderFound = orderOpt.get();
 
+            log.info(">>> [OrderServiceImpl] orderFound: {}", orderFound);
             if (orderFound.getStatus().equals(OrderStatus.PENDING)) {
                 log.info(">>> [OrderServiceImpl] order pending status");
                 Transaction transaction = transactionService.createTransaction(orderFound, TransactionStatus.CANCELED,
@@ -123,7 +126,7 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] created transaction successfully");
                 orderFound = updateOrderStatus(orderFound, OrderStatus.CANCELED);
                 log.info(">>> [OrderServiceImpl] update order status to canceled successfully");
-                walletService.handleBuyerRefundForCancelledOrder(orderFound.getSystemWallet(), 100, orderFound.getBuyer().getWallet());
+//                walletService.handleBuyerRefundForCancelledOrder(orderFound.getSystemWallet(), 100, orderFound.getBuyer().getWallet());
                 log.info(">>> [OrderServiceImpl] refund successfully");
                 orderFound.getPostProduct().setSold(false);
                 log.info(">>> [OrderServiceImpl] update order sold successfully");
