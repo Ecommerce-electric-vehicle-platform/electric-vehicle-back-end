@@ -64,6 +64,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
             Wallet wallet = buyerService.getWallet();
+            BigDecimal walletBalanceBefore = wallet.getBalance();
             log.info(">>> wallet balance: {}", wallet.getBalance());
             log.info(">>> order total price: {}", order.getPrice());
             BigDecimal moneyHandler = wallet.getBalance().subtract(order.getPrice().add(order.getShippingFee()));
@@ -86,7 +87,7 @@ public class TransactionServiceImpl implements TransactionService {
             WalletTransaction walletTransaction = WalletTransaction.builder()
                     .type(TransactionType.PLACE_ORDER)
                     .amount((order.getPrice().add(order.getShippingFee()).negate()))
-                    .balanceBefore(wallet.getBalance())
+                    .balanceBefore(walletBalanceBefore)
                     .status(TransactionStatus.SUCCESS)
                     .description("Đặt hàng cho đơn " + order.getId())
                     .order(order)
@@ -146,7 +147,7 @@ public class TransactionServiceImpl implements TransactionService {
     public Transaction createTransaction(Order order, TransactionStatus status, Payment payment) {
         log.info(">>> [TransactionServiceImpl] came createTransaction");
         Transaction transaction = Transaction.builder()
-                .amount(order.getPrice())
+                .amount(order.getPrice().add(order.getShippingFee()))
                 .currency("VND")
                 .status(status)
                 .paymentMethod(payment.getGatewayName())

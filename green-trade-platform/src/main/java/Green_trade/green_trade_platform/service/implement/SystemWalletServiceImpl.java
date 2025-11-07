@@ -82,6 +82,35 @@ public class SystemWalletServiceImpl {
         }
     }
 
+    public SystemWallet createEscrowRecordAfterReduceFeeCOD(Order order, BigDecimal totalFee) {
+        try {
+            log.info(">>> [SystemWalletServiceImpl] the system came createEscrowRecordAfterReduceFeeCOD");
+            BigDecimal productPrice = order.getPrice();
+            log.info(">>> [SystemWalletServiceImpl] productPrice: {}", productPrice);
+            BigDecimal shippingFee = order.getShippingFee();
+            log.info(">>> [SystemWalletServiceImpl] shippingFee: {}", shippingFee);
+            BigDecimal totalFeeInNumber = totalFee;
+            log.info(">>> [SystemWalletServiceImpl] totalFeeInNumber: {}", totalFeeInNumber);
+            BigDecimal actualReceivedMoney = productPrice;
+            log.info(">>> [SystemWalletServiceImpl] actualReceivedMoney: {}", actualReceivedMoney);
+            SystemWallet escrowRecord = SystemWallet.builder()
+                    .admin(null)
+                    .order(order)
+                    .buyerWalletId(order.getBuyer().getWallet().getWalletId())
+                    .sellerWalletId(order.getPostProduct().getSeller().getBuyer().getWallet().getWalletId())
+                    .concurrency("VND")
+                    .balance(actualReceivedMoney)
+                    .status(SystemWalletStatus.ESCROW_HOLD)
+                    .endAt(LocalDateTime.now().plusWeeks(2))
+                    .build();
+            log.info(">>> [SystemWalletServiceImpl] create new escrowRecord");
+            return systemWalletRepossitory.save(escrowRecord);
+        } catch (Exception e) {
+            log.info(">>> [SystemWalletServiceImpl] Error at createEscrowRecord: {}", e.getMessage());
+            throw new SystemWalletException();
+        }
+    }
+
     public SystemWallet createEscrowRecordAfterReduceFeeWalletPayment(Order order, String totalFee) {
         try {
             log.info(">>> 1 ");

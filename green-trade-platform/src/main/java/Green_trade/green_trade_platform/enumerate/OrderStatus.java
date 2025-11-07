@@ -12,9 +12,9 @@ public enum OrderStatus {
     // Đơn hàng đang được chuẩn bị để giao
     PROCESSING,
     // Đơn hàng đã được giao cho đơn vị vận chuyển
-    SHIPPED,
+    PICKED,
     // Đơn hàng đang được giao cho khách hàng
-    IN_TRANSIT,
+    DELIVERING,
     // Đơn hàng đã giao thành công
     DELIVERED,
     // Khách hàng đã nhận hàng

@@ -47,7 +47,7 @@ public class InvoiceUtils {
             document.open();
 
             Font titleFont = new Font(Font.HELVETICA, 20, Font.BOLD);
-            Paragraph header = new Paragraph("GREEN TRADING PLATFORM - HÓA ĐƠN MUA BÁN", titleFont);
+            Paragraph header = new Paragraph("GREEN TRADE PLATFORM - HÓA ĐƠN MUA BÁN", titleFont);
             header.setAlignment(Element.ALIGN_CENTER);
             document.add(header);
             document.add(new Paragraph(" "));
@@ -88,7 +88,7 @@ public class InvoiceUtils {
             table.addCell(product.getTitle());
             table.addCell("Thương hiệu");
             table.addCell(product.getBrand());
-            table.addCell("Mẫu xe");
+            table.addCell("Mẫu");
             table.addCell(product.getModel());
             table.addCell("Năm SX");
             table.addCell(String.valueOf(product.getManufactureYear()));
