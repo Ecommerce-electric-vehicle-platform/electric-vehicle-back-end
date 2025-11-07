@@ -26,12 +26,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -283,4 +286,43 @@ public class PostProductController {
         }
     }
 
+    @Operation(
+            summary = "Search post products by type and value",
+            description = """
+        Search products based on a specific type and value.
+        Supported search types: 
+        - title
+        - brand
+        - model
+        - conditionLevel
+        - locationTrading
+
+        Example:
+        GET /api/posts/search?type=brand&value=Yamaha
+        """
+    )
+    @GetMapping("/search")
+    public ResponseEntity<?> searchProduct(
+            @RequestParam(name = "type", defaultValue = "brand") String type,
+            @RequestParam(name = "value", defaultValue = "Pega") String value,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            Page<PostProduct> products = postProductService.searchProduct(type, value, page, size);
+            Page<PostProductResponse> response = products.map(postProductMapper::toDto);
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "SEARCH PRODUCT SUCCESSFULLY.",
+                    response, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "SEARCH PRODUCT FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
 }

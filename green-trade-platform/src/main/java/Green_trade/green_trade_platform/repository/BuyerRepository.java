@@ -23,4 +23,7 @@ public interface BuyerRepository extends JpaRepository<Buyer, Long> {
 
     @Query("SELECT w.balance FROM Wallet w WHERE w.buyer.buyerId = :buyerId")
     BigDecimal findBalanceByBuyerId(@Param("buyerId") Long buyerId);
+
+    @Query("SELECT COUNT(b) FROM Buyer b")
+    int getTotalBuyers();
 }

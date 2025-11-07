@@ -364,4 +364,8 @@ public class BuyerServiceImpl {
 
         mailSender.sendBeautifulMail(mailRequest);
     }
+
+    public int getTotalBuyers() {
+        return buyerRepository.getTotalBuyers();
+    }
 }

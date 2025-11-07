@@ -229,4 +229,8 @@ public class SellerServiceImpl implements SellerService {
     public List<PostProduct> getListPostProduct(Seller seller) {
         return postProductRepository.findAllBySeller(seller);
     }
+
+    public int getTotalSellers() {
+        return sellerRepository.getTotalSellers();
+    }
 }

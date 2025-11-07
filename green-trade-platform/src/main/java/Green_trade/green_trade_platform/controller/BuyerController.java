@@ -641,4 +641,16 @@ public class BuyerController {
             ));
         }
     }
+
+    @Operation()
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/total-buyers")
+    public ResponseEntity<?> getTotalBuyers() {
+        int total = buyerService.getTotalBuyers();
+        return ResponseEntity.ok(responseMapper.toDto(
+                true,
+                "GET TOTAL BUYERS SUCCESSFULLY.",
+                total, null
+        ));
+    }
 }
