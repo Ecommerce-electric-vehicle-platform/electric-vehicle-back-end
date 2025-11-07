@@ -243,7 +243,7 @@ INSERT INTO buyer (avatar_public_id,
                    ward_name)
 VALUES ('ae8ed05a-6eef-4f3c-ae27-63b6c8c04314',
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761368550/buyers/1:doanvien/avatar/ed4086f1-9cf3-48ae-8cac-3f493f07f9e7.jpg',
-        NOW(), '129 Nguyễn Văn Cừ', NULL, 'Quận 5', '2005-11-19', 'vientruongdoan@gmail.com', 'Truong Doan Vien',
+        NOW(), '1 Nguyễn Thị Minh Khai', NULL, 'Quận 1', '2005-11-19', 'vientruongdoan@gmail.com', 'Truong Doan Vien',
         'MALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', '0792043114', 'Hồ Chí Minh',
         NULL, 'doanvien', 'Phường 7'),
        ('fee6981f-33a2-4208-978c-b5c8ffaad9ba',
