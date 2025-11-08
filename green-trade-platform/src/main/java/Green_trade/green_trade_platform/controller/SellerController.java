@@ -372,7 +372,11 @@ public class SellerController {
         }
     }
 
-    @Operation()
+    @Operation(
+            summary = "Get total number of sellers",
+            description = "This endpoint retrieves the total number of registered sellers in the system. " +
+                    "Accessible only by users with the ADMIN role."
+    )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/total-sellers")
     public ResponseEntity<?> getTotalSellers() {
