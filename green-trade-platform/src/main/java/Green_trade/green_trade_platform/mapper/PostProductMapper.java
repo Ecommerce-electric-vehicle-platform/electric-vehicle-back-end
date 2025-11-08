@@ -22,7 +22,7 @@ public class PostProductMapper {
                 .map(this::toImageResponse)
                 .toList()
                 : Collections.emptyList();
-
+        // width height length weight description
         return PostProductResponse.builder()
                 .postId(postProduct.getId())
                 .sellerId(postProduct.getSeller().getSellerId())
@@ -41,6 +41,12 @@ public class PostProductMapper {
                 .locationTrading(postProduct.getLocationTrading())
                 .categoryName(postProduct.getCategory().getName())
                 .images(imageResponses)
+                .width(postProduct.getWidth())
+                .height(postProduct.getHeight())
+                .length(postProduct.getLength())
+                .weight(postProduct.getWeight())
+                .description(postProduct.description)
+                .category(postProduct.getCategory().getName())
                 .build();
     }
 

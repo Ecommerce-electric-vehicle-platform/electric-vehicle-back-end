@@ -32,5 +32,12 @@ public class PostProductResponse {
     private String categoryName;
     private BigDecimal price;
     private String locationTrading;
+    private String width;
+    private String height;
+    private String length;
+    private String weight;
+    private String description;
     private List<ProductImageResponse> images;
+    private String category;
+    // width height length weight description
 }

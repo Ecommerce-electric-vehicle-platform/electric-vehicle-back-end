@@ -327,7 +327,7 @@ public class PostProductServiceImpl implements PostProductService {
 
             productImageRepository.deleteAllInBatch(productImages);
 
-            if (files != null && files.size() > 0) {
+            if (files != null && !files.isEmpty()) {
                 log.info(">>> files data: {}", files);
 //                files.forEach((file) -> {
 //                    fileUtils.validateFile(file);
