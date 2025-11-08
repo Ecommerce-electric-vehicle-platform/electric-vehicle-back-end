@@ -234,63 +234,6 @@ public class PostProductController {
     }
 
     @Operation(
-            summary = "Update an existing post product",
-            description = """
-                    Allows a seller to update details of an existing product post.
-                    Only users with the role **ROLE_SELLER** can perform this operation.
-                    The post cannot be modified if the product has already been sold.
-                    """,
-            security = {@SecurityRequirement(name = "bearerAuth")},
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Post product updated successfully",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = RestResponse.class)
-                            )
-                    )
-            }
-    )
-    @PreAuthorize("hasRole('ROLE_SELLER')")
-    @PutMapping(
-            value = "/{postId}",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
-    public ResponseEntity<RestResponse<PostProductResponse, Object>> updatePostProduct(
-            @PathVariable Long postId,
-            @Valid @ModelAttribute UpdatePostProductRequest request,
-            @RequestPart("pictures") List<MultipartFile> files
-    ) throws Exception {
-        try {
-            PostProduct foundPostProduct = postProductService.findPostProductById(postId);
-            if (foundPostProduct == null) {
-                throw new PostProductNotFound();
-            }
-
-            if (foundPostProduct.isSold()) {
-                throw new Exception("Sold product's post cannot be changed the content");
-            }
-
-            PostProduct updatedPostProduct = postProductService.updatePostProduct(foundPostProduct, request, files);
-
-            PostProductResponse responseData = postProductMapper.toDto(updatedPostProduct);
-
-            RestResponse<PostProductResponse, Object> response = responseMapper.toDto(
-                    true,
-                    "UPDATED POST PRODUCT SUCCESSFULLY",
-                    responseData,
-                    null
-            );
-
-            return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-        } catch (Exception e) {
-            log.info(">>> [PostProductController] error at updatePostProduct: {}", e.getMessage());
-            throw e;
-        }
-    }
-
-    @Operation(
             summary = "Search post products by type and value",
             description = """
         Search products based on a specific type and value.
