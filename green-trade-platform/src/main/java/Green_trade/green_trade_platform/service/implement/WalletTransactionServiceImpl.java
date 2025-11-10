@@ -95,4 +95,23 @@ public class WalletTransactionServiceImpl {
             throw new RuntimeException(e);
         }
     }
+
+    public WalletTransaction handleWithDrawMoney(Wallet wallet, double money) {
+        log.info(">>> [Wallet Transaction Service] Handling withdraw money: Started.");
+        try {
+            WalletTransaction walletTransaction = WalletTransaction.builder()
+                    .wallet(wallet)
+                    .type(TransactionType.WITHDRAW)
+                    .amount(BigDecimal.valueOf(money).negate())
+                    .balanceBefore(wallet.getBalance())
+                    .status(TransactionStatus.SUCCESS)
+                    .externalTransactionReference("None")
+                    .description("Withdraw money from wallet")
+                    .build();
+            return walletTransactionRepository.save(walletTransaction);
+        } catch (Exception e) {
+            log.info(">>> [Wallet Transaction Service] Error occur when handle withdraw money: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -28,7 +28,7 @@ public class SystemWalletServiceImpl {
 
     public SystemWallet getSystemWalletByOrder(Order order) {
         return systemWalletRepossitory.findByOrder(order).orElseThrow(
-                () -> new IllegalArgumentException("This order does not have any escrow service (system wallet).")
+                () -> new IllegalArgumentException("COD order cannot apply refund money from system wallet.")
         );
     }
 
