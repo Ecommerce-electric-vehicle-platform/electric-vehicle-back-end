@@ -26,12 +26,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -230,57 +234,42 @@ public class PostProductController {
     }
 
     @Operation(
-            summary = "Update an existing post product",
+            summary = "Search post products by type and value",
             description = """
-                    Allows a seller to update details of an existing product post.
-                    Only users with the role **ROLE_SELLER** can perform this operation.
-                    The post cannot be modified if the product has already been sold.
-                    """,
-            security = {@SecurityRequirement(name = "bearerAuth")},
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Post product updated successfully",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = RestResponse.class)
-                            )
-                    )
-            }
+        Search products based on a specific type and value.
+        Supported search types: 
+        - title
+        - brand
+        - model
+        - conditionLevel
+        - locationTrading
+
+        Example:
+        GET /api/posts/search?type=brand&value=Yamaha
+        """
     )
-    @PreAuthorize("hasRole('ROLE_SELLER')")
-    @PutMapping("/{postId}")
-    public ResponseEntity<RestResponse<PostProductResponse, Object>> updatePostProduct(
-            @PathVariable Long postId,
-            @Valid @ModelAttribute UpdatePostProductRequest request,
-            @RequestPart("pictures") List<MultipartFile> files
-    ) throws Exception {
+    @GetMapping("/search")
+    public ResponseEntity<?> searchProduct(
+            @RequestParam(name = "type", defaultValue = "brand") String type,
+            @RequestParam(name = "value", defaultValue = "Pega") String value,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
         try {
-            PostProduct foundPostProduct = postProductService.findPostProductById(postId);
-            if (foundPostProduct == null) {
-                throw new PostProductNotFound();
-            }
+            Page<PostProduct> products = postProductService.searchProduct(type, value, page, size);
+            Page<PostProductResponse> response = products.map(postProductMapper::toDto);
 
-            if (foundPostProduct.isSold()) {
-                throw new Exception("Sold product's post cannot be changed the content");
-            }
-
-            PostProduct updatedPostProduct = postProductService.updatePostProduct(foundPostProduct, request, files);
-
-            PostProductResponse responseData = postProductMapper.toDto(updatedPostProduct);
-
-            RestResponse<PostProductResponse, Object> response = responseMapper.toDto(
+            return ResponseEntity.ok(responseMapper.toDto(
                     true,
-                    "UPDATED POST PRODUCT SUCCESSFULLY",
-                    responseData,
-                    null
-            );
-
-            return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+                    "SEARCH PRODUCT SUCCESSFULLY.",
+                    response, null
+            ));
         } catch (Exception e) {
-            log.info(">>> [PostProductController] error at updatePostProduct: {}", e.getMessage());
-            throw e;
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "SEARCH PRODUCT FAILED.",
+                    null, e.getMessage()
+            ));
         }
     }
-
 }

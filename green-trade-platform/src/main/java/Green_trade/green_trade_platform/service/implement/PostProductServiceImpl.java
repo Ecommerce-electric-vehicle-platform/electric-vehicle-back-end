@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -326,7 +327,7 @@ public class PostProductServiceImpl implements PostProductService {
 
             productImageRepository.deleteAllInBatch(productImages);
 
-            if (files != null && files.size() > 0) {
+            if (files != null && !files.isEmpty()) {
                 log.info(">>> files data: {}", files);
 //                files.forEach((file) -> {
 //                    fileUtils.validateFile(file);
@@ -360,5 +361,22 @@ public class PostProductServiceImpl implements PostProductService {
                 () -> new EntityNotFoundException("Can not find post product with id: " + id)
         );
         return postProduct.getSeller();
+    }
+
+    public Page<PostProduct> searchProduct(String type, String value, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        return switch (type.toLowerCase()) {
+            case "title" -> postProductRepository.findByTitleContainingIgnoreCase(value, pageable);
+            case "brand" -> postProductRepository.findByBrandContainingIgnoreCase(value, pageable);
+            case "model" -> postProductRepository.findByModelContainingIgnoreCase(value, pageable);
+            case "conditionlevel" -> postProductRepository.findByConditionLevelContainingIgnoreCase(value, pageable);
+            case "locationtrading" -> postProductRepository.findByLocationTradingContainingIgnoreCase(value, pageable);
+            default -> throw new IllegalArgumentException("Invalid search type: " + type);
+        };
+    }
+
+    public long getTotalNewPostInMonth(LocalDateTime startDate, LocalDateTime endDate) {
+        return postProductRepository.countNewPostsInMonth(startDate, endDate);
     }
 }

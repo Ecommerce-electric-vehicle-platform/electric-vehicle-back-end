@@ -25,4 +25,7 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
 
     @Query("SELECT s FROM Seller s WHERE s.buyer = :buyer")
     Optional<Seller> findByBuyer(Buyer buyer);
+
+    @Query("SELECT COUNT(s) FROM Seller s")
+    int getTotalSellers();
 }

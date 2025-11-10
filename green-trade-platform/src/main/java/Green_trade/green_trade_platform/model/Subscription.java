@@ -43,6 +43,9 @@ public class Subscription {
     @Column(name = "remain_post", nullable = false)
     private long remainPost;
 
+    @Column(name = "price_at_purchase", nullable = false)
+    private double priceAtPurchase;
+
     @PrePersist
     public void onCreate() {
         this.isActive = true;
