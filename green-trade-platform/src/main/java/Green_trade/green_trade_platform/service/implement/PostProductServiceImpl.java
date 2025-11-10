@@ -271,9 +271,12 @@ public class PostProductServiceImpl implements PostProductService {
     }
 
     public PostProduct hidePostProduct(Long id, boolean isHide) {
+        log.info(">>> [hide post product]: Started.");
         PostProduct selected = postProductRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("Post product id does not existed.")
         );
+
+        log.info(">>> [hide post product] Post id: {}", selected.getId());
 
         selected.setActive(!isHide);
         return postProductRepository.save(selected);
