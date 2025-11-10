@@ -41,16 +41,11 @@ public class SystemWallet {
     @Enumerated(EnumType.STRING)
     private SystemWalletStatus status;
 
-    @Column(name = "created_at", nullable = false, unique = false)
+    @Column(name = "created_at", nullable = true, unique = false)
     private LocalDateTime createdAt;
 
     @Column(name = "end_at")
     private LocalDateTime endAt;
-
-    @PrePersist
-    public void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
 
     @ManyToOne()
     @JoinColumn(name = "admin_id")

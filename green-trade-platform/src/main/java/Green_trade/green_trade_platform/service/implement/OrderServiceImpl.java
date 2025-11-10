@@ -126,7 +126,7 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] created transaction successfully");
                 orderFound = updateOrderStatus(orderFound, OrderStatus.CANCELED);
                 log.info(">>> [OrderServiceImpl] update order status to canceled successfully");
-//                walletService.handleBuyerRefundForCancelledOrder(orderFound.getSystemWallet(), 100, orderFound.getBuyer().getWallet());
+                walletService.handleBuyerRefundForCancelledOrder(orderFound.getSystemWallet(), 100, orderFound.getBuyer().getWallet());
                 log.info(">>> [OrderServiceImpl] refund successfully");
                 orderFound.getPostProduct().setSold(false);
                 log.info(">>> [OrderServiceImpl] update order sold successfully");

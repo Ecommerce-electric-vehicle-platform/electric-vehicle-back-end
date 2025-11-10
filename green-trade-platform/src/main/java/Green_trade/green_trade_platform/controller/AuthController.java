@@ -144,7 +144,7 @@ public class AuthController {
             ));
         } catch (Exception e) {
             log.info(">>> [Auth Controller] Error occured in sign in controller");
-            return ResponseEntity.ok(responseMapper.toDto(
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(responseMapper.toDto(
                     false,
                     "SIGN IN FAILED",
                     null, e.getMessage()

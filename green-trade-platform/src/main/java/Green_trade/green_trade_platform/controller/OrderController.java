@@ -143,8 +143,8 @@ public class OrderController {
         log.info(">>> [OrderController] came cancelOrder");
         Order canceledOrder = orderService.cancelOrder(id, request);
         log.info(">>> [OrderController] cancelOrder pass");
-//        systemWalletService.updateEscrowRecordStatus(canceledOrder.getSystemWallet(), SystemWalletStatus.REFUNDED);
-//        log.info(">>> [OrderController] update system wallet status successfully");
+        systemWalletService.updateEscrowRecordStatus(canceledOrder.getSystemWallet(), SystemWalletStatus.REFUNDED);
+        log.info(">>> [OrderController] update system wallet status successfully");
         ghnService.createCancelOrderShippingServiceResponseToDto(canceledOrder.getOrderCode(), canceledOrder.getPostProduct().getSeller().getGhnShopId());
         log.info(">>> [OrderController] cancel order ghn successfully");
         OrderResponse responseData = orderMapper.toDto(canceledOrder);

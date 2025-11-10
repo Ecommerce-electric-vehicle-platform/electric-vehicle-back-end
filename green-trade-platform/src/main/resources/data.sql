@@ -97,6 +97,7 @@ ALTER TABLE evidence AUTO_INCREMENT = 1;
 ALTER TABLE notification AUTO_INCREMENT = 1;
 ALTER TABLE system_wallet AUTO_INCREMENT = 1;
 ALTER TABLE wallet_transaction AUTO_INCREMENT = 1;
+ALTER TABLE cancel_order_reason AUTO_INCREMENT = 1;
 
 
 CREATE
@@ -245,12 +246,12 @@ VALUES ('ae8ed05a-6eef-4f3c-ae27-63b6c8c04314',
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1761368550/buyers/1:doanvien/avatar/ed4086f1-9cf3-48ae-8cac-3f493f07f9e7.jpg',
         NOW(), '1 Nguyễn Thị Minh Khai', NULL, 'Quận 1', '2005-11-19', 'vientruongdoan@gmail.com', 'Truong Doan Vien',
         'MALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', '0792043114', 'Hồ Chí Minh',
-        NULL, 'doanvien', 'Phường 7'),
+        NULL, 'doanvien', 'Phường Bến Thành'),
        ('fee6981f-33a2-4208-978c-b5c8ffaad9ba',
         'https://res.cloudinary.com/dzhxwm90k/image/upload/v1762071147/buyers/2:kimthuydoan/avatar/fee6981f-33a2-4208-978c-b5c8ffaad9ba.jpg',
-        NOW(), '123', NULL, 'Thành phố Dĩ An', '2004-11-19', 'kimthuydoan22082005@gmail.com', 'Đoàn Thị Kim Thúy',
-        'FEMALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', '0780453118', 'Bình Dương',
-        NULL, 'kimthuydoan', 'Phường Bình An'),
+        NOW(), '24 Lý Chính Thắng', NULL, 'Hồ Chí Minh', '2004-11-19', 'kimthuydoan22082005@gmail.com', 'Đoàn Thị Kim Thúy',
+        'FEMALE', 1, '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', '0780453118', 'Hồ Chí Minh',
+        NULL, 'kimthuydoan', 'Phường Võ Thị Sáu'),
        (NULL, NULL, NOW(), NULL, NULL, NULL, NULL, 'hanhtransdr@gmail.com', NULL, 'FEMALE', 1,
         '{bcrypt}$2a$10$0lvhh4z1X9DR5/6bJUacEux35ayoj1xsVeGIE3IED.e6Gs0.VPSi2', NULL, NULL, NULL, 'tranthihanh', NULL);
 

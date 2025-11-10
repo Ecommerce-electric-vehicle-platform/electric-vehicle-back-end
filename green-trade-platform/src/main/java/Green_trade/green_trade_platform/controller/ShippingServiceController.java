@@ -252,23 +252,31 @@ public class ShippingServiceController {
         Map<String, Object> responseData = ghnService.getLastestOrderStatus(foundOrder.getOrderCode());
         String status = responseData.get("status").toString();
         if (status.equalsIgnoreCase("picked")) {
-            orderService.updateOrderStatus(foundOrder, OrderStatus.PICKED);
+            if (!foundOrder.getStatus().equals(OrderStatus.PICKED)) {
+                orderService.updateOrderStatus(foundOrder, OrderStatus.PICKED);
+            }
         } else if (status.equalsIgnoreCase("delivering")) {
-            orderService.updateOrderStatus(foundOrder, OrderStatus.DELIVERING);
+            if (!foundOrder.getStatus().equals(OrderStatus.DELIVERING)) {
+                orderService.updateOrderStatus(foundOrder, OrderStatus.DELIVERING);
+            }
         } else if (status.equalsIgnoreCase("delivered")) {
-            orderService.updateOrderStatus(foundOrder, OrderStatus.DELIVERED);
-            orderService.updateOrderStatus(foundOrder, OrderStatus.COMPLETED);
-            if ("COD".equalsIgnoreCase(foundOrder.getTransactions().getLast().getPayment().getGatewayName())) {
-                Transaction transaction = transactionService.createTransaction(foundOrder, TransactionStatus.SUCCESS, foundOrder.getTransactions().getLast().getPayment());
-                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(foundOrder, foundOrder.getShippingFee());
-                log.info(">>> pass create system wallet");
-                foundOrder = orderService.updateSystemWallet(systemWallet, foundOrder);
-                log.info(">>> pass update system wallet for order");
-            } else {
-                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(foundOrder, foundOrder.getShippingFee());
-                log.info(">>> pass create system wallet");
-                foundOrder = orderService.updateSystemWallet(systemWallet, foundOrder);
-                log.info(">>> pass update system wallet for order");
+            if (!foundOrder.getStatus().equals(OrderStatus.COMPLETED)) {
+                orderService.updateOrderStatus(foundOrder, OrderStatus.DELIVERED);
+                orderService.updateOrderStatus(foundOrder, OrderStatus.COMPLETED);
+                if ("COD".equalsIgnoreCase(foundOrder.getTransactions().getLast().getPayment().getGatewayName())) {
+                    Transaction transaction = transactionService.createTransaction(foundOrder, TransactionStatus.SUCCESS, foundOrder.getTransactions().getLast().getPayment());
+//                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(foundOrder, foundOrder.getShippingFee());
+//                log.info(">>> pass create system wallet");
+//                foundOrder = orderService.updateSystemWallet(systemWallet, foundOrder);
+                    systemWalletService.updateTimeWhenBuyerReceivedProduct(foundOrder.getSystemWallet());
+                    log.info(">>> pass update system wallet for order");
+                } else {
+//                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(foundOrder, foundOrder.getShippingFee());
+//                log.info(">>> pass create system wallet");
+//                foundOrder = orderService.updateSystemWallet(systemWallet, foundOrder);
+                    systemWalletService.updateTimeWhenBuyerReceivedProduct(foundOrder.getSystemWallet());
+                    log.info(">>> pass update system wallet for order");
+                }
             }
         }
 
