@@ -154,51 +154,6 @@ public class PostProductController {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
-
-    @Operation(
-            summary = "Hide or unhide a post product by ID",
-            description = """
-                        Hides (deactivates) a specific post product from the platform by setting its `active` status to `false`.  
-                        The product remains stored in the database but will no longer be visible to buyers or appear in public listings.
-                    
-                        **Workflow:**
-                        1. The client sends a request with the `postId` of the product to hide.
-                        2. The system verifies ownership or admin privileges.
-                        3. The product’s `active` flag is updated to `false`.
-                        4. A confirmation response is returned with the updated product details.
-                    
-                        **Use cases:**
-                        - **Seller:** Temporarily hides a product that is out of stock or under maintenance.
-                        - **Admin:** Moderates or disables posts violating policies.
-                        - **Buyer (optional):** Typically not allowed; only for viewing hidden-state results if permitted.
-                    
-                        **Security Notes:**
-                        - Requires authentication via JWT.
-                        - Accessible to roles: `ROLE_SELLER`, `ROLE_ADMIN`.
-                        - The request is **idempotent** — hiding an already hidden product returns the same result.
-                    """
-    )
-    @PreAuthorize("hasRole('ROLE_SELLER')")
-    @PostMapping("/hide/{postId}")
-    public ResponseEntity<?> hidePostProduct(@PathVariable(name = "postId") Long id,
-                                             @RequestParam(name = "is_hide") boolean isHide) {
-        String hide = isHide ? "HIDE" : "FALSE";
-        try {
-            PostProduct temp = postProductService.hidePostProduct(id, isHide);
-            return ResponseEntity.ok(responseMapper.toDto(
-                    true,
-                    hide + " PRODUCT SUCCESSFULLY.",
-                    postProductMapper.toDto(temp), null
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.ok(responseMapper.toDto(
-                    false,
-                    hide + " PRODUCT SUCCESSFULLY.",
-                    null, e.getMessage()
-            ));
-        }
-    }
-
     @Operation(
             summary = "Get post product information based on a wish-list ID",
             description = """
