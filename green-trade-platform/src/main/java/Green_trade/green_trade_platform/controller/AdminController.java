@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.controller;
 
+import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
 import Green_trade.green_trade_platform.mapper.AdminMapper;
 import Green_trade.green_trade_platform.mapper.PostProductListMapper;
 import Green_trade.green_trade_platform.mapper.PostProductMapper;
@@ -467,5 +468,57 @@ public class AdminController {
                 "GET TOTAL NEW POST SUCCESSFULLY.",
                 totalPost, null
         ));
+    }
+
+    @Operation(
+            summary = "Get all pending post products for verification",
+            description = """
+                     This endpoint allows administrators to retrieve a paginated list of post products.
+                     that are pending verification. Accessible only by users with the ADMIN role.
+                     """)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/pending-post")
+    public ResponseEntity<?> getPendingVerifyPostProduct(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            Page<PostProduct> pendingPost = postProductService.getPendingVerifyPost(page, size);
+
+            Page<PostProductResponse> response = pendingPost.map(postProductMapper::toDto);
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ALL PENDING VERIFY POST PRODUCT SUCCESSFULLY.",
+                    response, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ALL PENDING VERIFY POST PRODUCT FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation()
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/approve-post/{postId}/{decision}")
+    public ResponseEntity<?> handlePendingPost(@PathVariable(name = "postId") long id,
+                                               @PathVariable(name = "decision")VerifiedDecisionStatus decision) throws Exception {
+        try {
+            PostProduct postProduct = postProductServiceImpl.handlePendingPostProduct(id, decision);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "APPROVE POST SUCCESSFULLY.",
+                    postProductMapper.toDto(postProduct), null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "APPROVE POST FAILED.",
+                    null, e.getMessage()
+            ));
+        }
     }
 }

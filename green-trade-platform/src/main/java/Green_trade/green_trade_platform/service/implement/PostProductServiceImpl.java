@@ -379,4 +379,21 @@ public class PostProductServiceImpl implements PostProductService {
     public long getTotalNewPostInMonth(LocalDateTime startDate, LocalDateTime endDate) {
         return postProductRepository.countNewPostsInMonth(startDate, endDate);
     }
+
+    public Page<PostProduct> getPendingVerifyPost(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        return postProductRepository.findAllByVerifiedDecisionstatus(VerifiedDecisionStatus.PENDING, pageable);
+    }
+
+    public PostProduct handlePendingPostProduct(long id, VerifiedDecisionStatus decision) throws Exception {
+        PostProduct postProduct = getPostProductById(id);
+
+        if(decision == VerifiedDecisionStatus.APPROVED) {
+            postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.APPROVED);
+        } else {
+            postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.REJECTED);
+        }
+
+        return postProductRepository.save(postProduct);
+    }
 }
