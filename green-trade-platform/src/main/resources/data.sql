@@ -97,6 +97,7 @@ ALTER TABLE evidence AUTO_INCREMENT = 1;
 ALTER TABLE notification AUTO_INCREMENT = 1;
 ALTER TABLE system_wallet AUTO_INCREMENT = 1;
 ALTER TABLE wallet_transaction AUTO_INCREMENT = 1;
+ALTER TABLE cancel_order_reason AUTO_INCREMENT = 1;
 
 
 CREATE

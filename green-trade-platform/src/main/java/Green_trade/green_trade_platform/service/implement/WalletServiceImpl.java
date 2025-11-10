@@ -116,9 +116,10 @@ public class WalletServiceImpl {
 
     public Wallet handleBuyerRefundForCancelledOrder(SystemWallet systemWallet, double refundPercent, Wallet wallet) {
         BigDecimal systemBalance = systemWallet.getBalance();
+        BigDecimal shippingFee = systemWallet.getOrder().getShippingFee();
         BigDecimal money = systemBalance
                 .multiply(BigDecimal.valueOf(refundPercent))
-                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP).add(shippingFee);
         WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, true, "REFUNDED FROM CANCELED ORDER");
         log.info(">>> [Wallet Service] Balance before refunding money for buyer: {}", wallet.getBalance());
         wallet.setBalance(wallet.getBalance().add(money));

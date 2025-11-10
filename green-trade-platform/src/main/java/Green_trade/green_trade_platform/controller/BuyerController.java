@@ -309,6 +309,8 @@ public class BuyerController {
             newOrder = buyerService.placeOrder(request, shippingFee);
 
             if ("COD".equalsIgnoreCase(payment.getGatewayName())) {
+                //quy trình transaction
+                //tạo transaction
                 log.info(">>> COD payment flow");
                 Transaction transaction = transactionService.checkoutCODPayment(
                         request.getUsername(),
@@ -316,31 +318,39 @@ public class BuyerController {
                         request.getPaymentId(),
                         newOrder
                 );
+                //lấy danh sách các transaction liên quan đến đơn hàng
                 List<Transaction> transactions = transactionService.getTransactionsOfOrder(newOrder);
                 log.info(">>> Passed get transactions");
 
+                //lưu danh sách các transaction liên quan đến đơn hàng vào đơn hàng
                 newOrder = orderService.updateOrderTransactions(newOrder, transactions);
                 log.info(">>> Passed update transactions");
+                //Kết thúc transaction
 
+                //gọi api của ghn để tạo đơn hàng vận chuyển
                 Map<String, String> createOrderShippingResponse = ghnService.createOrderShippingResponseToDto(
                         newOrder, transactionRepository.findAllByOrder(newOrder).getLast().getPayment()
                 );
 
+                //lấy mã vận đơn gán vào order
                 String orderShippingCode = createOrderShippingResponse.get("orderCode");
                 log.info(">>> Passed get orderShippingCode: {}", orderShippingCode);
+                //cập nhật mã vận đơn vào order
                 newOrder = orderService.updateOrderCode(orderShippingCode, newOrder);
 
+                //lấy tổng phí dịch vụ để cập nhật Shipping Fee
                 String totalServiceFee = createOrderShippingResponse.get("totalFee");
                 log.info(">>> Passed get totalServiceFee: {}", totalServiceFee);
+                //cập nhật tổng phí dịch vụ vào đơn hàng
                 orderService.updateShippingFee(newOrder, totalServiceFee);
-
-
                 log.info(">>> Passed set Order Code");
 
+                //cập nhật tổng tiền của transaction
                 transactionService.updateAmount(transactions.getLast(), newOrder.getPrice().add(newOrder.getShippingFee()));
 
-//                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(newOrder, totalServiceFee);
-//                newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
+                //tạo escrow cho đơn hàng
+                SystemWallet systemWallet = systemWalletService.createEscrowRecordForCOD(newOrder, totalServiceFee);
+                newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
             } else {
                 log.info(">>> Wallet payment flow");
                 //tạo đơn hàng giả để lấy phí dịch vụ thật
@@ -399,15 +409,16 @@ public class BuyerController {
                 //cập nhật lại tiền của transaction mới nhất
                 transactionService.updateAmount(transactions.getLast(), newOrder.getPrice().add(newOrder.getShippingFee()));
 
-//                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeWalletPayment(newOrder, totalServiceFee);
-//                newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
+                SystemWallet systemWallet = systemWalletService.createEscrowRecordForWalletPayment(newOrder, totalServiceFee);
+                newOrder = orderService.updateSystemWallet(systemWallet, newOrder);
             }
             //tạo hoá đơn
-            Invoice newInvoice = invoiceService.createInvoiceInstance(newOrder, "", 0);
+            Invoice newInvoice = invoiceService.createInvoiceInstance(newOrder, "Không có ghi chú", 0);
 
             //tạo mã hoá đơn
             invoiceService.generateInvoice(newInvoice.getId());
 
+            //cập nhật trạng thái bài đăng bán sản phẩm
             postProductService.updateSoldStatus(true, postProduct);
 
             //tạo response
