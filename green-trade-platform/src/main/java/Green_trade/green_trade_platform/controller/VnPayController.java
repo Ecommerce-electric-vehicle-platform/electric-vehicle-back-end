@@ -2,12 +2,15 @@ package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.mapper.WalletMapper;
+import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Wallet;
+import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
 import Green_trade.green_trade_platform.service.implement.VnPayServiceImpl;
 import Green_trade.green_trade_platform.service.implement.WalletServiceImpl;
 import com.google.gson.JsonObject;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -31,15 +34,18 @@ public class VnPayController {
     private final ResponseMapper responseMapper;
     private final WalletServiceImpl walletServiceImpl;
     private final WalletMapper walletMapper;
+    private final BuyerServiceImpl buyerService;
 
     public VnPayController(VnPayServiceImpl vnPayService,
                            ResponseMapper responseMapper,
                            WalletServiceImpl walletServiceImpl,
-                           WalletMapper walletMapper) {
+                           WalletMapper walletMapper,
+                           BuyerServiceImpl buyerService) {
         this.vnPayService = vnPayService;
         this.responseMapper = responseMapper;
-        this.walletServiceImpl = walletServiceImpl;
         this.walletMapper = walletMapper;
+        this.walletServiceImpl = walletServiceImpl;
+        this.buyerService = buyerService;
     }
 
     @Operation(
@@ -192,6 +198,28 @@ public class VnPayController {
         return ResponseEntity.ok(responseMapper.toDto(
                 false, "Nạp tiền không thành công.",
                 result.get("response_code"), null));
+    }
+
+    @Operation()
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
+    @GetMapping("/with-draw")
+    public ResponseEntity<?> withDrawMoney(
+            @RequestParam(name = "money") double money) {
+        try {
+            Buyer buyer = buyerService.getCurrentUser();
+            Wallet wallet = walletServiceImpl.withDrawMoney(buyer, money);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "WITHDRAW MONEY SUCCESSFULLY.",
+                    walletMapper.toDto(wallet), null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "WITHDRAW MONEY FAILED.",
+                    null, e.getMessage()
+            ));
+        }
     }
 
 }

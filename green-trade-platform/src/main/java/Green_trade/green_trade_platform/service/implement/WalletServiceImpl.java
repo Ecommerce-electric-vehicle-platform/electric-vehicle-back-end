@@ -141,4 +141,11 @@ public class WalletServiceImpl {
         return walletTransactionRepository.findByWallet(wallet, pageable);
     }
 
+    public Wallet withDrawMoney(Buyer buyer, double money) {
+        Wallet wallet = buyer.getWallet();
+
+        WalletTransaction walletTransaction = walletTransactionService.handleWithDrawMoney(wallet, money);
+        wallet.setBalance(wallet.getBalance().subtract(BigDecimal.valueOf(money)));
+        return walletRepository.save(wallet);
+    }
 }
