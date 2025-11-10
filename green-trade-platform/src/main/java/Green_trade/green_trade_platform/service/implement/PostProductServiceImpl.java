@@ -388,7 +388,7 @@ public class PostProductServiceImpl implements PostProductService {
     public PostProduct handlePendingPostProduct(long id, VerifiedDecisionStatus decision) throws Exception {
         PostProduct postProduct = getPostProductById(id);
 
-        if(decision == VerifiedDecisionStatus.APPROVED) {
+        if (decision == VerifiedDecisionStatus.APPROVED) {
             postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.APPROVED);
         } else {
             postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.REJECTED);

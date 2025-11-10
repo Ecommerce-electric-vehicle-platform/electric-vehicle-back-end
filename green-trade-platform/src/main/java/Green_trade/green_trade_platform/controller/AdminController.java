@@ -448,13 +448,13 @@ public class AdminController {
     @Operation(
             summary = "Get total new post products within a date range",
             description = """
-        This endpoint allows **administrators** to retrieve the total number of new post products 
-        created within a specific date range.  
-        
-        - Both `start_date` and `end_date` must be provided in ISO format (`yyyy-MM-dd`).  
-        - The result counts posts whose `createdAt` values fall within the given range.  
-        - Only users with role **ROLE_ADMIN** are authorized to access this endpoint.
-        """
+                    This endpoint allows **administrators** to retrieve the total number of new post products 
+                    created within a specific date range.  
+                    
+                    - Both `start_date` and `end_date` must be provided in ISO format (`yyyy-MM-dd`).  
+                    - The result counts posts whose `createdAt` values fall within the given range.  
+                    - Only users with role **ROLE_ADMIN** are authorized to access this endpoint.
+                    """
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/total-new-post")
@@ -473,9 +473,9 @@ public class AdminController {
     @Operation(
             summary = "Get all pending post products for verification",
             description = """
-                     This endpoint allows administrators to retrieve a paginated list of post products.
-                     that are pending verification. Accessible only by users with the ADMIN role.
-                     """)
+                    This endpoint allows administrators to retrieve a paginated list of post products.
+                    that are pending verification. Accessible only by users with the ADMIN role.
+                    """)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/pending-post")
     public ResponseEntity<?> getPendingVerifyPostProduct(
@@ -505,7 +505,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/approve-post/{postId}/{decision}")
     public ResponseEntity<?> handlePendingPost(@PathVariable(name = "postId") long id,
-                                               @PathVariable(name = "decision")VerifiedDecisionStatus decision) throws Exception {
+                                               @PathVariable(name = "decision") VerifiedDecisionStatus decision) throws Exception {
         try {
             PostProduct postProduct = postProductServiceImpl.handlePendingPostProduct(id, decision);
             return ResponseEntity.ok(responseMapper.toDto(

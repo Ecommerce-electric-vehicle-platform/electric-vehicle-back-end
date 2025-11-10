@@ -268,15 +268,15 @@ public class OrderController {
     @Operation(
             summary = "Get detailed order information by ID",
             description = """
-        This endpoint retrieves detailed information about a specific order using its ID.
-        The response includes details about:
-        - The order itself
-        - The product associated with the order
-        - The buyer who placed the order
-        - The payment information
-        - The shipping partner handling the order
-        If the order ID does not exist, an `OrderNotFound` exception will be thrown.
-        """
+                    This endpoint retrieves detailed information about a specific order using its ID.
+                    The response includes details about:
+                    - The order itself
+                    - The product associated with the order
+                    - The buyer who placed the order
+                    - The payment information
+                    - The shipping partner handling the order
+                    If the order ID does not exist, an `OrderNotFound` exception will be thrown.
+                    """
     )
     @GetMapping("/{orderId}")
     public ResponseEntity<RestResponse<Map<String, Object>, Object>> getOrderDetailByOrderId(@PathVariable Long orderId) {
