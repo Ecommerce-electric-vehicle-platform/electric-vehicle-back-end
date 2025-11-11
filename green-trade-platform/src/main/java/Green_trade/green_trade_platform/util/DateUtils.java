@@ -45,6 +45,16 @@ public final class DateUtils {
     }
 
     /**
+     * Lấy thời gian hiện tại theo giờ Việt Nam (Asia/Ho_Chi_Minh)
+     * 
+     * @return LocalDateTime hiện tại theo giờ Việt Nam
+     */
+    public static LocalDateTime getCurrentVietnamTime() {
+        ZoneId vietnamZone = ZoneId.of("Asia/Ho_Chi_Minh");
+        return LocalDateTime.now(vietnamZone);
+    }
+
+    /**
      * Chuyển đổi LocalDateTime từ UTC sang giờ địa phương Việt Nam (UTC+7)
      * 
      * @param dateTime LocalDateTime cần chuyển đổi (giả định đang ở UTC)

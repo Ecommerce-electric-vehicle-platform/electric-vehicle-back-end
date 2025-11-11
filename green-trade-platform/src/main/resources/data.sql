@@ -1,8 +1,10 @@
 -- =========================================================
 -- 🚀 RESET DATABASE DỮ LIỆU DEMO
 -- =========================================================
-SET
-GLOBAL time_zone = 'Asia/Ho_Chi_Minh';
+-- Timezone đã được cấu hình trong docker-compose.yml và init.sql
+-- Đảm bảo timezone là Asia/Ho_Chi_Minh (UTC+7)
+SET GLOBAL time_zone = '+07:00';
+SET time_zone = '+07:00';
 SET
 FOREIGN_KEY_CHECKS = 0;
 SET
@@ -67,6 +69,7 @@ DELETE
 FROM invoice;
 DELETE FROM conversation;
 DELETE FROM message;
+DELETE FROM system_config;
 DROP
 EVENT IF EXISTS auto_resolve_escrow;
 
@@ -98,8 +101,9 @@ ALTER TABLE notification AUTO_INCREMENT = 1;
 ALTER TABLE system_wallet AUTO_INCREMENT = 1;
 ALTER TABLE wallet_transaction AUTO_INCREMENT = 1;
 ALTER TABLE cancel_order_reason AUTO_INCREMENT = 1;
-
-
+ALTER TABLE system_config AUTO_INCREMENT = 1;
+ 
+ 
 CREATE
 EVENT IF NOT EXISTS auto_resolve_escrow
 ON SCHEDULE EVERY 1 DAY
@@ -218,6 +222,18 @@ VALUES ('https://cdn.example.com/avatar/admin1.png',
         'MALE',
         NOW(),
         NOW());
+
+-- =========================================================
+-- ⚙️ SYSTEM_CONFIG
+-- =========================================================
+-- Cấu hình thời gian chuyển tiền escrow (tính bằng giây)
+-- Mặc định: 1209600 giây = 14 ngày = 2 tuần
+-- Admin có thể cập nhật giá trị này qua API: PUT /api/v1/admin/system-config/ESCROW_TRANSFER_SECONDS
+INSERT INTO system_config (config_key, config_value, description, created_at, updated_at, admin_id)
+VALUES ('ESCROW_TRANSFER_SECONDS', '1209600', 
+        'Số giây sau khi tạo escrow record thì hệ thống sẽ tự động chuyển tiền từ system wallet về ví người bán. Admin có thể cấu hình giá trị này qua API. Mặc định: 1209600 giây = 14 ngày = 2 tuần.',
+        NOW(), NOW(), 1)
+ON DUPLICATE KEY UPDATE config_key = config_key;
 
 -- =========================================================
 -- 👤 BUYER
