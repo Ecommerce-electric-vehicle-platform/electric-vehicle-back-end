@@ -9,6 +9,7 @@ import Green_trade.green_trade_platform.request.RefundResolveRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import Green_trade.green_trade_platform.util.DateUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,7 +23,7 @@ public class SystemWalletServiceImpl {
 
     public void handleRefund(SystemWallet systemWallet) {
         systemWallet.setStatus(SystemWalletStatus.IS_SOLVED);
-        systemWallet.setEndAt(LocalDateTime.now());
+        systemWallet.setEndAt(DateUtils.convertToVietnamTime(LocalDateTime.now()));
         systemWalletRepossitory.save(systemWallet);
     }
 
@@ -43,7 +44,7 @@ public class SystemWalletServiceImpl {
                     .concurrency("VND")
                     .balance(order.getPrice())
                     .status(SystemWalletStatus.ESCROW_HOLD)
-                    .endAt(LocalDateTime.now().plusWeeks(2))
+                    .endAt(DateUtils.convertToVietnamTime(LocalDateTime.now()).plusWeeks(2))
                     .build();
             log.info(">>> [SystemWalletServiceImpl] create new escrowRecord");
             return systemWalletRepossitory.save(escrowRecord);
@@ -72,7 +73,7 @@ public class SystemWalletServiceImpl {
                     .concurrency("VND")
                     .balance(actualReceivedMoney)
                     .status(SystemWalletStatus.ESCROW_HOLD)
-                    .endAt(LocalDateTime.now().plusWeeks(2))
+                    .endAt(DateUtils.convertToVietnamTime(LocalDateTime.now()).plusWeeks(2))
                     .build();
             log.info(">>> [SystemWalletServiceImpl] create new escrowRecord");
             return systemWalletRepossitory.save(escrowRecord);
@@ -131,7 +132,7 @@ public class SystemWalletServiceImpl {
                     .concurrency("VND")
                     .balance(actualReceivedMoney)
                     .status(SystemWalletStatus.ESCROW_HOLD)
-                    .endAt(LocalDateTime.now().plusWeeks(2))
+                    .endAt(DateUtils.convertToVietnamTime(LocalDateTime.now()).plusWeeks(2))
                     .build();
             log.info(">>> [SystemWalletServiceImpl] create new escrowRecord");
             return systemWalletRepossitory.save(escrowRecord);
@@ -209,8 +210,8 @@ public class SystemWalletServiceImpl {
     }
 
     public SystemWallet updateTimeWhenBuyerReceivedProduct(SystemWallet systemWallet) {
-        systemWallet.setCreatedAt(LocalDateTime.now());
-        systemWallet.setEndAt(LocalDateTime.now().plusWeeks(2));
+        systemWallet.setCreatedAt(DateUtils.convertToVietnamTime(LocalDateTime.now()));
+        systemWallet.setEndAt(DateUtils.convertToVietnamTime(LocalDateTime.now()).plusWeeks(2));
         return systemWalletRepossitory.save(systemWallet);
     }
 }

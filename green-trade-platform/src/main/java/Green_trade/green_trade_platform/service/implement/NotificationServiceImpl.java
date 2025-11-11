@@ -8,6 +8,7 @@ import Green_trade.green_trade_platform.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import Green_trade.green_trade_platform.util.DateUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,7 +40,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     public void markAsRead(Long notificationId) {
         Notification isRead = notificationRepository.findById(notificationId).orElseThrow();
-        isRead.setReadAt(LocalDateTime.now());
+        isRead.setReadAt(DateUtils.convertToVietnamTime(LocalDateTime.now()));
         notificationRepository.save(isRead);
     }
 }

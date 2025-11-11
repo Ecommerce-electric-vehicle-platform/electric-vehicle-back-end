@@ -1,15 +1,21 @@
 package Green_trade.green_trade_platform.util;
 
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-@Component
-public class DateUtils {
-    public LocalDate parseAndValidateDob(String dobStr) {
+public final class DateUtils {
+    
+    // Ngăn khởi tạo instance
+    private DateUtils() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
+    
+    public static LocalDate parseAndValidateDob(String dobStr) {
         if (dobStr == null || dobStr.trim().isEmpty()) {
             throw new IllegalArgumentException("Ngày sinh không được để trống.");
         }
@@ -36,5 +42,26 @@ public class DateUtils {
         }
 
         return dob;
+    }
+
+    /**
+     * Chuyển đổi LocalDateTime từ UTC sang giờ địa phương Việt Nam (UTC+7)
+     * 
+     * @param dateTime LocalDateTime cần chuyển đổi (giả định đang ở UTC)
+     * @return LocalDateTime đã được chuyển đổi sang giờ Việt Nam
+     */
+    public static LocalDateTime convertToVietnamTime(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return null;
+        }
+
+        // Giả định input là UTC, chuyển sang timezone Việt Nam
+        ZoneId utcZone = ZoneId.of("UTC");
+        ZoneId vietnamZone = ZoneId.of("Asia/Ho_Chi_Minh");
+
+        ZonedDateTime utcZonedDateTime = dateTime.atZone(utcZone);
+        ZonedDateTime vietnamZonedDateTime = utcZonedDateTime.withZoneSameInstant(vietnamZone);
+
+        return vietnamZonedDateTime.toLocalDateTime();
     }
 }

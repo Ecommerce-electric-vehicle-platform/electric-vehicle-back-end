@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.cglib.core.Local;
+import Green_trade.green_trade_platform.util.DateUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -97,7 +98,7 @@ public class Admin {
         this.isSuperAdmin = false;
         this.gender = Gender.MALE;
         this.status = AccountStatus.ACTIVE;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
     }
 
 }

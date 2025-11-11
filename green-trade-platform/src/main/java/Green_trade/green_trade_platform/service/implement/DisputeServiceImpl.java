@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import Green_trade.green_trade_platform.util.DateUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -107,7 +108,7 @@ public class DisputeServiceImpl implements DisputeService {
                     .type(AccountType.BUYER)
                     .title("REJECT YOUR ORDER DISPUTE")
                     .content(request.getResolution())
-                    .createdAt(LocalDateTime.now())
+                    .createdAt(DateUtils.convertToVietnamTime(LocalDateTime.now()))
                     .build();
         } else if (request.getDecision() == DisputeDecision.ACCEPTED) {
             dispute.setStatus(DisputeStatus.ACCEPTED);
@@ -121,7 +122,7 @@ public class DisputeServiceImpl implements DisputeService {
                     .type(AccountType.BUYER)
                     .title("ACCEPTED YOUR ORDER DISPUTE")
                     .content(request.getResolution())
-                    .createdAt(LocalDateTime.now())
+                    .createdAt(DateUtils.convertToVietnamTime(LocalDateTime.now()))
                     .build();
         }
 

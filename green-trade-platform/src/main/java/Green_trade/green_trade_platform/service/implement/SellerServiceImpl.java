@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import Green_trade.green_trade_platform.util.DateUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -75,7 +76,7 @@ public class SellerServiceImpl implements SellerService {
 
             Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(sellerOpt.get().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
 
-            if (LocalDateTime.now().isAfter(subscription.getEndDay()) || subscription.getIsActive() == false || subscription.getRemainPost() == 0) {
+            if (DateUtils.convertToVietnamTime(LocalDateTime.now()).isAfter(subscription.getEndDay()) || subscription.getIsActive() == false || subscription.getRemainPost() == 0) {
                 throw new SubscriptionExpiredException();
             }
 
@@ -117,7 +118,7 @@ public class SellerServiceImpl implements SellerService {
                 .sellerId(seller.getSellerId())
                 .reason(request.getMessage())
                 .decision(request.getDecision())
-                .decidedAt(LocalDateTime.now())
+                .decidedAt(DateUtils.convertToVietnamTime(LocalDateTime.now()))
                 .build();
 
         if (request.getDecision().equals(VerifiedDecisionStatus.APPROVED)) {
@@ -133,7 +134,7 @@ public class SellerServiceImpl implements SellerService {
                     .type(AccountType.SELLER)
                     .title("UPGRADE ACCOUNT INFORMATION RESULT")
                     .content(request.getMessage())
-                    .createdAt(LocalDateTime.now())
+                    .createdAt(DateUtils.convertToVietnamTime(LocalDateTime.now()))
                     .build();
 
             mailRequest.setMessage("""
@@ -165,7 +166,7 @@ public class SellerServiceImpl implements SellerService {
                     .type(AccountType.BUYER)
                     .title("UPGRADE ACCOUNT INFORMATION RESULT")
                     .content(request.getMessage())
-                    .createdAt(LocalDateTime.now())
+                    .createdAt(DateUtils.convertToVietnamTime(LocalDateTime.now()))
                     .build();
         }
         notificationRepository.save(notice);

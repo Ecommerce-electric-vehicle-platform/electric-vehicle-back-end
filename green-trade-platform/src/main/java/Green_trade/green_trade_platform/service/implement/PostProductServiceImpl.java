@@ -11,6 +11,7 @@ import Green_trade.green_trade_platform.request.UploadPostProductRequest;
 import Green_trade.green_trade_platform.request.VerifiedPostProductRequest;
 import Green_trade.green_trade_platform.response.SellerResponse;
 import Green_trade.green_trade_platform.service.PostProductService;
+import Green_trade.green_trade_platform.util.DateUtils;
 import Green_trade.green_trade_platform.util.FileUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -55,7 +56,7 @@ public class PostProductServiceImpl implements PostProductService {
                     request.getSellerId()).orElseThrow(() -> new SubscriptionNotFound()
             );
             Long maxImg = subscription.getSubscriptionPackage().getMaxImgPerPost();
-            if (subscription.getEndDay().isBefore(LocalDateTime.now())) {
+            if (subscription.getEndDay().isBefore(DateUtils.convertToVietnamTime(LocalDateTime.now()))) {
                 throw new SubscriptionExpiredException();
             }
             if (files.size() > maxImg) {
@@ -91,8 +92,8 @@ public class PostProductServiceImpl implements PostProductService {
                     .active(true)
                     .verifiedDecisionstatus(VerifiedDecisionStatus.UNVAILABLE)
                     .verified(false)
-                    .createdAt(LocalDateTime.now())
-                    .updatedAt(LocalDateTime.now())
+                    .createdAt(DateUtils.convertToVietnamTime(LocalDateTime.now()))
+                    .updatedAt(DateUtils.convertToVietnamTime(LocalDateTime.now()))
                     .deletedAt(null)
                     .category(category)
                     .admin(null)

@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import Green_trade.green_trade_platform.util.DateUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -73,7 +74,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
         Map<String, Object> walletResult = walletService.handleSignPackageForSeller(buyer, request.getPrice());
 
-        LocalDateTime startDate = LocalDateTime.now();
+        LocalDateTime startDate = DateUtils.convertToVietnamTime(LocalDateTime.now());
         LocalDateTime endDate = startDate.plusDays(request.getDurationByDay());
         Subscription subscription = Subscription.builder()
                 .seller(seller)
@@ -112,7 +113,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
         if (subscription.getIsActive() == true) {
             subscription.setIsActive(false);
-            subscription.setEndDay(LocalDateTime.now());
+            subscription.setEndDay(DateUtils.convertToVietnamTime(LocalDateTime.now()));
         } else {
             throw new IllegalArgumentException("This seller has not been sign any packages yet.");
         }

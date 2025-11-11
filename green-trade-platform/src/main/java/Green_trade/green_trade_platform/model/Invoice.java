@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import Green_trade.green_trade_platform.util.DateUtils;
 
 import java.time.LocalDateTime;
 
@@ -47,6 +48,6 @@ public class Invoice {
 
     @PrePersist
     public void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
     }
 }
