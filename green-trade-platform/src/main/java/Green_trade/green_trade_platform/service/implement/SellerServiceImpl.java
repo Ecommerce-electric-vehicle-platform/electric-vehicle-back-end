@@ -51,6 +51,7 @@ public class SellerServiceImpl implements SellerService {
     private final BuyerRepository buyerRepository;
     private final PostProductRepository postProductRepository;
     private final MailServiceImpl mailSender;
+    private final OrderServiceImpl orderService;
 
     public Seller createShippingShop(String dataRaw, Seller seller) throws JsonProcessingException {
         try {
@@ -234,5 +235,9 @@ public class SellerServiceImpl implements SellerService {
 
     public int getTotalSellers() {
         return sellerRepository.getTotalSellers();
+    }
+
+    public int getTotalPendingOrder(Seller seller) {
+        return orderService.countPendingOrder(seller);
     }
 }

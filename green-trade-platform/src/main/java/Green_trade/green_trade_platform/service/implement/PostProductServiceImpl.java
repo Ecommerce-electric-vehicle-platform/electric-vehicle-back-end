@@ -400,4 +400,8 @@ public class PostProductServiceImpl implements PostProductService {
 
         return postProductRepository.save(postProduct);
     }
+
+    public int countAllActivePost(Seller seller) {
+        return postProductRepository.countByActiveAndSeller(true, seller.getSellerId());
+    }
 }

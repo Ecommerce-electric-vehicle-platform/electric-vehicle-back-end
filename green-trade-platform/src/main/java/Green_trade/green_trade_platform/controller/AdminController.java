@@ -6,15 +6,9 @@ import Green_trade.green_trade_platform.mapper.PostProductListMapper;
 import Green_trade.green_trade_platform.mapper.PostProductMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.model.*;
-import Green_trade.green_trade_platform.request.ApproveSellerRequest;
-import Green_trade.green_trade_platform.request.CreateAdminRequest;
-import Green_trade.green_trade_platform.request.NeedVerifyPostRequest;
-import Green_trade.green_trade_platform.request.PostProductDecisionRequest;
+import Green_trade.green_trade_platform.request.*;
 import Green_trade.green_trade_platform.response.*;
-import Green_trade.green_trade_platform.service.implement.AdminServiceImpl;
-import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
-import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
-import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
+import Green_trade.green_trade_platform.service.implement.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -49,6 +43,7 @@ public class AdminController {
     private final NotificationSocketController socketController;
     private final BuyerServiceImpl buyerService;
     private final PostProductServiceImpl postProductService;
+    private final MailServiceImpl mailSender;
 
     @Operation(
             summary = "Get all pending seller accounts",
@@ -263,6 +258,33 @@ public class AdminController {
     @PostMapping("/review-post-product-decision")
     public ResponseEntity<RestResponse<PostProductResponse, Object>> reviewPostProductDecision(@Valid @RequestBody PostProductDecisionRequest request) throws Exception {
         PostProduct result = postProductServiceImpl.checkPostProductVerification(request);
+
+        MailRequest mailRequest = MailRequest.builder()
+                .from("green.trade.platform.391@gmail.com")
+                .to(result.getSeller().getBuyer().getEmail())
+                .subject("Kết quả duyệt bài đăng sản phẩm")
+                .build();
+        log.info(">>> [Handle pending post]: Seller email: {}", result.getSeller().getBuyer().getEmail());
+
+        // 3️⃣ Soạn nội dung email theo quyết định
+        if (request.getPassed()) {
+            mailRequest.setMessage("""
+                🎉 <strong>Chúc mừng bạn!</strong><br><br>
+                Bài đăng sản phẩm <strong>%s</strong> của bạn đã được phê duyệt thành công và hiện đang hiển thị trên hệ thống.<br><br>
+                Hãy đảm bảo rằng thông tin sản phẩm luôn chính xác và tuân thủ các <a href='https://green-trade-platform.com/policies' style='color:#4CAF50;font-weight:bold;'>chính sách bán hàng</a> của Green Trade.<br><br>
+                💚 Chúc bạn kinh doanh thuận lợi!
+                """.formatted(result.getTitle()));
+        } else {
+            mailRequest.setMessage("""
+                ⚠️ <strong>Rất tiếc!</strong><br><br>
+                Bài đăng sản phẩm <strong>%s</strong> của bạn chưa được phê duyệt.<br>
+                Nguyên nhân có thể do thông tin sản phẩm chưa đầy đủ hoặc vi phạm quy định của nền tảng.<br><br>
+                Vui lòng kiểm tra lại nội dung bài đăng và gửi yêu cầu phê duyệt lại sau khi điều chỉnh phù hợp.<br><br>
+                💚 Cảm ơn bạn đã hợp tác cùng Green Trade Platform!
+                """.formatted(result.getTitle()));
+        }
+
+        mailSender.sendBeautifulMail(mailRequest);
         PostProductResponse responseData = postProductMapper.toDto(result);
         RestResponse response = responseMapper.toDto(
                 true,
@@ -502,13 +524,55 @@ public class AdminController {
         }
     }
 
-    @Operation()
+    @Operation(
+            summary = "Admin approves or rejects a product post",
+            description = """
+                Allows admin to approve or reject a product post submitted by a seller.
+                The endpoint updates the post status and sends an email notification to the seller.
+                
+                **Path Variables:**
+                - postId: ID of the product post
+                - decision: APPROVED or REJECTED
+                
+                **Permissions:** ROLE_ADMIN required.
+                **Example:**
+                POST /api/admin/approve-post/12/APPROVED
+                """
+    )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/approve-post/{postId}/{decision}")
     public ResponseEntity<?> handlePendingPost(@PathVariable(name = "postId") long id,
                                                @PathVariable(name = "decision") VerifiedDecisionStatus decision) throws Exception {
         try {
             PostProduct postProduct = postProductServiceImpl.handlePendingPostProduct(id, decision);
+
+            MailRequest mailRequest = MailRequest.builder()
+                    .from("green.trade.platform.391@gmail.com")
+                    .to(postProduct.getSeller().getBuyer().getEmail())
+                    .subject("Kết quả duyệt bài đăng sản phẩm")
+                    .build();
+            log.info(">>> [Handle pending post]: Seller email: {}", postProduct.getSeller().getBuyer().getEmail());
+
+            // 3️⃣ Soạn nội dung email theo quyết định
+            if (decision == VerifiedDecisionStatus.APPROVED) {
+                mailRequest.setMessage("""
+                🎉 <strong>Chúc mừng bạn!</strong><br><br>
+                Bài đăng sản phẩm <strong>%s</strong> của bạn đã được phê duyệt thành công và hiện đang hiển thị trên hệ thống.<br><br>
+                Hãy đảm bảo rằng thông tin sản phẩm luôn chính xác và tuân thủ các <a href='https://green-trade-platform.com/policies' style='color:#4CAF50;font-weight:bold;'>chính sách bán hàng</a> của Green Trade.<br><br>
+                💚 Chúc bạn kinh doanh thuận lợi!
+                """.formatted(postProduct.getTitle()));
+            } else {
+                mailRequest.setMessage("""
+                ⚠️ <strong>Rất tiếc!</strong><br><br>
+                Bài đăng sản phẩm <strong>%s</strong> của bạn chưa được phê duyệt.<br>
+                Nguyên nhân có thể do thông tin sản phẩm chưa đầy đủ hoặc vi phạm quy định của nền tảng.<br><br>
+                Vui lòng kiểm tra lại nội dung bài đăng và gửi yêu cầu phê duyệt lại sau khi điều chỉnh phù hợp.<br><br>
+                💚 Cảm ơn bạn đã hợp tác cùng Green Trade Platform!
+                """.formatted(postProduct.getTitle()));
+            }
+
+            mailSender.sendBeautifulMail(mailRequest);
+
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "APPROVE POST SUCCESSFULLY.",

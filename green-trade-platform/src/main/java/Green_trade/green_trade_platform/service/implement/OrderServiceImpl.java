@@ -189,4 +189,16 @@ public class OrderServiceImpl implements OrderService {
         order.setShippingFee(new BigDecimal(shippingFee));
         return orderRepository.save(order);
     }
+
+    public int countPendingOrder(Seller seller) {
+        return orderRepository.countByStatusAndSeller(OrderStatus.PENDING, seller.getSellerId());
+    }
+
+    public int countAllOrder(Seller seller) {
+        return orderRepository.countBySeller(seller.getSellerId());
+    }
+
+    public BigDecimal getTotalRevenue(Seller seller) {
+        return orderRepository.getTotalRevenueBySeller(seller.getSellerId());
+    }
 }
