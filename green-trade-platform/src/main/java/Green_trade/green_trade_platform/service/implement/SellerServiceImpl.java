@@ -54,57 +54,75 @@ public class SellerServiceImpl implements SellerService {
     private final OrderServiceImpl orderService;
 
     public Seller createShippingShop(String dataRaw, Seller seller) throws JsonProcessingException {
+        log.info(">>> [SellerServiceImpl] createShippingShop - sellerId: {}", seller.getSellerId());
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(dataRaw);
             JsonNode data = root.path("data");
             int shopId = data.path("shop_id").asInt();
+            log.info(">>> [SellerServiceImpl] createShippingShop - shopId from GHN: {}", shopId);
             seller.setGhnShopId(shopId + "");
-            return sellerRepository.save(seller);
+            Seller result = sellerRepository.save(seller);
+            log.info(">>> [SellerServiceImpl] createShippingShop - result: {}", result);
+            return result;
         } catch (Exception e) {
+            log.info(">>> [SellerServiceImpl] createShippingShop - error: {}", e.getMessage());
             throw e;
         }
     }
 
 
     public SubscriptionResponse checkServicePackageValidity(String username) throws Exception {
+        log.info(">>> [SellerServiceImpl] checkServicePackageValidity - username: {}", username);
         try {
             Buyer buyer = buyerRepository.findByUsername(username).orElseThrow(() -> new ProfileException("Profile is not existed"));
+            log.info(">>> [SellerServiceImpl] checkServicePackageValidity - found buyer: {}", buyer.getBuyerId());
             Optional<Seller> sellerOpt = sellerRepository.findByBuyer(buyer);
             if (sellerOpt.isEmpty()) {
                 throw new ProfileException("Seller is not existed");
             }
+            log.info(">>> [SellerServiceImpl] checkServicePackageValidity - found seller: {}", sellerOpt.get().getSellerId());
 
             Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(sellerOpt.get().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
+            log.info(">>> [SellerServiceImpl] checkServicePackageValidity - found subscription: {}", subscription.getId());
 
             if (DateUtils.convertToVietnamTime(LocalDateTime.now()).isAfter(subscription.getEndDay()) || subscription.getIsActive() == false || subscription.getRemainPost() == 0) {
+                log.info(">>> [SellerServiceImpl] checkServicePackageValidity - subscription expired or inactive");
                 throw new SubscriptionExpiredException();
             }
 
-            return subscriptionMapper.toDto(true, subscription.getEndDay(), subscription.getSubscriptionPackage().getName());
+            SubscriptionResponse result = subscriptionMapper.toDto(true, subscription.getEndDay(), subscription.getSubscriptionPackage().getName());
+            log.info(">>> [SellerServiceImpl] checkServicePackageValidity - result: {}", result);
+            return result;
         } catch (Exception e) {
-            log.info("Error at checkServicePackageValidity: {}", e);
+            log.info(">>> [SellerServiceImpl] checkServicePackageValidity - error: {}", e.getMessage());
             throw e;
         }
     }
 
     public Page<SellerResponse> getAllPendingSeller(int page, int size) {
+        log.info(">>> [SellerServiceImpl] getAllPendingSeller - page: {}, size: {}", page, size);
         Pageable pageable = PageRequest.of(page, size, Sort.by("sellerId").ascending());
         Page<Seller> sellers = sellerRepository.findAllByStatus(SellerStatus.PENDING, pageable);
+        log.info(">>> [SellerServiceImpl] getAllPendingSeller - found {} pending sellers", sellers.getTotalElements());
 
         List<SellerResponse> responses = sellers.getContent()
                 .stream()
                 .map(sellerMapper::toDto)
                 .toList();
 
-        return new PageImpl<>(responses, pageable, sellers.getTotalElements());
+        Page<SellerResponse> result = new PageImpl<>(responses, pageable, sellers.getTotalElements());
+        log.info(">>> [SellerServiceImpl] getAllPendingSeller - result: {} sellers", result.getTotalElements());
+        return result;
     }
 
     @Transactional
     public ApproveSellerResponse handlePendingSeller(ApproveSellerRequest request) throws JsonProcessingException {
+        log.info(">>> [SellerServiceImpl] handlePendingSeller - request: {}", request);
         Seller seller = sellerRepository.findById(request.getSellerId())
                 .orElseThrow(() -> new ProfileException("Không tìm thấy hồ sơ seller này: " + request.getSellerId())
                 );
+        log.info(">>> [SellerServiceImpl] handlePendingSeller - found seller: {}", seller.getSellerId());
 
         // Create mail request to send to seller
         MailRequest mailRequest = MailRequest.builder()
@@ -173,6 +191,7 @@ public class SellerServiceImpl implements SellerService {
         notificationRepository.save(notice);
         response.setNotification(notice);
         mailSender.sendBeautifulMail(mailRequest);
+        log.info(">>> [SellerServiceImpl] handlePendingSeller - result: {}", response);
         return response;
     }
 
@@ -184,8 +203,11 @@ public class SellerServiceImpl implements SellerService {
     }
 
     public Page<Seller> getSellerList(int page, int size) {
+        log.info(">>> [SellerServiceImpl] getSellerList - page: {}, size: {}", page, size);
         Pageable pageable = PageRequest.of(page, size, Sort.by("sellerId").ascending());
-        return sellerRepository.findAllByStatus(SellerStatus.ACCEPTED, pageable);
+        Page<Seller> result = sellerRepository.findAllByStatus(SellerStatus.ACCEPTED, pageable);
+        log.info(">>> [SellerServiceImpl] getSellerList - result: {} sellers found", result.getTotalElements());
+        return result;
     }
 
     public void blockAccount(long id, String message, String activity) {
@@ -230,14 +252,23 @@ public class SellerServiceImpl implements SellerService {
     }
 
     public List<PostProduct> getListPostProduct(Seller seller) {
-        return postProductRepository.findAllBySeller(seller);
+        log.info(">>> [SellerServiceImpl] getListPostProduct - sellerId: {}", seller.getSellerId());
+        List<PostProduct> result = postProductRepository.findAllBySeller(seller);
+        log.info(">>> [SellerServiceImpl] getListPostProduct - result: {} posts found", result.size());
+        return result;
     }
 
     public int getTotalSellers() {
-        return sellerRepository.getTotalSellers();
+        log.info(">>> [SellerServiceImpl] getTotalSellers");
+        int result = sellerRepository.getTotalSellers();
+        log.info(">>> [SellerServiceImpl] getTotalSellers - result: {} total sellers", result);
+        return result;
     }
 
     public int getTotalPendingOrder(Seller seller) {
-        return orderService.countPendingOrder(seller);
+        log.info(">>> [SellerServiceImpl] getTotalPendingOrder - sellerId: {}", seller.getSellerId());
+        int result = orderService.countPendingOrder(seller);
+        log.info(">>> [SellerServiceImpl] getTotalPendingOrder - result: {} pending orders", result);
+        return result;
     }
 }
