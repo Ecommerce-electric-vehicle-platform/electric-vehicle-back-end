@@ -33,6 +33,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -363,7 +364,7 @@ public class SellerController {
     ) {
         try {
             Page<Seller> sellers = sellerService.getSellerList(page, size);
-            Page<SellerResponse> response = sellers.map(sellerMapper::toDto);
+            Page<SellerResponse> response = sellers.map(sellerMapper::toDto2);
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "GET SELLER LIST SUCCESSFULLY.",
@@ -496,4 +497,152 @@ public class SellerController {
         ));
     }
 
+    @Operation(
+            summary = "Get total pending orders for current seller",
+            description = """
+                Returns the total number of orders that are currently in the **PENDING** state 
+                for the authenticated seller.
+
+                **Authorization:** Requires `ROLE_SELLER`.
+
+                **Example:**
+                ```
+                GET /api/seller/total-pending-order
+                ```
+                **Response:**
+                ```json
+                {
+                    "success": true,
+                    "message": "GET ALL PENDING ORDER SUCCESSFULLY.",
+                    "data": 5
+                }
+                ```
+                """
+    )
+    @PreAuthorize("hasRole('ROLE_SELLER')")
+    @GetMapping("/total-pending-order")
+    public ResponseEntity<?> getTotalPendingOrder() {
+        try {
+            Seller seller = sellerService.getCurrentUser();
+
+            int count = sellerService.getTotalPendingOrder(seller);
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ALL PENDING ORDER SUCCESSFULLY.",
+                    count, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET ALL PENDING ORDER FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Get total active posts for current seller",
+            description = """
+                Retrieves the total number of **active posts** (approved and visible products) 
+                created by the authenticated seller.
+
+                **Authorization:** Requires `ROLE_SELLER`.
+
+                **Example:**
+                ```
+                GET /api/seller/active-post
+                ```
+                **Response:**
+                ```json
+                {
+                    "success": true,
+                    "message": "GET ALL ACTIVE POST SUCCESSFULLY.",
+                    "data": 8
+                }
+                ```
+                """
+    )
+    @PreAuthorize("hasRole('ROLE_SELLER')")
+    @GetMapping("/active-post")
+    public ResponseEntity<?> getAllActivePost() {
+        try {
+            Seller seller = sellerService.getCurrentUser();
+            int count = postProductService.countAllActivePost(seller);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ALL ACTIVE POST SUCCESSFULLY.",
+                    count, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET ALL ACTIVE POST FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Get total orders for current seller",
+            description = """
+                Returns the total number of **all orders** associated with the authenticated seller, 
+                regardless of their status (Pending, Completed, Canceled, etc.).
+
+                **Authorization:** Requires `ROLE_SELLER`.
+
+                **Example:**
+                ```
+                GET /api/seller/total-order
+                ```
+                **Response:**
+                ```json
+                {
+                    "success": true,
+                    "message": "GET ALL ORDERS SUCCESSFULLY.",
+                    "data": 27
+                }
+                ```
+                """
+    )
+    @PreAuthorize("hasRole('ROLE_SELLER')")
+    @GetMapping("/total-order")
+    public ResponseEntity<?> getAllOrder() {
+        try {
+            Seller seller = sellerService.getCurrentUser();
+            int count = orderService.countAllOrder(seller);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ALL ORDERS SUCCESSFULLY.",
+                    count, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET ALL ORDERS FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation()
+    @PreAuthorize("hasRole('ROLE_SELLER')")
+    @GetMapping("/total-revenue")
+    public ResponseEntity<?> getTotalRevenue() {
+        try {
+            Seller seller = sellerService.getCurrentUser();
+            BigDecimal total = orderService.getTotalRevenue(seller);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET TOTAL REVENUE.",
+                    total, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET TOTAL FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
 }
