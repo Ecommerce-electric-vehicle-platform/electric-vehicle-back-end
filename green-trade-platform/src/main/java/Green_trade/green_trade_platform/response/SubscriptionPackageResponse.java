@@ -16,5 +16,6 @@ public class SubscriptionPackageResponse {
     private Long maxProduct;
     private Long maxStoragePerImg;
     private Long maxImgPerPost;
+    private boolean canSendVerifyRequest;
     private List<PackagePriceResponse> prices;
 }

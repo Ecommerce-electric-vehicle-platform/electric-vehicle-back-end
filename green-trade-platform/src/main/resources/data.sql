@@ -129,6 +129,7 @@ INSERT INTO subscription_packages (subscription_package_id,
                                    is_active,
                                    max_product,
                                    max_img_per_post,
+                                   can_send_verify_request,
                                    created_at,
                                    updated_at)
 VALUES
@@ -141,7 +142,7 @@ VALUES
          'Hỗ trợ & Phí: hỗ trợ qua email hoặc chat với thời gian phản hồi tiêu chuẩn.', CHAR(10),
          'Phí hoa hồng doanh thu khoảng 7%.'
  ),
- TRUE, 10, 5, NOW(), NOW()),
+ TRUE, 10, 5, FALSE, NOW(), NOW()),
 
 -- PRO PLAN
 (2, 'Pro Plan',
@@ -152,7 +153,7 @@ VALUES
          'Hỗ trợ & Phí: phản hồi nhanh hơn qua email/chat, có hotline trong giờ hành chính.', CHAR(10),
          'Phí hoa hồng doanh thu khoảng 5%.'
  ),
- TRUE, 30, 7, NOW(), NOW()),
+ TRUE, 30, 7, TRUE, NOW(), NOW()),
 
 -- VIP PLAN
 (3, 'VIP Plan',
@@ -162,12 +163,12 @@ VALUES
          'Hiển thị & Thương hiệu: sản phẩm được ưu tiên cao nhất trong kết quả tìm kiếm và có thể hiển thị logo thương hiệu.', CHAR(10),
          'Hỗ trợ & Phí: hỗ trợ 24/7 với thời gian phản hồi nhanh nhất.', CHAR(10), 'Phí hoa hồng doanh thu khoảng 3%.'
  ),
- TRUE, 100, 10, NOW(), NOW()),
+ TRUE, 100, 10, TRUE, NOW(), NOW()),
 
 -- LEGACY PLAN
 (4, 'Legacy Plan',
  'Gói cũ, không còn được hỗ trợ hoặc cập nhật. Dành cho người dùng đã đăng ký trước khi hệ thống nâng cấp.',
- FALSE, 20, 5, NOW(), NOW()) ON DUPLICATE KEY
+ FALSE, 20, 5, FALSE, NOW(), NOW()) ON DUPLICATE KEY
 UPDATE subscription_package_id = subscription_package_id;
 
 

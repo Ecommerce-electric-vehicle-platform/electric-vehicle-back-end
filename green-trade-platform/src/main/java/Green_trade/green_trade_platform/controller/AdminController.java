@@ -48,6 +48,8 @@ public class AdminController {
     private final MailServiceImpl mailSender;
     private final SystemWalletServiceImpl systemWalletService;
     private final SystemWalletMapper systemWalletMapper;
+    private final SubscriptionPackageServiceImpl subscriptionPackageService;
+    private final SubscriptionPackageMapper subscriptionPackageMapper;
 
     @Operation(
             summary = "Get all pending seller accounts",
@@ -918,6 +920,163 @@ public class AdminController {
             return ResponseEntity.ok(responseMapper.toDto(
                     false,
                     "Failed to update system wallet endAt: " + e.getMessage(),
+                    null,
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Create a new subscription package",
+            description = """
+                    Allows a **super admin** to create a new subscription package in the system.
+                    This endpoint is restricted to super administrators only.
+                    
+                    **Request Body (CreateSubscriptionPackageRequest):**
+                    - `name` (String, required): Unique name of the subscription package
+                    - `description` (String, required): Description of the package features
+                    - `isActive` (Boolean, required): Whether the package is active and available
+                    - `maxProduct` (Long, required): Maximum number of products allowed (must be positive)
+                    - `maxImgPerPost` (Long, required): Maximum images per post (must be positive)
+                    - `canSendVerifyRequest` (Boolean, required): Whether this package allows sellers to send verify requests for post products
+                    - `prices` (List<PackagePriceRequest>, optional): List of package prices to create
+                      - `price` (Double, required): Price amount (must be positive)
+                      - `isActive` (Boolean, required): Whether this price option is active
+                      - `durationByDay` (Long, required): Duration in days (must be positive)
+                      - `currency` (String, required): Currency code (e.g., "VND")
+                      - `discountPercent` (Double, required): Discount percentage (must be >= 0)
+                    
+                    **Response:**
+                    - Success (200): Returns created `SubscriptionPackageResponse` with package details
+                    - Error (400): Invalid request data or validation failed
+                    - Error (403): Access denied (non-super admin)
+                    - Error (409): Package name already exists
+                    
+                    **Use Cases:**
+                    - Creating new subscription tiers with different features
+                    - Configuring which packages allow verify request feature
+                    - Managing subscription package offerings
+                    
+                    **Access Control:** Super admin only (ROLE_ADMIN + isSuperAdmin = true).
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Subscription package created successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data or validation failed"),
+            @ApiResponse(responseCode = "403", description = "Access denied - Super admin required"),
+            @ApiResponse(responseCode = "409", description = "Package name already exists")
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/subscription-packages")
+    public ResponseEntity<?> createSubscriptionPackage(
+            @Parameter(description = "Subscription package creation request", required = true)
+            @Valid @RequestBody CreateSubscriptionPackageRequest request
+    ) {
+        try {
+            Admin admin = adminService.getCurrentUser();
+            if (!admin.isSuperAdmin()) {
+                throw new IllegalArgumentException("Only super admin can create subscription packages.");
+            }
+
+            SubscriptionPackages createdPackage = subscriptionPackageService.createSubscriptionPackage(request);
+            SubscriptionPackageResponse response = subscriptionPackageMapper.toResponse(createdPackage);
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "Subscription package created successfully.",
+                    response,
+                    null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "Failed to create subscription package: " + e.getMessage(),
+                    null,
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Update an existing subscription package",
+            description = """
+                    Allows a **super admin** to update an existing subscription package in the system.
+                    This endpoint is restricted to super administrators only.
+                    
+                    **Path Parameters:**
+                    - `packageId` (Long, required): Unique identifier of the subscription package to update
+                    
+                    **Request Body (UpdateSubscriptionPackageRequest):**
+                    - `name` (String, required): Updated name of the subscription package
+                    - `description` (String, required): Updated description of the package features
+                    - `isActive` (Boolean, required): Whether the package is active and available
+                    - `maxProduct` (Long, required): Maximum number of products allowed (must be positive)
+                    - `maxImgPerPost` (Long, required): Maximum images per post (must be positive)
+                    - `canSendVerifyRequest` (Boolean, required): Whether this package allows sellers to send verify requests for post products
+                    - `prices` (List<PackagePriceRequest>, optional): List of package prices to update/create/delete
+                      - `id` (Long, optional): Price ID if updating existing price, null if creating new
+                      - `price` (Double, required): Price amount (must be positive)
+                      - `isActive` (Boolean, required): Whether this price option is active
+                      - `durationByDay` (Long, required): Duration in days (must be positive)
+                      - `currency` (String, required): Currency code (e.g., "VND")
+                      - `discountPercent` (Double, required): Discount percentage (must be >= 0)
+                    
+                    **Price Update Logic:**
+                    - Prices with `id` in request → Update existing prices
+                    - Prices without `id` in request → Create new prices
+                    - Existing prices not in request → Soft delete (set deletedAt)
+                    
+                    **Response:**
+                    - Success (200): Returns updated `SubscriptionPackageResponse` with package details
+                    - Error (400): Invalid request data or validation failed
+                    - Error (403): Access denied (non-super admin)
+                    - Error (404): Subscription package not found
+                    - Error (409): New package name conflicts with existing package
+                    
+                    **Use Cases:**
+                    - Updating package features and limits
+                    - Enabling/disabling verify request feature for specific packages
+                    - Modifying package availability status
+                    
+                    **Access Control:** Super admin only (ROLE_ADMIN + isSuperAdmin = true).
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Subscription package updated successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data or validation failed"),
+            @ApiResponse(responseCode = "403", description = "Access denied - Super admin required"),
+            @ApiResponse(responseCode = "404", description = "Subscription package not found"),
+            @ApiResponse(responseCode = "409", description = "Package name already exists")
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/subscription-packages/{packageId}")
+    public ResponseEntity<?> updateSubscriptionPackage(
+            @Parameter(description = "Unique identifier of the subscription package", required = true, example = "1")
+            @PathVariable Long packageId,
+            @Parameter(description = "Subscription package update request", required = true)
+            @Valid @RequestBody UpdateSubscriptionPackageRequest request
+    ) {
+        try {
+            Admin admin = adminService.getCurrentUser();
+            if (!admin.isSuperAdmin()) {
+                throw new IllegalArgumentException("Only super admin can update subscription packages.");
+            }
+
+            SubscriptionPackages updatedPackage = subscriptionPackageService.updateSubscriptionPackage(packageId, request);
+            SubscriptionPackageResponse response = subscriptionPackageMapper.toResponse(updatedPackage);
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "Subscription package updated successfully.",
+                    response,
+                    null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "Failed to update subscription package: " + e.getMessage(),
                     null,
                     e.getMessage()
             ));
