@@ -17,6 +17,12 @@ import Green_trade.green_trade_platform.response.*;
 import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -252,21 +258,276 @@ public class BuyerController {
             summary = "Place a new order",
             description = """
                     This endpoint allows a buyer to place a new order in the Green Trade platform.
-                    <br><br>
-                    Workflow:
-                    <ul>
-                        <li>Validate the payment method and buyer information.</li>
-                        <li>Fetch the product and verify its availability.</li>
-                        <li>Reject the request if the buyer attempts to purchase their own product.</li>
-                        <li>Calculate the shipping fee through the GHN API (depending on COD or online payment).</li>
-                        <li>Create a new order, transaction, and GHN shipping order.</li>
-                        <li>Return a response containing the new order details and GHN order code.</li>
-                    </ul>
-                    """
+                    
+                    ## Workflow:
+                    1. **Validation Phase:**
+                       - Validates payment method exists and is supported
+                       - Verifies buyer account exists and is active
+                       - Checks product exists and is available (not sold)
+                       - Prevents self-purchase (buyer cannot buy their own product)
+                    
+                    2. **Shipping Fee Calculation:**
+                       - For **COD payment**: Calculates shipping fee including product value
+                       - For **Online/Wallet payment**: Calculates shipping fee with zero value (payment handled separately)
+                       - Uses GHN API to get accurate shipping costs
+                    
+                    3. **Order Creation:**
+                       - Creates new order record in database
+                       - Sets order status based on payment method
+                       - Links order to buyer, product, and shipping partner
+                    
+                    4. **Payment Processing:**
+                       - **COD Flow**: Creates transaction with PENDING status, creates GHN shipping order
+                       - **Wallet Flow**: Deducts from buyer wallet, creates PAID transaction, creates GHN shipping order
+                       - Creates escrow record to hold funds until order completion
+                    
+                    5. **Post-Order Actions:**
+                       - Generates invoice for the order
+                       - Updates product status to SOLD
+                       - Returns order details with shipping code
+                    
+                    ## Payment Methods:
+                    - **COD (Cash on Delivery)**: Payment made when receiving goods
+                    - **Wallet/Online Payment**: Payment deducted immediately from buyer's wallet
+                    
+                    ## Security:
+                    - Requires authentication (ROLE_BUYER or ROLE_SELLER)
+                    - Validates all input data
+                    - Prevents unauthorized purchases
+                    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Order placement request with buyer and shipping information",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = PlaceOrderRequest.class),
+                            examples = @ExampleObject(
+                                    name = "Example Request",
+                                    value = """
+                                            {
+                                              "postProductId": 123,
+                                              "username": "buyer123",
+                                              "fullName": "Nguyễn Văn A",
+                                              "street": "123 Đường ABC",
+                                              "wardName": "Phường 1",
+                                              "districtName": "Quận 1",
+                                              "provinceName": "TP. Hồ Chí Minh",
+                                              "phoneNumber": "0912345678",
+                                              "shippingPartnerId": 1,
+                                              "paymentId": 1
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            tags = {"Order Management"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Order placed successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "PLACE ORDERED SUCCESS",
+                                              "data": {
+                                                "id": 456,
+                                                "orderCode": "GHN123456789",
+                                                "shippingAddress": "123 Đường ABC, Phường 1, Quận 1, TP. Hồ Chí Minh",
+                                                "phoneNumber": "0912345678",
+                                                "price": 5000000.00,
+                                                "shippingFee": 30000.00,
+                                                "status": "PENDING",
+                                                "createdAt": "2024-01-15T10:30:00",
+                                                "updatedAt": "2024-01-15T10:30:00",
+                                                "canceledAt": null,
+                                                "cancelOrderReasonResponse": null
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Validation errors or invalid input",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Invalid Product ID",
+                                            value = """
+                                                    {
+                                                      "success": false,
+                                                      "message": "Product ID must be a positive number",
+                                                      "data": null,
+                                                      "error": {
+                                                        "field": "postProductId",
+                                                        "message": "Product ID must be a positive number"
+                                                      }
+                                                    }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Invalid Phone Number",
+                                            value = """
+                                                    {
+                                                      "success": false,
+                                                      "message": "Phone number must be valid (starts with 0 or +84 and has 10–11 digits)",
+                                                      "data": null,
+                                                      "error": {
+                                                        "field": "phoneNumber",
+                                                        "message": "Phone number must be valid"
+                                                      }
+                                                    }
+                                                    """
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Unauthorized",
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Unauthorized - Please login",
+                                              "data": null,
+                                              "error": "Authentication required"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Not Found - Resource not found",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Product Not Found",
+                                            value = """
+                                                    {
+                                                      "success": false,
+                                                      "message": "Post product not found",
+                                                      "data": null,
+                                                      "error": "Product with ID 123 does not exist"
+                                                    }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Buyer Not Found",
+                                            value = """
+                                                    {
+                                                      "success": false,
+                                                      "message": "Buyer with Username: buyer123 is not existed",
+                                                      "data": null,
+                                                      "error": "Profile not found"
+                                                    }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Payment Method Not Found",
+                                            value = """
+                                                    {
+                                                      "success": false,
+                                                      "message": "Payment method not found",
+                                                      "data": null,
+                                                      "error": "Payment method with ID 1 does not exist"
+                                                    }
+                                                    """
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Conflict - Business rule violation",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Self Purchase Not Allowed",
+                                            value = """
+                                                    {
+                                                      "success": false,
+                                                      "message": "You cannot purchase your own product",
+                                                      "data": null,
+                                                      "error": "Self purchase is not allowed"
+                                                    }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Product Already Sold",
+                                            value = """
+                                                    {
+                                                      "success": false,
+                                                      "message": "Product is already sold",
+                                                      "data": null,
+                                                      "error": "Product with ID 123 has been sold"
+                                                    }
+                                                    """
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "422",
+                    description = "Unprocessable Entity - Payment method not supported",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Payment Method Not Supported",
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Payment method not supported",
+                                              "data": null,
+                                              "error": "The selected payment method is not available"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal Server Error",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Server Error",
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Internal server error occurred",
+                                              "data": null,
+                                              "error": "An unexpected error occurred while processing your order"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/place-order")
-    public ResponseEntity<RestResponse<OrderResponse, Object>> placeOrder(@Valid @RequestBody PlaceOrderRequest request) throws Exception {
+    public ResponseEntity<RestResponse<OrderResponse, Object>> placeOrder(
+            @Valid 
+            @RequestBody 
+            @Parameter(
+                    description = "Order placement request containing product, buyer, shipping, and payment information",
+                    required = true
+            )
+            PlaceOrderRequest request
+    ) throws Exception {
         Order newOrder = null;
         RestResponse<OrderResponse, Object> response = null;
         OrderResponse responseData = null;
