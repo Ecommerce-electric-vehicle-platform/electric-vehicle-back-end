@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.model.*;
+import Green_trade.green_trade_platform.service.GhnSerivce;
 import Green_trade.green_trade_platform.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -15,7 +16,7 @@ import java.util.*;
 
 @Service
 @Slf4j
-public class GhnServiceImpl {
+public class GhnServiceImpl implements GhnSerivce {
 
     private final StringUtils stringUtils;
     @Value("${ghn.token}")

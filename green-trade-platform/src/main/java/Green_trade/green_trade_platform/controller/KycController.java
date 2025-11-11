@@ -74,7 +74,7 @@ public class KycController {
                     backOfIdentity,
                     policy,
                     request);
-            if(response.isSuccess()) {
+            if (response.isSuccess()) {
                 return ResponseEntity.ok(responseMapper.toDto(
                         true,
                         "KYC INFORMATION SUCCESSFULLY.",

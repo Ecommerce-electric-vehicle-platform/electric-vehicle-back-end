@@ -179,10 +179,10 @@ public class SubscriptionPackageController {
     @Operation(
             summary = "Get total subscription revenue",
             description = """
-        This API endpoint is used by administrators to calculate the total revenue 
-        generated from all active subscription packages in the system.
-        Only users with the role **ROLE_ADMIN** are authorized to access this endpoint.
-        """
+                    This API endpoint is used by administrators to calculate the total revenue 
+                    generated from all active subscription packages in the system.
+                    Only users with the role **ROLE_ADMIN** are authorized to access this endpoint.
+                    """
     )
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/subscription-revenue")

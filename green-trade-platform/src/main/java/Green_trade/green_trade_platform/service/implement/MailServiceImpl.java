@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.request.MailRequest;
+import Green_trade.green_trade_platform.service.MailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class MailServiceImpl {
+public class MailServiceImpl implements MailService {
     private final JavaMailSender mailSender;
 
     public void sendBeautifulMail(MailRequest req) {

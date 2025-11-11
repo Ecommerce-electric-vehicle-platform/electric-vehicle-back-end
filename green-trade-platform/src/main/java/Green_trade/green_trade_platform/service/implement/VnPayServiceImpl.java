@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.config.VnPayConfig;
+import Green_trade.green_trade_platform.service.VnPayService;
 import Green_trade.green_trade_platform.model.Buyer;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,7 @@ import java.util.*;
 
 @Service
 @Slf4j
-public class VnPayServiceImpl {
+public class VnPayServiceImpl implements VnPayService {
     @Value(("${vnp_TmnCode}"))
     private String vnpTmnCode;
     @Value("${vnp_HashSecret}")

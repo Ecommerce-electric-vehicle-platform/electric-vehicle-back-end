@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.enumerate.AccountStatus;
+import Green_trade.green_trade_platform.service.BuyerService;
 import Green_trade.green_trade_platform.enumerate.OrderStatus;
 import Green_trade.green_trade_platform.exception.*;
 import Green_trade.green_trade_platform.model.*;
@@ -36,7 +37,7 @@ import java.util.*;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class BuyerServiceImpl {
+public class BuyerServiceImpl implements BuyerService {
     private final BuyerRepository buyerRepository;
     private final CloudinaryService cloudinaryService;
     //    private final DateUtils dateUtils;

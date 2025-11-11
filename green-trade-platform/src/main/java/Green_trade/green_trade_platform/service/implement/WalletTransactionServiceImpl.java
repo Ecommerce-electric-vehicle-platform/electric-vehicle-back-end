@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.enumerate.TransactionStatus;
+import Green_trade.green_trade_platform.service.WalletTransactionService;
 import Green_trade.green_trade_platform.enumerate.TransactionType;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Order;
@@ -16,7 +17,7 @@ import java.util.Map;
 
 @Service
 @Slf4j
-public class WalletTransactionServiceImpl {
+public class WalletTransactionServiceImpl implements WalletTransactionService {
     private final WalletTransactionRepository walletTransactionRepository;
     private final BuyerRepository buyerRepository;
 

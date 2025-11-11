@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Service
 @Slf4j
-public class CloudinaryService {
+public class CloudinaryService implements Green_trade.green_trade_platform.service.CloudinaryService {
     @Autowired
     private Cloudinary cloudinary;
 

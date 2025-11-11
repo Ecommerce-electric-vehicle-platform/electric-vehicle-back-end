@@ -191,17 +191,17 @@ public class PostProductController {
     @Operation(
             summary = "Search post products by type and value",
             description = """
-        Search products based on a specific type and value.
-        Supported search types: 
-        - title
-        - brand
-        - model
-        - conditionLevel
-        - locationTrading
-
-        Example:
-        GET /api/posts/search?type=brand&value=Yamaha
-        """
+                    Search products based on a specific type and value.
+                    Supported search types: 
+                    - title
+                    - brand
+                    - model
+                    - conditionLevel
+                    - locationTrading
+                    
+                    Example:
+                    GET /api/posts/search?type=brand&value=Yamaha
+                    """
     )
     @GetMapping("/search")
     public ResponseEntity<?> searchProduct(

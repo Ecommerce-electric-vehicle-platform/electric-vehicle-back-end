@@ -1,13 +1,14 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.model.Payment;
+import Green_trade.green_trade_platform.service.PaymentService;
 import Green_trade.green_trade_platform.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-public class PaymentServiceImpl {
+public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
 
