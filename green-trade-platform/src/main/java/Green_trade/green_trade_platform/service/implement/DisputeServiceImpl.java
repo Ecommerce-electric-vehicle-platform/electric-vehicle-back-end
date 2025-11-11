@@ -145,5 +145,14 @@ public class DisputeServiceImpl implements DisputeService {
         );
     }
 
+    public List<DisputeResponse> getDisputesByOrderId(Long orderId) {
+        log.info(">>> [Dispute Service] Get disputes by orderId: {}", orderId);
+        List<Dispute> disputes = disputeRepository.findByOrder_Id(orderId);
+        log.info(">>> [Dispute Service] Found {} disputes for orderId: {}", disputes.size(), orderId);
+        return disputes.stream()
+                .map(disputeMapper::toDto)
+                .toList();
+    }
+
 
 }
