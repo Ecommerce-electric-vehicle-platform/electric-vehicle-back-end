@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import Green_trade.green_trade_platform.util.DateUtils;
 
 import java.time.LocalDateTime;
 
@@ -61,6 +62,6 @@ public class Message {
     @PrePersist
     public void onCreate() {
         this.status = MessageStatus.NOT_READ_YET;
-        this.sentAt = LocalDateTime.now();
+        this.sentAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
     }
 }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import Green_trade.green_trade_platform.util.DateUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -83,12 +84,12 @@ public class Seller {
     @PrePersist
     public void onCreate() {
         this.status = SellerStatus.PENDING;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
     }
 
     @PreUpdate
     public void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
     }
 
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)

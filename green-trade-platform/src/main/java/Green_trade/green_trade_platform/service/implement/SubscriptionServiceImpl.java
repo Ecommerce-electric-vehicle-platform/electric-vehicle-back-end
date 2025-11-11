@@ -3,6 +3,7 @@ package Green_trade.green_trade_platform.service.implement;
 import Green_trade.green_trade_platform.model.Subscription;
 import Green_trade.green_trade_platform.repository.SubscriptionRepository;
 import Green_trade.green_trade_platform.service.SubscriptionService;
+import Green_trade.green_trade_platform.util.DateUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,7 +24,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .orElseThrow(
                         () -> new Exception("Seller doesn't subscribe any service")
                 );
-        if (LocalDateTime.now().isAfter(subscription.getEndDay())) {
+        if (DateUtils.convertToVietnamTime(LocalDateTime.now()).isAfter(subscription.getEndDay())) {
             result = true;
         }
         return result;

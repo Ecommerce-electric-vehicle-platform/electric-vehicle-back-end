@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.model;
 
 import Green_trade.green_trade_platform.enumerate.Gender;
+import Green_trade.green_trade_platform.util.DateUtils;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -107,11 +108,11 @@ public class Buyer {
     @PrePersist
     public void onCreate() {
         this.isActive = true;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
     }
 
     @PreUpdate
     public void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
     }
 }

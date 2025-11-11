@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import Green_trade.green_trade_platform.util.DateUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -117,7 +118,7 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] update order sold successfully");
                 orderFound.setCancelOrderReason(cancelOrderReason);
                 log.info(">>> [OrderServiceImpl] update cancel order reason successfully");
-                orderFound.setCanceledAt(LocalDateTime.now());
+                orderFound.setCanceledAt(DateUtils.convertToVietnamTime(LocalDateTime.now()));
                 log.info(">>> [OrderServiceImpl] update canceled at successfully");
             } else if (orderFound.getStatus().equals(OrderStatus.PAID)) {
                 log.info(">>> [OrderServiceImpl] order paid status");
@@ -132,7 +133,7 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] update order sold successfully");
                 orderFound.setCancelOrderReason(cancelOrderReason);
                 log.info(">>> [OrderServiceImpl] update cancel order reason successfully");
-                orderFound.setCanceledAt(LocalDateTime.now());
+                orderFound.setCanceledAt(DateUtils.convertToVietnamTime(LocalDateTime.now()));
                 log.info(">>> [OrderServiceImpl] update canceled at successfully");
             } else {
                 throw new Exception("Cannot cancel order");

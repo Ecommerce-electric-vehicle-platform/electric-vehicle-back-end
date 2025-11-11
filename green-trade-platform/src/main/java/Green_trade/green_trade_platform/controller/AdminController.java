@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import Green_trade.green_trade_platform.util.DateUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -101,7 +102,7 @@ public class AdminController {
     @PostMapping("/approve-seller")
     public ResponseEntity<RestResponse<?, ?>> handlePendingSeller(@RequestBody ApproveSellerRequest request) throws JsonProcessingException {
         ApproveSellerResponse sellerNotification = sellerService.handlePendingSeller(request);
-        sellerNotification.getNotification().setSendAt(LocalDateTime.now());
+        sellerNotification.getNotification().setSendAt(DateUtils.convertToVietnamTime(LocalDateTime.now()));
         socketController.sendUpgradeNotificationToUser(sellerNotification);
         return ResponseEntity.ok(responseMapper.toDto(true,
                 "Approve request was be solved.",
