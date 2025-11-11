@@ -23,6 +23,7 @@ public class BuyerResponse {
     private String email;
     private Gender gender;
     private LocalDate dob;
+    private boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String provinceName;

@@ -30,4 +30,5 @@ public class SellerResponse {
     private String sellerName;
     private String nationality;
     private String home;
+    private boolean isActive;
 }

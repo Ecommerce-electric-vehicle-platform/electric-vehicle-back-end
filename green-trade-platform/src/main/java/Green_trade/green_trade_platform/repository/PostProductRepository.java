@@ -3,6 +3,7 @@ package Green_trade.green_trade_platform.repository;
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
 import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.model.Seller;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,4 +37,7 @@ public interface PostProductRepository extends JpaRepository<PostProduct, Long> 
           AND p.deletedAt IS NULL
     """)
     Long countNewPostsInMonth(LocalDateTime startDate, LocalDateTime endDate);
+
+    @Query("SELECT COUNT(p) FROM PostProduct p WHERE p.active = :isActive AND p.seller.sellerId = :sellerId")
+    int countByActiveAndSeller(@Param("isActive") boolean isActive, @Param("sellerId") Long sellerId);
 }

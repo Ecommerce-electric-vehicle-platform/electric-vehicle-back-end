@@ -5,6 +5,7 @@ import Green_trade.green_trade_platform.enumerate.SystemWalletStatus;
 import Green_trade.green_trade_platform.mapper.DisputeMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.model.*;
+import Green_trade.green_trade_platform.request.MailRequest;
 import Green_trade.green_trade_platform.request.RaiseDisputeRequest;
 import Green_trade.green_trade_platform.request.RefundResolveRequest;
 import Green_trade.green_trade_platform.request.ResolveDisputeRequest;
@@ -42,6 +43,7 @@ public class DisputeController {
     private final NotificationSocketController notificationSocketController;
     private final SystemWalletServiceImpl systemWalletService;
     private final WalletServiceImpl walletService;
+    private final MailServiceImpl mailSender;
 
     @Operation(
             summary = "Raise a dispute for an order",
@@ -175,6 +177,34 @@ public class DisputeController {
                 Wallet sellerWalletAfterRefund = walletService.handleBuyerRefund(systemWallet, 100 - request.getRefundPercent(), sellerWallet, true);
 
                 systemWalletService.handleRefund(systemWallet);
+
+                MailRequest buyerMailRequest = MailRequest.builder()
+                        .from("green.trade.platform.391@gmail.com")
+                        .to(buyerWallet.getBuyer().getEmail())
+                        .subject("Kết quả xử lý khiếu nại đơn hàng #" + order.getId())
+                        .message("""
+                💚 <strong>Kết quả xử lý khiếu nại</strong><br><br>
+                Khiếu nại của bạn đã được Green Trade xem xét và phê duyệt hoàn tiền.<br>
+                Phần trăm hoàn tiền: %s%%<br><br>
+                Vui lòng kiểm tra ví của bạn để xác nhận giao dịch hoàn tiền đã được xử lý.<br><br>
+                Cảm ơn bạn đã tin tưởng Green Trade Platform!
+                """.formatted(request.getRefundPercent()))
+                        .build();
+
+                MailRequest sellerMailRequest = MailRequest.builder()
+                        .from("green.trade.platform.391@gmail.com")
+                        .to(sellerWallet.getBuyer().getEmail())
+                        .subject("Kết quả khiếu nại đơn hàng #" + order.getId())
+                        .message("""
+                ⚠️ <strong>Thông báo kết quả khiếu nại</strong><br><br>
+                Khiếu nại liên quan đến <strong>đơn hàng #%s</strong> đã được xử lý.<br><br>
+                🔹 <strong>Tỷ lệ thanh toán giữ lại:</strong> %s%%<br><br>
+                Vui lòng kiểm tra ví của bạn để xác nhận số dư mới.<br><br>
+                Trân trọng,<br>Green Trade Platform
+                """.formatted(order.getId(), 100 - request.getRefundPercent()))
+                        .build();
+                mailSender.sendBeautifulMail(sellerMailRequest);
+                mailSender.sendBeautifulMail(buyerMailRequest);
             }
             notificationSocketController.sendNotificationToUser(notification);
             return ResponseEntity.ok(notification);

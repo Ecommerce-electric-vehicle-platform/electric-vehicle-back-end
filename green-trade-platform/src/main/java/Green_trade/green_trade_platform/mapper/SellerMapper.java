@@ -47,4 +47,28 @@ public class SellerMapper {
                 .home(seller.getHome())
                 .build();
     }
+
+    public SellerResponse toDto2(Seller seller) {
+        if (seller == null) return null;
+
+        Buyer buyer = seller.getBuyer();
+
+        return SellerResponse.builder()
+                .sellerId(seller.getSellerId())
+                .storeName(seller.getStoreName())
+                .status(seller.getStatus())
+                .storePolicyUrl(seller.getStorePolicyUrl())
+                .taxNumber(seller.getTaxNumber())
+                .createAt(seller.getCreatedAt())
+                .updateAt(seller.getUpdatedAt())
+                .identityFrontImageUrl(seller.getIdentityFrontImageUrl())
+                .identityBackImageUrl(seller.getIdentityBackImageUrl())
+                .businessLicenseUrl(seller.getBusinessLicenseUrl())
+                .selfieUrl(seller.getSelfieUrl())
+                .sellerName(seller.getSellerName())
+                .nationality(seller.getNationality())
+                .home(seller.getHome())
+                .isActive(seller.getBuyer().isActive())
+                .build();
+    }
 }

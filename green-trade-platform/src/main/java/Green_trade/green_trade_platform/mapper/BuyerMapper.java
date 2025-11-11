@@ -25,6 +25,7 @@ public class BuyerMapper {
                 .email(buyer.getEmail())
                 .gender(buyer.getGender())
                 .dob(buyer.getDob())
+                .isActive(buyer.isActive())
                 .provinceName(buyer.getProvinceName())
                 .districtName(buyer.getDistrictName())
                 .wardName(buyer.getWardName())
