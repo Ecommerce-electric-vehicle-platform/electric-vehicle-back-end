@@ -37,6 +37,9 @@ public class SystemWallet {
     @Column(name = "balance", nullable = false, unique = false)
     private BigDecimal balance;
 
+    @Column(name = "shipping_fee", nullable = false, unique = false)
+    private BigDecimal shippingFee;
+
     @Column(name = "status", nullable = false, unique = false)
     @Enumerated(EnumType.STRING)
     private SystemWalletStatus status;
