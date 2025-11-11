@@ -70,23 +70,35 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public Order updateOrderCode(String orderCode, Order order) {
+        log.info(">>> [OrderServiceImpl] updateOrderCode - orderCode: {}, orderId: {}", orderCode, order.getId());
         order.setOrderCode(orderCode);
-        return orderRepository.save(order);
+        Order result = orderRepository.save(order);
+        log.info(">>> [OrderServiceImpl] updateOrderCode - result: {}", result);
+        return result;
     }
 
     public Order updateSystemWallet(SystemWallet systemWallet, Order order) {
+        log.info(">>> [OrderServiceImpl] updateSystemWallet - systemWalletId: {}, orderId: {}", systemWallet.getId(), order.getId());
         order.setSystemWallet(systemWallet);
-        return orderRepository.save(order);
+        Order result = orderRepository.save(order);
+        log.info(">>> [OrderServiceImpl] updateSystemWallet - result: {}", result);
+        return result;
     }
 
     public Order updateOrderTransactions(Order order, List<Transaction> transactions) {
+        log.info(">>> [OrderServiceImpl] updateOrderTransactions - orderId: {}, transactionsCount: {}", order.getId(), transactions.size());
         order.setTransactions(transactions);
-        return orderRepository.save(order);
+        Order result = orderRepository.save(order);
+        log.info(">>> [OrderServiceImpl] updateOrderTransactions - result: {}", result);
+        return result;
     }
 
     public Order updateOrderStatus(Order order, OrderStatus status) {
+        log.info(">>> [OrderServiceImpl] updateOrderStatus - orderId: {}, newStatus: {}", order.getId(), status);
         order.setStatus(status);
-        return orderRepository.save(order);
+        Order result = orderRepository.save(order);
+        log.info(">>> [OrderServiceImpl] updateOrderStatus - result: {}", result);
+        return result;
     }
 
     public Order cancelOrder(Long id, CancelOrderRequest request) throws Exception {
@@ -146,24 +158,35 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public Page<Order> getPendingOrders(Seller seller, int page, int size) {
+        log.info(">>> [OrderServiceImpl] getPendingOrders - sellerId: {}, page: {}, size: {}", seller.getSellerId(), page, size);
         Pageable pageable = PageRequest.of(page, size);
-        return orderRepository.findByPostProduct_SellerAndStatus(seller, OrderStatus.PENDING, pageable);
+        Page<Order> result = orderRepository.findByPostProduct_SellerAndStatus(seller, OrderStatus.PENDING, pageable);
+        log.info(">>> [OrderServiceImpl] getPendingOrders - result: {} orders found", result.getTotalElements());
+        return result;
     }
 
     public Order verifyOrder(long id) {
+        log.info(">>> [OrderServiceImpl] verifyOrder - orderId: {}", id);
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("Can not find order with this order id: " + id)
         );
+        log.info(">>> [OrderServiceImpl] verifyOrder - found order: {}", order);
 
         order.setStatus(OrderStatus.VERIFIED);
-        return orderRepository.save(order);
+        Order result = orderRepository.save(order);
+        log.info(">>> [OrderServiceImpl] verifyOrder - result: {}", result);
+        return result;
     }
 
     public Order getOrderById(Long orderId) {
+        log.info(">>> [OrderServiceImpl] getOrderById - orderId: {}", orderId);
         Order result = null;
         Optional<Order> orderOpt = orderRepository.findOrderById(orderId);
         if (orderOpt.isPresent()) {
             result = orderOpt.get();
+            log.info(">>> [OrderServiceImpl] getOrderById - found order: {}", result);
+        } else {
+            log.info(">>> [OrderServiceImpl] getOrderById - order not found");
         }
         return result;
     }
@@ -181,24 +204,39 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public Page<Order> getAllOrders(int page, int size, Seller seller) {
+        log.info(">>> [OrderServiceImpl] getAllOrders - sellerId: {}, page: {}, size: {}", seller.getSellerId(), page, size);
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return orderRepository.findAllByPostProduct_Seller(seller, pageable);
+        Page<Order> result = orderRepository.findAllByPostProduct_Seller(seller, pageable);
+        log.info(">>> [OrderServiceImpl] getAllOrders - result: {} orders found", result.getTotalElements());
+        return result;
     }
 
     public Order updateShippingFee(Order order, String shippingFee) {
+        log.info(">>> [OrderServiceImpl] updateShippingFee - orderId: {}, shippingFee: {}", order.getId(), shippingFee);
         order.setShippingFee(new BigDecimal(shippingFee));
-        return orderRepository.save(order);
+        Order result = orderRepository.save(order);
+        log.info(">>> [OrderServiceImpl] updateShippingFee - result: {}", result);
+        return result;
     }
 
     public int countPendingOrder(Seller seller) {
-        return orderRepository.countByStatusAndSeller(OrderStatus.PENDING, seller.getSellerId());
+        log.info(">>> [OrderServiceImpl] countPendingOrder - sellerId: {}", seller.getSellerId());
+        int result = orderRepository.countByStatusAndSeller(OrderStatus.PENDING, seller.getSellerId());
+        log.info(">>> [OrderServiceImpl] countPendingOrder - result: {} pending orders", result);
+        return result;
     }
 
     public int countAllOrder(Seller seller) {
-        return orderRepository.countBySeller(seller.getSellerId());
+        log.info(">>> [OrderServiceImpl] countAllOrder - sellerId: {}", seller.getSellerId());
+        int result = orderRepository.countBySeller(seller.getSellerId());
+        log.info(">>> [OrderServiceImpl] countAllOrder - result: {} total orders", result);
+        return result;
     }
 
     public BigDecimal getTotalRevenue(Seller seller) {
-        return orderRepository.getTotalRevenueBySeller(seller.getSellerId());
+        log.info(">>> [OrderServiceImpl] getTotalRevenue - sellerId: {}", seller.getSellerId());
+        BigDecimal result = orderRepository.getTotalRevenueBySeller(seller.getSellerId());
+        log.info(">>> [OrderServiceImpl] getTotalRevenue - result: {}", result);
+        return result;
     }
 }

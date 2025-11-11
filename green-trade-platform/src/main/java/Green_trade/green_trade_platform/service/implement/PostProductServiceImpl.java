@@ -162,16 +162,19 @@ public class PostProductServiceImpl implements PostProductService {
 
 
     public Page<PostProduct> getAllProductPaging(int page, int size, String sortedBy, boolean isAsc) {
+        log.info(">>> [PostProductServiceImpl] getAllProductPaging - page: {}, size: {}, sortedBy: {}, isAsc: {}", page, size, sortedBy, isAsc);
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortedBy).descending());
         if (!isAsc) {
             pageable = PageRequest.of(page, size, Sort.by(sortedBy).descending());
         }
         Page<PostProduct> postProductsPaging = postProductRepository.findAllBySoldFalseAndActiveTrue(pageable);
-        return new PageImpl<>(
+        Page<PostProduct> result = new PageImpl<>(
                 postProductsPaging.getContent(),
                 pageable,
                 postProductsPaging.getTotalElements()
         );
+        log.info(">>> [PostProductServiceImpl] getAllProductPaging - result: {} products found", result.getTotalElements());
+        return result;
     }
 
     public Page<PostProduct> getAllPostProductForVerifiedReview(int size, int page) throws Exception {
@@ -241,18 +244,26 @@ public class PostProductServiceImpl implements PostProductService {
     }
 
     public PostProduct postProductVerifiedRequest(VerifiedPostProductRequest request) throws Exception {
+        log.info(">>> [PostProductServiceImpl] postProductVerifiedRequest - request: {}", request);
         PostProduct postProduct = postProductRepository.findById(request.getPostId()).orElseThrow(() -> new Exception("Post is not existed"));
+        log.info(">>> [PostProductServiceImpl] postProductVerifiedRequest - found post: {}", postProduct.getId());
         Long sellerId = postProduct.getSeller().getSellerId();
         if (subscriptionService.isServicePackageExpired(sellerId)) {
+            log.info(">>> [PostProductServiceImpl] postProductVerifiedRequest - subscription expired for sellerId: {}", sellerId);
             throw new SubscriptionExpiredException();
         }
         postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.PENDING);
-        return postProductRepository.save(postProduct);
+        PostProduct result = postProductRepository.save(postProduct);
+        log.info(">>> [PostProductServiceImpl] postProductVerifiedRequest - result: {}", result);
+        return result;
     }
 
     public PostProduct updateSoldStatus(boolean status, PostProduct postProduct) {
+        log.info(">>> [PostProductServiceImpl] updateSoldStatus - postId: {}, status: {}", postProduct.getId(), status);
         postProduct.setSold(status);
-        return postProductRepository.save(postProduct);
+        PostProduct result = postProductRepository.save(postProduct);
+        log.info(">>> [PostProductServiceImpl] updateSoldStatus - result: {}", result);
+        return result;
     }
 
     public PostProduct findPostProductById(Long id) {
@@ -267,8 +278,11 @@ public class PostProductServiceImpl implements PostProductService {
     }
 
     public Page<PostProduct> getAllPostBySeller(Seller seller, int page, int size) {
+        log.info(">>> [PostProductServiceImpl] getAllPostBySeller - sellerId: {}, page: {}, size: {}", seller.getSellerId(), page, size);
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return postProductRepository.findBySeller(seller, pageable);
+        Page<PostProduct> result = postProductRepository.findBySeller(seller, pageable);
+        log.info(">>> [PostProductServiceImpl] getAllPostBySeller - result: {} posts found", result.getTotalElements());
+        return result;
     }
 
     public PostProduct hidePostProduct(Long id, boolean isHide) {
@@ -284,9 +298,12 @@ public class PostProductServiceImpl implements PostProductService {
     }
 
     public PostProduct findPostByWishId(long id) {
-        return wishListingRepository.findPostProductByWishListId(id).orElseThrow(
+        log.info(">>> [PostProductServiceImpl] findPostByWishId - wishId: {}", id);
+        PostProduct result = wishListingRepository.findPostProductByWishListId(id).orElseThrow(
                 () -> new IllegalArgumentException("Can not find post product with this wish-list id: " + id)
         );
+        log.info(">>> [PostProductServiceImpl] findPostByWishId - result: {}", result);
+        return result;
     }
 
     public PostProduct updatePostProduct(
@@ -361,16 +378,21 @@ public class PostProductServiceImpl implements PostProductService {
     }
 
     public Seller findSellerByPostId(Long id) {
+        log.info(">>> [PostProductServiceImpl] findSellerByPostId - postId: {}", id);
         PostProduct postProduct = postProductRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Can not find post product with id: " + id)
         );
-        return postProduct.getSeller();
+        log.info(">>> [PostProductServiceImpl] findSellerByPostId - found post: {}", postProduct.getId());
+        Seller result = postProduct.getSeller();
+        log.info(">>> [PostProductServiceImpl] findSellerByPostId - result: {}", result);
+        return result;
     }
 
     public Page<PostProduct> searchProduct(String type, String value, int page, int size) {
+        log.info(">>> [PostProductServiceImpl] searchProduct - type: {}, value: {}, page: {}, size: {}", type, value, page, size);
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-        return switch (type.toLowerCase()) {
+        Page<PostProduct> result = switch (type.toLowerCase()) {
             case "title" -> postProductRepository.findByTitleContainingIgnoreCase(value, pageable);
             case "brand" -> postProductRepository.findByBrandContainingIgnoreCase(value, pageable);
             case "model" -> postProductRepository.findByModelContainingIgnoreCase(value, pageable);
@@ -378,30 +400,47 @@ public class PostProductServiceImpl implements PostProductService {
             case "locationtrading" -> postProductRepository.findByLocationTradingContainingIgnoreCase(value, pageable);
             default -> throw new IllegalArgumentException("Invalid search type: " + type);
         };
+        log.info(">>> [PostProductServiceImpl] searchProduct - result: {} products found", result.getTotalElements());
+        return result;
     }
 
     public long getTotalNewPostInMonth(LocalDateTime startDate, LocalDateTime endDate) {
-        return postProductRepository.countNewPostsInMonth(startDate, endDate);
+        log.info(">>> [PostProductServiceImpl] getTotalNewPostInMonth - startDate: {}, endDate: {}", startDate, endDate);
+        long result = postProductRepository.countNewPostsInMonth(startDate, endDate);
+        log.info(">>> [PostProductServiceImpl] getTotalNewPostInMonth - result: {} posts", result);
+        return result;
     }
 
     public Page<PostProduct> getPendingVerifyPost(int page, int size) {
+        log.info(">>> [PostProductServiceImpl] getPendingVerifyPost - page: {}, size: {}", page, size);
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
-        return postProductRepository.findAllByVerifiedDecisionstatus(VerifiedDecisionStatus.PENDING, pageable);
+        Page<PostProduct> result = postProductRepository.findAllByVerifiedDecisionstatus(VerifiedDecisionStatus.PENDING, pageable);
+        log.info(">>> [PostProductServiceImpl] getPendingVerifyPost - result: {} posts found", result.getTotalElements());
+        return result;
     }
 
     public PostProduct handlePendingPostProduct(long id, VerifiedDecisionStatus decision) throws Exception {
+        log.info(">>> [PostProductServiceImpl] handlePendingPostProduct - postId: {}, decision: {}", id, decision);
         PostProduct postProduct = getPostProductById(id);
+        log.info(">>> [PostProductServiceImpl] handlePendingPostProduct - found post: {}", postProduct.getId());
 
         if (decision == VerifiedDecisionStatus.APPROVED) {
             postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.APPROVED);
+            log.info(">>> [PostProductServiceImpl] handlePendingPostProduct - set status to APPROVED");
         } else {
             postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.REJECTED);
+            log.info(">>> [PostProductServiceImpl] handlePendingPostProduct - set status to REJECTED");
         }
 
-        return postProductRepository.save(postProduct);
+        PostProduct result = postProductRepository.save(postProduct);
+        log.info(">>> [PostProductServiceImpl] handlePendingPostProduct - result: {}", result);
+        return result;
     }
 
     public int countAllActivePost(Seller seller) {
-        return postProductRepository.countByActiveAndSeller(true, seller.getSellerId());
+        log.info(">>> [PostProductServiceImpl] countAllActivePost - sellerId: {}", seller.getSellerId());
+        int result = postProductRepository.countByActiveAndSeller(true, seller.getSellerId());
+        log.info(">>> [PostProductServiceImpl] countAllActivePost - result: {} active posts", result);
+        return result;
     }
 }
