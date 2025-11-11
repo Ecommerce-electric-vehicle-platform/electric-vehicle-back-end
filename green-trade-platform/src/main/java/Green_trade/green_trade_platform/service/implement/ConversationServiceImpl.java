@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.service.ConversationService;
 import Green_trade.green_trade_platform.model.Conversation;
 import Green_trade.green_trade_platform.repository.ConversationRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -13,7 +14,7 @@ import java.util.List;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class ConversationServiceImpl {
+public class ConversationServiceImpl implements ConversationService {
     private final ConversationRepository conversationRepository;
 
     public Conversation createConversation(Conversation conversation) {

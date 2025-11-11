@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.controller.ChattingSocketController;
+import Green_trade.green_trade_platform.service.MessageService;
 import Green_trade.green_trade_platform.enumerate.MessageType;
 import Green_trade.green_trade_platform.model.Conversation;
 import Green_trade.green_trade_platform.model.Message;
@@ -20,7 +21,7 @@ import java.util.Map;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class MessageServiceImpl {
+public class MessageServiceImpl implements MessageService {
     private final MessageRepository messageRepository;
     private final CloudinaryService cloudinaryService;
     private final ChattingSocketController chattingSocketController;

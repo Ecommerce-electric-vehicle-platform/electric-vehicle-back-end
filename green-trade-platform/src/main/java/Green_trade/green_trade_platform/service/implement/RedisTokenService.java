@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
-public class RedisTokenService {
+public class RedisTokenService implements Green_trade.green_trade_platform.service.RedisTokenService {
     @Autowired
     private StringRedisTemplate redisTemplate;
 

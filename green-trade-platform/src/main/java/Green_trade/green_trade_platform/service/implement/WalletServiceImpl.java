@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.exception.WalletNotFoundException;
+import Green_trade.green_trade_platform.service.WalletService;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.SystemWallet;
 import Green_trade.green_trade_platform.model.Wallet;
@@ -25,7 +26,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-public class WalletServiceImpl {
+public class WalletServiceImpl implements WalletService {
     private final WalletRepository walletRepository;
     private final BuyerServiceImpl buyerService;
     private final WalletTransactionServiceImpl walletTransactionService;

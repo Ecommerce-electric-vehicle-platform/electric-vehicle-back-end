@@ -31,7 +31,7 @@ import java.util.Map;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class KycService {
+public class KycService implements Green_trade.green_trade_platform.service.KycService {
 
     private final BuyerRepository buyerRepository;
     private final CloudinaryService cloudinaryService;
@@ -105,7 +105,7 @@ public class KycService {
 
     }
 
-    private Map<String, String> callOcrApi(String imageUrl) throws IOException {
+    public Map<String, String> callOcrApi(String imageUrl) throws IOException {
         log.info(">>> Calling OCR API...");
         URL imageDownloadUrl = new URL(imageUrl);
         File tempFile = File.createTempFile("ocr", ".jpg");

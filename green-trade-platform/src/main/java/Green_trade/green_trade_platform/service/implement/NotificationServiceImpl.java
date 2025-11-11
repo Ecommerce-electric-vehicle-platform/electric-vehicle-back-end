@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.enumerate.AccountType;
+import Green_trade.green_trade_platform.service.NotificationService;
 import Green_trade.green_trade_platform.model.Notification;
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.repository.NotificationRepository;
@@ -14,7 +15,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class NotificationServiceImpl {
+public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
 
     public Notification createNotificationForSeller(Seller receiver, String title, String content) {

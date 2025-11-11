@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Service
 @Slf4j
-public class RedisOtpService {
+public class RedisOtpService implements Green_trade.green_trade_platform.service.RedisOtpService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 

@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.model.ShippingPartner;
+import Green_trade.green_trade_platform.service.ShippingPartnerService;
 import Green_trade.green_trade_platform.repository.ShippingPartnerRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -9,7 +10,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class ShippingPartnerServiceImpl {
+public class ShippingPartnerServiceImpl implements ShippingPartnerService {
 
     private final ShippingPartnerRepository shippingPartnerRepository;
 

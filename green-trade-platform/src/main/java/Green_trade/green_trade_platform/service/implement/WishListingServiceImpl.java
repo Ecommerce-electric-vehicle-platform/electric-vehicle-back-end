@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.enumerate.WishListPriority;
+import Green_trade.green_trade_platform.service.WishListingService;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.WishListing;
 import Green_trade.green_trade_platform.repository.WishListingRepository;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class WishListingServiceImpl {
+public class WishListingServiceImpl implements WishListingService {
     private final WishListingRepository wishListingRepository;
 
     public WishListing addWishList(WishListing wishListing) {

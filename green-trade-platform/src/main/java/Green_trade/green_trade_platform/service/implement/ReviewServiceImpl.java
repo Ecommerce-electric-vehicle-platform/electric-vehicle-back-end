@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.filter.BadWordFilter;
+import Green_trade.green_trade_platform.service.ReviewService;
 import Green_trade.green_trade_platform.mapper.ReviewMapper;
 import Green_trade.green_trade_platform.model.Order;
 import Green_trade.green_trade_platform.model.Review;
@@ -20,7 +21,7 @@ import java.util.*;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class ReviewServiceImpl {
+public class ReviewServiceImpl implements ReviewService {
     private final BadWordFilter badWordFilter;
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;

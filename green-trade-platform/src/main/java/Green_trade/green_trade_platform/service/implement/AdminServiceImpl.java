@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.enumerate.AccountStatus;
+import Green_trade.green_trade_platform.service.AdminService;
 import Green_trade.green_trade_platform.mapper.AdminMapper;
 import Green_trade.green_trade_platform.model.Admin;
 import Green_trade.green_trade_platform.model.Buyer;
@@ -27,7 +28,7 @@ import java.util.Map;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class AdminServiceImpl {
+public class AdminServiceImpl implements AdminService {
     private final AdminRepository adminRepository;
     private final StringUtils stringUtils;
     private final AdminMapper adminMapper;

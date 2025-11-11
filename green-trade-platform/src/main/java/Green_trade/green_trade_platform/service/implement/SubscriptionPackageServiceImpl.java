@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.mapper.SubscriptionMapper;
+import Green_trade.green_trade_platform.service.SubscriptionPackageService;
 import Green_trade.green_trade_platform.mapper.SubscriptionPackageMapper;
 import Green_trade.green_trade_platform.model.Buyer;
 import Green_trade.green_trade_platform.model.Seller;
@@ -30,7 +31,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SubscriptionPackageServiceImpl {
+public class SubscriptionPackageServiceImpl implements SubscriptionPackageService {
 
     private final SubscriptionPackagesRepository subscriptionPackageRepository;
     private final SubscriptionPackageMapper subscriptionPackageMapper;
