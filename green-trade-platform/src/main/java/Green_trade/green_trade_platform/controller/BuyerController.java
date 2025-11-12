@@ -1550,7 +1550,6 @@ public class BuyerController {
     }
 
     @Operation(
-<<<<<<< HEAD
             summary = "Buyer confirms order receipt",
             description = """
                     Allows a buyer to confirm that they have received their order, 
@@ -1635,28 +1634,28 @@ public class BuyerController {
     ) {
         try {
             log.info(">>> [BuyerController] confirmOrder - orderId: {}", orderId);
-            
+
             // Lấy buyer hiện tại
             Buyer buyer = buyerService.getCurrentUser();
             log.info(">>> [BuyerController] Current buyer: {}", buyer.getBuyerId());
-            
+
             // Xác nhận đơn hàng
             Order confirmedOrder = orderService.confirmOrder(orderId, buyer);
-            
+
             // Cập nhật system wallet endAt nếu có
             if (confirmedOrder.getSystemWallet() != null) {
                 systemWalletService.updateTimeWhenBuyerReceivedProduct(confirmedOrder.getSystemWallet());
                 log.info(">>> [BuyerController] Updated system wallet endAt for order {}", orderId);
             }
-            
+
             // Xử lý transaction cho COD nếu chưa có
             if (confirmedOrder.getTransactions() != null && !confirmedOrder.getTransactions().isEmpty()) {
                 String paymentGateway = confirmedOrder.getTransactions().getLast().getPayment().getGatewayName();
-                
+
                 // Kiểm tra xem transaction SUCCESS đã có chưa
                 boolean hasSuccessTransaction = confirmedOrder.getTransactions().stream()
                         .anyMatch(t -> t.getStatus().equals(TransactionStatus.SUCCESS));
-                
+
                 if ("COD".equalsIgnoreCase(paymentGateway) && !hasSuccessTransaction) {
                     Transaction transaction = transactionService.createTransaction(
                             confirmedOrder,
@@ -1666,16 +1665,16 @@ public class BuyerController {
                     log.info(">>> [BuyerController] Created transaction for COD order {}", orderId);
                 }
             }
-            
+
             OrderResponse responseData = orderMapper.toDto(confirmedOrder);
-            
+
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "ORDER CONFIRMED SUCCESSFULLY",
                     responseData,
                     null
             ));
-            
+
         } catch (OrderNotFound e) {
             log.error(">>> [BuyerController] Order not found: {}", orderId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseMapper.toDto(
@@ -1696,10 +1695,6 @@ public class BuyerController {
     }
 
     @Operation(
-            summary = "Get total number of buyers",
-            description = "This endpoint returns the total number of registered buyers in the system. " +
-                    "Accessible only by users with the ADMIN role."
-=======
             summary = "Get total count of buyers (Admin only)",
             description = """
                     Retrieve the total number of registered buyers in the system - Admin access only.
