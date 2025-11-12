@@ -81,7 +81,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
         Map<String, Object> walletResult = walletService.handleSignPackageForSeller(buyer, request.getPrice());
 
-        LocalDateTime startDate = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        LocalDateTime startDate = DateUtils.getCurrentVietnamTime();
         LocalDateTime endDate = startDate.plusDays(request.getDurationByDay());
         Subscription subscription = Subscription.builder()
                 .seller(seller)
@@ -120,7 +120,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
         if (subscription.getIsActive() == true) {
             subscription.setIsActive(false);
-            subscription.setEndDay(DateUtils.convertToVietnamTime(LocalDateTime.now()));
+            subscription.setEndDay(DateUtils.getCurrentVietnamTime());
         } else {
             throw new IllegalArgumentException("This seller has not been sign any packages yet.");
         }

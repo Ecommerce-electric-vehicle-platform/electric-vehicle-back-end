@@ -34,7 +34,7 @@ public class SubscriptionPackageController {
     private final SubscriptionMapper subscriptionMapper;
 
     @Operation(
-            summary = "Get active subscription packages for sellers",
+            summary = "Get active subscription packages for everyone",
             description = """
                         Returns a paginated list of active subscription packages available in the system for sellers to register.  
                         Each package contains details such as package name, description, duration, price, and features.

@@ -57,7 +57,11 @@ public final class DateUtils {
     /**
      * Chuyển đổi LocalDateTime từ UTC sang giờ địa phương Việt Nam (UTC+7)
      * 
-     * @param dateTime LocalDateTime cần chuyển đổi (giả định đang ở UTC)
+     * LƯU Ý: Hàm này CHỈ dùng khi bạn chắc chắn input là UTC và cần chuyển sang VN.
+     * KHÔNG dùng với LocalDateTime.now() vì nó đã là giờ VN rồi.
+     * Để lấy thời gian hiện tại, dùng getCurrentVietnamTime() thay vì convertToVietnamTime(LocalDateTime.now())
+     * 
+     * @param dateTime LocalDateTime cần chuyển đổi (PHẢI là UTC)
      * @return LocalDateTime đã được chuyển đổi sang giờ Việt Nam
      */
     public static LocalDateTime convertToVietnamTime(LocalDateTime dateTime) {

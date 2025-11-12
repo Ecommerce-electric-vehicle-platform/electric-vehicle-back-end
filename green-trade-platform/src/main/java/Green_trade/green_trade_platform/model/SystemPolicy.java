@@ -50,12 +50,12 @@ public class SystemPolicy {
 
     @PrePersist
     public void onCreate() {
-        this.createdAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.createdAt = DateUtils.getCurrentVietnamTime();
     }
 
     @PreUpdate
     public void onUpdate() {
-        this.updatedAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.updatedAt = DateUtils.getCurrentVietnamTime();
     }
 
     @JoinColumn(name = "admin_id")

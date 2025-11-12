@@ -24,7 +24,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .orElseThrow(
                         () -> new Exception("Seller doesn't subscribe any service")
                 );
-        if (DateUtils.convertToVietnamTime(LocalDateTime.now()).isAfter(subscription.getEndDay())) {
+        if (DateUtils.getCurrentVietnamTime().isAfter(subscription.getEndDay())) {
             result = true;
         }
         return result;

@@ -62,6 +62,6 @@ public class Message {
     @PrePersist
     public void onCreate() {
         this.status = MessageStatus.NOT_READ_YET;
-        this.sentAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.sentAt = DateUtils.getCurrentVietnamTime();
     }
 }

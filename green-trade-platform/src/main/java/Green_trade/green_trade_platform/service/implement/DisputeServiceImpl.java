@@ -108,7 +108,7 @@ public class DisputeServiceImpl implements DisputeService {
                     .type(AccountType.BUYER)
                     .title("REJECT YOUR ORDER DISPUTE")
                     .content(request.getResolution())
-                    .createdAt(DateUtils.convertToVietnamTime(LocalDateTime.now()))
+                    .createdAt(DateUtils.getCurrentVietnamTime())
                     .build();
         } else if (request.getDecision() == DisputeDecision.ACCEPTED) {
             dispute.setStatus(DisputeStatus.ACCEPTED);
@@ -122,7 +122,7 @@ public class DisputeServiceImpl implements DisputeService {
                     .type(AccountType.BUYER)
                     .title("ACCEPTED YOUR ORDER DISPUTE")
                     .content(request.getResolution())
-                    .createdAt(DateUtils.convertToVietnamTime(LocalDateTime.now()))
+                    .createdAt(DateUtils.getCurrentVietnamTime())
                     .build();
         }
 

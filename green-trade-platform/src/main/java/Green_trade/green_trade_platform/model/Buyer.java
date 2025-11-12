@@ -108,11 +108,11 @@ public class Buyer {
     @PrePersist
     public void onCreate() {
         this.isActive = true;
-        this.createdAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.createdAt = DateUtils.getCurrentVietnamTime();
     }
 
     @PreUpdate
     public void onUpdate() {
-        this.updatedAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.updatedAt = DateUtils.getCurrentVietnamTime();
     }
 }

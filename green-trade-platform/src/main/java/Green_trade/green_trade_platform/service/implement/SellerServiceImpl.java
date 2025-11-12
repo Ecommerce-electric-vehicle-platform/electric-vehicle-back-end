@@ -86,7 +86,7 @@ public class SellerServiceImpl implements SellerService {
             Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(sellerOpt.get().getSellerId()).orElseThrow(() -> new Exception("Seller doesn't subscribe service"));
             log.info(">>> [SellerServiceImpl] checkServicePackageValidity - found subscription: {}", subscription.getId());
 
-            if (DateUtils.convertToVietnamTime(LocalDateTime.now()).isAfter(subscription.getEndDay()) || subscription.getIsActive() == false || subscription.getRemainPost() == 0) {
+            if (DateUtils.getCurrentVietnamTime().isAfter(subscription.getEndDay()) || subscription.getIsActive() == false || subscription.getRemainPost() == 0) {
                 log.info(">>> [SellerServiceImpl] checkServicePackageValidity - subscription expired or inactive");
                 throw new SubscriptionExpiredException();
             }
@@ -137,7 +137,7 @@ public class SellerServiceImpl implements SellerService {
                 .sellerId(seller.getSellerId())
                 .reason(request.getMessage())
                 .decision(request.getDecision())
-                .decidedAt(DateUtils.convertToVietnamTime(LocalDateTime.now()))
+                .decidedAt(DateUtils.getCurrentVietnamTime())
                 .build();
 
         if (request.getDecision().equals(VerifiedDecisionStatus.APPROVED)) {
@@ -153,7 +153,7 @@ public class SellerServiceImpl implements SellerService {
                     .type(AccountType.SELLER)
                     .title("UPGRADE ACCOUNT INFORMATION RESULT")
                     .content(request.getMessage())
-                    .createdAt(DateUtils.convertToVietnamTime(LocalDateTime.now()))
+                    .createdAt(DateUtils.getCurrentVietnamTime())
                     .build();
 
             mailRequest.setMessage("""
@@ -185,7 +185,7 @@ public class SellerServiceImpl implements SellerService {
                     .type(AccountType.BUYER)
                     .title("UPGRADE ACCOUNT INFORMATION RESULT")
                     .content(request.getMessage())
-                    .createdAt(DateUtils.convertToVietnamTime(LocalDateTime.now()))
+                    .createdAt(DateUtils.getCurrentVietnamTime())
                     .build();
         }
         notificationRepository.save(notice);

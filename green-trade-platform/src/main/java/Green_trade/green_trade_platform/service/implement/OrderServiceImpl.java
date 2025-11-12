@@ -162,7 +162,7 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] update order sold successfully");
                 orderFound.setCancelOrderReason(cancelOrderReason);
                 log.info(">>> [OrderServiceImpl] update cancel order reason successfully");
-                orderFound.setCanceledAt(DateUtils.convertToVietnamTime(LocalDateTime.now()));
+                orderFound.setCanceledAt(DateUtils.getCurrentVietnamTime());
                 log.info(">>> [OrderServiceImpl] update canceled at successfully");
             } else if (orderFound.getStatus().equals(OrderStatus.PAID)) {
                 log.info(">>> [OrderServiceImpl] order paid status");
@@ -177,7 +177,7 @@ public class OrderServiceImpl implements OrderService {
                 log.info(">>> [OrderServiceImpl] update order sold successfully");
                 orderFound.setCancelOrderReason(cancelOrderReason);
                 log.info(">>> [OrderServiceImpl] update cancel order reason successfully");
-                orderFound.setCanceledAt(DateUtils.convertToVietnamTime(LocalDateTime.now()));
+                orderFound.setCanceledAt(DateUtils.getCurrentVietnamTime());
                 log.info(">>> [OrderServiceImpl] update canceled at successfully");
             } else {
                 throw new Exception("Cannot cancel order");

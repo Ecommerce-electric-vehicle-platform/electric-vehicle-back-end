@@ -45,7 +45,7 @@ public class Transaction {
 
     @PrePersist
     public void onCreate() {
-        this.createdAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.createdAt = DateUtils.getCurrentVietnamTime();
     }
 
     @ManyToOne(fetch = FetchType.LAZY)

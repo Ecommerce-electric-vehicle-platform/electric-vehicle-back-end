@@ -120,12 +120,12 @@ public class Order {
 
     @PrePersist
     public void onCreate() {
-        this.createdAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
-        this.updatedAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.createdAt = DateUtils.getCurrentVietnamTime();
+        this.updatedAt = DateUtils.getCurrentVietnamTime();
     }
 
     @PreUpdate
     public void onUpdate() {
-        this.updatedAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.updatedAt = DateUtils.getCurrentVietnamTime();
     }
 }

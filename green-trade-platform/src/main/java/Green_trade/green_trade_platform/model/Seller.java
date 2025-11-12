@@ -84,12 +84,12 @@ public class Seller {
     @PrePersist
     public void onCreate() {
         this.status = SellerStatus.PENDING;
-        this.createdAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.createdAt = DateUtils.getCurrentVietnamTime();
     }
 
     @PreUpdate
     public void onUpdate() {
-        this.updatedAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.updatedAt = DateUtils.getCurrentVietnamTime();
     }
 
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)

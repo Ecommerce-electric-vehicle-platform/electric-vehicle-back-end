@@ -40,7 +40,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     public void markAsRead(Long notificationId) {
         Notification isRead = notificationRepository.findById(notificationId).orElseThrow();
-        isRead.setReadAt(DateUtils.convertToVietnamTime(LocalDateTime.now()));
+        isRead.setReadAt(DateUtils.getCurrentVietnamTime());
         notificationRepository.save(isRead);
     }
 }

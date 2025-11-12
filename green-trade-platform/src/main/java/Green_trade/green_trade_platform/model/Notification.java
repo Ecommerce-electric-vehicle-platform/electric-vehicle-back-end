@@ -45,7 +45,7 @@ public class Notification {
 
     @PrePersist
     public void onCreate() {
-        this.createdAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
-        this.sendAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.createdAt = DateUtils.getCurrentVietnamTime();
+        this.sendAt = DateUtils.getCurrentVietnamTime();
     }
 }
