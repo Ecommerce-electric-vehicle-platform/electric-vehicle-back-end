@@ -38,13 +38,15 @@ public class EscrowAutoResolveTask {
             log.info(">>> [EscrowAutoResolveTask] Current time: {}", currentTime);
             
             // Tìm tất cả escrow records có status ESCROW_HOLD và endAt đã qua
+            // Lưu ý: endAt chỉ được set khi order được complete (status = COMPLETED)
+            // Nếu endAt = null, nghĩa là order chưa complete, không nên auto release
             List<SystemWallet> escrowRecords = systemWalletRepository.findAll().stream()
                     .filter(sw -> sw.getStatus() == SystemWalletStatus.ESCROW_HOLD)
                     .filter(sw -> sw.getEndAt() != null && 
                             (sw.getEndAt().isBefore(currentTime) || sw.getEndAt().isEqual(currentTime)))
                     .toList();
             
-            log.info(">>> [EscrowAutoResolveTask] Found {} escrow records to resolve (endAt <= currentTime)", escrowRecords.size());
+            log.info(">>> [EscrowAutoResolveTask] Found {} escrow records to resolve (endAt <= currentTime, order must be COMPLETED)", escrowRecords.size());
             
             for (SystemWallet escrowRecord : escrowRecords) {
                 try {
@@ -67,7 +69,7 @@ public class EscrowAutoResolveTask {
                             .balanceBefore(balanceBefore)
                             .status(TransactionStatus.SUCCESS)
                             .description("Tiền được chuyển tự động từ escrow cho đơn hàng #" + 
-                                    (escrowRecord.getOrder() != null ? escrowRecord.getOrder().getId() : "N/A"))
+                                    (escrowRecord.getOrder() != null ? escrowRecord.getOrder().getOrderCode() : "N/A"))
                             .externalTransactionReference("ESCROW_AUTO_" + escrowRecord.getId())
                             .order(escrowRecord.getOrder())
                             .build();
@@ -79,7 +81,8 @@ public class EscrowAutoResolveTask {
                     
                     // Cập nhật status của escrow record thành IS_SOLVED
                     escrowRecord.setStatus(SystemWalletStatus.IS_SOLVED);
-                    escrowRecord.setEndAt(DateUtils.getCurrentVietnamTime()); // Cập nhật endAt thành thời gian thực tế đã giải quyết
+                    // Ghi lại thời gian thực tế đã giải quyết (endAt ban đầu là thời gian dự kiến, giờ là thời gian thực tế)
+                    escrowRecord.setEndAt(DateUtils.getCurrentVietnamTime());
                     systemWalletRepository.save(escrowRecord);
                     
                     log.info(">>> [EscrowAutoResolveTask] Successfully resolved escrow record ID: {}, " +

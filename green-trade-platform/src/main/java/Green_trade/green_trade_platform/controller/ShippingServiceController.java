@@ -262,21 +262,13 @@ public class ShippingServiceController {
         } else if (status.equalsIgnoreCase("delivered")) {
             if (!foundOrder.getStatus().equals(OrderStatus.COMPLETED)) {
                 orderService.updateOrderStatus(foundOrder, OrderStatus.DELIVERED);
-//                orderService.updateOrderStatus(foundOrder, OrderStatus.COMPLETED);
+                // Tạo transaction cho COD nếu cần
                 if ("COD".equalsIgnoreCase(foundOrder.getTransactions().getLast().getPayment().getGatewayName())) {
                     Transaction transaction = transactionService.createTransaction(foundOrder, TransactionStatus.SUCCESS, foundOrder.getTransactions().getLast().getPayment());
-//                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(foundOrder, foundOrder.getShippingFee());
-//                log.info(">>> pass create system wallet");
-//                foundOrder = orderService.updateSystemWallet(systemWallet, foundOrder);
-                    systemWalletService.updateTimeWhenBuyerReceivedProduct(foundOrder.getSystemWallet());
-                    log.info(">>> pass update system wallet for order");
-                } else {
-//                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(foundOrder, foundOrder.getShippingFee());
-//                log.info(">>> pass create system wallet");
-//                foundOrder = orderService.updateSystemWallet(systemWallet, foundOrder);
-                    systemWalletService.updateTimeWhenBuyerReceivedProduct(foundOrder.getSystemWallet());
-                    log.info(">>> pass update system wallet for order");
+                    log.info(">>> [ShippingServiceController] Created transaction for COD order");
                 }
+                // Lưu ý: Không cập nhật system wallet endAt ở đây
+                // endAt sẽ được cập nhật khi order status chuyển sang COMPLETED
             }
         }
 

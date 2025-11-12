@@ -41,6 +41,6 @@ public class Announcement {
 
     @PrePersist
     public void onCreate() {
-        this.createdAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.createdAt = DateUtils.getCurrentVietnamTime();
     }
 }

@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class UpdateSystemWalletEndAtRequest {
     @NotNull(message = "End date time is required.")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime endAt;
 }
 

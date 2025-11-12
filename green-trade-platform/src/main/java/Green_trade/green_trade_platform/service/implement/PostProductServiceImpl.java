@@ -56,7 +56,7 @@ public class PostProductServiceImpl implements PostProductService {
                     request.getSellerId()).orElseThrow(() -> new SubscriptionNotFound()
             );
             Long maxImg = subscription.getSubscriptionPackage().getMaxImgPerPost();
-            if (subscription.getEndDay().isBefore(DateUtils.convertToVietnamTime(LocalDateTime.now()))) {
+            if (subscription.getEndDay().isBefore(DateUtils.getCurrentVietnamTime())) {
                 throw new SubscriptionExpiredException();
             }
             if (files.size() > maxImg) {
@@ -92,8 +92,8 @@ public class PostProductServiceImpl implements PostProductService {
                     .active(true)
                     .verifiedDecisionstatus(VerifiedDecisionStatus.UNVAILABLE)
                     .verified(false)
-                    .createdAt(DateUtils.convertToVietnamTime(LocalDateTime.now()))
-                    .updatedAt(DateUtils.convertToVietnamTime(LocalDateTime.now()))
+                    .createdAt(DateUtils.getCurrentVietnamTime())
+                    .updatedAt(DateUtils.getCurrentVietnamTime())
                     .deletedAt(null)
                     .category(category)
                     .admin(null)
