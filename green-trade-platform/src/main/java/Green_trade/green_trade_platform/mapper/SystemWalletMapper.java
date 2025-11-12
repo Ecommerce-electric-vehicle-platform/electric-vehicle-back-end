@@ -21,6 +21,7 @@ public class SystemWalletMapper {
                 .status(systemWallet.getStatus())
                 .orderCode(systemWallet.getOrder().getOrderCode())
                 .createdAt(systemWallet.getCreatedAt())
+                .endAt(systemWallet.getEndAt())
                 .build();
     }
 }

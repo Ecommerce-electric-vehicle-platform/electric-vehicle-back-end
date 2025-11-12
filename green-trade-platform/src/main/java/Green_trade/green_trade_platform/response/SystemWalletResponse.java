@@ -19,4 +19,5 @@ public class SystemWalletResponse {
     private SystemWalletStatus status;
     private String orderCode;
     private LocalDateTime createdAt;
+    private LocalDateTime endAt;
 }
