@@ -262,7 +262,7 @@ public class ShippingServiceController {
         } else if (status.equalsIgnoreCase("delivered")) {
             if (!foundOrder.getStatus().equals(OrderStatus.COMPLETED)) {
                 orderService.updateOrderStatus(foundOrder, OrderStatus.DELIVERED);
-                orderService.updateOrderStatus(foundOrder, OrderStatus.COMPLETED);
+//                orderService.updateOrderStatus(foundOrder, OrderStatus.COMPLETED);
                 if ("COD".equalsIgnoreCase(foundOrder.getTransactions().getLast().getPayment().getGatewayName())) {
                     Transaction transaction = transactionService.createTransaction(foundOrder, TransactionStatus.SUCCESS, foundOrder.getTransactions().getLast().getPayment());
 //                SystemWallet systemWallet = systemWalletService.createEscrowRecordAfterReduceFeeCOD(foundOrder, foundOrder.getShippingFee());
