@@ -19,7 +19,7 @@ public interface WalletService {
 
     boolean isBuyerHasWallet(Buyer buyer);
 
-    Wallet handleBuyerRefund(SystemWallet systemWallet, double refundPercent, Wallet wallet, boolean isSeller);
+    Wallet handleBuyerRefund(SystemWallet systemWallet, double refundPercent, Wallet wallet, boolean isSeller, String orderCode);
 
     Wallet handleBuyerRefundForCancelledOrder(SystemWallet systemWallet, double refundPercent, Wallet wallet);
 

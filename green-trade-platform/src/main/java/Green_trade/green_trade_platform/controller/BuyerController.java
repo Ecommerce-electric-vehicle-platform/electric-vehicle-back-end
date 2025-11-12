@@ -1,7 +1,9 @@
 package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.enumerate.OrderStatus;
+import Green_trade.green_trade_platform.enumerate.TransactionStatus;
 import Green_trade.green_trade_platform.enumerate.WishListPriority;
+import Green_trade.green_trade_platform.exception.OrderNotFound;
 import Green_trade.green_trade_platform.exception.PaymentMethodNotSupportedException;
 import Green_trade.green_trade_platform.exception.PostProductNotFound;
 import Green_trade.green_trade_platform.exception.ProfileException;
@@ -1548,6 +1550,156 @@ public class BuyerController {
     }
 
     @Operation(
+<<<<<<< HEAD
+            summary = "Buyer confirms order receipt",
+            description = """
+                    Allows a buyer to confirm that they have received their order, 
+                    which updates the order status from DELIVERED to COMPLETED.
+                    
+                    **Workflow:**
+                    1. Buyer calls this endpoint after receiving the order
+                    2. System validates:
+                       - Order exists
+                       - Order belongs to the authenticated buyer
+                       - Order status is DELIVERED (not already COMPLETED)
+                    3. System updates order status to COMPLETED
+                    4. Returns updated order information
+                    
+                    **Business Rules:**
+                    - Only the buyer who placed the order can confirm it
+                    - Order must be in DELIVERED status
+                    - If order is already COMPLETED, returns the order without changes
+                    
+                    **Path Parameters:**
+                    - **orderId** *(Long, required)* - The unique identifier of the order to confirm
+                    
+                    **Response:**
+                    Returns the updated order object with status = COMPLETED
+                    
+                    **Error Cases:**
+                    - Order not found → 404
+                    - Order does not belong to buyer → 403
+                    - Order status is not DELIVERED → 400
+                    
+                    **Permissions:** Requires ROLE_BUYER authentication.
+                    **Example:** PUT /api/v1/buyer/orders/123/confirm
+                    """,
+            parameters = {
+                    @Parameter(
+                            name = "orderId",
+                            description = "The ID of the order to confirm",
+                            required = true,
+                            example = "123"
+                    )
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Order confirmed successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = RestResponse.class),
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                        "success": true,
+                                                        "message": "ORDER CONFIRMED SUCCESSFULLY",
+                                                        "data": {
+                                                            "id": 123,
+                                                            "status": "COMPLETED",
+                                                            ...
+                                                        }
+                                                    }
+                                                    """
+                                    )
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Order status is not DELIVERED or order already completed"
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Order does not belong to this buyer"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Order not found"
+                    )
+            }
+    )
+    @PreAuthorize("hasRole('ROLE_BUYER')")
+    @PutMapping("/orders/{orderId}/confirm")
+    public ResponseEntity<?> confirmOrder(
+            @PathVariable(name = "orderId") Long orderId
+    ) {
+        try {
+            log.info(">>> [BuyerController] confirmOrder - orderId: {}", orderId);
+            
+            // Lấy buyer hiện tại
+            Buyer buyer = buyerService.getCurrentUser();
+            log.info(">>> [BuyerController] Current buyer: {}", buyer.getBuyerId());
+            
+            // Xác nhận đơn hàng
+            Order confirmedOrder = orderService.confirmOrder(orderId, buyer);
+            
+            // Cập nhật system wallet endAt nếu có
+            if (confirmedOrder.getSystemWallet() != null) {
+                systemWalletService.updateTimeWhenBuyerReceivedProduct(confirmedOrder.getSystemWallet());
+                log.info(">>> [BuyerController] Updated system wallet endAt for order {}", orderId);
+            }
+            
+            // Xử lý transaction cho COD nếu chưa có
+            if (confirmedOrder.getTransactions() != null && !confirmedOrder.getTransactions().isEmpty()) {
+                String paymentGateway = confirmedOrder.getTransactions().getLast().getPayment().getGatewayName();
+                
+                // Kiểm tra xem transaction SUCCESS đã có chưa
+                boolean hasSuccessTransaction = confirmedOrder.getTransactions().stream()
+                        .anyMatch(t -> t.getStatus().equals(TransactionStatus.SUCCESS));
+                
+                if ("COD".equalsIgnoreCase(paymentGateway) && !hasSuccessTransaction) {
+                    Transaction transaction = transactionService.createTransaction(
+                            confirmedOrder,
+                            TransactionStatus.SUCCESS,
+                            confirmedOrder.getTransactions().getLast().getPayment()
+                    );
+                    log.info(">>> [BuyerController] Created transaction for COD order {}", orderId);
+                }
+            }
+            
+            OrderResponse responseData = orderMapper.toDto(confirmedOrder);
+            
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "ORDER CONFIRMED SUCCESSFULLY",
+                    responseData,
+                    null
+            ));
+            
+        } catch (OrderNotFound e) {
+            log.error(">>> [BuyerController] Order not found: {}", orderId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseMapper.toDto(
+                    false,
+                    "ORDER NOT FOUND",
+                    null,
+                    e.getMessage()
+            ));
+        } catch (Exception e) {
+            log.error(">>> [BuyerController] Error confirming order: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMapper.toDto(
+                    false,
+                    "ERROR CONFIRMING ORDER: " + e.getMessage(),
+                    null,
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Get total number of buyers",
+            description = "This endpoint returns the total number of registered buyers in the system. " +
+                    "Accessible only by users with the ADMIN role."
+=======
             summary = "Get total count of buyers (Admin only)",
             description = """
                     Retrieve the total number of registered buyers in the system - Admin access only.
@@ -1568,6 +1720,7 @@ public class BuyerController {
                     - No access for regular buyers or sellers
                     """,
             tags = {"Admin - Buyer Management"}
+>>>>>>> main
     )
     @ApiResponses(value = {
             @ApiResponse(

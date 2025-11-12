@@ -173,8 +173,8 @@ public class DisputeController {
                 Wallet buyerWallet = walletService.findWalletById(systemWallet.getBuyerWalletId());
                 Wallet sellerWallet = walletService.findWalletById(systemWallet.getSellerWalletId());
 
-                Wallet buyerWalletAfterRefund = walletService.handleBuyerRefund(systemWallet, request.getRefundPercent(), buyerWallet, false);
-                Wallet sellerWalletAfterRefund = walletService.handleBuyerRefund(systemWallet, 100 - request.getRefundPercent(), sellerWallet, true);
+                Wallet buyerWalletAfterRefund = walletService.handleBuyerRefund(systemWallet, request.getRefundPercent(), buyerWallet, false, order.getOrderCode());
+                Wallet sellerWalletAfterRefund = walletService.handleBuyerRefund(systemWallet, 100 - request.getRefundPercent(), sellerWallet, true, order.getOrderCode());
 
                 systemWalletService.handleRefund(systemWallet);
 

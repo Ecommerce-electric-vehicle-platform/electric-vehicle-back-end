@@ -94,19 +94,19 @@ public class WalletServiceImpl implements WalletService {
         return result;
     }
 
-    public Wallet handleBuyerRefund(SystemWallet systemWallet, double refundPercent, Wallet wallet, boolean isSeller) {
+    public Wallet handleBuyerRefund(SystemWallet systemWallet, double refundPercent, Wallet wallet, boolean isSeller, String orderCode) {
         BigDecimal systemBalance = systemWallet.getBalance();
         BigDecimal money = systemBalance
                 .multiply(BigDecimal.valueOf(refundPercent))
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         if (!isSeller) {
-            WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, true, "Refund money from dispute");
+            WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, true, "Refund money from dispute" + orderCode);
             log.info(">>> [Wallet Service] Balance before refunding money for buyer: {}", wallet.getBalance());
             wallet.setBalance(wallet.getBalance().add(money));
             wallet = walletRepository.save(wallet);
             log.info(">>> [Wallet Service] Balance after refunding money for buyer: {}", wallet.getBalance());
         } else {
-            WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, false, "Refund money from dispute");
+            WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, false, "Refund money from dispute" + orderCode);
             log.info(">>> [Wallet Service] Balance before refunding money for seller: {}", wallet.getBalance());
             wallet.setBalance(wallet.getBalance().add(money));
             wallet = walletRepository.save(wallet);

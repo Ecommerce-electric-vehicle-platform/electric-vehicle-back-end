@@ -17,5 +17,7 @@ public class SystemWalletResponse {
     private BigDecimal balance;
     private BigDecimal shippingFee;
     private SystemWalletStatus status;
+    private String orderCode;
     private LocalDateTime createdAt;
+    private LocalDateTime endAt;
 }

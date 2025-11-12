@@ -99,7 +99,7 @@ public class SystemConfigController {
 
             SystemConfig updatedConfig = systemConfigService.updateConfig(
                     configKey,
-                    request.getConfigValue(),
+                    request.getConfigValue().toUpperCase(),
                     admin.getId()
             );
 
@@ -112,88 +112,6 @@ public class SystemConfigController {
         } catch (Exception e) {
             return ResponseEntity.ok(responseMapper.toDto(false,
                     "Failed to update config: " + e.getMessage(),
-                    null,
-                    e));
-        }
-    }
-
-    @Operation(
-            summary = "Update escrow transfer seconds",
-            description = "Updates the escrow transfer delay in seconds. Admin only. This configures how long before escrow funds are automatically transferred to seller."
-    )
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping("/escrow-transfer-seconds")
-    public ResponseEntity<?> updateEscrowTransferSeconds(
-            @Valid @RequestBody UpdateSystemConfigRequest request) {
-        try {
-            Admin admin = adminService.getCurrentUser();
-            if(!admin.isSuperAdmin()) {
-                throw new IllegalArgumentException("Only super admin can access this resource.");
-            }
-
-            String configKey = "ESCROW_TRANSFER_SECONDS";
-
-            SystemConfig updatedConfig = systemConfigService.updateConfig(
-                    configKey,
-                    request.getConfigValue(),
-                    admin.getId()
-            );
-
-            long seconds = Long.parseLong(updatedConfig.getConfigValue());
-            long days = seconds / 86400;
-            long hours = seconds / 3600;
-            long minutes = seconds / 60;
-
-            Map<String, Object> result = Map.of(
-                    "config", configMapper.toDto(updatedConfig),
-                    "converted", Map.of(
-                            "seconds", seconds,
-                            "days", days,
-                            "hours", hours,
-                            "minutes", minutes
-                    )
-            );
-
-            return ResponseEntity.ok(responseMapper.toDto(true,
-                    "Escrow transfer seconds updated successfully.",
-                    result,
-                    null));
-        } catch (Exception e) {
-            return ResponseEntity.ok(responseMapper.toDto(false,
-                    "Failed to update escrow transfer seconds: " + e.getMessage(),
-                    null,
-                    e));
-        }
-    }
-
-    @Operation(
-            summary = "Get escrow transfer seconds config",
-            description = "Gets the configured number of seconds before escrow funds are automatically transferred to seller."
-    )
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping("/escrow-transfer-seconds")
-    public ResponseEntity<?> getEscrowTransferSeconds() {
-        try {
-            Admin admin = adminService.getCurrentUser();
-            if(!admin.isSuperAdmin()) {
-                throw new IllegalArgumentException("Only super admin can access this resource.");
-            }
-
-            long seconds = systemConfigService.getEscrowTransferSeconds();
-            long days = seconds / 86400;
-            Map<String, Object> result = Map.of(
-                    "seconds", seconds,
-                    "days", days,
-                    "hours", seconds / 3600,
-                    "minutes", seconds / 60
-            );
-            return ResponseEntity.ok(responseMapper.toDto(true,
-                    "Escrow transfer seconds retrieved successfully.",
-                    result,
-                    null));
-        } catch (Exception e) {
-            return ResponseEntity.ok(responseMapper.toDto(false,
-                    "Failed to retrieve escrow transfer seconds: " + e.getMessage(),
                     null,
                     e));
         }
