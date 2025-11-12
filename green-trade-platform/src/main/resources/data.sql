@@ -231,7 +231,7 @@ VALUES ('https://cdn.example.com/avatar/admin1.png',
 -- Mặc định: 1209600 giây = 14 ngày = 2 tuần
 -- Admin có thể cập nhật giá trị này qua API: PUT /api/v1/admin/system-config/ESCROW_TRANSFER_SECONDS
 INSERT INTO system_config (config_key, config_value, description, created_at, updated_at, admin_id)
-VALUES ('ESCROW_TRANSFER_SECONDS', '1209600', 
+VALUES ('ESCROW_TRANSFER_SECONDS', '60',
         'Số giây sau khi tạo escrow record thì hệ thống sẽ tự động chuyển tiền từ system wallet về ví người bán. Admin có thể cấu hình giá trị này qua API. Mặc định: 1209600 giây = 14 ngày = 2 tuần.',
         NOW(), NOW(), 1)
 ON DUPLICATE KEY UPDATE config_key = config_key;
@@ -240,7 +240,7 @@ ON DUPLICATE KEY UPDATE config_key = config_key;
 -- Mặc định: 259200 giây = 3 ngày
 -- Admin có thể cập nhật giá trị này qua API: PUT /api/v1/admin/system-config/ORDER_DELIVERED_TO_COMPLETED_SECONDS
 INSERT INTO system_config (config_key, config_value, description, created_at, updated_at, admin_id)
-VALUES ('ORDER_DELIVERED_TO_COMPLETED_SECONDS', '259200', 
+VALUES ('ORDER_DELIVERED_TO_COMPLETED_SECONDS', '60',
         'Số giây sau khi đơn hàng ở trạng thái DELIVERED thì hệ thống sẽ tự động chuyển sang trạng thái COMPLETED. Admin có thể cấu hình giá trị này qua API. Mặc định: 259200 giây = 3 ngày.',
         NOW(), NOW(), 1)
 ON DUPLICATE KEY UPDATE config_key = config_key;
@@ -380,24 +380,24 @@ INSERT INTO post_product
  deleted_at, category_id, admin_id, seller_id)
 VALUES ('Xe đạp điện Pega Aura 2022 - còn mới 90%', 'Pega', 'Aura', 2022, '18 tháng', NULL, 'Good', 8900000, '680',
         '105', '148', '47000', 'Xe đạp điện chạy êm, pin thay gần đây, phanh còn tốt, đi học đi làm ổn định.',
-        'Quận 7, TP.HCM', FALSE, FALSE, 'APPROVED', TRUE, '2025-09-30 10:15:00', '2025-10-10 08:40:00', NULL, 1, NULL,
+        'Quận 7, TP.HCM', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-30 10:15:00', '2025-10-10 08:40:00', NULL, 1, NULL,
         1),
        ('Pin LFP 60V 20Ah cho xe điện - đã test dung lượng', 'CATL', 'LFP-60V-20Ah', 2023, '6 tháng', NULL, 'Like New',
         4200000, '18', '20', '35', '47000',
         'Pin LiFePO4 60V 20Ah, đã test nội trở, còn ~92% dung lượng, dùng cho nhiều dòng xe điện.', 'Cầu Giấy, Hà Nội',
-        FALSE, FALSE, 'APPROVED', TRUE, '2025-10-01 09:00:00', '2025-10-15 11:20:00', NULL, 2, NULL, 1),
+        FALSE, TRUE, 'APPROVED', TRUE, '2025-10-01 09:00:00', '2025-10-15 11:20:00', NULL, 2, NULL, 1),
        ('Xe máy điện VinFast Feliz S 2022 - pin thuê', 'VinFast', 'Feliz S', 2022, '20 tháng', NULL, 'Good', 16500000,
         '70', '112', '149', '47000',
         'Bản S, đi lại hằng ngày, khung vỏ còn đẹp, pin đang thuê VinFast (không kèm pin).', 'Thanh Khê, Đà Nẵng', FALSE,
-        FALSE, 'APPROVED', TRUE, '2025-10-05 14:05:00', '2025-10-20 09:30:00', NULL, 1, NULL, 1),
+        TRUE, 'APPROVED', TRUE, '2025-10-05 14:05:00', '2025-10-20 09:30:00', NULL, 1, NULL, 1),
        ('Pin NMC 72V 30Ah tháo xe - còn 85% SOH', 'EVE', 'NMC-72V-30Ah', 2021, '24 tháng', NULL, 'Fair', 5500000, '20',
         '22', '42', '47000',
         'Pack NMC 72V 30Ah, đã cân bằng cell, còn ~85% SOH, phù hợp xe máy điện công suất trung bình.',
-        'Thủ Đức, TP.HCM', FALSE, FALSE, 'APPROVED', TRUE, '2025-09-25 16:00:00', '2025-10-12 13:10:00', NULL, 2, NULL,
+        'Thủ Đức, TP.HCM', FALSE, TRUE, 'APPROVED', TRUE, '2025-09-25 16:00:00', '2025-10-12 13:10:00', NULL, 2, NULL,
         1),
        ('Xe đạp điện Giant M3 cũ - bảo dưỡng định kỳ', 'Giant', 'M3', 2020, '3 năm', NULL, 'Fair', 6500000, '66', '103',
         '145', '47000', 'Đã thay lốp và phanh, pin còn dùng tốt ~70-75%, có trầy nhẹ theo thời gian.',
-        'Biên Hòa, Đồng Nai', FALSE, FALSE, 'PENDING', FALSE, '2025-10-18 10:45:00', '2025-10-18 10:45:00', NULL, 1,
+        'Biên Hòa, Đồng Nai', FALSE, TRUE, 'PENDING', FALSE, '2025-10-18 10:45:00', '2025-10-18 10:45:00', NULL, 1,
         NULL, 1),
        ('Pin LFP 48V 12Ah cho xe đạp điện - nhẹ, bền', 'Gotion', 'LFP-48V-12Ah', 2024, '4 tháng', NULL, 'Like New',
         1900000, '15', '16', '32', '47000', 'Pin LiFePO4 an toàn, vòng sạc thấp, phù hợp xe đạp điện học sinh.',

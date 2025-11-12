@@ -98,7 +98,7 @@ public class Admin {
         this.isSuperAdmin = false;
         this.gender = Gender.MALE;
         this.status = AccountStatus.ACTIVE;
-        this.createdAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.createdAt = DateUtils.getCurrentVietnamTime();
     }
 
 }

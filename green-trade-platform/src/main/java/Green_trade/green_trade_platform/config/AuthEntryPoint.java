@@ -10,6 +10,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +19,14 @@ import java.util.Map;
 @Component
 @Slf4j
 public class AuthEntryPoint implements AuthenticationEntryPoint {
+    
+    private final ObjectMapper objectMapper;
+    
+    @Autowired
+    public AuthEntryPoint(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+    
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
@@ -32,7 +42,6 @@ public class AuthEntryPoint implements AuthenticationEntryPoint {
         body.put("message", authException.getMessage());
         body.put("path", request.getServletPath());
 
-        final ObjectMapper mapper = new ObjectMapper();
-        mapper.writeValue(response.getOutputStream(), body);
+        objectMapper.writeValue(response.getOutputStream(), body);
     }
 }

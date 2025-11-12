@@ -48,6 +48,6 @@ public class Invoice {
 
     @PrePersist
     public void onCreate() {
-        this.createdAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.createdAt = DateUtils.getCurrentVietnamTime();
     }
 }

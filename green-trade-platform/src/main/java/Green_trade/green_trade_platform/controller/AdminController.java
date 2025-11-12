@@ -134,7 +134,7 @@ public class AdminController {
             @Parameter(description = "Seller approval request containing sellerId and decision", required = true)
             @RequestBody ApproveSellerRequest request) throws JsonProcessingException {
         ApproveSellerResponse sellerNotification = sellerService.handlePendingSeller(request);
-        sellerNotification.getNotification().setSendAt(DateUtils.convertToVietnamTime(LocalDateTime.now()));
+        sellerNotification.getNotification().setSendAt(DateUtils.getCurrentVietnamTime());
         socketController.sendUpgradeNotificationToUser(sellerNotification);
         return ResponseEntity.ok(responseMapper.toDto(true,
                 "Approve request was be solved.",

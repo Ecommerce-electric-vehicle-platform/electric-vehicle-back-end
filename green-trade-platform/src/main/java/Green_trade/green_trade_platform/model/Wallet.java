@@ -51,7 +51,7 @@ public class Wallet {
     public void onCreate() {
         this.balance = BigDecimal.ZERO;
         this.provider = "VNPay";
-        this.createdAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.createdAt = DateUtils.getCurrentVietnamTime();
         this.concurrency = WalletConcurrency.VND;
     }
 

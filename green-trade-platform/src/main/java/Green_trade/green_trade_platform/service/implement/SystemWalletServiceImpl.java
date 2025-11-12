@@ -68,7 +68,7 @@ public class SystemWalletServiceImpl {
                     .concurrency("VND")
                     .balance(order.getPrice())
                     .status(SystemWalletStatus.ESCROW_HOLD)
-                    .endAt(DateUtils.getCurrentVietnamTime().plusSeconds(getEscrowTransferSeconds()))
+                    .endAt(null) // endAt sẽ được cập nhật khi order được complete
                     .build();
             log.info(">>> [SystemWalletServiceImpl] create new escrowRecord");
             return systemWalletRepossitory.save(escrowRecord);
@@ -97,7 +97,7 @@ public class SystemWalletServiceImpl {
                     .concurrency("VND")
                     .balance(actualReceivedMoney)
                     .status(SystemWalletStatus.ESCROW_HOLD)
-                    .endAt(DateUtils.getCurrentVietnamTime().plusSeconds(getEscrowTransferSeconds()))
+                    .endAt(null) // endAt sẽ được cập nhật khi order được complete
                     .build();
             log.info(">>> [SystemWalletServiceImpl] create new escrowRecord");
             return systemWalletRepossitory.save(escrowRecord);
@@ -156,7 +156,7 @@ public class SystemWalletServiceImpl {
                     .concurrency("VND")
                     .balance(actualReceivedMoney)
                     .status(SystemWalletStatus.ESCROW_HOLD)
-                    .endAt(DateUtils.getCurrentVietnamTime().plusSeconds(getEscrowTransferSeconds()))
+                    .endAt(null) // endAt sẽ được cập nhật khi order được complete
                     .build();
             log.info(">>> [SystemWalletServiceImpl] create new escrowRecord");
             return systemWalletRepossitory.save(escrowRecord);
@@ -218,7 +218,7 @@ public class SystemWalletServiceImpl {
                     .balance(actualReceivedMoney)
                     .shippingFee(order.getShippingFee())
                     .status(SystemWalletStatus.ESCROW_HOLD)
-                    .endAt(DateUtils.getCurrentVietnamTime().plusSeconds(getEscrowTransferSeconds()))
+                    .endAt(null) // endAt sẽ được cập nhật khi order được complete
                     .build();
             log.info(">>> [SystemWalletServiceImpl] create new escrowRecord");
             return systemWalletRepossitory.save(escrowRecord);
@@ -233,9 +233,22 @@ public class SystemWalletServiceImpl {
         return systemWalletRepossitory.save(escrowRecord);
     }
 
+    /**
+     * Cập nhật endAt của system wallet khi đơn hàng được complete
+     * Chỉ cập nhật endAt, không thay đổi createdAt
+     * 
+     * @param systemWallet System wallet cần cập nhật
+     * @return SystemWallet đã được cập nhật
+     */
     public SystemWallet updateTimeWhenBuyerReceivedProduct(SystemWallet systemWallet) {
-        systemWallet.setCreatedAt(DateUtils.getCurrentVietnamTime());
+        if (systemWallet == null) {
+            throw new IllegalArgumentException("System wallet cannot be null");
+        }
+        
+        // Chỉ cập nhật endAt, không thay đổi createdAt
         systemWallet.setEndAt(DateUtils.getCurrentVietnamTime().plusSeconds(getEscrowTransferSeconds()));
+        log.info(">>> [SystemWalletServiceImpl] Updated endAt for system wallet ID: {} to {}", 
+                systemWallet.getId(), systemWallet.getEndAt());
         return systemWalletRepossitory.save(systemWallet);
     }
 
