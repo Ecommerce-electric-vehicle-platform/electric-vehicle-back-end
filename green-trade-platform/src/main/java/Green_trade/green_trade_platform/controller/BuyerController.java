@@ -111,33 +111,109 @@ public class BuyerController {
     @Operation(
             summary = "Upload buyer profile",
             description = """
-                        Allows a buyer to upload or update their profile information including full name,
-                        shipping address, contact details, and avatar image.  
-                        This endpoint accepts multipart form data containing both profile fields and an image file.
+                    Allows a buyer to create their initial profile including personal information and avatar image.
                     
-                        **Workflow:**
-                        1. The buyer submits profile data (name, address, etc.) and an avatar image via multipart form.
-                        2. The system uploads the avatar file, updates the buyer's profile in the database, 
-                           and returns the updated profile data.
-                        3. Only authenticated buyers (ROLE_BUYER) can access this endpoint.
+                    ## Workflow:
+                    1. Buyer submits profile data (name, address, phone) and avatar image via multipart form
+                    2. System validates all input fields (phone format, required fields, etc.)
+                    3. Avatar image is uploaded to Cloudinary cloud storage
+                    4. Profile information is saved to database
+                    5. Returns complete buyer profile with avatar URL
                     
-                        **Use cases:**
-                        - Buyers updating their account profile for the first time.
-                        - Allowing users to change their avatar or update shipping address information.
+                    ## Validations:
+                    - Full name: Required
+                    - Street address: Required, max 255 characters
+                    - Phone number: Required, Vietnamese format (0XXXXXXXXX or +84XXXXXXXXX)
+                    - Date of birth: Format dd-MM-yyyy, must be valid date
+                    - Avatar file: Required, max 5MB, formats: JPEG, PNG, GIF
                     
-                        **Security Notes:**
-                        - Requires valid JWT token with `ROLE_BUYER` authority.
-                        - The uploaded image must comply with allowed size and format restrictions.
-                    """
+                    ## Security:
+                    - Requires authentication (ROLE_BUYER or ROLE_SELLER)
+                    - Only owner can upload their own profile
+                    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Multipart form data with profile information and avatar image",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE
+                    )
+            ),
+            tags = {"Buyer Profile Management"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Profile uploaded successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "UPLOAD PROFILE SUCCESS.",
+                                              "data": {
+                                                "buyerId": 1,
+                                                "username": "buyer123",
+                                                "fullName": "Nguyễn Văn A",
+                                                "email": "buyer@example.com",
+                                                "phoneNumber": "0912345678",
+                                                "avatarUrl": "https://cloudinary.com/avatar.jpg",
+                                                "shippingAddress": "123 Đường ABC, Phường 1, Quận 1, TP.HCM",
+                                                "dob": "1990-01-01",
+                                                "active": true,
+                                                "createdAt": "2024-01-15T10:00:00",
+                                                "updatedAt": "2024-01-15T10:00:00"
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Validation errors",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Validation failed",
+                                              "data": null,
+                                              "error": {
+                                                "fullName": "Full name cannot be blank",
+                                                "phoneNumber": "Phone number must be valid"
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "413",
+                    description = "Payload Too Large - File size exceeds 5MB limit"
+            ),
+            @ApiResponse(
+                    responseCode = "415",
+                    description = "Unsupported Media Type - Invalid file format"
+            )
+    })
     @PostMapping(
             value = "/upload-profile",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
-    public ResponseEntity<?> uploadBuyerProfile(@Parameter(description = "profile request for buyer")
-                                                @Valid @ModelAttribute ProfileRequest profileRequest,
-                                                @Parameter(description = "avatar of buyer")
-                                                @RequestPart(value = "avatar_url", required = true) MultipartFile avatarFile) throws IOException {
+    public ResponseEntity<?> uploadBuyerProfile(
+            @Parameter(description = "Profile information including name, address, phone, and date of birth", required = true)
+            @Valid @ModelAttribute ProfileRequest profileRequest,
+            @Parameter(description = "Avatar image file (JPEG/PNG/GIF, max 5MB)", required = true)
+            @RequestPart(value = "avatar_url", required = true) MultipartFile avatarFile
+    ) throws IOException {
         Map<String, Object> body = buyerService.uploadBuyerProfile(profileRequest, avatarFile);
         Buyer tempProfile = (Buyer) body.get("profile");
         return ResponseEntity.ok(responseMapper.toDto(
@@ -150,32 +226,103 @@ public class BuyerController {
     @Operation(
             summary = "Update Buyer Profile",
             description = """
-                        Allows a buyer to update their existing profile information, including full name, 
-                        contact details, shipping address, and optionally their avatar image.  
-                        This endpoint accepts multipart/form-data requests where both text fields and a file may be included.
+                    Update existing buyer profile information including personal details and optional avatar image.
                     
-                        **Workflow:**
-                        1. The buyer submits updated profile details and, optionally, a new avatar image.
-                        2. The system updates the corresponding fields in the buyer’s profile.
-                        3. If a new avatar is provided, the image is uploaded and replaces the previous one.
-                        4. The response returns the updated buyer profile information.
+                    ## Workflow:
+                    1. Buyer submits updated profile fields (any or all fields can be updated)
+                    2. Optionally includes new avatar image to replace existing one
+                    3. System validates updated information
+                    4. Old avatar is deleted from cloud storage if new one is provided
+                    5. Profile is updated in database
+                    6. Returns complete updated profile
                     
-                        **Use cases:**
-                        - Buyers updating their personal information such as name, phone number, or address.
-                        - Changing or removing an avatar profile picture.
+                    ## Update Rules:
+                    - All fields are optional - only provided fields will be updated
+                    - Avatar is optional - if provided, replaces existing avatar
+                    - Phone number must follow Vietnamese format if provided
+                    - Date of birth must be valid date in format dd-MM-yyyy if provided
                     
-                        **Security Notes:**
-                        - Requires authentication via JWT token (ROLE_BUYER).
-                        - Only the owner of the account can update their own profile.
-                    """
+                    ## Security:
+                    - Requires authentication (ROLE_BUYER or ROLE_SELLER)
+                    - Only profile owner can update their information
+                    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Updated profile information and optional new avatar image",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE
+                    )
+            ),
+            tags = {"Buyer Profile Management"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Profile updated successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "UPDATED PROFILE SUCCESSFULLY",
+                                              "data": {
+                                                "buyerId": 1,
+                                                "username": "buyer123",
+                                                "fullName": "Nguyễn Văn A (Updated)",
+                                                "email": "buyer@example.com",
+                                                "phoneNumber": "0987654321",
+                                                "avatarUrl": "https://cloudinary.com/new-avatar.jpg",
+                                                "shippingAddress": "456 Đường XYZ, Phường 2, Quận 3, TP.HCM",
+                                                "dob": "1990-01-01",
+                                                "active": true,
+                                                "createdAt": "2024-01-15T10:00:00",
+                                                "updatedAt": "2024-01-16T15:30:00"
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Validation errors",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Validation failed",
+                                              "data": null,
+                                              "error": {
+                                                "phoneNumber": "Phone number must be valid format"
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Not Found - Profile not found"
+            )
+    })
     @PutMapping(
             value = "/update-profile",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     public ResponseEntity<RestResponse<BuyerResponse, Object>> updateProfile(
+            @Parameter(description = "Updated profile information (all fields optional)", required = true)
             @Valid @ModelAttribute UpdateBuyerProfileRequest updateProfileRequest,
+            @Parameter(description = "New avatar image file (optional, replaces existing)", required = false)
             @RequestPart(value = "avatar_url", required = false) MultipartFile avatarFile
     ) throws Exception {
         log.info(">>> Passed came updateProfile API");
@@ -198,26 +345,93 @@ public class BuyerController {
     @Operation(
             summary = "Get buyer profile",
             description = """
-                        Retrieves the profile information of the currently authenticated buyer.  
-                        The client must include a valid JWT access token in the `Authorization` header.  
-                        The system will decode the token, identify the buyer, and return their corresponding profile details.
+                    Retrieve the complete profile information of the currently authenticated buyer.
                     
-                        **Workflow:**
-                        1. The client sends a `GET /profile` request with an Authorization header:  
-                           `Authorization: Bearer <access_token>`
-                        2. The system validates the access token.
-                        3. The system identifies the buyer associated with the token.
-                        4. The buyer’s profile is fetched and returned as a response.
+                    ## Workflow:
+                    1. Client sends request with JWT token in Authorization header
+                    2. System validates token and extracts buyer identity
+                    3. System fetches complete buyer profile from database
+                    4. Returns profile with all details including avatar URL
                     
-                        **Use cases:**
-                        - Retrieving current logged-in buyer’s profile for display in their dashboard.
-                        - Ensuring front-end applications can show user-specific information without manually passing user IDs.
+                    ## Response Includes:
+                    - Personal information (name, email, phone)
+                    - Shipping address details
+                    - Avatar image URL
+                    - Account status and timestamps
                     
-                        **Security Notes:**
-                        - Requires a valid access token (`ROLE_BUYER`).
-                        - Access is limited to the authenticated buyer’s own profile.
-                    """
+                    ## Security:
+                    - Requires valid JWT Bearer token
+                    - Only returns authenticated user's own profile
+                    - No access to other users' profiles
+                    """,
+            tags = {"Buyer Profile Management"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Profile retrieved successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "Get user profile successfully.",
+                                              "data": {
+                                                "buyerId": 1,
+                                                "username": "buyer123",
+                                                "fullName": "Nguyễn Văn A",
+                                                "email": "buyer@example.com",
+                                                "phoneNumber": "0912345678",
+                                                "avatarUrl": "https://cloudinary.com/avatar.jpg",
+                                                "shippingAddress": "123 Đường ABC, Phường 1, Quận 1, TP.HCM",
+                                                "dob": "1990-01-01",
+                                                "active": true,
+                                                "createdAt": "2024-01-15T10:00:00",
+                                                "updatedAt": "2024-01-15T10:00:00"
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Invalid or expired token",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Unauthorized - Please login",
+                                              "data": null,
+                                              "error": "Invalid or expired token"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal Server Error",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Error occur during get user profile.",
+                                              "data": null,
+                                              "error": "Internal server error"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @GetMapping("/profile")
     public ResponseEntity<RestResponse<Object, Object>> getProfile() {
@@ -235,10 +449,97 @@ public class BuyerController {
     }
 
     @Operation(
-            summary = "Get user wallet.",
-            description = "Front-end put access token in the header request. " +
-                    "Back-end will give user's wallet information."
+            summary = "Get user wallet information",
+            description = """
+                    Retrieve wallet information for the currently authenticated buyer including balance and transaction history access.
+                    
+                    ## Workflow:
+                    1. Client sends request with JWT token in Authorization header
+                    2. System validates token and extracts user identity
+                    3. System fetches wallet associated with the authenticated user
+                    4. Returns wallet details including current balance
+                    
+                    ## Wallet Information Includes:
+                    - Wallet ID
+                    - Current balance (in VND)
+                    - Associated user information
+                    - Wallet status (active/inactive)
+                    - Creation and update timestamps
+                    
+                    ## Use Cases:
+                    - Display wallet balance on user dashboard
+                    - Check available funds before making purchase
+                    - Verify wallet status before transactions
+                    
+                    ## Security:
+                    - Requires valid JWT Bearer token
+                    - Only returns authenticated user's own wallet
+                    - Balance information is protected
+                    """,
+            tags = {"Buyer Wallet Management"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Wallet information retrieved successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "Get wallet's information successfully.",
+                                              "data": {
+                                                "walletId": 1,
+                                                "balance": 1500000.00,
+                                                "userId": 1,
+                                                "username": "buyer123",
+                                                "status": "ACTIVE",
+                                                "createdAt": "2024-01-15T10:00:00",
+                                                "updatedAt": "2024-11-10T14:30:00"
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Invalid or expired token",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Unauthorized - Please login",
+                                              "data": null,
+                                              "error": "Invalid or expired token"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal Server Error",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Get wallet information failed.",
+                                              "data": null,
+                                              "error": "Internal server error"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @GetMapping("/wallet")
     public ResponseEntity<RestResponse<Object, Object>> getWallet() {
@@ -744,23 +1045,137 @@ public class BuyerController {
     }
 
     @Operation(
-            summary = "Add a product post to the buyer's wish-list",
+            summary = "Add product to wish list",
             description = """
-                    This endpoint allows an authenticated **buyer** to add a product post 
-                    (`PostProduct`) to their personal wish-list.
+                    Add a product post to buyer's personal wish list for future tracking and potential purchase.
                     
-                    - The buyer must be logged in.
-                    - The product (`PostProduct`) must exist and be active.
-                    - A seller **cannot** add their own product to their own wish-list (for fairness and data integrity).
-                    - If the product is already in the buyer's wish-list, the service may prevent duplication or update the record, depending on business logic.
+                    ## Workflow:
+                    1. System authenticates the buyer from JWT token
+                    2. Validates that product exists and is active
+                    3. Prevents sellers from adding their own products
+                    4. Creates wish list entry with specified priority
+                    5. Returns saved wish list item details
                     
-                    **Use case:**  
-                    Buyers use this API to save or bookmark products they are interested in purchasing later.
-                    """
+                    ## Business Rules:
+                    - Product must exist and be available
+                    - Buyer cannot add already wishlisted products (duplicate prevention)
+                    - Sellers cannot wishlist their own products
+                    - Each wish list item has a priority level (HIGH/MEDIUM/LOW)
+                    
+                    ## Use Cases:
+                    - Save interesting products for later review
+                    - Track products before making purchase decision
+                    - Compare multiple products
+                    - Maintain shopping list
+                    
+                    ## Security:
+                    - Requires authentication (ROLE_BUYER or ROLE_SELLER)
+                    - Only authenticated user can add to their wish list
+                    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Wish list request containing product ID and priority",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = WishListRequest.class),
+                            examples = @ExampleObject(
+                                    name = "Example Request",
+                                    value = """
+                                            {
+                                              "postId": 123,
+                                              "priority": "HIGH"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            tags = {"Buyer Wish List Management"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Product added to wish list successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "ADD PRODUCT TO WISH LISTING SUCCESSFULLY.",
+                                              "data": {
+                                                "wishId": 1,
+                                                "postProductId": 123,
+                                                "productName": "iPhone 13 Pro Max",
+                                                "productPrice": 15000000,
+                                                "priority": "HIGH",
+                                                "buyerId": 1,
+                                                "createdAt": "2024-11-12T10:00:00"
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Validation error or seller trying to add own product",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Self-Wishlist Error",
+                                            value = """
+                                                    {
+                                                      "success": false,
+                                                      "message": "ADD PRODUCT TO WISH LISTING FAILED.",
+                                                      "data": null,
+                                                      "error": "Seller can not add your product into your wish-listing."
+                                                    }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Duplicate Entry",
+                                            value = """
+                                                    {
+                                                      "success": false,
+                                                      "message": "ADD PRODUCT TO WISH LISTING FAILED.",
+                                                      "data": null,
+                                                      "error": "Product is already in your wish list"
+                                                    }
+                                                    """
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Not Found - Product not found",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "ADD PRODUCT TO WISH LISTING FAILED.",
+                                              "data": null,
+                                              "error": "Product with ID 123 not found"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/wish-list")
-    public ResponseEntity<?> addProductToWishList(@RequestBody WishListRequest request) {
+    public ResponseEntity<?> addProductToWishList(
+            @Parameter(description = "Wish list request with product ID and priority level", required = true)
+            @RequestBody WishListRequest request
+    ) {
         log.info(">>> [Buyer Controller] Add product to wish list: Started.");
         try {
             Buyer buyer = buyerService.getCurrentUser();
@@ -793,22 +1208,87 @@ public class BuyerController {
     }
 
     @Operation(
-            summary = "Remove a product from the buyer's wish list",
+            summary = "Remove product from wish list",
             description = """
-                    This endpoint allows an authenticated **buyer** to remove a product post 
-                    from their personal wish list.
+                    Remove a specific product from buyer's wish list using the wish list entry ID.
                     
-                    - The `wishId` must correspond to an existing wish-list entry.
-                    - The buyer must own the wish-list entry; otherwise, access will be denied.
-                    - If the wish-list item does not exist or has already been removed, the API will return an appropriate error message.
+                    ## Workflow:
+                    1. System validates wish list entry exists
+                    2. Verifies ownership (only entry owner can remove)
+                    3. Deletes wish list entry from database
+                    4. Returns success confirmation
                     
-                    **Use case:**  
-                    Buyers use this endpoint when they no longer wish to keep a product in their saved wish-list.
-                    """
+                    ## Business Rules:
+                    - Wish list entry must exist
+                    - Only the owner can remove their wish list items
+                    - Removal is permanent and cannot be undone
+                    
+                    ## Use Cases:
+                    - Clean up wish list after purchase
+                    - Remove no longer interested products
+                    - Manage wish list size
+                    
+                    ## Security:
+                    - Requires authentication (ROLE_BUYER or ROLE_SELLER)
+                    - Access control validates ownership
+                    """,
+            tags = {"Buyer Wish List Management"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Product removed from wish list successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "REMOVE POST PRODUCT FROM WISH LIST SUCCESSFULLY.",
+                                              "data": null,
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Removal failed",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "REMOVE POST PRODUCT FROM WISH LIST FAILED.",
+                                              "data": null,
+                                              "error": "Error message details"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - Not authorized to remove this wish list item"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Not Found - Wish list entry not found"
+            )
+    })
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/remove-wish-list/{wishId}")
-    public ResponseEntity<?> removeWishList(@PathVariable(name = "wishId") long id) {
+    public ResponseEntity<?> removeWishList(
+            @Parameter(description = "Wish list entry ID to be removed", required = true, example = "1")
+            @PathVariable(name = "wishId") long id
+    ) {
         try {
             wishListingService.removePostProduct(id);
             return ResponseEntity.ok(responseMapper.toDto(
@@ -826,23 +1306,91 @@ public class BuyerController {
     }
 
     @Operation(
-            summary = "Retrieve the buyer's wish list",
+            summary = "Get buyer's wish list",
             description = """
-                    This endpoint returns a paginated list of the buyer's wish-list items.
+                    Retrieve a paginated list of products in the buyer's wish list with optional priority filtering.
                     
-                    - The buyer must be logged in.
-                    - Results can be optionally filtered by **priority** (e.g., HIGH, MEDIUM, LOW).
-                    - If no priority is specified, all wish-list items are returned.
-                    - Supports pagination via `page` and `size` parameters.
+                    ## Workflow:
+                    1. System authenticates buyer from JWT token
+                    2. Fetches wish list entries associated with buyer
+                    3. Applies priority filter if specified (HIGH/MEDIUM/LOW)
+                    4. Returns paginated results with product details
                     
-                    **Use case:**  
-                    Buyers use this endpoint to view and manage the list of product posts they have added to their wish-list.
-                    """
+                    ## Query Parameters:
+                    - **page**: Page number (0-based indexing), default: 0
+                    - **size**: Number of items per page, default: 10
+                    - **priority**: Filter by priority level (optional)
+                    
+                    ## Response Includes:
+                    - List of wish list items with product details
+                    - Pagination metadata (page number, size, total elements, total pages)
+                    - Product information (name, price, images, seller)
+                    - Wish list entry metadata (priority, created date)
+                    
+                    ## Use Cases:
+                    - View all saved/bookmarked products
+                    - Filter high-priority items for quick access
+                    - Manage and organize wish list
+                    - Compare products before purchase
+                    
+                    ## Security:
+                    - Requires authentication (ROLE_BUYER or ROLE_SELLER)
+                    - Only returns authenticated user's wish list
+                    """,
+            tags = {"Buyer Wish List Management"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Wish list retrieved successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "GET WISH LIST SUCCESSFULLY.",
+                                              "data": {
+                                                "content": [
+                                                  {
+                                                    "wishId": 1,
+                                                    "postProductId": 123,
+                                                    "productName": "iPhone 13 Pro Max",
+                                                    "productPrice": 15000000,
+                                                    "productImage": "https://cloudinary.com/product.jpg",
+                                                    "priority": "HIGH",
+                                                    "sellerName": "Seller ABC",
+                                                    "createdAt": "2024-11-10T10:00:00"
+                                                  }
+                                                ],
+                                                "pageNumber": 0,
+                                                "pageSize": 10,
+                                                "totalElements": 5,
+                                                "totalPages": 1
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal Server Error"
+            )
+    })
     @GetMapping("/wish-list")
     public ResponseEntity<?> getWishList(
+            @Parameter(description = "Page number (0-based)", example = "0")
             @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page", example = "10")
             @RequestParam(name = "size", defaultValue = "10") int size,
+            @Parameter(description = "Filter by priority level (HIGH/MEDIUM/LOW)", required = false)
             @RequestParam(name = "priority", required = false) WishListPriority priority
     ) {
         try {
@@ -878,23 +1426,108 @@ public class BuyerController {
     }
 
     @Operation(
-            summary = "Retrieve paginated list of buyers",
+            summary = "Get list of all buyers (Admin only)",
             description = """
-                    This endpoint allows an **administrator** to retrieve a paginated list of all registered buyers in the system. 
-                    The request supports pagination parameters (`page`, `size`) and returns a structured response containing 
-                    buyer information and metadata.
+                    Retrieve a paginated list of all registered buyers in the system - Admin access only.
                     
-                    **Access Control:** Only users with the role `ROLE_ADMIN` can access this endpoint.
+                    ## Workflow:
+                    1. System verifies admin authentication and authorization
+                    2. Fetches all buyer accounts from database
+                    3. Applies pagination to results
+                    4. Returns buyer list with pagination metadata
                     
-                    **Response:**
-                    - On success: returns a paginated list of `BuyerResponse` objects with a success message.
-                    - On failure: returns an error response with failure status and message details.
-                    """
+                    ## Response Includes:
+                    - Buyer profiles (ID, username, email, full name, phone)
+                    - Avatar URLs
+                    - Shipping addresses
+                    - Account status (active/inactive)
+                    - Registration dates
+                    - Pagination metadata
+                    
+                    ## Use Cases:
+                    - Admin dashboard to view all buyers
+                    - User management and monitoring
+                    - Generate buyer reports
+                    - Account verification and support
+                    
+                    ## Security:
+                    - **Admin only** - Requires ROLE_ADMIN
+                    - No access for regular buyers or sellers
+                    """,
+            tags = {"Admin - Buyer Management"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Buyer list retrieved successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "GET LIST BUYERS SUCCESSFULLY.",
+                                              "data": {
+                                                "content": [
+                                                  {
+                                                    "buyerId": 1,
+                                                    "username": "buyer123",
+                                                    "email": "buyer@example.com",
+                                                    "fullName": "Nguyễn Văn A",
+                                                    "phoneNumber": "0912345678",
+                                                    "avatarUrl": "https://cloudinary.com/avatar1.jpg",
+                                                    "active": true,
+                                                    "createdAt": "2024-01-15T10:00:00"
+                                                  }
+                                                ],
+                                                "pageable": {
+                                                  "pageNumber": 0,
+                                                  "pageSize": 10
+                                                },
+                                                "totalElements": 50,
+                                                "totalPages": 5,
+                                                "last": false,
+                                                "first": true
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - Admin access required",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Access denied",
+                                              "data": null,
+                                              "error": "Admin privileges required"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal Server Error"
+            )
+    })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/list")
     public ResponseEntity<?> getBuyerList(
+            @Parameter(description = "Page number (0-based)", example = "0")
             @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page", example = "10")
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         try {
@@ -915,10 +1548,55 @@ public class BuyerController {
     }
 
     @Operation(
-            summary = "Get total number of buyers",
-            description = "This endpoint returns the total number of registered buyers in the system. " +
-                    "Accessible only by users with the ADMIN role."
+            summary = "Get total count of buyers (Admin only)",
+            description = """
+                    Retrieve the total number of registered buyers in the system - Admin access only.
+                    
+                    ## Workflow:
+                    1. System verifies admin authentication and authorization
+                    2. Queries database to count all buyer accounts
+                    3. Returns total count as integer
+                    
+                    ## Use Cases:
+                    - Admin dashboard statistics
+                    - System monitoring and reporting
+                    - Business analytics
+                    - User growth tracking
+                    
+                    ## Security:
+                    - **Admin only** - Requires ROLE_ADMIN
+                    - No access for regular buyers or sellers
+                    """,
+            tags = {"Admin - Buyer Management"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Total buyers count retrieved successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "GET TOTAL BUYERS SUCCESSFULLY.",
+                                              "data": 150,
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - Admin access required"
+            )
+    })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/total-buyers")
     public ResponseEntity<?> getTotalBuyers() {
