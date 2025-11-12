@@ -1,16 +1,18 @@
 package Green_trade.green_trade_platform.controller;
 
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
-import Green_trade.green_trade_platform.mapper.AdminMapper;
-import Green_trade.green_trade_platform.mapper.PostProductListMapper;
-import Green_trade.green_trade_platform.mapper.PostProductMapper;
-import Green_trade.green_trade_platform.mapper.ResponseMapper;
+import Green_trade.green_trade_platform.mapper.*;
 import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.request.*;
 import Green_trade.green_trade_platform.response.*;
 import Green_trade.green_trade_platform.service.implement.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,10 @@ public class AdminController {
     private final BuyerServiceImpl buyerService;
     private final PostProductServiceImpl postProductService;
     private final MailServiceImpl mailSender;
+    private final SystemWalletServiceImpl systemWalletService;
+    private final SystemWalletMapper systemWalletMapper;
+    private final SubscriptionPackageServiceImpl subscriptionPackageService;
+    private final SubscriptionPackageMapper subscriptionPackageMapper;
 
     @Operation(
             summary = "Get all pending seller accounts",
@@ -51,20 +57,32 @@ public class AdminController {
                         Retrieves a paginated list of seller accounts that are currently in a pending verification or approval state.
                         This endpoint is restricted to administrators only (requires ROLE_ADMIN authority).
                     
-                        The API supports pagination using the 'page' and 'size' query parameters.
+                        **Query Parameters:**
+                        - `page` (integer, optional): The page number to retrieve (0-based index). Default: `0`
+                        - `size` (integer, optional): Number of records per page. Default: `10`
                     
-                        Response includes:
-                        - A list of sellers awaiting approval (`sellers`)
-                        - Pagination details such as current page, total elements, and total pages
+                        **Response Structure:**
+                        - `sellers` (array): List of seller objects awaiting approval
+                        - `currentPage` (integer): Current page number
+                        - `totalElements` (long): Total number of pending sellers
+                        - `totalPage` (integer): Total number of pages
                     
-                        Typical use cases:
+                        **Use Cases:**
                         - Admin dashboard for managing seller approvals
+                        - Reviewing seller registration requests
                     """
     )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved pending sellers",
+                    content = @Content(schema = @Schema(implementation = Map.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied - Admin role required")
+    })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/pending-seller")
     public ResponseEntity<?> findAllPendingSeller(
+            @Parameter(description = "Page number (0-based)", example = "0")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of records per page", example = "10")
             @RequestParam(defaultValue = "10") int size
     ) {
         Page<SellerResponse> ans = sellerService.getAllPendingSeller(page, size);
@@ -83,24 +101,38 @@ public class AdminController {
                         Handles the approval or rejection process for a pending seller registration request. 
                         This endpoint is restricted to administrators and requires a valid bearer token.
                     
-                        The request body should contain seller information along with an approval decision. 
-                        If approved, the seller's account status is updated and a notification is sent to the user 
-                        in real time via WebSocket.
+                        **Request Body (ApproveSellerRequest):**
+                        - `sellerId` (Long)`: ID of the seller account to approve/reject
+                        - `decision` (String)`: Decision status - typically "APPROVED" or "REJECTED"
+                        - Additional fields may include reason, notes, etc.
                     
                         **Workflow:**
                         1. Admin submits approval/rejection data through this endpoint.
-                        2. The system updates the seller’s status.
+                        2. The system updates the seller's status.
                         3. A notification is constructed and timestamped (`sendAt`).
                         4. The notification is sent to the corresponding seller user through a socket event.
+                    
+                        **Response:**
+                        - Success: Returns `ApproveSellerResponse` with updated seller info and notification details
+                        - Error: Returns error message if seller not found or operation fails
                     
                         **Use cases:**
                         - Approving verified sellers after document validation.
                         - Rejecting invalid or incomplete seller registration requests.
                     """
     )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Seller approval/rejection processed successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "403", description = "Access denied - Admin role required"),
+            @ApiResponse(responseCode = "404", description = "Seller not found")
+    })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/approve-seller")
-    public ResponseEntity<RestResponse<?, ?>> handlePendingSeller(@RequestBody ApproveSellerRequest request) throws JsonProcessingException {
+    public ResponseEntity<RestResponse<?, ?>> handlePendingSeller(
+            @Parameter(description = "Seller approval request containing sellerId and decision", required = true)
+            @RequestBody ApproveSellerRequest request) throws JsonProcessingException {
         ApproveSellerResponse sellerNotification = sellerService.handlePendingSeller(request);
         sellerNotification.getNotification().setSendAt(DateUtils.convertToVietnamTime(LocalDateTime.now()));
         socketController.sendUpgradeNotificationToUser(sellerNotification);
@@ -113,26 +145,40 @@ public class AdminController {
             summary = "Create a new admin account",
             description = """
                         Allows an existing administrator to create a new admin account in the system.
-                        This endpoint accepts both form data and a profile image file (`avatar_url`) for the new admin.
+                        This endpoint accepts multipart/form-data with admin details and an avatar image.
                     
-                        The request must include valid admin details (username, email, password, role, etc.) 
-                        and an avatar image. The uploaded avatar will be processed and linked to the new account.
+                        **Request Parameters (multipart/form-data):**
+                        - `avatar_url` (file, required): Profile image file for the new admin (JPG, PNG, etc.)
+                        - Form fields from `CreateAdminRequest`:
+                          - `username` (String, required): Unique username for the admin
+                          - `email` (String, required): Valid email address
+                          - `password` (String, required): Password for the account
+                          - `fullName` (String, optional): Full name of the admin
+                          - `phoneNumber` (String, optional): Contact phone number
+                          - `isSuperAdmin` (Boolean, optional): Whether this admin has super admin privileges
                     
-                        **Workflow:**
-                        1. Admin submits a multipart/form-data request containing admin details and an avatar image.
-                        2. The system validates the request and saves the image.
-                        3. The new admin account is created and persisted in the database.
-                        4. A success response is returned with the created admin's information.
+                        **Response:**
+                        - Success (200): Returns `AdminResponse` with created admin details
+                        - Error (400/500): Returns error message if validation fails or creation fails
                     
                         **Use cases:**
                         - Registering additional admin users for system management.
                         - Managing multi-admin access in the platform.
                     """
     )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Admin account created successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data or validation failed"),
+            @ApiResponse(responseCode = "403", description = "Access denied - Admin role required"),
+            @ApiResponse(responseCode = "500", description = "Internal server error during account creation")
+    })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("creating-admin")
     public ResponseEntity<?> handleCreatingAdmin(
+            @Parameter(description = "Admin account details (username, email, password, etc.)", required = true)
             @Valid @ModelAttribute CreateAdminRequest request,
+            @Parameter(description = "Profile image file (JPG, PNG, etc.)", required = true)
             @RequestPart(value = "avatar_url", required = true) MultipartFile avatarFile
     ) {
         try {
@@ -156,10 +202,16 @@ public class AdminController {
                         Retrieves a paginated list of post products that are pending verification or review by administrators.  
                         This API is restricted to users with the `ROLE_ADMIN` authority.
                     
-                        **Workflow:**
-                        1. The admin calls this endpoint with pagination parameters (`page`, `size`).
-                        2. The system queries all post products that are awaiting verification or moderation.
-                        3. The endpoint returns a paginated response containing post details, along with metadata.
+                        **Query Parameters:**
+                        - `page` (integer, optional): Page number (0-based index). Default: `0`
+                        - `size` (integer, optional): Number of records per page. Default: `10`
+                    
+                        **Response Structure:**
+                        - `data` (PostProductListResponse): Contains list of post products and pagination metadata
+                          - `posts` (array): Array of post product objects
+                          - `currentPage` (integer): Current page number
+                          - `totalElements` (long): Total number of posts
+                          - `totalPage` (integer): Total number of pages
                     
                         **Use cases:**
                         - Admins reviewing newly submitted product posts before approval.
@@ -171,10 +223,17 @@ public class AdminController {
                         - Unauthorized users (buyers/sellers) will be denied access.
                     """
     )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved post products for review",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied - Admin role required")
+    })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/review-post-seller-list")
     public ResponseEntity<RestResponse<PostProductListResponse, Object>> getAllPostProductForReview(
+            @Parameter(description = "Number of records per page", example = "10")
             @RequestParam(name = "size", defaultValue = "10") int size,
+            @Parameter(description = "Page number (0-based)", example = "0")
             @RequestParam(name = "page", defaultValue = "0") int page
     ) throws Exception {
         log.info(">>> Server came getAllPostProductForReview API");
@@ -206,10 +265,16 @@ public class AdminController {
                         Retrieves detailed information for a specific post product based on its unique ID.  
                         Accessible to **Buyers**, **Sellers**, and **Admins** with appropriate privileges.
                     
-                        **Workflow:**
-                        1. The client sends a request containing the post product ID as a path variable.
-                        2. The system retrieves the corresponding post product record from the database.
-                        3. The product details are returned as a structured response, including product info, seller data, and review status.
+                        **Path Parameters:**
+                        - `postProductId` (Long, required): Unique identifier of the post product
+                    
+                        **Response Structure:**
+                        - `data` (PostProductResponse): Contains complete product details including:
+                          - Product information (title, description, price, brand, model, etc.)
+                          - Seller information
+                          - Product images
+                          - Verification status
+                          - Category and specifications
                     
                         **Use cases:**
                         - **Admin:** Reviewing pending or verified posts before approval or publication.
@@ -221,8 +286,15 @@ public class AdminController {
                         - Different roles may have access to different levels of detail based on internal authorization rules.
                     """
     )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved post product details",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Post product not found"),
+            @ApiResponse(responseCode = "403", description = "Access denied - Authentication required")
+    })
     @GetMapping("/{postProductId}/post-details")
     public ResponseEntity<RestResponse<PostProductResponse, Object>> viewPostProductDetail(
+            @Parameter(description = "Unique identifier of the post product", required = true, example = "1")
             @PathVariable Long postProductId
     ) throws Exception {
         PostProduct postProduct = postProductServiceImpl.getPostProductById(postProductId);
@@ -242,12 +314,21 @@ public class AdminController {
             description = """
                         Allows an admin or moderator to approve or reject a seller's post product after manual review.
                         This endpoint records the decision, updates the product's verification status, 
-                        and returns the updated product details.
+                        sends an email notification to the seller, and returns the updated product details.
                     
-                        **Workflow:**
-                        1. Admin sends a decision request containing the post product ID and decision details (approve or reject).
-                        2. The system validates the product and applies the verification decision.
-                        3. The updated post product entity is returned in the response.
+                        **Request Body (PostProductDecisionRequest):**
+                        - `postProductId` (Long, required): ID of the post product to review
+                        - `passed` (Boolean, required): `true` to approve, `false` to reject
+                        - `reason` (String, optional): Reason for rejection (if applicable)
+                        - `notes` (String, optional): Additional admin notes
+                    
+                        **Response:**
+                        - Success (200): Returns updated `PostProductResponse` with new verification status
+                        - Error (400/404): Returns error message if product not found or validation fails
+                    
+                        **Email Notification:**
+                        - If approved: Sends congratulatory email to seller
+                        - If rejected: Sends rejection notice with reason
                     
                         **Use cases:**
                         - Approving a verified product for listing.
@@ -255,8 +336,17 @@ public class AdminController {
                         - Managing product moderation workflows.
                     """
     )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Post product decision processed successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "403", description = "Access denied - Admin role required"),
+            @ApiResponse(responseCode = "404", description = "Post product not found")
+    })
     @PostMapping("/review-post-product-decision")
-    public ResponseEntity<RestResponse<PostProductResponse, Object>> reviewPostProductDecision(@Valid @RequestBody PostProductDecisionRequest request) throws Exception {
+    public ResponseEntity<RestResponse<PostProductResponse, Object>> reviewPostProductDecision(
+            @Parameter(description = "Post product decision request containing postProductId and decision", required = true)
+            @Valid @RequestBody PostProductDecisionRequest request) throws Exception {
         PostProduct result = postProductServiceImpl.checkPostProductVerification(request);
 
         MailRequest mailRequest = MailRequest.builder()
@@ -301,32 +391,44 @@ public class AdminController {
                     This endpoint allows an **administrator** to block or unblock a user account based on its type and ID.  
                     Supported account types include **buyer**, **seller**, and **admin**.
                     
-                    The action performed (block or unblock) depends on the provided `activity` parameter.  
-                    A message explaining the reason for the action can also be passed.
-                    
-                    - For **buyer** and **seller** accounts: the platform will call their respective services to perform the action.  
-                    - For **admin** accounts: only a **super admin** can perform block or unblock operations.  
-                    - If an invalid account type is provided, the system returns a **400 Bad Request** response.
-                    
-                    **Access Control:** Only users with the role `ROLE_ADMIN` are authorized to use this API.
-                    
                     **Path Parameters:**
-                    - `accountId` – The ID of the account to block or unblock.  
-                    - `accountType` – The type of the account (`buyer`, `seller`, or `admin`).  
-                    - `message` – A short explanation or note about the action (e.g., "Violation of policy").  
-                    - `activity` – Defines the action to perform: `"block"` or `"unblock"`.
+                    - `accountId` (Long, required): The ID of the account to block or unblock
+                    - `accountType` (String, required): The type of the account. Valid values: `"buyer"`, `"seller"`, or `"admin"`
+                    - `message` (String, required): A short explanation or note about the action (e.g., "Violation of policy")
+                    - `activity` (String, required): Defines the action to perform. Valid values: `"block"` or `"unblock"`
+                    
+                    **Access Control:**
+                    - Only users with `ROLE_ADMIN` can use this API
+                    - For **admin** accounts: only a **super admin** can perform block or unblock operations
                     
                     **Response:**
-                    - **Success:** Returns a message confirming that the account was blocked or unblocked successfully.  
-                    - **Failure:** Returns an error message describing the issue (e.g., invalid type, insufficient permission, or internal error).
+                    - Success (200): Returns confirmation message (e.g., "BLOCK BUYER ACCOUNT SUCCESSFULLY")
+                    - Error (400): Invalid account type or activity value
+                    - Error (403): Insufficient permissions (e.g., non-super admin trying to block admin)
+                    - Error (404): Account not found
+                    
+                    **Example Requests:**
+                    - Block buyer: `POST /api/v1/admin/block-account/123/buyer/Violation%20of%20policy/block`
+                    - Unblock seller: `POST /api/v1/admin/block-account/456/seller/Account%20restored/unblock`
                     """
     )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Account blocked/unblocked successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid account type or activity parameter"),
+            @ApiResponse(responseCode = "403", description = "Access denied or insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Account not found")
+    })
     @PreAuthorize(("hasRole('ROLE_ADMIN')"))
     @PostMapping("/block-account/{accountId}/{accountType}/{message}/{activity}")
     public ResponseEntity<?> blockAccount(
+            @Parameter(description = "ID of the account to block/unblock", required = true, example = "123")
             @PathVariable(name = "accountId") long id,
+            @Parameter(description = "Account type: 'buyer', 'seller', or 'admin'", required = true, example = "buyer")
             @PathVariable(name = "accountType") String type,
+            @Parameter(description = "Reason or message for the action", required = true, example = "Violation of policy")
             @PathVariable(name = "message") String message,
+            @Parameter(description = "Action to perform: 'block' or 'unblock'", required = true, example = "block")
             @PathVariable(name = "activity") String activity
     ) {
         try {
@@ -402,21 +504,32 @@ public class AdminController {
                     This endpoint allows an **administrator** to retrieve a paginated list of all admin accounts in the system.  
                     It supports pagination parameters (`page`, `size`) to efficiently navigate large datasets.
                     
-                    **Access Control:** Only users with the role `ROLE_ADMIN` are authorized to access this endpoint.
-                    
                     **Query Parameters:**
-                    - `page` – (optional) The page number to retrieve, default is `0`.
-                    - `size` – (optional) The number of records per page, default is `10`.
+                    - `page` (integer, optional): The page number to retrieve (0-based index). Default: `0`
+                    - `size` (integer, optional): The number of records per page. Default: `10`
                     
-                    **Response:**
-                    - On success: Returns a paginated list of `AdminResponse` objects containing admin details.
-                    - On failure: Returns an error message and exception details if the retrieval fails.
+                    **Response Structure:**
+                    - `data` (Page<AdminResponse>): Paginated list containing:
+                      - `content` (array): Array of admin account objects with details (id, username, email, isSuperAdmin, etc.)
+                      - `totalElements` (long): Total number of admin accounts
+                      - `totalPages` (integer): Total number of pages
+                      - `number` (integer): Current page number
+                      - `size` (integer): Page size
+                    
+                    **Access Control:** Only users with the role `ROLE_ADMIN` are authorized to access this endpoint.
                     """
     )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved admin list",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied - Admin role required")
+    })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/list")
     public ResponseEntity<?> getAdminList(
+            @Parameter(description = "Page number (0-based)", example = "0")
             @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(description = "Number of records per page", example = "10")
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         try {
@@ -442,14 +555,36 @@ public class AdminController {
                     Retrieve the detailed profile information of an admin by their account ID.
                     Only users with the role ROLE_ADMIN can access this endpoint.
                     
-                    Example:
-                    GET /profile/5
+                    **Path Parameters:**
+                    - `accountId` (Long, required): Unique identifier of the admin account
+                    
+                    **Response Structure:**
+                    - `data` (AdminResponse): Contains admin profile details:
+                      - `id` (Long): Admin account ID
+                      - `username` (String): Admin username
+                      - `email` (String): Admin email address
+                      - `fullName` (String): Full name of admin
+                      - `phoneNumber` (String): Contact phone number
+                      - `avatarUrl` (String): URL to profile image
+                      - `isSuperAdmin` (Boolean): Whether admin has super admin privileges
+                      - `status` (String): Account status (ACTIVE, INACTIVE, etc.)
+                      - `createdAt` (LocalDateTime): Account creation timestamp
+                    
+                    **Example Request:**
+                    GET /api/v1/admin/profile/5
                     Requires Authorization header with a valid JWT token.
                     """
     )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved admin profile",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied - Admin role required"),
+            @ApiResponse(responseCode = "404", description = "Admin account not found")
+    })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/profile/{accountId}")
     public ResponseEntity<?> getProfile(
+            @Parameter(description = "Unique identifier of the admin account", required = true, example = "5")
             @PathVariable(name = "accountId") long id
     ) {
         try {
@@ -472,17 +607,35 @@ public class AdminController {
             summary = "Get total new post products within a date range",
             description = """
                     This endpoint allows **administrators** to retrieve the total number of new post products 
-                    created within a specific date range.  
+                    created within a specific date range. Useful for analytics and reporting purposes.
                     
-                    - Both `start_date` and `end_date` must be provided in ISO format (`yyyy-MM-dd`).  
-                    - The result counts posts whose `createdAt` values fall within the given range.  
+                    **Query Parameters:**
+                    - `start_date` (LocalDate, required): Start date of the range in ISO format (`yyyy-MM-dd`)
+                    - `end_date` (LocalDate, required): End date of the range in ISO format (`yyyy-MM-dd`)
+                    
+                    **Response:**
+                    - `data` (Long): Total count of post products created between start_date and end_date (inclusive)
+                    
+                    **Example Request:**
+                    GET /api/v1/admin/total-new-post?start_date=2025-01-01&end_date=2025-01-31
+                    
+                    **Note:**
+                    - The result counts posts whose `createdAt` values fall within the given range (inclusive).
                     - Only users with role **ROLE_ADMIN** are authorized to access this endpoint.
                     """
     )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved total new posts",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid date format or date range"),
+            @ApiResponse(responseCode = "403", description = "Access denied - Admin role required")
+    })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/total-new-post")
     public ResponseEntity<?> getTotalNewPostInMonth(
+            @Parameter(description = "Start date in ISO format (yyyy-MM-dd)", required = true, example = "2025-01-01")
             @RequestParam("start_date") LocalDate startDate,
+            @Parameter(description = "End date in ISO format (yyyy-MM-dd)", required = true, example = "2025-01-31")
             @RequestParam("end_date") LocalDate endDate
     ) {
         long totalPost = postProductService.getTotalNewPostInMonth(startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
@@ -496,13 +649,37 @@ public class AdminController {
     @Operation(
             summary = "Get all pending post products for verification",
             description = """
-                    This endpoint allows administrators to retrieve a paginated list of post products.
+                    This endpoint allows administrators to retrieve a paginated list of post products
                     that are pending verification. Accessible only by users with the ADMIN role.
-                    """)
+                    
+                    **Query Parameters:**
+                    - `page` (integer, optional): Page number (0-based index). Default: `0`
+                    - `size` (integer, optional): Number of records per page. Default: `10`
+                    
+                    **Response Structure:**
+                    - `data` (Page<PostProductResponse>): Paginated list containing:
+                      - `content` (array): Array of post product objects awaiting verification
+                      - `totalElements` (long): Total number of pending posts
+                      - `totalPages` (integer): Total number of pages
+                      - `number` (integer): Current page number
+                      - `size` (integer): Page size
+                    
+                    **Use Cases:**
+                    - Admin dashboard for reviewing pending product submissions
+                    - Quality control and content moderation
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved pending post products",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied - Admin role required")
+    })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/pending-post")
     public ResponseEntity<?> getPendingVerifyPostProduct(
+            @Parameter(description = "Page number (0-based)", example = "0")
             @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(description = "Number of records per page", example = "10")
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         try {
@@ -530,19 +707,39 @@ public class AdminController {
                 Allows admin to approve or reject a product post submitted by a seller.
                 The endpoint updates the post status and sends an email notification to the seller.
                 
-                **Path Variables:**
-                - postId: ID of the product post
-                - decision: APPROVED or REJECTED
+                **Path Parameters:**
+                - `postId` (Long, required): ID of the product post to approve/reject
+                - `decision` (VerifiedDecisionStatus, required): Decision status. Valid values: `APPROVED` or `REJECTED`
+                
+                **Response:**
+                - Success (200): Returns updated `PostProductResponse` with new verification status
+                - Error (400/404): Returns error message if post not found or validation fails
+                
+                **Email Notification:**
+                - If APPROVED: Sends congratulatory email to seller
+                - If REJECTED: Sends rejection notice with reason
+                
+                **Example Requests:**
+                - Approve: POST /api/v1/admin/approve-post/12/APPROVED
+                - Reject: POST /api/v1/admin/approve-post/12/REJECTED
                 
                 **Permissions:** ROLE_ADMIN required.
-                **Example:**
-                POST /api/admin/approve-post/12/APPROVED
                 """
     )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Post approval/rejection processed successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid decision status"),
+            @ApiResponse(responseCode = "403", description = "Access denied - Admin role required"),
+            @ApiResponse(responseCode = "404", description = "Post product not found")
+    })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/approve-post/{postId}/{decision}")
-    public ResponseEntity<?> handlePendingPost(@PathVariable(name = "postId") long id,
-                                               @PathVariable(name = "decision") VerifiedDecisionStatus decision) throws Exception {
+    public ResponseEntity<?> handlePendingPost(
+            @Parameter(description = "ID of the product post", required = true, example = "12")
+            @PathVariable(name = "postId") long id,
+            @Parameter(description = "Decision status: APPROVED or REJECTED", required = true, example = "APPROVED")
+            @PathVariable(name = "decision") VerifiedDecisionStatus decision) throws Exception {
         try {
             PostProduct postProduct = postProductServiceImpl.handlePendingPostProduct(id, decision);
 
@@ -583,6 +780,305 @@ public class AdminController {
                     false,
                     "APPROVE POST FAILED.",
                     null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Get all escrow system wallets",
+            description = """
+                    Retrieves a paginated list of system wallets with ESCROW_HOLD status. 
+                    These are escrow records where money is being held before transfer to seller.
+                    
+                    **Query Parameters:**
+                    - `page` (integer, optional): Page number (0-based index). Default: `0`
+                    - `size` (integer, optional): Number of records per page. Default: `10`
+                    
+                    **Response Structure:**
+                    - `data` (Page<SystemWalletResponse>): Paginated list containing:
+                      - `content` (array): Array of system wallet objects with:
+                        - `id` (Long): System wallet ID
+                        - `order` (Order): Associated order information
+                        - `balance` (BigDecimal): Amount held in escrow
+                        - `status` (SystemWalletStatus): Current status (ESCROW_HOLD)
+                        - `createdAt` (LocalDateTime): When escrow was created
+                        - `endAt` (LocalDateTime): When escrow will be automatically resolved
+                        - `buyerWalletId` (Long): Buyer's wallet ID
+                        - `sellerWalletId` (Long): Seller's wallet ID
+                      - `totalElements` (long): Total number of escrow records
+                      - `totalPages` (integer): Total number of pages
+                    
+                    **Use Cases:**
+                    - Admin monitoring escrow transactions
+                    - Reviewing pending money transfers
+                    - Managing escrow resolution timeline
+                    
+                    **Access Control:** Admin only (ROLE_ADMIN required).
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved escrow system wallets",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied - Admin role required")
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/system-wallets")
+    public ResponseEntity<?> getSystemWallets(
+            @Parameter(description = "Page number (0-based)", example = "0")
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(description = "Number of records per page", example = "10")
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            Page<SystemWallet> systemWallets = systemWalletService.getAllEscrowService(page, size);
+            Page<SystemWalletResponse> responses = systemWallets.map(systemWalletMapper::toDto);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "Get all escrow service (pending) successfully.",
+                    responses, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "Get all escrow service (pending) failed.",
+                    null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Update system wallet endAt",
+            description = """
+                    Updates the `endAt` time of a system wallet (escrow record). 
+                    This determines when the escrow will be automatically resolved and money transferred to seller.
+                    
+                    **Path Parameters:**
+                    - `systemWalletId` (Long, required): Unique identifier of the system wallet to update
+                    
+                    **Request Body (UpdateSystemWalletEndAtRequest):**
+                    - `endAt` (LocalDateTime, required): New end date/time in ISO format (`yyyy-MM-dd'T'HH:mm:ss`)
+                    
+                    **Validation Rules:**
+                    - Only system wallets with status `ESCROW_HOLD` can be updated
+                    - `endAt` must be after `createdAt`
+                    - Only super admin can perform this operation
+                    
+                    **Response:**
+                    - Success (200): Returns updated `SystemWalletResponse` with new `endAt` value
+                    - Error (400): Invalid request (e.g., endAt before createdAt, wrong status)
+                    - Error (403): Access denied (non-super admin)
+                    - Error (404): System wallet not found
+                    
+                    **Example Request:**
+                    PUT /api/v1/admin/system-wallets/1/end-at
+                    {
+                      "endAt": "2025-11-15T14:30:00"
+                    }
+                    
+                    **Use Cases:**
+                    - Adjusting escrow resolution timeline
+                    - Extending or shortening escrow period for specific orders
+                    - Manual intervention in escrow management
+                    
+                    **Access Control:** Super admin only (ROLE_ADMIN + isSuperAdmin = true).
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "System wallet endAt updated successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request (wrong status, invalid date, etc.)"),
+            @ApiResponse(responseCode = "403", description = "Access denied - Super admin required"),
+            @ApiResponse(responseCode = "404", description = "System wallet not found")
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/system-wallets/{systemWalletId}/end-at")
+    public ResponseEntity<?> updateSystemWalletEndAt(
+            @Parameter(description = "Unique identifier of the system wallet", required = true, example = "1")
+            @PathVariable Long systemWalletId,
+            @Parameter(description = "Request body containing new endAt datetime", required = true)
+            @Valid @RequestBody UpdateSystemWalletEndAtRequest request
+    ) {
+        try {
+            Admin admin = adminService.getCurrentUser();
+            if (!admin.isSuperAdmin()) {
+                throw new IllegalArgumentException("Only super admin can update system wallet endAt.");
+            }
+
+            // Sử dụng endAt từ request (đã được parse theo timezone của request)
+            LocalDateTime endAt = request.getEndAt();
+
+            SystemWallet updatedWallet = systemWalletService.updateEndAt(systemWalletId, endAt);
+            SystemWalletResponse response = systemWalletMapper.toDto(updatedWallet);
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "System wallet endAt updated successfully.",
+                    response,
+                    null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "Failed to update system wallet endAt: " + e.getMessage(),
+                    null,
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Create a new subscription package",
+            description = """
+                    Allows a **super admin** to create a new subscription package in the system.
+                    This endpoint is restricted to super administrators only.
+                    
+                    **Request Body (CreateSubscriptionPackageRequest):**
+                    - `name` (String, required): Unique name of the subscription package
+                    - `description` (String, required): Description of the package features
+                    - `isActive` (Boolean, required): Whether the package is active and available
+                    - `maxProduct` (Long, required): Maximum number of products allowed (must be positive)
+                    - `maxImgPerPost` (Long, required): Maximum images per post (must be positive)
+                    - `canSendVerifyRequest` (Boolean, required): Whether this package allows sellers to send verify requests for post products
+                    - `prices` (List<PackagePriceRequest>, optional): List of package prices to create
+                      - `price` (Double, required): Price amount (must be positive)
+                      - `isActive` (Boolean, required): Whether this price option is active
+                      - `durationByDay` (Long, required): Duration in days (must be positive)
+                      - `currency` (String, required): Currency code (e.g., "VND")
+                      - `discountPercent` (Double, required): Discount percentage (must be >= 0)
+                    
+                    **Response:**
+                    - Success (200): Returns created `SubscriptionPackageResponse` with package details
+                    - Error (400): Invalid request data or validation failed
+                    - Error (403): Access denied (non-super admin)
+                    - Error (409): Package name already exists
+                    
+                    **Use Cases:**
+                    - Creating new subscription tiers with different features
+                    - Configuring which packages allow verify request feature
+                    - Managing subscription package offerings
+                    
+                    **Access Control:** Super admin only (ROLE_ADMIN + isSuperAdmin = true).
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Subscription package created successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data or validation failed"),
+            @ApiResponse(responseCode = "403", description = "Access denied - Super admin required"),
+            @ApiResponse(responseCode = "409", description = "Package name already exists")
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/subscription-packages")
+    public ResponseEntity<?> createSubscriptionPackage(
+            @Parameter(description = "Subscription package creation request", required = true)
+            @Valid @RequestBody CreateSubscriptionPackageRequest request
+    ) {
+        try {
+            Admin admin = adminService.getCurrentUser();
+            if (!admin.isSuperAdmin()) {
+                throw new IllegalArgumentException("Only super admin can create subscription packages.");
+            }
+
+            SubscriptionPackages createdPackage = subscriptionPackageService.createSubscriptionPackage(request);
+            SubscriptionPackageResponse response = subscriptionPackageMapper.toResponse(createdPackage);
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "Subscription package created successfully.",
+                    response,
+                    null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "Failed to create subscription package: " + e.getMessage(),
+                    null,
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Update an existing subscription package",
+            description = """
+                    Allows a **super admin** to update an existing subscription package in the system.
+                    This endpoint is restricted to super administrators only.
+                    
+                    **Path Parameters:**
+                    - `packageId` (Long, required): Unique identifier of the subscription package to update
+                    
+                    **Request Body (UpdateSubscriptionPackageRequest):**
+                    - `name` (String, required): Updated name of the subscription package
+                    - `description` (String, required): Updated description of the package features
+                    - `isActive` (Boolean, required): Whether the package is active and available
+                    - `maxProduct` (Long, required): Maximum number of products allowed (must be positive)
+                    - `maxImgPerPost` (Long, required): Maximum images per post (must be positive)
+                    - `canSendVerifyRequest` (Boolean, required): Whether this package allows sellers to send verify requests for post products
+                    - `prices` (List<PackagePriceRequest>, optional): List of package prices to update/create/delete
+                      - `id` (Long, optional): Price ID if updating existing price, null if creating new
+                      - `price` (Double, required): Price amount (must be positive)
+                      - `isActive` (Boolean, required): Whether this price option is active
+                      - `durationByDay` (Long, required): Duration in days (must be positive)
+                      - `currency` (String, required): Currency code (e.g., "VND")
+                      - `discountPercent` (Double, required): Discount percentage (must be >= 0)
+                    
+                    **Price Update Logic:**
+                    - Prices with `id` in request → Update existing prices
+                    - Prices without `id` in request → Create new prices
+                    - Existing prices not in request → Soft delete (set deletedAt)
+                    
+                    **Response:**
+                    - Success (200): Returns updated `SubscriptionPackageResponse` with package details
+                    - Error (400): Invalid request data or validation failed
+                    - Error (403): Access denied (non-super admin)
+                    - Error (404): Subscription package not found
+                    - Error (409): New package name conflicts with existing package
+                    
+                    **Use Cases:**
+                    - Updating package features and limits
+                    - Enabling/disabling verify request feature for specific packages
+                    - Modifying package availability status
+                    
+                    **Access Control:** Super admin only (ROLE_ADMIN + isSuperAdmin = true).
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Subscription package updated successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data or validation failed"),
+            @ApiResponse(responseCode = "403", description = "Access denied - Super admin required"),
+            @ApiResponse(responseCode = "404", description = "Subscription package not found"),
+            @ApiResponse(responseCode = "409", description = "Package name already exists")
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/subscription-packages/{packageId}")
+    public ResponseEntity<?> updateSubscriptionPackage(
+            @Parameter(description = "Unique identifier of the subscription package", required = true, example = "1")
+            @PathVariable Long packageId,
+            @Parameter(description = "Subscription package update request", required = true)
+            @Valid @RequestBody UpdateSubscriptionPackageRequest request
+    ) {
+        try {
+            Admin admin = adminService.getCurrentUser();
+            if (!admin.isSuperAdmin()) {
+                throw new IllegalArgumentException("Only super admin can update subscription packages.");
+            }
+
+            SubscriptionPackages updatedPackage = subscriptionPackageService.updateSubscriptionPackage(packageId, request);
+            SubscriptionPackageResponse response = subscriptionPackageMapper.toResponse(updatedPackage);
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "Subscription package updated successfully.",
+                    response,
+                    null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "Failed to update subscription package: " + e.getMessage(),
+                    null,
+                    e.getMessage()
             ));
         }
     }

@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,26 +15,21 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "package_price")
-public class PackagePrice {
+@Table(name = "system_config")
+public class SystemConfig {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "config_id")
     private Long id;
 
-    @Column(name = "price", nullable = false, unique = false)
-    private double price;
+    @Column(name = "config_key", nullable = false, unique = true)
+    private String configKey;
 
-    @Column(name = "is_active", nullable = false, unique = false)
-    private boolean isActive;
+    @Column(name = "config_value", nullable = false)
+    private String configValue;
 
-    @Column(name = "duration_by_day", nullable = false, unique = false)
-    private Long durationByDay;
-
-    @Column(name = "currency", nullable = false, unique = false)
-    private String currency;
-
-    @Column(name = "discount_percent", nullable = false, unique = false)
-    private double discountPercent;
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -41,12 +37,10 @@ public class PackagePrice {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "package_id", nullable = false)
-    private SubscriptionPackages subscriptionPackage;
+    @ManyToOne
+    @JoinColumn(name = "admin_id")
+    @JsonManagedReference
+    private Admin admin;
 
     @PrePersist
     public void onCreate() {
@@ -58,3 +52,4 @@ public class PackagePrice {
         this.updatedAt = DateUtils.getCurrentVietnamTime();
     }
 }
+

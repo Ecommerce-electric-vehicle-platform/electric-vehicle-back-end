@@ -3,7 +3,9 @@ package Green_trade.green_trade_platform.service;
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.model.Subscription;
 import Green_trade.green_trade_platform.model.SubscriptionPackages;
+import Green_trade.green_trade_platform.request.CreateSubscriptionPackageRequest;
 import Green_trade.green_trade_platform.request.SignPackageRequest;
+import Green_trade.green_trade_platform.request.UpdateSubscriptionPackageRequest;
 import Green_trade.green_trade_platform.response.SubscriptionPackageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,5 +28,9 @@ public interface SubscriptionPackageService {
     Subscription updateRemainPost(Seller seller);
 
     double getTotalRevenue();
+
+    SubscriptionPackages createSubscriptionPackage(CreateSubscriptionPackageRequest request);
+
+    SubscriptionPackages updateSubscriptionPackage(Long packageId, UpdateSubscriptionPackageRequest request);
 }
 

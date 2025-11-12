@@ -3,6 +3,7 @@ package Green_trade.green_trade_platform.model;
 import Green_trade.green_trade_platform.enumerate.AccountStatus;
 import Green_trade.green_trade_platform.enumerate.Gender;
 import Green_trade.green_trade_platform.enumerate.SystemWalletStatus;
+import Green_trade.green_trade_platform.util.DateUtils;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -44,10 +45,10 @@ public class SystemWallet {
     @Enumerated(EnumType.STRING)
     private SystemWalletStatus status;
 
-    @Column(name = "created_at", nullable = true, unique = false)
+    @Column(name = "created_at", nullable = true, unique = false, columnDefinition = "DATETIME")
     private LocalDateTime createdAt;
 
-    @Column(name = "end_at")
+    @Column(name = "end_at", columnDefinition = "DATETIME")
     private LocalDateTime endAt;
 
     @ManyToOne()
@@ -59,4 +60,9 @@ public class SystemWallet {
     @JoinColumn(name = "order_id")
     @JsonManagedReference
     private Order order;
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = DateUtils.getCurrentVietnamTime();
+    }
 }

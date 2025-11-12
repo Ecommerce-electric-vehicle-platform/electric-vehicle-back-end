@@ -4,13 +4,18 @@ import Green_trade.green_trade_platform.mapper.SubscriptionMapper;
 import Green_trade.green_trade_platform.service.SubscriptionPackageService;
 import Green_trade.green_trade_platform.mapper.SubscriptionPackageMapper;
 import Green_trade.green_trade_platform.model.Buyer;
+import Green_trade.green_trade_platform.model.PackagePrice;
 import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.model.Subscription;
 import Green_trade.green_trade_platform.model.SubscriptionPackages;
+import Green_trade.green_trade_platform.repository.PackagePriceRepository;
 import Green_trade.green_trade_platform.repository.SellerRepository;
 import Green_trade.green_trade_platform.repository.SubscriptionPackagesRepository;
 import Green_trade.green_trade_platform.repository.SubscriptionRepository;
+import Green_trade.green_trade_platform.request.CreateSubscriptionPackageRequest;
+import Green_trade.green_trade_platform.request.PackagePriceRequest;
 import Green_trade.green_trade_platform.request.SignPackageRequest;
+import Green_trade.green_trade_platform.request.UpdateSubscriptionPackageRequest;
 import Green_trade.green_trade_platform.response.SignPackageResponse;
 import Green_trade.green_trade_platform.response.SubscriptionPackageResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +31,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,6 +47,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
     private final SubscriptionRepository subscriptionRepository;
     private final SellerRepository sellerRepository;
     private final SubscriptionMapper subscriptionMapper;
+    private final PackagePriceRepository packagePriceRepository;
 
     public Page<SubscriptionPackages> getActivePackages(Pageable pageable) {
         return subscriptionPackageRepository.findByIsActiveTrue(pageable);
@@ -144,5 +151,128 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
     public double getTotalRevenue() {
         return subscriptionRepository.getTotalRevenue();
+    }
+
+    public SubscriptionPackages createSubscriptionPackage(CreateSubscriptionPackageRequest request) {
+        log.info(">>> [SubscriptionPackageServiceImpl] createSubscriptionPackage - request: {}", request);
+        
+        // Check if package name already exists
+        subscriptionPackageRepository.findByName(request.getName())
+                .ifPresent(pkg -> {
+                    throw new IllegalArgumentException("Package name already exists: " + request.getName());
+                });
+        
+        SubscriptionPackages subscriptionPackage = SubscriptionPackages.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .isActive(request.getIsActive())
+                .maxProduct(request.getMaxProduct())
+                .maxImgPerPost(request.getMaxImgPerPost())
+                .canSendVerifyRequest(request.getCanSendVerifyRequest())
+                .build();
+        
+        SubscriptionPackages saved = subscriptionPackageRepository.save(subscriptionPackage);
+        log.info(">>> [SubscriptionPackageServiceImpl] createSubscriptionPackage - created package ID: {}", saved.getId());
+        
+        // Create package prices if provided
+        if (request.getPrices() != null && !request.getPrices().isEmpty()) {
+            for (PackagePriceRequest priceRequest : request.getPrices()) {
+                PackagePrice packagePrice = PackagePrice.builder()
+                        .subscriptionPackage(saved)
+                        .price(priceRequest.getPrice())
+                        .isActive(priceRequest.getIsActive())
+                        .durationByDay(priceRequest.getDurationByDay())
+                        .currency(priceRequest.getCurrency())
+                        .discountPercent(priceRequest.getDiscountPercent())
+                        .build();
+                packagePriceRepository.save(packagePrice);
+                log.info(">>> [SubscriptionPackageServiceImpl] createSubscriptionPackage - created price ID: {}", packagePrice.getId());
+            }
+        }
+        
+        return saved;
+    }
+
+    public SubscriptionPackages updateSubscriptionPackage(Long packageId, UpdateSubscriptionPackageRequest request) {
+        log.info(">>> [SubscriptionPackageServiceImpl] updateSubscriptionPackage - packageId: {}, request: {}", packageId, request);
+        
+        SubscriptionPackages subscriptionPackage = subscriptionPackageRepository.findById(packageId)
+                .orElseThrow(() -> new IllegalArgumentException("Subscription package not found with id: " + packageId));
+        
+        // Check if new name conflicts with existing package (excluding current package)
+        subscriptionPackageRepository.findByName(request.getName())
+                .ifPresent(pkg -> {
+                    if (!pkg.getId().equals(packageId)) {
+                        throw new IllegalArgumentException("Package name already exists: " + request.getName());
+                    }
+                });
+        
+        subscriptionPackage.setName(request.getName());
+        subscriptionPackage.setDescription(request.getDescription());
+        subscriptionPackage.setActive(request.getIsActive());
+        subscriptionPackage.setMaxProduct(request.getMaxProduct());
+        subscriptionPackage.setMaxImgPerPost(request.getMaxImgPerPost());
+        subscriptionPackage.setCanSendVerifyRequest(request.getCanSendVerifyRequest());
+        
+        SubscriptionPackages updated = subscriptionPackageRepository.save(subscriptionPackage);
+        log.info(">>> [SubscriptionPackageServiceImpl] updateSubscriptionPackage - updated package ID: {}", updated.getId());
+        
+        // Update package prices if provided
+        if (request.getPrices() != null && !request.getPrices().isEmpty()) {
+            // Get all existing prices for this package
+            List<PackagePrice> existingPrices = packagePriceRepository.findBySubscriptionPackageId(packageId);
+            
+            // Get IDs from request
+            List<Long> requestPriceIds = request.getPrices().stream()
+                    .map(PackagePriceRequest::getId)
+                    .filter(id -> id != null)
+                    .toList();
+            
+            // Soft delete prices that are not in the request
+            for (PackagePrice existingPrice : existingPrices) {
+                if (!requestPriceIds.contains(existingPrice.getId())) {
+                    existingPrice.setDeletedAt(DateUtils.getCurrentVietnamTime());
+                    existingPrice.setActive(false);
+                    packagePriceRepository.save(existingPrice);
+                    log.info(">>> [SubscriptionPackageServiceImpl] updateSubscriptionPackage - soft deleted price ID: {}", existingPrice.getId());
+                }
+            }
+            
+            // Create or update prices from request
+            for (PackagePriceRequest priceRequest : request.getPrices()) {
+                if (priceRequest.getId() != null) {
+                    // Update existing price
+                    PackagePrice existingPrice = packagePriceRepository.findById(priceRequest.getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Package price not found with id: " + priceRequest.getId()));
+                    
+                    if (!existingPrice.getSubscriptionPackage().getId().equals(packageId)) {
+                        throw new IllegalArgumentException("Package price does not belong to this subscription package");
+                    }
+                    
+                    existingPrice.setPrice(priceRequest.getPrice());
+                    existingPrice.setActive(priceRequest.getIsActive());
+                    existingPrice.setDurationByDay(priceRequest.getDurationByDay());
+                    existingPrice.setCurrency(priceRequest.getCurrency());
+                    existingPrice.setDiscountPercent(priceRequest.getDiscountPercent());
+                    existingPrice.setDeletedAt(null); // Restore if was deleted
+                    packagePriceRepository.save(existingPrice);
+                    log.info(">>> [SubscriptionPackageServiceImpl] updateSubscriptionPackage - updated price ID: {}", existingPrice.getId());
+                } else {
+                    // Create new price
+                    PackagePrice newPrice = PackagePrice.builder()
+                            .subscriptionPackage(updated)
+                            .price(priceRequest.getPrice())
+                            .isActive(priceRequest.getIsActive())
+                            .durationByDay(priceRequest.getDurationByDay())
+                            .currency(priceRequest.getCurrency())
+                            .discountPercent(priceRequest.getDiscountPercent())
+                            .build();
+                    packagePriceRepository.save(newPrice);
+                    log.info(">>> [SubscriptionPackageServiceImpl] updateSubscriptionPackage - created new price ID: {}", newPrice.getId());
+                }
+            }
+        }
+        
+        return updated;
     }
 }

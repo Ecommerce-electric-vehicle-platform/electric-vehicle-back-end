@@ -215,6 +215,53 @@ public class DisputeController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_BUYER', 'ROLE_SELLER')")
     @Operation(
+            summary = "Get all disputes by order ID",
+            description = """
+                        Retrieves all disputes associated with a specific order.
+                    
+                        This endpoint returns a list of disputes that have been raised for the given order.
+                        Since an order can have multiple disputes (e.g., different dispute categories),
+                        the response is a list of dispute objects.
+                    
+                        **Use Cases:**
+                        - View all disputes related to a specific order
+                        - Check dispute history for an order
+                        - Admin reviewing order-related disputes
+                    
+                        **Path Parameters:**
+                        - **orderId** *(Long, required)* - The unique identifier of the order
+                    
+                        **Response:**
+                        Returns a list of dispute objects, each containing:
+                        - Dispute ID, status, creation date
+                        - Dispute category and description
+                        - Evidence and resolution details
+                        - Related order information
+                    
+                        **Permissions:** Admin, Buyer, or Seller roles required.
+                        **Example:** GET /api/v1/dispute/order/123
+                    """
+    )
+    @GetMapping("/order/{orderId}")
+    public ResponseEntity<?> getDisputesByOrderId(@PathVariable(name = "orderId") Long orderId) {
+        log.info(">>> [Dispute Controller] Get disputes by orderId: {}", orderId);
+        try {
+            List<DisputeResponse> disputes = disputeService.getDisputesByOrderId(orderId);
+            return ResponseEntity.ok(responseMapper.toDto(true,
+                    "GET DISPUTES BY ORDER ID SUCCESSFULLY.",
+                    disputes,
+                    null));
+        } catch (Exception e) {
+            log.error(">>> [Dispute Controller] Error getting disputes by orderId: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(false,
+                    "GET DISPUTES BY ORDER ID FAILED: " + e.getMessage(),
+                    null,
+                    e));
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_BUYER', 'ROLE_SELLER')")
+    @Operation(
             summary = "Get detailed information of a specific dispute",
             description = """
                         Retrieves complete details of a dispute based on its unique identifier.

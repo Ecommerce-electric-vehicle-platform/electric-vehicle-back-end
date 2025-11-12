@@ -38,6 +38,9 @@ public class SubscriptionPackages {
     @Column(name = "max_img_per_post", nullable = false, unique = false)
     private Long maxImgPerPost;
 
+    @Column(name = "can_send_verify_request", nullable = false, unique = false)
+    private boolean canSendVerifyRequest;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -54,11 +57,11 @@ public class SubscriptionPackages {
 
     @PrePersist
     public void onCreate() {
-        this.createdAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.createdAt = DateUtils.getCurrentVietnamTime();
     }
 
     @PreUpdate
     public void onUpdate() {
-        this.updatedAt = DateUtils.convertToVietnamTime(LocalDateTime.now());
+        this.updatedAt = DateUtils.getCurrentVietnamTime();
     }
 }

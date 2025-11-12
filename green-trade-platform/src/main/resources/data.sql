@@ -1,8 +1,10 @@
 -- =========================================================
 -- 🚀 RESET DATABASE DỮ LIỆU DEMO
 -- =========================================================
-SET
-GLOBAL time_zone = 'Asia/Ho_Chi_Minh';
+-- Timezone đã được cấu hình trong docker-compose.yml và init.sql
+-- Đảm bảo timezone là Asia/Ho_Chi_Minh (UTC+7)
+SET GLOBAL time_zone = '+07:00';
+SET time_zone = '+07:00';
 SET
 FOREIGN_KEY_CHECKS = 0;
 SET
@@ -67,6 +69,7 @@ DELETE
 FROM invoice;
 DELETE FROM conversation;
 DELETE FROM message;
+DELETE FROM system_config;
 DROP
 EVENT IF EXISTS auto_resolve_escrow;
 
@@ -98,8 +101,9 @@ ALTER TABLE notification AUTO_INCREMENT = 1;
 ALTER TABLE system_wallet AUTO_INCREMENT = 1;
 ALTER TABLE wallet_transaction AUTO_INCREMENT = 1;
 ALTER TABLE cancel_order_reason AUTO_INCREMENT = 1;
-
-
+ALTER TABLE system_config AUTO_INCREMENT = 1;
+ 
+ 
 CREATE
 EVENT IF NOT EXISTS auto_resolve_escrow
 ON SCHEDULE EVERY 1 DAY
@@ -125,6 +129,7 @@ INSERT INTO subscription_packages (subscription_package_id,
                                    is_active,
                                    max_product,
                                    max_img_per_post,
+                                   can_send_verify_request,
                                    created_at,
                                    updated_at)
 VALUES
@@ -137,7 +142,7 @@ VALUES
          'Hỗ trợ & Phí: hỗ trợ qua email hoặc chat với thời gian phản hồi tiêu chuẩn.', CHAR(10),
          'Phí hoa hồng doanh thu khoảng 7%.'
  ),
- TRUE, 10, 5, NOW(), NOW()),
+ TRUE, 10, 5, FALSE, NOW(), NOW()),
 
 -- PRO PLAN
 (2, 'Pro Plan',
@@ -148,7 +153,7 @@ VALUES
          'Hỗ trợ & Phí: phản hồi nhanh hơn qua email/chat, có hotline trong giờ hành chính.', CHAR(10),
          'Phí hoa hồng doanh thu khoảng 5%.'
  ),
- TRUE, 30, 7, NOW(), NOW()),
+ TRUE, 30, 7, TRUE, NOW(), NOW()),
 
 -- VIP PLAN
 (3, 'VIP Plan',
@@ -158,12 +163,12 @@ VALUES
          'Hiển thị & Thương hiệu: sản phẩm được ưu tiên cao nhất trong kết quả tìm kiếm và có thể hiển thị logo thương hiệu.', CHAR(10),
          'Hỗ trợ & Phí: hỗ trợ 24/7 với thời gian phản hồi nhanh nhất.', CHAR(10), 'Phí hoa hồng doanh thu khoảng 3%.'
  ),
- TRUE, 100, 10, NOW(), NOW()),
+ TRUE, 100, 10, TRUE, NOW(), NOW()),
 
 -- LEGACY PLAN
 (4, 'Legacy Plan',
  'Gói cũ, không còn được hỗ trợ hoặc cập nhật. Dành cho người dùng đã đăng ký trước khi hệ thống nâng cấp.',
- FALSE, 20, 5, NOW(), NOW()) ON DUPLICATE KEY
+ FALSE, 20, 5, FALSE, NOW(), NOW()) ON DUPLICATE KEY
 UPDATE subscription_package_id = subscription_package_id;
 
 
@@ -218,6 +223,18 @@ VALUES ('https://cdn.example.com/avatar/admin1.png',
         'MALE',
         NOW(),
         NOW());
+
+-- =========================================================
+-- ⚙️ SYSTEM_CONFIG
+-- =========================================================
+-- Cấu hình thời gian chuyển tiền escrow (tính bằng giây)
+-- Mặc định: 1209600 giây = 14 ngày = 2 tuần
+-- Admin có thể cập nhật giá trị này qua API: PUT /api/v1/admin/system-config/ESCROW_TRANSFER_SECONDS
+INSERT INTO system_config (config_key, config_value, description, created_at, updated_at, admin_id)
+VALUES ('ESCROW_TRANSFER_SECONDS', '1209600', 
+        'Số giây sau khi tạo escrow record thì hệ thống sẽ tự động chuyển tiền từ system wallet về ví người bán. Admin có thể cấu hình giá trị này qua API. Mặc định: 1209600 giây = 14 ngày = 2 tuần.',
+        NOW(), NOW(), 1)
+ON DUPLICATE KEY UPDATE config_key = config_key;
 
 -- =========================================================
 -- 👤 BUYER
