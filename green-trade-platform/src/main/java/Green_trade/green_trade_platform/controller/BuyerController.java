@@ -823,8 +823,8 @@ public class BuyerController {
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/place-order")
     public ResponseEntity<RestResponse<OrderResponse, Object>> placeOrder(
-            @Valid 
-            @RequestBody 
+            @Valid
+            @RequestBody
             @Parameter(
                     description = "Order placement request containing product, buyer, shipping, and payment information",
                     required = true
@@ -1720,7 +1720,6 @@ public class BuyerController {
                     - No access for regular buyers or sellers
                     """,
             tags = {"Admin - Buyer Management"}
->>>>>>> main
     )
     @ApiResponses(value = {
             @ApiResponse(
