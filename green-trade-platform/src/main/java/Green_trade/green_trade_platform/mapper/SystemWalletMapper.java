@@ -19,6 +19,7 @@ public class SystemWalletMapper {
                 .balance(systemWallet.getBalance())
                 .shippingFee(systemWallet.getShippingFee())
                 .status(systemWallet.getStatus())
+                .orderCode(systemWallet.getOrder().getOrderCode())
                 .createdAt(systemWallet.getCreatedAt())
                 .build();
     }

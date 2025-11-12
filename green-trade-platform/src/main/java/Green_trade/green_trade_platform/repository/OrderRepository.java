@@ -33,4 +33,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT COALESCE(SUM(o.price), 0) FROM Order o WHERE o.status = 'COMPLETED' AND o.postProduct.seller.sellerId = :sellerId")
     BigDecimal getTotalRevenueBySeller(@Param("sellerId") Long sellerId);
+
+    Optional<Order> findByOrderCode(String orderCode);
+
+    @Query("SELECT o FROM Order o WHERE o.status = :status")
+    java.util.List<Order> findAllByStatus(@Param("status") OrderStatus status);
 }

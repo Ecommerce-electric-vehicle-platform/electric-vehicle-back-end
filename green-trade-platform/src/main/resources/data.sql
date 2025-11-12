@@ -236,6 +236,15 @@ VALUES ('ESCROW_TRANSFER_SECONDS', '1209600',
         NOW(), NOW(), 1)
 ON DUPLICATE KEY UPDATE config_key = config_key;
 
+-- Cấu hình thời gian chuyển đơn hàng từ DELIVERED sang COMPLETED (tính bằng giây)
+-- Mặc định: 259200 giây = 3 ngày
+-- Admin có thể cập nhật giá trị này qua API: PUT /api/v1/admin/system-config/ORDER_DELIVERED_TO_COMPLETED_SECONDS
+INSERT INTO system_config (config_key, config_value, description, created_at, updated_at, admin_id)
+VALUES ('ORDER_DELIVERED_TO_COMPLETED_SECONDS', '259200', 
+        'Số giây sau khi đơn hàng ở trạng thái DELIVERED thì hệ thống sẽ tự động chuyển sang trạng thái COMPLETED. Admin có thể cấu hình giá trị này qua API. Mặc định: 259200 giây = 3 ngày.',
+        NOW(), NOW(), 1)
+ON DUPLICATE KEY UPDATE config_key = config_key;
+
 -- =========================================================
 -- 👤 BUYER
 -- =========================================================

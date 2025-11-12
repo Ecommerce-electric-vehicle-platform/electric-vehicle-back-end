@@ -101,6 +101,38 @@ public class OrderServiceImpl implements OrderService {
         return result;
     }
 
+    public Order confirmOrder(Long orderId, Buyer buyer) throws Exception {
+        log.info(">>> [OrderServiceImpl] confirmOrder - orderId: {}, buyerId: {}", orderId, buyer.getBuyerId());
+        
+        // Tìm order
+        Order order = orderRepository.findOrderById(orderId)
+                .orElseThrow(() -> new OrderNotFound());
+        
+        log.info(">>> [OrderServiceImpl] Found order: orderId={}, buyerId={}, status={}", 
+                order.getId(), order.getBuyer().getBuyerId(), order.getStatus());
+        
+        // Kiểm tra order thuộc về buyer
+        if (!order.getBuyer().getBuyerId().equals(buyer.getBuyerId())) {
+            throw new Exception("Order does not belong to this buyer");
+        }
+        
+        // Kiểm tra order status phải là DELIVERED
+        if (order.getStatus().equals(OrderStatus.COMPLETED)) {
+            log.info(">>> [OrderServiceImpl] Order already completed");
+            return order;
+        }
+        
+        if (!order.getStatus().equals(OrderStatus.DELIVERED)) {
+            throw new Exception("Order status must be DELIVERED to confirm. Current status: " + order.getStatus());
+        }
+        
+        // Chuyển status sang COMPLETED
+        order = updateOrderStatus(order, OrderStatus.COMPLETED);
+        log.info(">>> [OrderServiceImpl] Updated order status to COMPLETED");
+        
+        return order;
+    }
+
     public Order cancelOrder(Long id, CancelOrderRequest request) throws Exception {
         try {
             log.info(">>> [OrderServiceImpl] came cancelOrder");
