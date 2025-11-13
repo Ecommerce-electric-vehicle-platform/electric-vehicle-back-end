@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -23,4 +25,7 @@ public class DisputeResponse {
     private String resolution;
     private DisputeStatus status;
     private List<EvidenceResponse> evidences;
+    // Thông tin tiền hoàn (chỉ có khi dispute đã được giải quyết với status = ACCEPTED)
+    private BigDecimal refundAmount;
+    private Double refundPercent;
 }

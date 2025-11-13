@@ -362,6 +362,6 @@ public class OrderController {
                 invoiceResponse,
                 null
         );
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return ResponseEntity.ok(response);
     }
 }
