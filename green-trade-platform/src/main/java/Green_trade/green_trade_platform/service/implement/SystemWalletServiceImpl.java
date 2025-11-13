@@ -236,7 +236,7 @@ public class SystemWalletServiceImpl {
     /**
      * Cập nhật endAt của system wallet khi đơn hàng được complete
      * Chỉ cập nhật endAt, không thay đổi createdAt
-     * 
+     *
      * @param systemWallet System wallet cần cập nhật
      * @return SystemWallet đã được cập nhật
      */
@@ -244,10 +244,10 @@ public class SystemWalletServiceImpl {
         if (systemWallet == null) {
             throw new IllegalArgumentException("System wallet cannot be null");
         }
-        
+
         // Chỉ cập nhật endAt, không thay đổi createdAt
         systemWallet.setEndAt(DateUtils.getCurrentVietnamTime().plusSeconds(getEscrowTransferSeconds()));
-        log.info(">>> [SystemWalletServiceImpl] Updated endAt for system wallet ID: {} to {}", 
+        log.info(">>> [SystemWalletServiceImpl] Updated endAt for system wallet ID: {} to {}",
                 systemWallet.getId(), systemWallet.getEndAt());
         return systemWalletRepossitory.save(systemWallet);
     }
@@ -259,28 +259,28 @@ public class SystemWalletServiceImpl {
 
     /**
      * Cập nhật endAt của system wallet (chỉ admin mới được phép)
-     * 
+     *
      * @param systemWalletId ID của system wallet cần cập nhật
-     * @param newEndAt Thời gian endAt mới
+     * @param newEndAt       Thời gian endAt mới
      * @return SystemWallet đã được cập nhật
      */
     public SystemWallet updateEndAt(Long systemWalletId, LocalDateTime newEndAt) {
         SystemWallet systemWallet = systemWalletRepossitory.findById(systemWalletId)
                 .orElseThrow(() -> new IllegalArgumentException("System wallet not found with id: " + systemWalletId));
-        
+
         // Chỉ cho phép cập nhật nếu status là ESCROW_HOLD
         if (systemWallet.getStatus() != SystemWalletStatus.ESCROW_HOLD) {
             throw new IllegalArgumentException("Can only update endAt for escrow records with status ESCROW_HOLD. Current status: " + systemWallet.getStatus());
         }
-        
+
         // Validate: endAt phải sau createdAt
         if (systemWallet.getCreatedAt() != null && newEndAt.isBefore(systemWallet.getCreatedAt())) {
             throw new IllegalArgumentException("End date time must be after created date time.");
         }
-        
+
         systemWallet.setEndAt(newEndAt);
         log.info(">>> [SystemWalletServiceImpl] Updated endAt for system wallet ID: {} to {}", systemWalletId, newEndAt);
-        
+
         return systemWalletRepossitory.save(systemWallet);
     }
 }

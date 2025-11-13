@@ -77,7 +77,7 @@ public class SystemConfigController {
             @PathVariable String configKey) {
         try {
             Admin admin = adminService.getCurrentUser();
-            if(!admin.isSuperAdmin()) {
+            if (!admin.isSuperAdmin()) {
                 throw new IllegalArgumentException("Only super admin can access this resource.");
             }
             SystemConfig config = systemConfigService.getConfigByKey(configKey);
@@ -200,7 +200,7 @@ public class SystemConfigController {
             @Valid @RequestBody UpdateSystemConfigRequest request) {
         try {
             Admin admin = adminService.getCurrentUser();
-            if(!admin.isSuperAdmin()) {
+            if (!admin.isSuperAdmin()) {
                 throw new IllegalArgumentException("Only super admin can access this resource.");
             }
 

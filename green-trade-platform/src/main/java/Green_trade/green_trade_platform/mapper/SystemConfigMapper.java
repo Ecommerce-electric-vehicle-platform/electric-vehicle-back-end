@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class SystemConfigMapper {
 
     public SystemConfigResponse toDto(SystemConfig config) {
-       return SystemConfigResponse.builder()
+        return SystemConfigResponse.builder()
                 .id(config.getId())
                 .configKey(config.getConfigKey())
                 .configValue(config.getConfigValue())

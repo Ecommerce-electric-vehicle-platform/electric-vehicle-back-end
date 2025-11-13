@@ -160,13 +160,13 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
     public SubscriptionPackages createSubscriptionPackage(CreateSubscriptionPackageRequest request) {
         log.info(">>> [SubscriptionPackageServiceImpl] createSubscriptionPackage - request: {}", request);
-        
+
         // Check if package name already exists
         subscriptionPackageRepository.findByName(request.getName())
                 .ifPresent(pkg -> {
                     throw new IllegalArgumentException("Package name already exists: " + request.getName());
                 });
-        
+
         SubscriptionPackages subscriptionPackage = SubscriptionPackages.builder()
                 .name(request.getName())
                 .description(request.getDescription())
@@ -175,10 +175,10 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
                 .maxImgPerPost(request.getMaxImgPerPost())
                 .canSendVerifyRequest(request.getCanSendVerifyRequest())
                 .build();
-        
+
         SubscriptionPackages saved = subscriptionPackageRepository.save(subscriptionPackage);
         log.info(">>> [SubscriptionPackageServiceImpl] createSubscriptionPackage - created package ID: {}", saved.getId());
-        
+
         // Create package prices if provided
         if (request.getPrices() != null && !request.getPrices().isEmpty()) {
             for (PackagePriceRequest priceRequest : request.getPrices()) {
@@ -194,16 +194,16 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
                 log.info(">>> [SubscriptionPackageServiceImpl] createSubscriptionPackage - created price ID: {}", packagePrice.getId());
             }
         }
-        
+
         return saved;
     }
 
     public SubscriptionPackages updateSubscriptionPackage(Long packageId, UpdateSubscriptionPackageRequest request) {
         log.info(">>> [SubscriptionPackageServiceImpl] updateSubscriptionPackage - packageId: {}, request: {}", packageId, request);
-        
+
         SubscriptionPackages subscriptionPackage = subscriptionPackageRepository.findById(packageId)
                 .orElseThrow(() -> new IllegalArgumentException("Subscription package not found with id: " + packageId));
-        
+
         // Check if new name conflicts with existing package (excluding current package)
         subscriptionPackageRepository.findByName(request.getName())
                 .ifPresent(pkg -> {
@@ -211,28 +211,28 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
                         throw new IllegalArgumentException("Package name already exists: " + request.getName());
                     }
                 });
-        
+
         subscriptionPackage.setName(request.getName());
         subscriptionPackage.setDescription(request.getDescription());
         subscriptionPackage.setActive(request.getIsActive());
         subscriptionPackage.setMaxProduct(request.getMaxProduct());
         subscriptionPackage.setMaxImgPerPost(request.getMaxImgPerPost());
         subscriptionPackage.setCanSendVerifyRequest(request.getCanSendVerifyRequest());
-        
+
         SubscriptionPackages updated = subscriptionPackageRepository.save(subscriptionPackage);
         log.info(">>> [SubscriptionPackageServiceImpl] updateSubscriptionPackage - updated package ID: {}", updated.getId());
-        
+
         // Update package prices if provided
         if (request.getPrices() != null && !request.getPrices().isEmpty()) {
             // Get all existing prices for this package
             List<PackagePrice> existingPrices = packagePriceRepository.findBySubscriptionPackageId(packageId);
-            
+
             // Get IDs from request
             List<Long> requestPriceIds = request.getPrices().stream()
                     .map(PackagePriceRequest::getId)
                     .filter(id -> id != null)
                     .toList();
-            
+
             // Soft delete prices that are not in the request
             for (PackagePrice existingPrice : existingPrices) {
                 if (!requestPriceIds.contains(existingPrice.getId())) {
@@ -242,18 +242,18 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
                     log.info(">>> [SubscriptionPackageServiceImpl] updateSubscriptionPackage - soft deleted price ID: {}", existingPrice.getId());
                 }
             }
-            
+
             // Create or update prices from request
             for (PackagePriceRequest priceRequest : request.getPrices()) {
                 if (priceRequest.getId() != null) {
                     // Update existing price
                     PackagePrice existingPrice = packagePriceRepository.findById(priceRequest.getId())
                             .orElseThrow(() -> new IllegalArgumentException("Package price not found with id: " + priceRequest.getId()));
-                    
+
                     if (!existingPrice.getSubscriptionPackage().getId().equals(packageId)) {
                         throw new IllegalArgumentException("Package price does not belong to this subscription package");
                     }
-                    
+
                     existingPrice.setPrice(priceRequest.getPrice());
                     // Nếu isActive là null, giữ nguyên giá trị cũ
                     if (priceRequest.getIsActive() != null) {
@@ -282,7 +282,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
                 }
             }
         }
-        
+
         return updated;
     }
 
@@ -299,7 +299,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
     public SubscriptionPackageListResponse getAllSubscriptionPackagesWithStatistics() {
         log.info(">>> [SubscriptionPackageServiceImpl] getAllSubscriptionPackagesWithStatistics");
         List<SubscriptionPackages> packages = subscriptionPackageRepository.findAll();
-        
+
         List<SubscriptionPackageSummary> summaries = packages.stream()
                 .map(pkg -> {
                     Long totalSubscribers = subscriptionRepository.countBySubscriptionPackageId(pkg.getId());
@@ -307,7 +307,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
                     if (totalRevenue == null) {
                         totalRevenue = 0.0;
                     }
-                    
+
                     return SubscriptionPackageSummary.builder()
                             .packageId(pkg.getId())
                             .packageName(pkg.getName())
@@ -321,7 +321,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
                             .build();
                 })
                 .toList();
-        
+
         return SubscriptionPackageListResponse.builder()
                 .packages(summaries)
                 .build();
@@ -329,18 +329,18 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
     @Override
     public SubscriptionPackageStatisticsResponse getPackageStatistics(Long packageId, boolean includeSubscribers) {
-        log.info(">>> [SubscriptionPackageServiceImpl] getPackageStatistics - packageId: {}, includeSubscribers: {}", 
+        log.info(">>> [SubscriptionPackageServiceImpl] getPackageStatistics - packageId: {}, includeSubscribers: {}",
                 packageId, includeSubscribers);
-        
+
         SubscriptionPackages pkg = subscriptionPackageRepository.findById(packageId)
                 .orElseThrow(() -> new IllegalArgumentException("Subscription package not found with id: " + packageId));
-        
+
         Long totalSubscribers = subscriptionRepository.countBySubscriptionPackageId(packageId);
         Double totalRevenue = subscriptionRepository.getTotalRevenueByPackageId(packageId);
         if (totalRevenue == null) {
             totalRevenue = 0.0;
         }
-        
+
         List<SubscriberInfo> subscribers = null;
         if (includeSubscribers) {
             // Lấy tất cả subscriptions (không pagination vì đây là optional trong statistics)
@@ -361,7 +361,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
                     })
                     .toList();
         }
-        
+
         return SubscriptionPackageStatisticsResponse.builder()
                 .packageId(pkg.getId())
                 .packageName(pkg.getName())
@@ -375,15 +375,15 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
     @Override
     public Page<SubscriberInfo> getPackageSubscribers(Long packageId, int page, int size) {
-        log.info(">>> [SubscriptionPackageServiceImpl] getPackageSubscribers - packageId: {}, page: {}, size: {}", 
+        log.info(">>> [SubscriptionPackageServiceImpl] getPackageSubscribers - packageId: {}, page: {}, size: {}",
                 packageId, page, size);
-        
+
         SubscriptionPackages pkg = subscriptionPackageRepository.findById(packageId)
                 .orElseThrow(() -> new IllegalArgumentException("Subscription package not found with id: " + packageId));
-        
+
         Pageable pageable = PageRequest.of(page, size);
         Page<Subscription> subscriptionPage = subscriptionRepository.findBySubscriptionPackage_IdOrderByStartDayDesc(packageId, pageable);
-        
+
         return subscriptionPage.map(sub -> {
             Seller seller = sub.getSeller();
             return SubscriberInfo.builder()

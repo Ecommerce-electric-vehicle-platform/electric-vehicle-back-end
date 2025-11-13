@@ -309,12 +309,12 @@ public class DisputeController {
                         .to(buyerWallet.getBuyer().getEmail())
                         .subject("Kết quả xử lý khiếu nại đơn hàng #" + order.getId())
                         .message("""
-                💚 <strong>Kết quả xử lý khiếu nại</strong><br><br>
-                Khiếu nại của bạn đã được Green Trade xem xét và phê duyệt hoàn tiền.<br>
-                Phần trăm hoàn tiền: %s%%<br><br>
-                Vui lòng kiểm tra ví của bạn để xác nhận giao dịch hoàn tiền đã được xử lý.<br><br>
-                Cảm ơn bạn đã tin tưởng Green Trade Platform!
-                """.formatted(request.getRefundPercent()))
+                                💚 <strong>Kết quả xử lý khiếu nại</strong><br><br>
+                                Khiếu nại của bạn đã được Green Trade xem xét và phê duyệt hoàn tiền.<br>
+                                Phần trăm hoàn tiền: %s%%<br><br>
+                                Vui lòng kiểm tra ví của bạn để xác nhận giao dịch hoàn tiền đã được xử lý.<br><br>
+                                Cảm ơn bạn đã tin tưởng Green Trade Platform!
+                                """.formatted(request.getRefundPercent()))
                         .build();
 
                 MailRequest sellerMailRequest = MailRequest.builder()
@@ -322,12 +322,12 @@ public class DisputeController {
                         .to(sellerWallet.getBuyer().getEmail())
                         .subject("Kết quả khiếu nại đơn hàng #" + order.getId())
                         .message("""
-                ⚠️ <strong>Thông báo kết quả khiếu nại</strong><br><br>
-                Khiếu nại liên quan đến <strong>đơn hàng #%s</strong> đã được xử lý.<br><br>
-                🔹 <strong>Tỷ lệ thanh toán giữ lại:</strong> %s%%<br><br>
-                Vui lòng kiểm tra ví của bạn để xác nhận số dư mới.<br><br>
-                Trân trọng,<br>Green Trade Platform
-                """.formatted(order.getId(), 100 - request.getRefundPercent()))
+                                ⚠️ <strong>Thông báo kết quả khiếu nại</strong><br><br>
+                                Khiếu nại liên quan đến <strong>đơn hàng #%s</strong> đã được xử lý.<br><br>
+                                🔹 <strong>Tỷ lệ thanh toán giữ lại:</strong> %s%%<br><br>
+                                Vui lòng kiểm tra ví của bạn để xác nhận số dư mới.<br><br>
+                                Trân trọng,<br>Green Trade Platform
+                                """.formatted(order.getId(), 100 - request.getRefundPercent()))
                         .build();
                 mailSender.sendBeautifulMail(sellerMailRequest);
                 mailSender.sendBeautifulMail(buyerMailRequest);
@@ -372,8 +372,8 @@ public class DisputeController {
         log.info(">>> [Dispute Controller] Check pending dispute for orderId: {}", orderId);
         try {
             boolean hasPending = disputeService.hasPendingDisputeByOrderId(orderId);
-            String message = hasPending 
-                    ? "Order has pending dispute(s). Cannot raise new dispute." 
+            String message = hasPending
+                    ? "Order has pending dispute(s). Cannot raise new dispute."
                     : "Order does not have pending dispute. Can raise new dispute.";
             return ResponseEntity.ok(responseMapper.toDto(true,
                     message,
@@ -505,13 +505,13 @@ public class DisputeController {
         log.info(">>> [Dispute Controller] Get disputes by buyerId: {}", buyerId);
         try {
             Page<DisputeResponse> disputes = disputeService.getDisputesByBuyerId(buyerId, page, size);
-            
+
             Map<String, Object> data = new HashMap<>();
             data.put("disputes", disputes.getContent());
             data.put("currentPage", disputes.getNumber());
             data.put("totalElements", disputes.getTotalElements());
             data.put("totalPages", disputes.getTotalPages());
-            
+
             return ResponseEntity.ok(responseMapper.toDto(true,
                     "GET DISPUTES BY BUYER ID SUCCESSFULLY.",
                     data,

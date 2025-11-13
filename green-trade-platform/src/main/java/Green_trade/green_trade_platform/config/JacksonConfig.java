@@ -17,14 +17,14 @@ public class JacksonConfig {
     @Primary
     public ObjectMapper objectMapper(Jackson2ObjectMapperBuilder builder) {
         ObjectMapper mapper = builder.build();
-        
+
         // Đảm bảo timezone là Asia/Ho_Chi_Minh
         mapper.setTimeZone(java.util.TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
-        
+
         // Cấu hình cho Java 8 Time API
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        
+
         return mapper;
     }
 }
