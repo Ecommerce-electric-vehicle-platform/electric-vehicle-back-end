@@ -1082,4 +1082,281 @@ public class AdminController {
             ));
         }
     }
+
+    @Operation(
+            summary = "Get all subscription packages (for admin)",
+            description = """
+                    This endpoint allows **super admin** to retrieve all subscription packages in the system,
+                    including both active and inactive packages, with pagination support.
+                    
+                    **Query Parameters:**
+                    - `page` (Integer, optional, default: 0): Page number (0-based)
+                    - `size` (Integer, optional, default: 10): Number of items per page
+                    
+                    **Response includes:**
+                    - Paginated list of all subscription packages (both active and inactive)
+                    - For each package: Package details (name, description, features, prices)
+                    - Pagination metadata (totalElements, totalPages, currentPage, pageSize)
+                    
+                    **Use Cases:**
+                    - View all packages for management
+                    - Edit or update packages
+                    - See inactive packages that may need to be reactivated
+                    
+                    **Access Control:** Super admin only (ROLE_ADMIN + isSuperAdmin = true).
+                    
+                    **Example:**
+                    ```
+                    GET /api/v1/admin/subscription-packages?page=0&size=10
+                    ```
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Subscription packages retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = SubscriptionPackageResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied - Super admin required"
+            )
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/subscription-packages")
+    public ResponseEntity<?> getAllSubscriptionPackages(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            Admin admin = adminService.getCurrentUser();
+            if (!admin.isSuperAdmin()) {
+                throw new IllegalArgumentException("Only super admin can view all subscription packages.");
+            }
+
+            Page<SubscriptionPackages> packages = subscriptionPackageService.getAllSubscriptionPackages(page, size);
+            Page<SubscriptionPackageResponse> responses = packages.map(subscriptionPackageMapper::toResponse);
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ALL SUBSCRIPTION PACKAGES SUCCESSFULLY.",
+                    responses,
+                    null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET ALL SUBSCRIPTION PACKAGES FAILED.",
+                    null,
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Get all subscription packages with statistics",
+            description = """
+                    This endpoint allows **super admin** to retrieve all subscription packages in the system
+                    along with their statistics (total subscribers and total revenue).
+                    
+                    **Response includes:**
+                    - List of all subscription packages (both active and inactive)
+                    - For each package:
+                      - Package details (name, description, features)
+                      - Total number of sellers who purchased this package
+                      - Total revenue generated from this package
+                    
+                    **Use Cases:**
+                    - View all packages and their performance metrics
+                    - Analyze which packages are most popular
+                    - Monitor revenue by package
+                    
+                    **Access Control:** Super admin only (ROLE_ADMIN + isSuperAdmin = true).
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Subscription packages retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = SubscriptionPackageListResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied - Super admin required"
+            )
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/subscription-packages/statistics")
+    public ResponseEntity<?> getAllSubscriptionPackagesWithStatistics() {
+        try {
+            Admin admin = adminService.getCurrentUser();
+            if (!admin.isSuperAdmin()) {
+                throw new IllegalArgumentException("Only super admin can view subscription package statistics.");
+            }
+
+            SubscriptionPackageListResponse response = subscriptionPackageService.getAllSubscriptionPackagesWithStatistics();
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ALL SUBSCRIPTION PACKAGES WITH STATISTICS SUCCESSFULLY.",
+                    response,
+                    null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET ALL SUBSCRIPTION PACKAGES WITH STATISTICS FAILED.",
+                    null,
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Get detailed statistics for a specific subscription package",
+            description = """
+                    This endpoint allows **super admin** to retrieve detailed statistics for a specific subscription package.
+                    
+                    **Path Parameters:**
+                    - `packageId` (Long, required): Unique identifier of the subscription package
+                    
+                    **Query Parameters:**
+                    - `includeSubscribers` (Boolean, optional, default: false): Whether to include list of subscribers in response
+                    
+                    **Response includes:**
+                    - Package details (name, description, features)
+                    - Total number of sellers who purchased this package
+                    - Total revenue generated from this package
+                    - List of subscribers (if includeSubscribers = true):
+                      - Seller information (ID, name, store name)
+                      - Subscription details (price at purchase, start/end dates, status)
+                    
+                    **Use Cases:**
+                    - View detailed package performance
+                    - Analyze subscriber base for a specific package
+                    - Monitor revenue for individual packages
+                    
+                    **Access Control:** Super admin only (ROLE_ADMIN + isSuperAdmin = true).
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Package statistics retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = SubscriptionPackageStatisticsResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied - Super admin required"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Subscription package not found"
+            )
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/subscription-packages/{packageId}/statistics")
+    public ResponseEntity<?> getPackageStatistics(
+            @Parameter(description = "Unique identifier of the subscription package", required = true, example = "1")
+            @PathVariable Long packageId,
+            @Parameter(description = "Whether to include list of subscribers", example = "false")
+            @RequestParam(name = "includeSubscribers", defaultValue = "false") boolean includeSubscribers) {
+        try {
+            Admin admin = adminService.getCurrentUser();
+            if (!admin.isSuperAdmin()) {
+                throw new IllegalArgumentException("Only super admin can view subscription package statistics.");
+            }
+
+            SubscriptionPackageStatisticsResponse response = subscriptionPackageService.getPackageStatistics(packageId, includeSubscribers);
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET PACKAGE STATISTICS SUCCESSFULLY.",
+                    response,
+                    null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET PACKAGE STATISTICS FAILED.",
+                    null,
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Get list of sellers who purchased a specific subscription package",
+            description = """
+                    This endpoint allows **super admin** to retrieve a paginated list of sellers who have purchased
+                    a specific subscription package.
+                    
+                    **Path Parameters:**
+                    - `packageId` (Long, required): Unique identifier of the subscription package
+                    
+                    **Query Parameters:**
+                    - `page` (Integer, optional, default: 0): Page number (0-based)
+                    - `size` (Integer, optional, default: 10): Number of items per page
+                    
+                    **Response includes:**
+                    - List of subscribers with:
+                      - Seller information (ID, name, store name)
+                      - Subscription details (ID, price at purchase, start/end dates, active status)
+                    
+                    **Use Cases:**
+                    - View all sellers using a specific package
+                    - Analyze subscriber demographics
+                    - Contact sellers for package-related communications
+                    
+                    **Access Control:** Super admin only (ROLE_ADMIN + isSuperAdmin = true).
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Package subscribers retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = SubscriberInfo.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied - Super admin required"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Subscription package not found"
+            )
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/subscription-packages/{packageId}/subscribers")
+    public ResponseEntity<?> getPackageSubscribers(
+            @Parameter(description = "Unique identifier of the subscription package", required = true, example = "1")
+            @PathVariable Long packageId,
+            @Parameter(description = "Page number (0-based)", example = "0")
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page", example = "10")
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        try {
+            Admin admin = adminService.getCurrentUser();
+            if (!admin.isSuperAdmin()) {
+                throw new IllegalArgumentException("Only super admin can view subscription package subscribers.");
+            }
+
+            Page<SubscriberInfo> subscribersPage = 
+                    subscriptionPackageService.getPackageSubscribers(packageId, page, size);
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET PACKAGE SUBSCRIBERS SUCCESSFULLY.",
+                    subscribersPage,
+                    null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET PACKAGE SUBSCRIBERS FAILED.",
+                    null,
+                    e.getMessage()
+            ));
+        }
+    }
 }

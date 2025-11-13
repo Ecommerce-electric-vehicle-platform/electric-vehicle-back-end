@@ -17,11 +17,16 @@ import Green_trade.green_trade_platform.request.PackagePriceRequest;
 import Green_trade.green_trade_platform.request.SignPackageRequest;
 import Green_trade.green_trade_platform.request.UpdateSubscriptionPackageRequest;
 import Green_trade.green_trade_platform.response.SignPackageResponse;
+import Green_trade.green_trade_platform.response.SubscriberInfo;
+import Green_trade.green_trade_platform.response.SubscriptionPackageListResponse;
 import Green_trade.green_trade_platform.response.SubscriptionPackageResponse;
+import Green_trade.green_trade_platform.response.SubscriptionPackageStatisticsResponse;
+import Green_trade.green_trade_platform.response.SubscriptionPackageSummary;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -279,5 +284,118 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
         }
         
         return updated;
+    }
+
+    // ==================== Admin APIs ====================
+
+    @Override
+    public Page<SubscriptionPackages> getAllSubscriptionPackages(int page, int size) {
+        log.info(">>> [SubscriptionPackageServiceImpl] getAllSubscriptionPackages - page: {}, size: {}", page, size);
+        Pageable pageable = PageRequest.of(page, size);
+        return subscriptionPackageRepository.findAll(pageable);
+    }
+
+    @Override
+    public SubscriptionPackageListResponse getAllSubscriptionPackagesWithStatistics() {
+        log.info(">>> [SubscriptionPackageServiceImpl] getAllSubscriptionPackagesWithStatistics");
+        List<SubscriptionPackages> packages = subscriptionPackageRepository.findAll();
+        
+        List<SubscriptionPackageSummary> summaries = packages.stream()
+                .map(pkg -> {
+                    Long totalSubscribers = subscriptionRepository.countBySubscriptionPackageId(pkg.getId());
+                    Double totalRevenue = subscriptionRepository.getTotalRevenueByPackageId(pkg.getId());
+                    if (totalRevenue == null) {
+                        totalRevenue = 0.0;
+                    }
+                    
+                    return SubscriptionPackageSummary.builder()
+                            .packageId(pkg.getId())
+                            .packageName(pkg.getName())
+                            .description(pkg.getDescription())
+                            .isActive(pkg.isActive())
+                            .maxProduct(pkg.getMaxProduct())
+                            .maxImgPerPost(pkg.getMaxImgPerPost())
+                            .canSendVerifyRequest(pkg.isCanSendVerifyRequest())
+                            .totalSubscribers(totalSubscribers)
+                            .totalRevenue(totalRevenue)
+                            .build();
+                })
+                .toList();
+        
+        return SubscriptionPackageListResponse.builder()
+                .packages(summaries)
+                .build();
+    }
+
+    @Override
+    public SubscriptionPackageStatisticsResponse getPackageStatistics(Long packageId, boolean includeSubscribers) {
+        log.info(">>> [SubscriptionPackageServiceImpl] getPackageStatistics - packageId: {}, includeSubscribers: {}", 
+                packageId, includeSubscribers);
+        
+        SubscriptionPackages pkg = subscriptionPackageRepository.findById(packageId)
+                .orElseThrow(() -> new IllegalArgumentException("Subscription package not found with id: " + packageId));
+        
+        Long totalSubscribers = subscriptionRepository.countBySubscriptionPackageId(packageId);
+        Double totalRevenue = subscriptionRepository.getTotalRevenueByPackageId(packageId);
+        if (totalRevenue == null) {
+            totalRevenue = 0.0;
+        }
+        
+        List<SubscriberInfo> subscribers = null;
+        if (includeSubscribers) {
+            // Lấy tất cả subscriptions (không pagination vì đây là optional trong statistics)
+            List<Subscription> subscriptions = subscriptionRepository.findBySubscriptionPackageId(packageId);
+            subscribers = subscriptions.stream()
+                    .map(sub -> {
+                        Seller seller = sub.getSeller();
+                        return SubscriberInfo.builder()
+                                .sellerId(seller.getSellerId())
+                                .sellerName(seller.getSellerName())
+                                .storeName(seller.getStoreName())
+                                .subscriptionId(sub.getId())
+                                .priceAtPurchase(sub.getPriceAtPurchase())
+                                .startDay(sub.getStartDay())
+                                .endDay(sub.getEndDay())
+                                .isActive(sub.getIsActive())
+                                .build();
+                    })
+                    .toList();
+        }
+        
+        return SubscriptionPackageStatisticsResponse.builder()
+                .packageId(pkg.getId())
+                .packageName(pkg.getName())
+                .description(pkg.getDescription())
+                .isActive(pkg.isActive())
+                .totalSubscribers(totalSubscribers)
+                .totalRevenue(BigDecimal.valueOf(totalRevenue))
+                .subscribers(subscribers)
+                .build();
+    }
+
+    @Override
+    public Page<SubscriberInfo> getPackageSubscribers(Long packageId, int page, int size) {
+        log.info(">>> [SubscriptionPackageServiceImpl] getPackageSubscribers - packageId: {}, page: {}, size: {}", 
+                packageId, page, size);
+        
+        SubscriptionPackages pkg = subscriptionPackageRepository.findById(packageId)
+                .orElseThrow(() -> new IllegalArgumentException("Subscription package not found with id: " + packageId));
+        
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Subscription> subscriptionPage = subscriptionRepository.findBySubscriptionPackage_IdOrderByStartDayDesc(packageId, pageable);
+        
+        return subscriptionPage.map(sub -> {
+            Seller seller = sub.getSeller();
+            return SubscriberInfo.builder()
+                    .sellerId(seller.getSellerId())
+                    .sellerName(seller.getSellerName())
+                    .storeName(seller.getStoreName())
+                    .subscriptionId(sub.getId())
+                    .priceAtPurchase(sub.getPriceAtPurchase())
+                    .startDay(sub.getStartDay())
+                    .endDay(sub.getEndDay())
+                    .isActive(sub.getIsActive())
+                    .build();
+        });
     }
 }
