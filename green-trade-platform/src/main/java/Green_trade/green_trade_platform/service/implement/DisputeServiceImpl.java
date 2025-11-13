@@ -154,5 +154,20 @@ public class DisputeServiceImpl implements DisputeService {
                 .toList();
     }
 
+    public Page<DisputeResponse> getDisputesByBuyerId(Long buyerId, int page, int size) {
+        log.info(">>> [Dispute Service] Get disputes by buyerId: {}", buyerId);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        
+        Page<Dispute> disputes = disputeRepository.findByOrder_Buyer_BuyerId(buyerId, pageable);
+        log.info(">>> [Dispute Service] Found {} disputes for buyerId: {}", disputes.getTotalElements(), buyerId);
+        
+        List<DisputeResponse> responses = disputes.getContent()
+                .stream()
+                .map(disputeMapper::toDto)
+                .toList();
+        
+        return new PageImpl<>(responses, pageable, disputes.getTotalElements());
+    }
+
 
 }

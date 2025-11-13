@@ -286,4 +286,67 @@ public class DisputeController {
                 disputeMapper.toDto(dispute),
                 null));
     }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_BUYER', 'ROLE_SELLER')")
+    @Operation(
+            summary = "Get all disputes by buyer ID",
+            description = """
+                        Retrieves a paginated list of disputes raised by a specific buyer.
+                    
+                        This endpoint returns all disputes associated with orders belonging to the specified buyer.
+                        The results are paginated and sorted by creation date (newest first).
+                    
+                        **Use Cases:**
+                        - View all disputes raised by a buyer
+                        - Check dispute history for a specific user
+                        - Admin reviewing buyer-related disputes
+                        - Buyer viewing their own dispute history
+                    
+                        **Path Parameters:**
+                        - **buyerId** *(Long, required)* - The unique identifier of the buyer
+                    
+                        **Query Parameters:**
+                        - **page** *(int, optional)* - Page number (default: 0)
+                        - **size** *(int, optional)* - Page size (default: 10)
+                    
+                        **Response:**
+                        Returns a paginated list of dispute objects, each containing:
+                        - Dispute ID, status, creation date
+                        - Dispute category and description
+                        - Evidence and resolution details
+                        - Related order information
+                        - Refund information (if resolved)
+                    
+                        **Permissions:** Admin, Buyer, or Seller roles required.
+                        **Example:** GET /api/v1/dispute/buyer/123?page=0&size=10
+                    """
+    )
+    @GetMapping("/buyer/{buyerId}")
+    public ResponseEntity<?> getDisputesByBuyerId(
+            @PathVariable(name = "buyerId") Long buyerId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        log.info(">>> [Dispute Controller] Get disputes by buyerId: {}", buyerId);
+        try {
+            Page<DisputeResponse> disputes = disputeService.getDisputesByBuyerId(buyerId, page, size);
+            
+            Map<String, Object> data = new HashMap<>();
+            data.put("disputes", disputes.getContent());
+            data.put("currentPage", disputes.getNumber());
+            data.put("totalElements", disputes.getTotalElements());
+            data.put("totalPages", disputes.getTotalPages());
+            
+            return ResponseEntity.ok(responseMapper.toDto(true,
+                    "GET DISPUTES BY BUYER ID SUCCESSFULLY.",
+                    data,
+                    null));
+        } catch (Exception e) {
+            log.error(">>> [Dispute Controller] Error getting disputes by buyerId: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(false,
+                    "GET DISPUTES BY BUYER ID FAILED: " + e.getMessage(),
+                    null,
+                    e));
+        }
+    }
 }
