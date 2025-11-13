@@ -191,9 +191,25 @@ public class OrderServiceImpl implements OrderService {
 
     public Page<Order> getPendingOrders(Seller seller, int page, int size) {
         log.info(">>> [OrderServiceImpl] getPendingOrders - sellerId: {}, page: {}, size: {}", seller.getSellerId(), page, size);
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Order> result = orderRepository.findByPostProduct_SellerAndStatus(seller, OrderStatus.PENDING, pageable);
         log.info(">>> [OrderServiceImpl] getPendingOrders - result: {} orders found", result.getTotalElements());
+        return result;
+    }
+
+    public Page<Order> getDeliveringOrders(Seller seller, int page, int size) {
+        log.info(">>> [OrderServiceImpl] getDeliveringOrders - sellerId: {}, page: {}, size: {}", seller.getSellerId(), page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Order> result = orderRepository.findByPostProduct_SellerAndStatus(seller, OrderStatus.DELIVERING, pageable);
+        log.info(">>> [OrderServiceImpl] getDeliveringOrders - result: {} orders found", result.getTotalElements());
+        return result;
+    }
+
+    public Page<Order> getCompletedOrders(Seller seller, int page, int size) {
+        log.info(">>> [OrderServiceImpl] getCompletedOrders - sellerId: {}, page: {}, size: {}", seller.getSellerId(), page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Order> result = orderRepository.findByPostProduct_SellerAndStatus(seller, OrderStatus.COMPLETED, pageable);
+        log.info(">>> [OrderServiceImpl] getCompletedOrders - result: {} orders found", result.getTotalElements());
         return result;
     }
 

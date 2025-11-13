@@ -5,13 +5,16 @@ import Green_trade.green_trade_platform.model.ReviewImage;
 import Green_trade.green_trade_platform.request.ReviewRequest;
 import Green_trade.green_trade_platform.response.ReviewImagesResponse;
 import Green_trade.green_trade_platform.response.ReviewResponse;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
 
 @Component
+@AllArgsConstructor
 public class ReviewMapper {
+    private final OrderMapper orderMapper;
     public Review toEntity(ReviewRequest request, List<ReviewImage> reviewImages) {
         return Review.builder()
                 .rating(request.getRating())
@@ -23,6 +26,7 @@ public class ReviewMapper {
     public ReviewResponse toDto(Review review) {
         return ReviewResponse.builder()
                 .orderId(review.getOrder() != null ? review.getOrder().getId() : null)
+                .orderResponse(review.getOrder() != null ? orderMapper.toDto(review.getOrder()) : null)
                 .feedback(review.getFeedback())
                 .rating(review.getRating())
                 .reviewImages(

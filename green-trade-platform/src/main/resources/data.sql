@@ -1,6 +1,17 @@
 -- =========================================================
 -- 🚀 RESET DATABASE DỮ LIỆU DEMO
 -- =========================================================
+-- ⚠️ CẢNH BÁO: FILE NÀY SẼ XÓA TẤT CẢ DỮ LIỆU HIỆN CÓ!
+-- 
+-- File này hiện KHÔNG được chạy tự động (spring.sql.init.mode=never)
+-- Chỉ chạy file này khi:
+--   1. Cần reset database về trạng thái demo
+--   2. Database mới và cần seed dữ liệu mẫu
+-- 
+-- Để chạy file này:
+--   - Đổi spring.sql.init.mode=always trong application.properties (tạm thời)
+--   - Hoặc chạy thủ công qua MySQL client/phpMyAdmin
+-- 
 -- Timezone đã được cấu hình trong docker-compose.yml và init.sql
 -- Đảm bảo timezone là Asia/Ho_Chi_Minh (UTC+7)
 SET GLOBAL time_zone = '+07:00';

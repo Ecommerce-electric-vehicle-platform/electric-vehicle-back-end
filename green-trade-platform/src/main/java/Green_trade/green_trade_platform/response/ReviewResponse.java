@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ReviewResponse {
     private Long orderId;
+    private OrderResponse orderResponse;
     private double rating;
     private String feedback;
     private List<ReviewImagesResponse> reviewImages;
