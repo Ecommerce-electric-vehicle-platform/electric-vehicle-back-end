@@ -47,11 +47,18 @@ public class DisputeController {
 
     @Operation(
             summary = "Raise a dispute for an order",
-            description = "Allows a buyer to submit a dispute related to an order. " +
-                    "The API receives dispute details and evidence pictures, " +
-                    "saves them to the database, " +
-                    "updates the dispute with associated evidences, " +
-                    "and sends a notification to the seller about the disputed product."
+            description = """
+                    Allows a buyer to submit a dispute related to an order. 
+                    The API receives dispute details and evidence pictures, 
+                    saves them to the database, 
+                    updates the dispute with associated evidences, 
+                    and sends a notification to the seller about the disputed product.
+                    
+                    **Validation Rules:**
+                    - Only completed orders can have disputes
+                    - If an order already has a pending dispute, a new dispute cannot be raised
+                    - If all previous disputes have been resolved (ACCEPTED or REJECTED), a new dispute can be raised
+                    """
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/raise-dispute")
@@ -75,8 +82,15 @@ public class DisputeController {
             log.info(">>> Passed create response");
             return ResponseEntity.status(HttpStatus.OK.value()).body(response);
         } catch (Exception e) {
-            log.info(">>> Error at raiseDisput: {}", e.getMessage());
-            throw e;
+            log.info(">>> Error at raiseDispute: {}", e.getMessage());
+            // Trả về error response thay vì throw exception
+            RestResponse<DisputeResponse, Object> errorResponse = responseMapper.toDto(
+                    false,
+                    "RAISE DISPUTE FAILED: " + e.getMessage(),
+                    null,
+                    e.getMessage()
+            );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(errorResponse);
         }
     }
 
@@ -161,6 +175,7 @@ public class DisputeController {
     public ResponseEntity<?> handleDispute(@RequestBody ResolveDisputeRequest request) {
         log.info(">>> [Dispute Controller]: Started.");
         try {
+            log.info(">>> [Dispute Controller] Refund percent: {}", request.getRefundPercent());
             Admin admin = adminService.getCurrentUser();
             Notification notification = disputeService.handlePendingDispute(admin, request);
             Map<String, Object> orderTemp = disputeService.getOrderByDisputeId(request.getDisputeId());

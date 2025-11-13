@@ -1,11 +1,8 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.exception.WalletNotFoundException;
+import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.service.WalletService;
-import Green_trade.green_trade_platform.model.Buyer;
-import Green_trade.green_trade_platform.model.SystemWallet;
-import Green_trade.green_trade_platform.model.Wallet;
-import Green_trade.green_trade_platform.model.WalletTransaction;
 import Green_trade.green_trade_platform.repository.WalletRepository;
 import Green_trade.green_trade_platform.repository.WalletTransactionRepository;
 import lombok.AllArgsConstructor;
@@ -99,14 +96,15 @@ public class WalletServiceImpl implements WalletService {
         BigDecimal money = systemBalance
                 .multiply(BigDecimal.valueOf(refundPercent))
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        Order order = systemWallet.getOrder(); // Lấy order từ systemWallet
         if (!isSeller) {
-            WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, true, "Refund money from dispute" + orderCode);
+            WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, true, "Refund money from dispute" + orderCode, order);
             log.info(">>> [Wallet Service] Balance before refunding money for buyer: {}", wallet.getBalance());
             wallet.setBalance(wallet.getBalance().add(money));
             wallet = walletRepository.save(wallet);
             log.info(">>> [Wallet Service] Balance after refunding money for buyer: {}", wallet.getBalance());
         } else {
-            WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, false, "Refund money from dispute" + orderCode);
+            WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, false, "Refund money from dispute" + orderCode, order);
             log.info(">>> [Wallet Service] Balance before refunding money for seller: {}", wallet.getBalance());
             wallet.setBalance(wallet.getBalance().add(money));
             wallet = walletRepository.save(wallet);
@@ -121,7 +119,8 @@ public class WalletServiceImpl implements WalletService {
         BigDecimal money = systemBalance
                 .multiply(BigDecimal.valueOf(refundPercent))
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP).add(shippingFee);
-        WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, true, "REFUNDED FROM CANCELED ORDER");
+        Order order = systemWallet.getOrder(); // Lấy order từ systemWallet
+        WalletTransaction refundTransaction = walletTransactionService.handleRefundMoney(wallet, money, true, "REFUNDED FROM CANCELED ORDER", order);
         log.info(">>> [Wallet Service] Balance before refunding money for buyer: {}", wallet.getBalance());
         wallet.setBalance(wallet.getBalance().add(money));
         wallet = walletRepository.save(wallet);

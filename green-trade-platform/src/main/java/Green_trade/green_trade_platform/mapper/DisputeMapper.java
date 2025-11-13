@@ -8,6 +8,7 @@ import Green_trade.green_trade_platform.model.Order;
 import Green_trade.green_trade_platform.model.SystemWallet;
 import Green_trade.green_trade_platform.model.WalletTransaction;
 import Green_trade.green_trade_platform.repository.SystemWalletRepossitory;
+import Green_trade.green_trade_platform.repository.WalletTransactionRepository;
 import Green_trade.green_trade_platform.response.DisputeResponse;
 import Green_trade.green_trade_platform.response.EvidenceResponse;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class DisputeMapper {
     private final SystemWalletRepossitory systemWalletRepository;
+    private final WalletTransactionRepository walletTransactionRepository;
     
     public DisputeResponse toDto(Dispute dispute) {
         List<Evidence> evidences = dispute.getEvidences();
@@ -47,35 +49,56 @@ public class DisputeMapper {
                     SystemWallet systemWallet = systemWalletOpt.get();
                     BigDecimal systemBalance = systemWallet.getBalance();
                     
-                    // Tìm wallet transaction refund cho buyer
-                    // Transaction có type = REFUND và description chứa "Refund money from dispute"
-                    if (order.getWalletTransactions() != null && !order.getWalletTransactions().isEmpty()) {
-                        Optional<WalletTransaction> refundTransaction = order.getWalletTransactions().stream()
-                                .filter(wt -> wt.getType() == TransactionType.REFUND)
-                                .filter(wt -> wt.getDescription() != null && 
-                                        wt.getDescription().contains("Refund money from dispute"))
-                                .findFirst();
+                    // Tìm wallet transaction refund cho buyer từ database
+                    // Query theo order id và type = REFUND
+                    String descriptionPattern = "%Refund money from dispute%";
+                    List<WalletTransaction> refundTransactions = walletTransactionRepository
+                            .findRefundTransactionsByOrderAndType(
+                                    order,
+                                    TransactionType.REFUND,
+                                    descriptionPattern
+                            );
+                    
+                    // Lọc transaction có description chứa "Refund money from dispute" và type = REFUND
+                    // (chỉ lấy transaction của buyer, không phải seller - seller có type = DEPOSIT)
+                    Optional<WalletTransaction> refundTransaction = refundTransactions.stream()
+                            .filter(wt -> wt.getType() == TransactionType.REFUND)
+                            .filter(wt -> wt.getDescription() != null && 
+                                    wt.getDescription().startsWith("Refund money from dispute"))
+                            .findFirst();
+                    
+                    if (refundTransaction.isPresent()) {
+                        BigDecimal refundAmount = refundTransaction.get().getAmount();
                         
-                        if (refundTransaction.isPresent()) {
-                            BigDecimal refundAmount = refundTransaction.get().getAmount();
-                            
-                            // Tính refund percent dựa trên system wallet balance ban đầu
-                            Double refundPercent = null;
-                            if (systemBalance != null && systemBalance.compareTo(BigDecimal.ZERO) > 0) {
+                        // Tính refund percent dựa trên system wallet balance ban đầu
+                        // Lưu ý: systemBalance hiện tại đã bị giảm sau khi refund
+                        // Balance ban đầu = systemBalance hiện tại + refundAmount (phần buyer) + phần seller
+                        // Nhưng vì không biết phần seller, ta tính dựa trên refundAmount và systemBalance
+                        // Giả sử systemBalance hiện tại là phần còn lại (phần seller), thì:
+                        // originalBalance = systemBalance + refundAmount
+                        Double refundPercent = null;
+                        if (refundAmount != null && refundAmount.compareTo(BigDecimal.ZERO) > 0) {
+                            // Tính original balance: systemBalance hiện tại + refundAmount
+                            // (vì systemBalance đã bị trừ refundAmount rồi)
+                            BigDecimal originalBalance = systemBalance.add(refundAmount);
+                            if (originalBalance.compareTo(BigDecimal.ZERO) > 0) {
                                 refundPercent = refundAmount
                                         .multiply(BigDecimal.valueOf(100))
-                                        .divide(systemBalance, 2, RoundingMode.HALF_UP)
+                                        .divide(originalBalance, 2, RoundingMode.HALF_UP)
                                         .doubleValue();
                             }
-                            
-                            builder.refundAmount(refundAmount)
-                                   .refundPercent(refundPercent);
                         }
+                        
+                        builder.refundAmount(refundAmount)
+                               .refundPercent(refundPercent);
                     }
                 }
             } catch (Exception e) {
                 // Nếu có lỗi khi tính toán, không set refund info
                 // Không throw exception để không ảnh hưởng đến response chính
+                // Log error để debug
+                System.err.println("Error calculating refund info: " + e.getMessage());
+                e.printStackTrace();
             }
         }
         
