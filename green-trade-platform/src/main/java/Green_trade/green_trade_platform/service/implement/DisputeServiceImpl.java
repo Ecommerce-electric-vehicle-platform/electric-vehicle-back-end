@@ -165,6 +165,14 @@ public class DisputeServiceImpl implements DisputeService {
                 .toList();
     }
 
+    public boolean hasPendingDisputeByOrderId(Long orderId) {
+        log.info(">>> [Dispute Service] Check pending dispute for orderId: {}", orderId);
+        List<Dispute> pendingDisputes = disputeRepository.findByOrder_IdAndStatus(orderId, DisputeStatus.PENDING);
+        boolean hasPending = pendingDisputes != null && !pendingDisputes.isEmpty();
+        log.info(">>> [Dispute Service] Order {} has pending dispute: {}", orderId, hasPending);
+        return hasPending;
+    }
+
     public Page<DisputeResponse> getDisputesByBuyerId(Long buyerId, int page, int size) {
         log.info(">>> [Dispute Service] Get disputes by buyerId: {}", buyerId);
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());

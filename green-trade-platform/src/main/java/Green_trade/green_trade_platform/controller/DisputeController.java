@@ -230,6 +230,55 @@ public class DisputeController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_BUYER', 'ROLE_SELLER')")
     @Operation(
+            summary = "Check if order has pending dispute",
+            description = """
+                        Checks whether a specific order currently has any pending disputes.
+                    
+                        This endpoint returns a simple boolean status indicating:
+                        - true: The order has pending disputes
+                        - false: The order does not have any pending disputes
+                    
+                        **Use Cases:**
+                        - Check if an order can have a new dispute raised
+                        - Validate before allowing dispute creation
+                        - Display dispute status in order details
+                    
+                        **Path Parameters:**
+                        - **orderId** *(Long, required)* - The unique identifier of the order
+                    
+                        **Response:**
+                        Returns a simple response with:
+                        - success: Boolean indicating if the check was successful
+                        - message: Status message
+                        - data: Boolean value (true if has pending dispute, false otherwise)
+                    
+                        **Permissions:** Admin, Buyer, or Seller roles required.
+                        **Example:** GET /api/v1/dispute/order/123/pending-status
+                    """
+    )
+    @GetMapping("/order/{orderId}/pending-status")
+    public ResponseEntity<?> checkPendingDisputeByOrderId(@PathVariable(name = "orderId") Long orderId) {
+        log.info(">>> [Dispute Controller] Check pending dispute for orderId: {}", orderId);
+        try {
+            boolean hasPending = disputeService.hasPendingDisputeByOrderId(orderId);
+            String message = hasPending 
+                    ? "Order has pending dispute(s). Cannot raise new dispute." 
+                    : "Order does not have pending dispute. Can raise new dispute.";
+            return ResponseEntity.ok(responseMapper.toDto(true,
+                    message,
+                    hasPending,
+                    null));
+        } catch (Exception e) {
+            log.error(">>> [Dispute Controller] Error checking pending dispute: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(false,
+                    "CHECK PENDING DISPUTE STATUS FAILED: " + e.getMessage(),
+                    null,
+                    e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_BUYER', 'ROLE_SELLER')")
+    @Operation(
             summary = "Get all disputes by order ID",
             description = """
                         Retrieves all disputes associated with a specific order.
