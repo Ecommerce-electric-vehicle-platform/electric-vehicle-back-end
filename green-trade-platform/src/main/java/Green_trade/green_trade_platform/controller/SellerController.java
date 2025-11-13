@@ -668,37 +668,64 @@ public class SellerController {
     }
 
     @Operation(
-            summary = "Get total orders for current seller",
+            summary = "Get all orders for current seller with pagination",
             description = """
-                Returns the total number of **all orders** associated with the authenticated seller, 
+                Returns a paginated list of **all orders** associated with the authenticated seller, 
                 regardless of their status (Pending, Completed, Canceled, etc.).
+                
+                The response includes:
+                - List of orders (OrderResponse) with pagination
+                - Total count of all orders (in Page metadata: totalElements)
+
+                **Query Parameters:**
+                - `page` (Integer, optional, default: 0): Page number (0-based)
+                - `size` (Integer, optional, default: 10): Number of items per page
 
                 **Authorization:** Requires `ROLE_SELLER`.
 
                 **Example:**
                 ```
-                GET /api/seller/total-order
+                GET /api/v1/seller/total-order?page=0&size=10
                 ```
                 **Response:**
                 ```json
                 {
                     "success": true,
                     "message": "GET ALL ORDERS SUCCESSFULLY.",
-                    "data": 27
+                    "data": {
+                        "orders": [...],
+                        "totalOrders": 27,
+                        "currentPage": 0,
+                        "totalPages": 3,
+                        "pageSize": 10
+                    }
                 }
                 ```
                 """
     )
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @GetMapping("/total-order")
-    public ResponseEntity<?> getAllOrder() {
+    public ResponseEntity<?> getAllOrder(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
         try {
             Seller seller = sellerService.getCurrentUser();
-            int count = orderService.countAllOrder(seller);
+            Page<Order> orders = orderService.getAllOrders(page, size, seller);
+            Page<OrderResponse> orderResponses = orders.map(orderMapper::toDto);
+            
+            SellerOrdersResponse response = SellerOrdersResponse.builder()
+                    .orders(orderResponses.getContent())
+                    .totalOrders(orderResponses.getTotalElements())
+                    .currentPage(orderResponses.getNumber())
+                    .totalPages(orderResponses.getTotalPages())
+                    .pageSize(orderResponses.getSize())
+                    .build();
+            
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "GET ALL ORDERS SUCCESSFULLY.",
-                    count, null
+                    response, null
             ));
         } catch (Exception e) {
             return ResponseEntity.ok(responseMapper.toDto(

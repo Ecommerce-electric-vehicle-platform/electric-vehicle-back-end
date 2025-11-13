@@ -6,10 +6,14 @@ import Green_trade.green_trade_platform.model.SubscriptionPackages;
 import Green_trade.green_trade_platform.request.CreateSubscriptionPackageRequest;
 import Green_trade.green_trade_platform.request.SignPackageRequest;
 import Green_trade.green_trade_platform.request.UpdateSubscriptionPackageRequest;
+import Green_trade.green_trade_platform.response.SubscriberInfo;
+import Green_trade.green_trade_platform.response.SubscriptionPackageListResponse;
 import Green_trade.green_trade_platform.response.SubscriptionPackageResponse;
+import Green_trade.green_trade_platform.response.SubscriptionPackageStatisticsResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Map;
 
 public interface SubscriptionPackageService {
@@ -32,5 +36,14 @@ public interface SubscriptionPackageService {
     SubscriptionPackages createSubscriptionPackage(CreateSubscriptionPackageRequest request);
 
     SubscriptionPackages updateSubscriptionPackage(Long packageId, UpdateSubscriptionPackageRequest request);
+
+    // Admin APIs
+    Page<SubscriptionPackages> getAllSubscriptionPackages(int page, int size);
+
+    SubscriptionPackageListResponse getAllSubscriptionPackagesWithStatistics();
+
+    SubscriptionPackageStatisticsResponse getPackageStatistics(Long packageId, boolean includeSubscribers);
+
+    Page<SubscriberInfo> getPackageSubscribers(Long packageId, int page, int size);
 }
 
