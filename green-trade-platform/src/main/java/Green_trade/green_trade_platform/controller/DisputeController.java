@@ -47,11 +47,18 @@ public class DisputeController {
 
     @Operation(
             summary = "Raise a dispute for an order",
-            description = "Allows a buyer to submit a dispute related to an order. " +
-                    "The API receives dispute details and evidence pictures, " +
-                    "saves them to the database, " +
-                    "updates the dispute with associated evidences, " +
-                    "and sends a notification to the seller about the disputed product."
+            description = """
+                    Allows a buyer to submit a dispute related to an order. 
+                    The API receives dispute details and evidence pictures, 
+                    saves them to the database, 
+                    updates the dispute with associated evidences, 
+                    and sends a notification to the seller about the disputed product.
+                    
+                    **Validation Rules:**
+                    - Only completed orders can have disputes
+                    - If an order already has a pending dispute, a new dispute cannot be raised
+                    - If all previous disputes have been resolved (ACCEPTED or REJECTED), a new dispute can be raised
+                    """
     )
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/raise-dispute")
@@ -75,8 +82,15 @@ public class DisputeController {
             log.info(">>> Passed create response");
             return ResponseEntity.status(HttpStatus.OK.value()).body(response);
         } catch (Exception e) {
-            log.info(">>> Error at raiseDisput: {}", e.getMessage());
-            throw e;
+            log.info(">>> Error at raiseDispute: {}", e.getMessage());
+            // Trả về error response thay vì throw exception
+            RestResponse<DisputeResponse, Object> errorResponse = responseMapper.toDto(
+                    false,
+                    "RAISE DISPUTE FAILED: " + e.getMessage(),
+                    null,
+                    e.getMessage()
+            );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(errorResponse);
         }
     }
 
@@ -161,6 +175,7 @@ public class DisputeController {
     public ResponseEntity<?> handleDispute(@RequestBody ResolveDisputeRequest request) {
         log.info(">>> [Dispute Controller]: Started.");
         try {
+            log.info(">>> [Dispute Controller] Refund percent: {}", request.getRefundPercent());
             Admin admin = adminService.getCurrentUser();
             Notification notification = disputeService.handlePendingDispute(admin, request);
             Map<String, Object> orderTemp = disputeService.getOrderByDisputeId(request.getDisputeId());
@@ -210,6 +225,55 @@ public class DisputeController {
             return ResponseEntity.ok(notification);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_BUYER', 'ROLE_SELLER')")
+    @Operation(
+            summary = "Check if order has pending dispute",
+            description = """
+                        Checks whether a specific order currently has any pending disputes.
+                    
+                        This endpoint returns a simple boolean status indicating:
+                        - true: The order has pending disputes
+                        - false: The order does not have any pending disputes
+                    
+                        **Use Cases:**
+                        - Check if an order can have a new dispute raised
+                        - Validate before allowing dispute creation
+                        - Display dispute status in order details
+                    
+                        **Path Parameters:**
+                        - **orderId** *(Long, required)* - The unique identifier of the order
+                    
+                        **Response:**
+                        Returns a simple response with:
+                        - success: Boolean indicating if the check was successful
+                        - message: Status message
+                        - data: Boolean value (true if has pending dispute, false otherwise)
+                    
+                        **Permissions:** Admin, Buyer, or Seller roles required.
+                        **Example:** GET /api/v1/dispute/order/123/pending-status
+                    """
+    )
+    @GetMapping("/order/{orderId}/pending-status")
+    public ResponseEntity<?> checkPendingDisputeByOrderId(@PathVariable(name = "orderId") Long orderId) {
+        log.info(">>> [Dispute Controller] Check pending dispute for orderId: {}", orderId);
+        try {
+            boolean hasPending = disputeService.hasPendingDisputeByOrderId(orderId);
+            String message = hasPending 
+                    ? "Order has pending dispute(s). Cannot raise new dispute." 
+                    : "Order does not have pending dispute. Can raise new dispute.";
+            return ResponseEntity.ok(responseMapper.toDto(true,
+                    message,
+                    hasPending,
+                    null));
+        } catch (Exception e) {
+            log.error(">>> [Dispute Controller] Error checking pending dispute: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(false,
+                    "CHECK PENDING DISPUTE STATUS FAILED: " + e.getMessage(),
+                    null,
+                    e.getMessage()));
         }
     }
 
@@ -285,5 +349,68 @@ public class DisputeController {
                 "GET DISPUTE INFOR SUCCESSFULLY.",
                 disputeMapper.toDto(dispute),
                 null));
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_BUYER', 'ROLE_SELLER')")
+    @Operation(
+            summary = "Get all disputes by buyer ID",
+            description = """
+                        Retrieves a paginated list of disputes raised by a specific buyer.
+                    
+                        This endpoint returns all disputes associated with orders belonging to the specified buyer.
+                        The results are paginated and sorted by creation date (newest first).
+                    
+                        **Use Cases:**
+                        - View all disputes raised by a buyer
+                        - Check dispute history for a specific user
+                        - Admin reviewing buyer-related disputes
+                        - Buyer viewing their own dispute history
+                    
+                        **Path Parameters:**
+                        - **buyerId** *(Long, required)* - The unique identifier of the buyer
+                    
+                        **Query Parameters:**
+                        - **page** *(int, optional)* - Page number (default: 0)
+                        - **size** *(int, optional)* - Page size (default: 10)
+                    
+                        **Response:**
+                        Returns a paginated list of dispute objects, each containing:
+                        - Dispute ID, status, creation date
+                        - Dispute category and description
+                        - Evidence and resolution details
+                        - Related order information
+                        - Refund information (if resolved)
+                    
+                        **Permissions:** Admin, Buyer, or Seller roles required.
+                        **Example:** GET /api/v1/dispute/buyer/123?page=0&size=10
+                    """
+    )
+    @GetMapping("/buyer/{buyerId}")
+    public ResponseEntity<?> getDisputesByBuyerId(
+            @PathVariable(name = "buyerId") Long buyerId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        log.info(">>> [Dispute Controller] Get disputes by buyerId: {}", buyerId);
+        try {
+            Page<DisputeResponse> disputes = disputeService.getDisputesByBuyerId(buyerId, page, size);
+            
+            Map<String, Object> data = new HashMap<>();
+            data.put("disputes", disputes.getContent());
+            data.put("currentPage", disputes.getNumber());
+            data.put("totalElements", disputes.getTotalElements());
+            data.put("totalPages", disputes.getTotalPages());
+            
+            return ResponseEntity.ok(responseMapper.toDto(true,
+                    "GET DISPUTES BY BUYER ID SUCCESSFULLY.",
+                    data,
+                    null));
+        } catch (Exception e) {
+            log.error(">>> [Dispute Controller] Error getting disputes by buyerId: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(false,
+                    "GET DISPUTES BY BUYER ID FAILED: " + e.getMessage(),
+                    null,
+                    e));
+        }
     }
 }

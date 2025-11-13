@@ -18,4 +18,10 @@ public interface DisputeRepository extends JpaRepository<Dispute, Long> {
     Optional<Order> findOrderById(Long disputeId);
 
     List<Dispute> findByOrder_Id(Long orderId);
+    
+    // Lấy tất cả disputes của một buyer (thông qua order)
+    Page<Dispute> findByOrder_Buyer_BuyerId(Long buyerId, Pageable pageable);
+    
+    // Tìm disputes có status PENDING cho một order
+    List<Dispute> findByOrder_IdAndStatus(Long orderId, DisputeStatus status);
 }

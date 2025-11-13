@@ -7,6 +7,7 @@ import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.repository.OrderRepository;
 import Green_trade.green_trade_platform.request.CancelOrderRequest;
 import Green_trade.green_trade_platform.request.ReviewRequest;
+import Green_trade.green_trade_platform.request.UpdateReviewRequest;
 import Green_trade.green_trade_platform.response.*;
 import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -231,6 +232,77 @@ public class OrderController {
     }
 
     @Operation(
+            summary = "Update a product review",
+            description = """
+                    This endpoint allows customers to update their existing review for a product they have purchased.
+                    
+                    The request should include:
+                    - **Review details** (rating, feedback text) as a JSON object named `request`.
+                    - **Optional new product images** (photos of the product or proof of use) as `pictures`.
+                    
+                    **Important Notes:**
+                    - Only the buyer who created the review can update it.
+                    - If new images are provided, old images will be replaced.
+                    - The API automatically checks the feedback text for inappropriate or offensive language (Vietnamese supported).
+                    - Rating must be between 0 and 5.
+                    
+                    **Content type:** multipart/form-data  
+                    **Authentication:** Required - must be the buyer who created the review.
+                    """
+    )
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
+    @PutMapping(
+            value = "/review/{reviewId}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<?> updateReview(
+            @PathVariable(name = "reviewId") Long reviewId,
+            @ModelAttribute UpdateReviewRequest request,
+            @RequestPart(name = "pictures", required = false) List<MultipartFile> newImages) {
+        log.info(">>> [Order Controller] Update Review: Started. ReviewId: {}", reviewId);
+        log.info(">>> [Order Controller] Request: {}.", request);
+        try {
+            // Kiểm tra quyền: chỉ buyer của order mới được update review
+            Review existingReview = reviewService.getReviewById(reviewId);
+            Buyer currentBuyer = buyerService.getCurrentUser();
+            
+            if (existingReview.getOrder() == null || existingReview.getOrder().getBuyer() == null) {
+                return ResponseEntity.ok(responseMapper.toDto(
+                        false,
+                        "UPDATE REVIEW FAILED.",
+                        null,
+                        "Order information not found."
+                ));
+            }
+            
+            if (!existingReview.getOrder().getBuyer().getBuyerId().equals(currentBuyer.getBuyerId())) {
+                return ResponseEntity.ok(responseMapper.toDto(
+                        false,
+                        "UPDATE REVIEW FAILED.",
+                        null,
+                        "You are not authorized to update this review. Only the buyer who created the review can update it."
+                ));
+            }
+            
+            Review updatedReview = reviewService.updateReview(reviewId, request, newImages);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "UPDATE REVIEW SUCCESSFULLY.",
+                    reviewMapper.toDto(updatedReview),
+                    null
+            ));
+        } catch (Exception e) {
+            log.error(">>> [Order Controller] Update Review Failed: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "UPDATE REVIEW FAILED.",
+                    null,
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
             summary = "Get payment information by order ID",
             description = """
                     This endpoint retrieves the payment details associated with a specific order. 
@@ -362,6 +434,6 @@ public class OrderController {
                 invoiceResponse,
                 null
         );
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return ResponseEntity.ok(response);
     }
 }

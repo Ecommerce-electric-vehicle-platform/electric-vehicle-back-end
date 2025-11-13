@@ -4,6 +4,7 @@ import Green_trade.green_trade_platform.exception.PostProductNotFound;
 import Green_trade.green_trade_platform.mapper.OrderMapper;
 import Green_trade.green_trade_platform.mapper.PostProductMapper;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
+import Green_trade.green_trade_platform.mapper.ReviewMapper;
 import Green_trade.green_trade_platform.mapper.SellerMapper;
 import Green_trade.green_trade_platform.model.Order;
 import Green_trade.green_trade_platform.model.PostProduct;
@@ -13,6 +14,8 @@ import Green_trade.green_trade_platform.request.UpdatePostProductRequest;
 import Green_trade.green_trade_platform.request.UploadPostProductRequest;
 import Green_trade.green_trade_platform.request.VerifiedPostProductRequest;
 import Green_trade.green_trade_platform.response.*;
+import Green_trade.green_trade_platform.model.Review;
+import Green_trade.green_trade_platform.service.ReviewService;
 import Green_trade.green_trade_platform.service.implement.OrderServiceImpl;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
@@ -51,6 +54,8 @@ public class SellerController {
     private final OrderServiceImpl orderService;
     private final OrderMapper orderMapper;
     private final SubscriptionPackageServiceImpl subscriptionPackageService;
+    private final ReviewService reviewService;
+    private final ReviewMapper reviewMapper;
 
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(
@@ -288,6 +293,7 @@ public class SellerController {
                     but not yet processed, shipped, or completed.
                     """
     )
+    @PreAuthorize("hasRole('ROLE_SELLER')")
     @GetMapping("/pending-orders")
     public ResponseEntity<?> getAllPendingOrders(
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -306,6 +312,84 @@ public class SellerController {
             return ResponseEntity.ok(responseMapper.toDto(
                     false,
                     "GET ALL PENDING ORDER FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Retrieve all delivering orders for the current seller",
+            description = """
+                    This endpoint returns a paginated list of orders that are currently in **DELIVERING** status
+                    and belong to the authenticated seller.
+                    
+                    - It requires the user to be logged in as a seller.
+                    - Each order in the response is mapped to the `OrderResponse` DTO.
+                    - Pagination is supported using the `page` and `size` query parameters.
+                    - Results are sorted by creation date (newest first).
+                    
+                    **Use case:**  
+                    Sellers can use this endpoint to track orders that are currently being delivered to customers.
+                    """
+    )
+    @PreAuthorize("hasRole('ROLE_SELLER')")
+    @GetMapping("/delivering-orders")
+    public ResponseEntity<?> getAllDeliveringOrders(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            Seller seller = sellerService.getCurrentUser();
+            Page<Order> deliveringOrders = orderService.getDeliveringOrders(seller, page, size);
+            Page<OrderResponse> response = deliveringOrders.map(orderMapper::toDto);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ALL DELIVERING ORDER SUCCESSFULLY.",
+                    response, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET ALL DELIVERING ORDER FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Retrieve all completed orders for the current seller",
+            description = """
+                    This endpoint returns a paginated list of orders that are currently in **COMPLETED** status
+                    and belong to the authenticated seller.
+                    
+                    - It requires the user to be logged in as a seller.
+                    - Each order in the response is mapped to the `OrderResponse` DTO.
+                    - Pagination is supported using the `page` and `size` query parameters.
+                    - Results are sorted by creation date (newest first).
+                    
+                    **Use case:**  
+                    Sellers can use this endpoint to view their order history of successfully completed orders.
+                    """
+    )
+    @PreAuthorize("hasRole('ROLE_SELLER')")
+    @GetMapping("/completed-orders")
+    public ResponseEntity<?> getAllCompletedOrders(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            Seller seller = sellerService.getCurrentUser();
+            Page<Order> completedOrders = orderService.getCompletedOrders(seller, page, size);
+            Page<OrderResponse> response = completedOrders.map(orderMapper::toDto);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ALL COMPLETED ORDER SUCCESSFULLY.",
+                    response, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET ALL COMPLETED ORDER FAILED.",
                     null, e.getMessage()
             ));
         }
@@ -584,37 +668,64 @@ public class SellerController {
     }
 
     @Operation(
-            summary = "Get total orders for current seller",
+            summary = "Get all orders for current seller with pagination",
             description = """
-                Returns the total number of **all orders** associated with the authenticated seller, 
+                Returns a paginated list of **all orders** associated with the authenticated seller, 
                 regardless of their status (Pending, Completed, Canceled, etc.).
+                
+                The response includes:
+                - List of orders (OrderResponse) with pagination
+                - Total count of all orders (in Page metadata: totalElements)
+
+                **Query Parameters:**
+                - `page` (Integer, optional, default: 0): Page number (0-based)
+                - `size` (Integer, optional, default: 10): Number of items per page
 
                 **Authorization:** Requires `ROLE_SELLER`.
 
                 **Example:**
                 ```
-                GET /api/seller/total-order
+                GET /api/v1/seller/total-order?page=0&size=10
                 ```
                 **Response:**
                 ```json
                 {
                     "success": true,
                     "message": "GET ALL ORDERS SUCCESSFULLY.",
-                    "data": 27
+                    "data": {
+                        "orders": [...],
+                        "totalOrders": 27,
+                        "currentPage": 0,
+                        "totalPages": 3,
+                        "pageSize": 10
+                    }
                 }
                 ```
                 """
     )
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @GetMapping("/total-order")
-    public ResponseEntity<?> getAllOrder() {
+    public ResponseEntity<?> getAllOrder(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
         try {
             Seller seller = sellerService.getCurrentUser();
-            int count = orderService.countAllOrder(seller);
+            Page<Order> orders = orderService.getAllOrders(page, size, seller);
+            Page<OrderResponse> orderResponses = orders.map(orderMapper::toDto);
+            
+            SellerOrdersResponse response = SellerOrdersResponse.builder()
+                    .orders(orderResponses.getContent())
+                    .totalOrders(orderResponses.getTotalElements())
+                    .currentPage(orderResponses.getNumber())
+                    .totalPages(orderResponses.getTotalPages())
+                    .pageSize(orderResponses.getSize())
+                    .build();
+            
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "GET ALL ORDERS SUCCESSFULLY.",
-                    count, null
+                    response, null
             ));
         } catch (Exception e) {
             return ResponseEntity.ok(responseMapper.toDto(
@@ -641,6 +752,51 @@ public class SellerController {
             return ResponseEntity.ok(responseMapper.toDto(
                     false,
                     "GET TOTAL FAILED.",
+                    null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Get all reviews for current seller's orders",
+            description = """
+                    This endpoint returns a paginated list of all reviews/ratings that customers have given
+                    for orders belonging to the authenticated seller.
+                    
+                    - It requires the user to be logged in as a seller.
+                    - Each review includes rating, feedback text, and associated review images.
+                    - Results are sorted by review ID (newest first).
+                    - Pagination is supported using the `page` and `size` query parameters.
+                    
+                    **Use case:**  
+                    Sellers can use this endpoint to view customer feedback and ratings to improve their
+                    product quality and customer service.
+                    
+                    **Example:**
+                    ```
+                    GET /api/v1/seller/reviews?page=0&size=10
+                    ```
+                    """
+    )
+    @PreAuthorize("hasRole('ROLE_SELLER')")
+    @GetMapping("/reviews")
+    public ResponseEntity<?> getAllReviews(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            Seller seller = sellerService.getCurrentUser();
+            Page<Review> reviews = reviewService.getReviewsBySeller(seller, page, size);
+            Page<ReviewResponse> response = reviews.map(reviewMapper::toDto);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET ALL REVIEWS SUCCESSFULLY.",
+                    response, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET ALL REVIEWS FAILED.",
                     null, e.getMessage()
             ));
         }
