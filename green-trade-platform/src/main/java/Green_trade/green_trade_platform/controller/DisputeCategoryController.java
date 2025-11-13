@@ -7,6 +7,13 @@ import Green_trade.green_trade_platform.response.DisputeCategoryResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.service.implement.DisputeCategoryServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +26,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/dispute-category")
+@Tag(name = "Dispute Category", description = "APIs for retrieving dispute categories")
 public class DisputeCategoryController {
 
     private final DisputeCategoryServiceImpl disputeCategoryService;
@@ -45,8 +53,54 @@ public class DisputeCategoryController {
                         **Use cases:**
                         - Allowing customers to choose a category when opening a dispute (e.g., "Product not delivered", "Damaged item").
                         - Used by admin or customer service tools to classify dispute reports.
-                    """
+                    """,
+            tags = {"Dispute Category"},
+            security = @SecurityRequirement(name = "bearerAuth")
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Dispute categories retrieved successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "FETCH DISPUTE CATEGORY LIST",
+                                              "data": [
+                                                {
+                                                  "categoryId": 1,
+                                                  "categoryName": "Product not delivered",
+                                                  "description": "Order was not received by customer"
+                                                },
+                                                {
+                                                  "categoryId": 2,
+                                                  "categoryName": "Damaged item",
+                                                  "description": "Product arrived in damaged condition"
+                                                },
+                                                {
+                                                  "categoryId": 3,
+                                                  "categoryName": "Wrong product",
+                                                  "description": "Received different product than ordered"
+                                                }
+                                              ],
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - Insufficient permissions"
+            )
+    })
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @GetMapping("/dispute-categories")
     public ResponseEntity<RestResponse<List<DisputeCategoryResponse>, Object>> getAllDisputeCategory() {

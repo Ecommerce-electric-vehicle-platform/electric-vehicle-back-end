@@ -44,6 +44,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/buyer")
 @Slf4j
+@Tag(name = "Buyer Management", description = "APIs for buyer operations including profile management, wallet, orders, wish list, and transaction history")
 public class BuyerController {
     private final BuyerServiceImpl buyerService;
     private final ResponseMapper responseMapper;
