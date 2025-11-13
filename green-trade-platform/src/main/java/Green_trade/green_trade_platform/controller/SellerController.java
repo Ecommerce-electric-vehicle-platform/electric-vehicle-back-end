@@ -22,6 +22,7 @@ import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SubscriptionPackageServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
