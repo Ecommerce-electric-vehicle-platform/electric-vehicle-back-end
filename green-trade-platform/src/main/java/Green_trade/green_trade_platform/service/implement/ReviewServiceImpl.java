@@ -184,7 +184,7 @@ public class ReviewServiceImpl implements ReviewService {
                         try {
                             // Xóa hình ảnh cũ từ Cloudinary
                             if (oldImage.getPublicImageId() != null) {
-                                cloudinaryService.delete(oldImage.getPublicImageId());
+                                cloudinaryService.delete(oldImage.getPublicImageId(), "reviews");
                             }
                         } catch (Exception e) {
                             log.warn(">>> [Review Service] Failed to delete old image from Cloudinary: {}", e.getMessage());
