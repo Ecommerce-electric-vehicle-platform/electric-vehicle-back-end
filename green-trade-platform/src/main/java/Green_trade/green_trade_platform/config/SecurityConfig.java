@@ -30,7 +30,8 @@ public class SecurityConfig {
             "/verify-otp",
             "/api/test/redis",
             "/ws/**",
-            "/queue/**"
+            "/queue/**",
+            "/api/v1/momo/return"
     );
 
     @Autowired

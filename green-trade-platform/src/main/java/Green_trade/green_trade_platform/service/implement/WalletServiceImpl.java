@@ -66,6 +66,86 @@ public class WalletServiceImpl implements WalletService {
         return walletRepository.findByBuyer(buyer).orElseThrow(() -> new WalletNotFoundException("Người dùng chưa được tạo ví."));
     }
 
+    public Wallet processDepositMoneyFromMoMo(Map<String, String> params) {
+        log.info(">>> [Wallet MoMo] Processing deposit with params: {}", params);
+        
+        String orderId = params.get("orderId");
+        if (orderId == null || orderId.trim().isEmpty()) {
+            log.error(">>> [Wallet MoMo] Missing orderId in params");
+            throw new IllegalArgumentException("Missing orderId from MoMo callback");
+        }
+
+        if (walletTransactionRepository.existsByExternalTransactionReference(orderId)) {
+            log.warn(">>> [Duplicate Transaction] OrderId {} already processed", orderId);
+            return walletTransactionRepository.findByExternalTransactionReference(orderId)
+                    .map(WalletTransaction::getWallet)
+                    .orElseThrow(() -> new WalletNotFoundException("Transaction already processed but wallet not found"));
+        }
+        
+        // Lấy buyerId từ orderInfo (format: "buyerId : username nạp tiền vào ví.")
+        String orderInfo = params.get("orderInfo");
+        if (orderInfo == null || orderInfo.trim().isEmpty()) {
+            log.error(">>> [Wallet MoMo] Missing orderInfo in params");
+            throw new IllegalArgumentException("Missing orderInfo from MoMo callback");
+        }
+        
+        String buyerIdStr = orderInfo.contains(":") 
+            ? orderInfo.split(":")[0].trim() 
+            : null;
+        
+        if (buyerIdStr == null || buyerIdStr.trim().isEmpty()) {
+            log.error(">>> [Wallet MoMo] Invalid orderInfo format: {}", orderInfo);
+            throw new IllegalArgumentException("Invalid orderInfo format from MoMo: " + orderInfo);
+        }
+        
+        try {
+            Long buyerId = Long.parseLong(buyerIdStr);
+            log.info(">>> [Wallet MoMo] Parsed buyerId: {}", buyerId);
+            
+            Buyer buyer = buyerService.findBuyerById(buyerId);
+            if (buyer == null) {
+                log.error(">>> [Wallet MoMo] Buyer not found with id: {}", buyerId);
+                throw new IllegalArgumentException("Buyer not found with id: " + buyerId);
+            }
+            
+            Wallet wallet = walletRepository.findByBuyer(buyer).orElseThrow(() -> {
+                log.error(">>> [Wallet MoMo] Wallet not found for buyer: {}", buyerId);
+                return new WalletNotFoundException("Người dùng chưa được tạo ví.");
+            });
+            
+            log.info(">>> [Wallet MoMo] Found wallet: {}", wallet.getWalletId());
+            
+            // Chuyển đổi format để phù hợp với handleDepositIntoMoney
+            String amountStr = params.get("amount");
+            if (amountStr == null || amountStr.trim().isEmpty()) {
+                log.error(">>> [Wallet MoMo] Missing amount in params");
+                throw new IllegalArgumentException("Missing amount from MoMo callback");
+            }
+            
+            Map<String, String> vnpayFormatParams = new HashMap<>();
+            vnpayFormatParams.put("vnp_TxnRef", orderId);
+            vnpayFormatParams.put("vnp_Amount", amountStr);
+            vnpayFormatParams.put("vnp_OrderInfo", orderInfo);
+            vnpayFormatParams.put("vnp_ResponseCode", params.getOrDefault("resultCode", "00"));
+            
+            log.info(">>> [Wallet MoMo] Creating transaction with params: {}", vnpayFormatParams);
+            
+            WalletTransaction walletTransaction = walletTransactionService.handleDepositIntoMoney(wallet, vnpayFormatParams);
+            wallet.setBalance(wallet.getBalance().add(walletTransaction.getAmount()));
+            wallet = walletRepository.save(wallet);
+            
+            log.info(">>> [Wallet MoMo] Deposit successful. New balance: {}", wallet.getBalance());
+            return wallet;
+            
+        } catch (NumberFormatException e) {
+            log.error(">>> [Wallet MoMo] Invalid buyerId format: {}", buyerIdStr, e);
+            throw new IllegalArgumentException("Invalid buyerId format: " + buyerIdStr, e);
+        } catch (Exception e) {
+            log.error(">>> [Wallet MoMo] Error processing deposit: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
     public Map<String, Object> handleSignPackageForSeller(Buyer buyer, double amount) {
 
         Map<String, Object> result = new HashMap<>();

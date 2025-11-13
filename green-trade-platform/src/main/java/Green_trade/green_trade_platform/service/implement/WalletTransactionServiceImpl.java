@@ -29,7 +29,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     public WalletTransaction handleDepositIntoMoney(Wallet wallet, Map<String, String> params) {
         try {
             String amountTemp = params.get("vnp_Amount");
-            long amount = Long.parseLong(amountTemp) / 100;
+            long amount = Long.parseLong(amountTemp);
             log.info(">>> Amount of transaction: {}", amount);
             WalletTransaction walletTransaction = WalletTransaction.builder()
                     .type(TransactionType.DEPOSIT)
@@ -46,6 +46,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
             throw new RuntimeException(e);
         }
     }
+
 
     public WalletTransaction handleSignPackageForSeller(Wallet wallet, double amount) {
         try {

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -60,42 +61,73 @@ public class VnPayServiceImpl implements VnPayService {
         vnp_Params.put("vnp_OrderInfo", buyer.getBuyerId().toString() + " : " + buyer.getUsername() + " nạp tiền vào ví.");
         vnp_Params.put("vnp_OrderType", Optional.ofNullable(req.getParameter("ordertype")).orElse("other"));
         vnp_Params.put("vnp_Locale", Optional.ofNullable(req.getParameter("language")).orElse("vn"));
-        vnp_Params.put("vnp_ReturnUrl", VnPayConfig.vnp_ReturnUrl);
+        // Sử dụng return URL từ application.properties, nếu không có thì dùng default từ VnPayConfig
+        String returnUrl = vnpReturnUrl != null && !vnpReturnUrl.isEmpty() 
+                ? vnpReturnUrl 
+                : VnPayConfig.vnp_ReturnUrl;
+        vnp_Params.put("vnp_ReturnUrl", returnUrl);
+        log.info(">>> [VNPay] Using return URL: {}", returnUrl);
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
-
-// Lấy thời gian bắt đầu theo múi giờ Việt Nam
-        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
-        String startTime = sdf.format(cld.getTime());
-
-// Cộng thêm 15 phút để tính expire
+        // Sử dụng timezone Etc/GMT+7 (tương đương UTC+7) như code mẫu VNPay
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        String vnp_CreateDate = formatter.format(cld.getTime());
+        
+        vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+        
+        // Cộng thêm 15 phút để tính expire
         cld.add(Calendar.MINUTE, 15);
-        String expire = sdf.format(cld.getTime());
+        String vnp_ExpireDate = formatter.format(cld.getTime());
+        vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
 
-        vnp_Params.put("vnp_CreateDate", startTime);
-        vnp_Params.put("vnp_ExpireDate", expire);
-
+        // Build data to hash and querystring (theo đúng code mẫu VNPay)
         List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
         Collections.sort(fieldNames);
 
-        StringJoiner hashData = new StringJoiner("&");
-        StringJoiner query = new StringJoiner("&");
+        StringBuilder hashData = new StringBuilder();
+        StringBuilder query = new StringBuilder();
 
-        for (String fieldName : fieldNames) {
+        Iterator<String> itr = fieldNames.iterator();
+        while (itr.hasNext()) {
+            String fieldName = itr.next();
             String fieldValue = vnp_Params.get(fieldName);
-            if (fieldValue != null && !fieldValue.isEmpty()) {
-                hashData.add(fieldName + "=" + URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
-                query.add(URLEncoder.encode(fieldName, StandardCharsets.UTF_8.toString()) + "=" +
-                        URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
+            if (fieldValue != null && fieldValue.length() > 0) {
+                try {
+                    // Build hash data: encode với US_ASCII (theo code mẫu VNPay)
+                    hashData.append(fieldName);
+                    hashData.append('=');
+                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                    
+                    // Build query: encode với US_ASCII (theo code mẫu VNPay)
+                    query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+                    query.append('=');
+                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                    
+                    if (itr.hasNext()) {
+                        query.append('&');
+                        hashData.append('&');
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    log.error(">>> [VNPay] Error encoding field: {}", fieldName, e);
+                    throw new RuntimeException("Error encoding VNPay parameters", e);
+                }
             }
         }
 
+        String queryUrl = query.toString();
         String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, hashData.toString());
-        query.add("vnp_SecureHash=" + vnp_SecureHash);
-
-        String paymentUrl = VnPayConfig.vnp_Url + "?" + query.toString();
+        queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
+        
+        String paymentUrl = VnPayConfig.vnp_Url + "?" + queryUrl;
+        
+        log.info(">>> [VNPay] Hash data (for hash calculation): {}", hashData.toString());
+        log.info(">>> [VNPay] Secure hash: {}", vnp_SecureHash);
+        
+        log.info(">>> [VNPay] Payment URL created successfully");
+        log.info(">>> [VNPay] Return URL: {}", returnUrl);
+        log.info(">>> [VNPay] Payment URL length: {}", paymentUrl.length());
+        log.debug(">>> [VNPay] Full payment URL: {}", paymentUrl);
 
         Map<String, Object> result = new HashMap<>();
         result.put("url_payment", paymentUrl);
