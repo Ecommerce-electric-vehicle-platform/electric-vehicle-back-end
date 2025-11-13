@@ -7,7 +7,6 @@ import Green_trade.green_trade_platform.model.Wallet;
 import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
 import Green_trade.green_trade_platform.service.implement.VnPayServiceImpl;
 import Green_trade.green_trade_platform.service.implement.WalletServiceImpl;
-import com.google.gson.JsonObject;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -148,9 +147,9 @@ public class VnPayController {
                             result,
                             null));
         } catch (Exception e) {
-            JsonObject error = new JsonObject();
-            error.addProperty("code", "99");
-            error.addProperty("message", "error: " + e.getMessage());
+            Map<String, Object> error = new HashMap<>();
+            error.put("code", "99");
+            error.put("message", "error: " + e.getMessage());
             return ResponseEntity.badRequest().body(
                     responseMapper.toDto(false,
                             "Không thể tạo link thanh toán.",

@@ -13,6 +13,8 @@ public interface WalletService {
 
     Wallet processDepositMoneyIntoWallet(Map<String, String> params);
 
+    Wallet processDepositMoneyFromMoMo(Map<String, String> params);
+
     Wallet getWalletWithVnPayRequest(String params);
 
     Map<String, Object> handleSignPackageForSeller(Buyer buyer, double amount);
