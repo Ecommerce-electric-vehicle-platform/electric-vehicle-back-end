@@ -24,7 +24,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,7 @@ import java.util.Map;
 @RequestMapping("/api/v1/seller")
 @Slf4j
 @AllArgsConstructor
+@Tag(name = "Seller Management", description = "APIs for seller operations including product management, order handling, revenue tracking, and subscription verification")
 public class SellerController {
 
     private final ResponseMapper responseMapper;

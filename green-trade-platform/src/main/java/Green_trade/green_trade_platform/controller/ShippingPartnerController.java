@@ -25,6 +25,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/shipping-partner")
+@Tag(name = "Shipping Partner", description = "APIs for retrieving shipping partner information")
 public class ShippingPartnerController {
 
     private final ShippingPartnerServiceImpl shippingPartnerService;

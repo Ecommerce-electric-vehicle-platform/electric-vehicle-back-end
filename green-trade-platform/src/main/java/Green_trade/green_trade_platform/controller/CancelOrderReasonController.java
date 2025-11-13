@@ -25,6 +25,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/cancel-order-reason")
+@Tag(name = "Cancel Order Reason", description = "APIs for retrieving predefined cancel order reasons")
 public class CancelOrderReasonController {
 
     private final CancelOrderReasonServiceImpl cancelOrderReasonService;

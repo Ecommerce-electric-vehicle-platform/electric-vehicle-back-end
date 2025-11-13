@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,7 @@ import java.util.Map;
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Admin Management", description = "APIs for admin operations including seller approval, product review, user management, system wallet, and subscription package management")
 public class AdminController {
     private final SellerServiceImpl sellerService;
     private final PostProductServiceImpl postProductServiceImpl;
