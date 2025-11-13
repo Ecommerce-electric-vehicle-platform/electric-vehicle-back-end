@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/post-product")
 @RequiredArgsConstructor
+@Tag(name = "Product Post", description = "APIs for product listing, searching, and retrieving product information")
 public class PostProductController {
     private final PostProductServiceImpl postProductService;
     private final ResponseMapper responseMapper;
@@ -186,18 +188,18 @@ public class PostProductController {
             summary = "Get seller information by post product ID",
             description = """
                         Retrieves detailed information about the seller associated with a specific post product.
-                        
+                    
                         ## Workflow:
                         1. System locates the post product using the provided postId
                         2. If found, retrieves the seller linked to that post
                         3. Returns seller details (store name, contact info, verification status)
                         4. If post product not found, throws 404 error
-                        
+                    
                         ## Use Cases:
                         - Displaying seller information on product detail page
                         - Showing seller ratings and verification status
                         - Allowing buyers to view product owner details
-                        
+                    
                         ## Security:
                         - Public endpoint - No authentication required
                         - Sensitive seller data should be filtered based on user permissions

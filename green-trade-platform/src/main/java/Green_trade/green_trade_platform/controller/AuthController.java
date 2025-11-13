@@ -22,6 +22,14 @@ import Green_trade.green_trade_platform.service.implement.SignInServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SignUpServiceImpl;
 import Green_trade.green_trade_platform.util.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -44,6 +52,7 @@ import java.util.Optional;
 @Slf4j
 @RequestMapping("/api/v1/auth")
 @AllArgsConstructor
+@Tag(name = "Authentication", description = "APIs for user authentication, registration, password management, and token refresh")
 public class AuthController {
 
     private final BuyerMapper buyerMapper;
@@ -77,10 +86,53 @@ public class AuthController {
                         **Use cases:**
                         - Customer account registration for the e-commerce platform.
                         - Initiating secure OTP-based email verification during signup.
-                    """
+                    """,
+            tags = {"Authentication"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OTP sent to email successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "Sent OTP to email",
+                                              "data": null,
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Validation error or email already exists",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Validation failed",
+                                              "data": null,
+                                              "error": "Email already exists or invalid input"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @PostMapping("/signup")
-    public ResponseEntity<RestResponse<Object, Object>> signUp(@Valid @RequestBody SignUpRequest req) {
+    public ResponseEntity<RestResponse<Object, Object>> signUp(
+            @Parameter(
+                    description = "User registration information including name, email, password, and username",
+                    required = true
+            )
+            @Valid @RequestBody SignUpRequest req) {
         signUpService.startSignUp(req);
         return ResponseEntity.ok(responseMapper.toDto(
                 true, "Sent OTP to email", null, null
@@ -106,10 +158,60 @@ public class AuthController {
                         - Allow users to log in to their account via web.
                         - Initialize a session for authenticated API requests.
                         - Manage secure token-based authentication (JWT).
-                    """
+                    """,
+            tags = {"Authentication"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Sign in successful",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "SIGN IN SUCCESSFULLY",
+                                              "data": {
+                                                "buyerId": 1,
+                                                "username": "john_doe",
+                                                "email": "john@example.com",
+                                                "role": "ROLE_BUYER",
+                                                "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                                "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Invalid credentials or account blocked",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "SIGN IN FAILED",
+                                              "data": null,
+                                              "error": "Invalid username or password"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @PostMapping("/signin")
-    public ResponseEntity<RestResponse<AuthResponse, Object>> signIn(@Valid @RequestBody SignInRequest req) {
+    public ResponseEntity<RestResponse<AuthResponse, Object>> signIn(
+            @Parameter(
+                    description = "User login credentials (username and password)",
+                    required = true
+            )
+            @Valid @RequestBody SignInRequest req) {
         try {
             log.info(">>> [Auth Controller] Starting sign in controller");
             Buyer user = signInService.startSignIn(req);
@@ -170,10 +272,63 @@ public class AuthController {
                         - Allow administrators to securely log into the management dashboard.
                         - Generate and return JWT tokens for admin session handling.
                         - Provide role-based access for administrative API endpoints.
-                    """
+                    """,
+            tags = {"Authentication"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Admin sign in successful",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "ADMIN SIGN IN SUCCESSFULLY.",
+                                              "data": {
+                                                "adminResponse": {
+                                                  "adminId": 1,
+                                                  "employeeNumber": "ADM001",
+                                                  "email": "admin@example.com",
+                                                  "fullName": "Admin User"
+                                                },
+                                                "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                                "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                                "role": "ROLE_ADMIN"
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Admin sign in failed",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "ADMIN SIGN IN FAILED.",
+                                              "data": null,
+                                              "error": "Invalid credentials or account blocked"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @PostMapping("/admin/signin")
-    public ResponseEntity<?> signInAdmin(@Valid @RequestBody SignInAdminRequest req) {
+    public ResponseEntity<?> signInAdmin(
+            @Parameter(
+                    description = "Admin login credentials (employee number and password)",
+                    required = true
+            )
+            @Valid @RequestBody SignInAdminRequest req) {
         try {
             Admin user = signInService.startSignInAdmin(req);
             if (user.getStatus() == AccountStatus.INACTIVE) {
@@ -224,10 +379,60 @@ public class AuthController {
                         - Allowing users to log in or register quickly using their Google account.
                         - Streamlining onboarding without password-based authentication.
                         - Supporting mobile and web-based OAuth flows.
-                    """
+                    """,
+            tags = {"Authentication"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Google sign in successful",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "SIGN IN SUCCESSFULLY",
+                                              "data": {
+                                                "buyerId": 1,
+                                                "username": "user@gmail.com",
+                                                "email": "user@gmail.com",
+                                                "role": "ROLE_BUYER",
+                                                "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                                "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Google sign in failed",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "SIGN IN FAILED",
+                                              "data": null,
+                                              "error": "Invalid Google token or account blocked"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @PostMapping("/signin-google")
-    public ResponseEntity<RestResponse<AuthResponse, Object>> loginWithGoogle(@RequestBody SignInGoogleRequest body) throws Exception {
+    public ResponseEntity<RestResponse<AuthResponse, Object>> loginWithGoogle(
+            @Parameter(
+                    description = "Google ID token for authentication",
+                    required = true
+            )
+            @RequestBody SignInGoogleRequest body) throws Exception {
         try {
             Buyer user = signInService.startSignInWithGoogle(body);
             if (!user.isActive()) {
@@ -275,10 +480,56 @@ public class AuthController {
                         **Use cases:**
                         - Initiating password reset flow for users who forgot their password.
                         - Ensuring that only valid and registered users can reset passwords.
-                    """
+                    """,
+            tags = {"Authentication"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OTP sent to email successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "OTP Sent To Email",
+                                              "data": {
+                                                "username": "john_doe",
+                                                "email": "john@example.com"
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "User not found",
+                                              "data": null,
+                                              "error": "No account found with this username"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @PostMapping("/verify-username-forgot-password")
-    public ResponseEntity<RestResponse<Object, Object>> verifyForgotPassword(@RequestBody VerifyUsernameForgotPasswordRequest req) throws Exception {
+    public ResponseEntity<RestResponse<Object, Object>> verifyForgotPassword(
+            @Parameter(
+                    description = "Username or email to verify for password reset",
+                    required = true
+            )
+            @RequestBody VerifyUsernameForgotPasswordRequest req) throws Exception {
         Map<String, Object> result = authService.verifyUsernameForgotPassword(req.getUsername());
         return ResponseEntity.status(HttpStatus.OK.value()).body(responseMapper.toDto(
                 true, "OTP Sent To Email", result, null
@@ -301,10 +552,53 @@ public class AuthController {
                         **Use cases:**
                         - Step 2 in the forgot password process after requesting an OTP.
                         - Ensuring user identity before allowing password change.
-                    """
+                    """,
+            tags = {"Authentication"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OTP verified successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "Verified OTP Successfully",
+                                              "data": null,
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Invalid or expired OTP",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "OTP verification failed",
+                                              "data": null,
+                                              "error": "Invalid or expired OTP"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @PostMapping("/verify-otp-forgot-password")
-    public ResponseEntity<RestResponse<Object, Object>> verifyOtpForgotPassword(@RequestBody VerifyOtpForgotPasswordRequest request) {
+    public ResponseEntity<RestResponse<Object, Object>> verifyOtpForgotPassword(
+            @Parameter(
+                    description = "OTP verification request with username/email and OTP code",
+                    required = true
+            )
+            @RequestBody VerifyOtpForgotPasswordRequest request) {
         log.info(">>> We are at verifyOtpForgotPassword");
         authService.verifyOtpForgotPassword(request);
         return ResponseEntity.status(HttpStatus.OK.value()).body(responseMapper.toDto(
@@ -330,10 +624,57 @@ public class AuthController {
                         **Security Notes:**
                         - The new password is securely hashed before being stored.
                         - Users must have a valid OTP verification record before calling this API.
-                    """
+                    """,
+            tags = {"Authentication"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Password reset successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "UPDATED PASSWORD SUCCESSFULLY",
+                                              "data": {
+                                                "buyerId": 1,
+                                                "username": "john_doe",
+                                                "email": "john@example.com"
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Invalid request or OTP not verified",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Password reset failed",
+                                              "data": null,
+                                              "error": "OTP not verified or invalid password format"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @PostMapping("/forgot-password")
-    public ResponseEntity<RestResponse<Buyer, Object>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) throws Exception {
+    public ResponseEntity<RestResponse<Buyer, Object>> forgotPassword(
+            @Parameter(
+                    description = "Password reset request with username/email and new password",
+                    required = true
+            )
+            @Valid @RequestBody ForgotPasswordRequest request) throws Exception {
         Buyer result = authService.forgotPassword(request);
         return ResponseEntity.status(HttpStatus.OK.value()).body(responseMapper.toDto(
                 true,
@@ -365,10 +706,62 @@ public class AuthController {
                         - Only authenticated users can access this endpoint.
                         - The new password must meet platform password policy requirements.
                         - Passwords are never stored in plain text and are hashed before persistence.
-                    """
+                    """,
+            tags = {"Authentication"},
+            security = @SecurityRequirement(name = "bearerAuth")
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Password changed successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "CHANGE PASSWORD SUCCESSFULLY",
+                                              "data": {
+                                                "buyerId": 1,
+                                                "username": "john_doe",
+                                                "email": "john@example.com"
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Invalid current password or password validation failed",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Password change failed",
+                                              "data": null,
+                                              "error": "Current password is incorrect"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            )
+    })
     @PostMapping("/change-password")
-    public ResponseEntity<RestResponse<BuyerResponse, Object>> changePassword(@Valid @RequestBody ChangePasswordRequest request) throws Exception {
+    public ResponseEntity<RestResponse<BuyerResponse, Object>> changePassword(
+            @Parameter(
+                    description = "Password change request with current password and new password",
+                    required = true
+            )
+            @Valid @RequestBody ChangePasswordRequest request) throws Exception {
         Buyer buyer = authService.changePassword(request);
         BuyerResponse responseData = buyerMapper.toDto(buyer);
         return ResponseEntity.status(HttpStatus.OK.value()).body(
@@ -400,9 +793,59 @@ public class AuthController {
                         **Use cases:**
                         - Final step in the sign-up flow for verifying a newly registered email address.
                         - Automatically signing in a user after OTP verification.
-                    """
+                    """,
+            tags = {"Authentication"}
     )
-    public ResponseEntity<RestResponse<AuthResponse, Object>> verify(@Valid @RequestBody VerifyOtpRequest req) {
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OTP verified and account activated successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "SIGN UP SUCCESSFULLY",
+                                              "data": {
+                                                "buyerId": 1,
+                                                "username": "john_doe",
+                                                "email": "john@example.com",
+                                                "role": "ROLE_BUYER",
+                                                "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                                "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Invalid or expired OTP",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "OTP verification failed",
+                                              "data": null,
+                                              "error": "Invalid or expired OTP"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
+    public ResponseEntity<RestResponse<AuthResponse, Object>> verify(
+            @Parameter(
+                    description = "OTP verification request with email/username and OTP code",
+                    required = true
+            )
+            @Valid @RequestBody VerifyOtpRequest req) {
         Buyer buyer = signUpService.verifyOtp(req);
         String refreshToken = jwtUtils.generateTokenFromUsername(buyer.getUsername(), REFRESH_EXPIRE_TIME);
         String accessToken = jwtUtils.generateTokenFromUsername(buyer.getUsername(), ACCESS_EXPIRE_TIME);
@@ -443,9 +886,74 @@ public class AuthController {
                         **Security Notes:**
                         - The refresh token must be sent in the Authorization header.
                         - Each refresh token is single-use and is rotated upon refresh.
-                    """
+                    """,
+            tags = {"Authentication"}
     )
-    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Tokens refreshed successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "GET NEW TOKEN SUCCESSFULLY.",
+                                              "data": {
+                                                "username": "john_doe",
+                                                "email": "john@example.com",
+                                                "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                                "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Invalid or expired refresh token",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "INVALID REFRESH TOKEN",
+                                              "data": null,
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal Server Error - Error occurred when refreshing tokens",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "ERROR OCCUR WHEN GET NEW TOKENS.",
+                                              "data": null,
+                                              "error": "Internal server error"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
+    public ResponseEntity<?> refreshToken(
+            @Parameter(
+                    description = "HTTP request containing refresh token in Authorization header (Bearer token)",
+                    required = true
+            )
+            HttpServletRequest request) {
         log.info(">>> [Refresh token controller]: {}", request.getHeader("Authorization"));
         try {
             Map<String, Object> data = authService.refreshToken(request);

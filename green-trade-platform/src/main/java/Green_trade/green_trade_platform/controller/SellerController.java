@@ -22,9 +22,12 @@ import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SubscriptionPackageServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +47,7 @@ import java.util.Map;
 @RequestMapping("/api/v1/seller")
 @Slf4j
 @AllArgsConstructor
+@Tag(name = "Seller Management", description = "APIs for seller operations including product management, order handling, revenue tracking, and subscription verification")
 public class SellerController {
 
     private final ResponseMapper responseMapper;
@@ -584,24 +588,24 @@ public class SellerController {
     @Operation(
             summary = "Get total pending orders for current seller",
             description = """
-                Returns the total number of orders that are currently in the **PENDING** state 
-                for the authenticated seller.
-
-                **Authorization:** Requires `ROLE_SELLER`.
-
-                **Example:**
-                ```
-                GET /api/seller/total-pending-order
-                ```
-                **Response:**
-                ```json
-                {
-                    "success": true,
-                    "message": "GET ALL PENDING ORDER SUCCESSFULLY.",
-                    "data": 5
-                }
-                ```
-                """
+                    Returns the total number of orders that are currently in the **PENDING** state 
+                    for the authenticated seller.
+                    
+                    **Authorization:** Requires `ROLE_SELLER`.
+                    
+                    **Example:**
+                    ```
+                    GET /api/seller/total-pending-order
+                    ```
+                    **Response:**
+                    ```json
+                    {
+                        "success": true,
+                        "message": "GET ALL PENDING ORDER SUCCESSFULLY.",
+                        "data": 5
+                    }
+                    ```
+                    """
     )
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @GetMapping("/total-pending-order")
@@ -628,24 +632,24 @@ public class SellerController {
     @Operation(
             summary = "Get total active posts for current seller",
             description = """
-                Retrieves the total number of **active posts** (approved and visible products) 
-                created by the authenticated seller.
-
-                **Authorization:** Requires `ROLE_SELLER`.
-
-                **Example:**
-                ```
-                GET /api/seller/active-post
-                ```
-                **Response:**
-                ```json
-                {
-                    "success": true,
-                    "message": "GET ALL ACTIVE POST SUCCESSFULLY.",
-                    "data": 8
-                }
-                ```
-                """
+                    Retrieves the total number of **active posts** (approved and visible products) 
+                    created by the authenticated seller.
+                    
+                    **Authorization:** Requires `ROLE_SELLER`.
+                    
+                    **Example:**
+                    ```
+                    GET /api/seller/active-post
+                    ```
+                    **Response:**
+                    ```json
+                    {
+                        "success": true,
+                        "message": "GET ALL ACTIVE POST SUCCESSFULLY.",
+                        "data": 8
+                    }
+                    ```
+                    """
     )
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @GetMapping("/active-post")
@@ -670,38 +674,38 @@ public class SellerController {
     @Operation(
             summary = "Get all orders for current seller with pagination",
             description = """
-                Returns a paginated list of **all orders** associated with the authenticated seller, 
-                regardless of their status (Pending, Completed, Canceled, etc.).
-                
-                The response includes:
-                - List of orders (OrderResponse) with pagination
-                - Total count of all orders (in Page metadata: totalElements)
-
-                **Query Parameters:**
-                - `page` (Integer, optional, default: 0): Page number (0-based)
-                - `size` (Integer, optional, default: 10): Number of items per page
-
-                **Authorization:** Requires `ROLE_SELLER`.
-
-                **Example:**
-                ```
-                GET /api/v1/seller/total-order?page=0&size=10
-                ```
-                **Response:**
-                ```json
-                {
-                    "success": true,
-                    "message": "GET ALL ORDERS SUCCESSFULLY.",
-                    "data": {
-                        "orders": [...],
-                        "totalOrders": 27,
-                        "currentPage": 0,
-                        "totalPages": 3,
-                        "pageSize": 10
+                    Returns a paginated list of **all orders** associated with the authenticated seller, 
+                    regardless of their status (Pending, Completed, Canceled, etc.).
+                    
+                    The response includes:
+                    - List of orders (OrderResponse) with pagination
+                    - Total count of all orders (in Page metadata: totalElements)
+                    
+                    **Query Parameters:**
+                    - `page` (Integer, optional, default: 0): Page number (0-based)
+                    - `size` (Integer, optional, default: 10): Number of items per page
+                    
+                    **Authorization:** Requires `ROLE_SELLER`.
+                    
+                    **Example:**
+                    ```
+                    GET /api/v1/seller/total-order?page=0&size=10
+                    ```
+                    **Response:**
+                    ```json
+                    {
+                        "success": true,
+                        "message": "GET ALL ORDERS SUCCESSFULLY.",
+                        "data": {
+                            "orders": [...],
+                            "totalOrders": 27,
+                            "currentPage": 0,
+                            "totalPages": 3,
+                            "pageSize": 10
+                        }
                     }
-                }
-                ```
-                """
+                    ```
+                    """
     )
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @GetMapping("/total-order")
@@ -713,7 +717,7 @@ public class SellerController {
             Seller seller = sellerService.getCurrentUser();
             Page<Order> orders = orderService.getAllOrders(page, size, seller);
             Page<OrderResponse> orderResponses = orders.map(orderMapper::toDto);
-            
+
             SellerOrdersResponse response = SellerOrdersResponse.builder()
                     .orders(orderResponses.getContent())
                     .totalOrders(orderResponses.getTotalElements())
@@ -721,7 +725,7 @@ public class SellerController {
                     .totalPages(orderResponses.getTotalPages())
                     .pageSize(orderResponses.getSize())
                     .build();
-            
+
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "GET ALL ORDERS SUCCESSFULLY.",
@@ -736,7 +740,72 @@ public class SellerController {
         }
     }
 
-    @Operation()
+    @Operation(
+            summary = "Get total revenue for current seller",
+            description = """
+                    Retrieves the total revenue generated by the authenticated seller from all completed orders.
+                    
+                    **Workflow:**
+                    1. System identifies the authenticated seller from JWT token
+                    2. Calculates total revenue from all completed orders
+                    3. Returns total revenue amount in VND
+                    
+                    **Response:**
+                    - Returns total revenue as BigDecimal (in VND)
+                    
+                    **Use Cases:**
+                    - Seller dashboard showing total earnings
+                    - Financial reporting for sellers
+                    - Revenue tracking and analytics
+                    
+                    **Security:**
+                    - Requires authentication (ROLE_SELLER)
+                    - Only returns revenue for authenticated seller's own orders
+                    """,
+            tags = {"Seller Revenue Management"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Total revenue retrieved successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "GET TOTAL REVENUE.",
+                                              "data": 15000000.00,
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Failed to get total revenue",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Failed Response",
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "GET TOTAL FAILED.",
+                                              "data": null,
+                                              "error": "Error message"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            )
+    })
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @GetMapping("/total-revenue")
     public ResponseEntity<?> getTotalRevenue() {

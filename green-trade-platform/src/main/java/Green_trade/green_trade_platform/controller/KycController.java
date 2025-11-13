@@ -7,6 +7,7 @@ import Green_trade.green_trade_platform.service.implement.KycService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,6 +21,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/kyc")
 @Slf4j
+@Tag(name = "KYC Verification", description = "APIs for Know Your Customer (KYC) verification including identity verification, OCR extraction, and seller/store information updates")
 public class KycController {
 
     private final KycService kycService;

@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ReviewMapper {
     private final OrderMapper orderMapper;
+
     public Review toEntity(ReviewRequest request, List<ReviewImage> reviewImages) {
         return Review.builder()
                 .rating(request.getRating())

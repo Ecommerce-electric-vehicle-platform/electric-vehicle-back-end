@@ -8,6 +8,14 @@ import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
 import Green_trade.green_trade_platform.service.implement.VnPayServiceImpl;
 import Green_trade.green_trade_platform.service.implement.WalletServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +31,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/vnpay")
 @Slf4j
+@Tag(name = "VNPay Payment", description = "APIs for VNPay payment integration including wallet top-up and withdrawal")
 public class VnPayController {
     @Value(("${vnp_HashSecret}"))
     private String secretKey;
@@ -58,7 +67,7 @@ public class VnPayController {
                         1. The client sends a request with the desired payment `amount`.
                         2. The server constructs a payment request containing order details, amount, timestamp, 
                            and the client's IP address (extracted from the `HttpServletRequest`).
-                        3. The request is signed using VNPay’s secure hash algorithm (SHA256 or HMAC-SHA512).
+                        3. The request is signed using VNPay's secure hash algorithm (SHA256 or HMAC-SHA512).
                         4. A VNPay payment URL is generated and returned to the frontend.
                         5. The user is redirected to VNPay to complete the transaction.
                     
@@ -68,13 +77,68 @@ public class VnPayController {
                         - Integrating VNPay checkout functionality into your e-commerce flow.
                     
                         **Security Notes:**
-                        - The endpoint should be protected if it’s part of an authenticated payment workflow.
+                        - The endpoint should be protected if it's part of an authenticated payment workflow.
                         - The `amount` should be validated server-side to prevent tampering.
-                    """
+                    """,
+            tags = {"VNPay Payment"},
+            security = @SecurityRequirement(name = "bearerAuth")
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Payment URL created successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = Map.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "Tạo liên kết thanh toán thành công.",
+                                              "data": {
+                                                "paymentUrl": "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_Amount=1000000&vnp_Command=pay&..."
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Invalid amount or payment creation failed",
+                    content = @Content(
+                            schema = @Schema(implementation = Map.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Không thể tạo link thanh toán.",
+                                              "data": {
+                                                "code": "99",
+                                                "message": "error: Invalid amount"
+                                              },
+                                              "error": "Invalid amount"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            )
+    })
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/create-payment")
-    public ResponseEntity<?> createPayment(HttpServletRequest request, @RequestParam long amount) {
+    public ResponseEntity<?> createPayment(
+            HttpServletRequest request,
+            @Parameter(
+                    description = "Payment amount in VND (must be positive)",
+                    required = true,
+                    example = "1000000"
+            )
+            @RequestParam long amount) {
         try {
             Map<String, Object> result = vnPayService.createPaymentUrl(request, amount);
             return ResponseEntity.ok(
@@ -118,8 +182,52 @@ public class VnPayController {
                         **Security Notes:**
                         - This endpoint is typically accessed by VNPay's redirect (user + VNPay callback).
                         - Request validation (signature, hash integrity) should be implemented server-side.
-                    """
+                        - Public endpoint - No authentication required (called by VNPay)
+                    """,
+            tags = {"VNPay Payment"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Payment processed successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = Map.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "Nạp tiền thành công.",
+                                              "data": {
+                                                "walletId": 1,
+                                                "balance": 1000000.00,
+                                                "updatedAt": "2024-01-15T10:30:00"
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Payment failed or canceled",
+                    content = @Content(
+                            schema = @Schema(implementation = Map.class),
+                            examples = @ExampleObject(
+                                    name = "Failed Response",
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Nạp tiền không thành công.",
+                                              "data": "07",
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @GetMapping("/return")
     public ResponseEntity<?> handleVnPayReturn(HttpServletRequest request) {
         log.info(">>> [VNPay Return] New request received at {}", new Date());
@@ -151,7 +259,7 @@ public class VnPayController {
             summary = "Handle VNPay Instant Payment Notification (IPN)",
             description = """
                         Handles VNPay's Instant Payment Notification (IPN) — a **server-to-server** callback sent by VNPay to confirm the final status of a payment.  
-                        This endpoint is called automatically by VNPay’s system, even if the user closes the browser before returning to the site.
+                        This endpoint is called automatically by VNPay's system, even if the user closes the browser before returning to the site.
                     
                         **Workflow:**
                         1. VNPay sends a GET request with multiple parameters (`vnp_Amount`, `vnp_TxnRef`, `vnp_ResponseCode`, `vnp_SecureHash`, etc.).
@@ -168,14 +276,55 @@ public class VnPayController {
                     
                         **Use cases:**
                         - Synchronizing payment success/failure status in the backend.
-                        - Crediting wallet balances reliably, even if user doesn’t return to the site.
+                        - Crediting wallet balances reliably, even if user doesn't return to the site.
                         - Ensuring payment data integrity between VNPay and internal systems.
                     
                         **Security Notes:**
                         - Public endpoint, but requires signature validation (`vnp_SecureHash`) for authentication.
                         - Idempotent processing is strongly recommended to prevent double deposits.
-                    """
+                    """,
+            tags = {"VNPay Payment"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "IPN processed successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = Map.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "Nạp tiền thành công.",
+                                              "data": {
+                                                "walletId": 1,
+                                                "balance": 1000000.00
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "IPN payment failed",
+                    content = @Content(
+                            schema = @Schema(implementation = Map.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Nạp tiền không thành công.",
+                                              "data": "07",
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @GetMapping("/ipn")
     public ResponseEntity<?> ipn(HttpServletRequest request) {
         Map<String, Object> result = vnPayService.processReturn(request);
@@ -199,10 +348,92 @@ public class VnPayController {
                 result.get("response_code"), null));
     }
 
-    @Operation()
+    @Operation(
+            summary = "Withdraw money from wallet",
+            description = """
+                        Allows an authenticated user (buyer or seller) to withdraw money from their wallet.
+                        The system validates the withdrawal amount, checks wallet balance, and processes the withdrawal.
+                    
+                        **Workflow:**
+                        1. User sends withdrawal request with desired amount
+                        2. System validates:
+                           - User is authenticated
+                           - Wallet balance is sufficient
+                           - Withdrawal amount is positive and within limits
+                        3. System deducts amount from wallet
+                        4. Returns updated wallet information
+                    
+                        **Use cases:**
+                        - Users withdrawing funds to their bank account
+                        - Sellers cashing out their earnings
+                        - Buyers withdrawing unused wallet balance
+                    
+                        **Security Notes:**
+                        - Requires authentication (ROLE_BUYER or ROLE_SELLER)
+                        - Only wallet owner can withdraw from their own wallet
+                        - Amount validation prevents negative or excessive withdrawals
+                    """,
+            tags = {"VNPay Payment"},
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Withdrawal processed successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = Map.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "WITHDRAW MONEY SUCCESSFULLY.",
+                                              "data": {
+                                                "walletId": 1,
+                                                "balance": 500000.00,
+                                                "updatedAt": "2024-01-15T11:00:00"
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Withdrawal failed",
+                    content = @Content(
+                            schema = @Schema(implementation = Map.class),
+                            examples = @ExampleObject(
+                                    name = "Failed Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "WITHDRAW MONEY FAILED.",
+                                              "data": null,
+                                              "error": "Insufficient balance"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Invalid withdrawal amount"
+            )
+    })
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @GetMapping("/with-draw")
     public ResponseEntity<?> withDrawMoney(
+            @Parameter(
+                    description = "Amount to withdraw in VND (must be positive and not exceed wallet balance)",
+                    required = true,
+                    example = "500000"
+            )
             @RequestParam(name = "money") double money) {
         try {
             Buyer buyer = buyerService.getCurrentUser();

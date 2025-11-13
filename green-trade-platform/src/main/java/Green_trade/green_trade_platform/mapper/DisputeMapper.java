@@ -24,11 +24,11 @@ import java.util.Optional;
 public class DisputeMapper {
     private final SystemWalletRepossitory systemWalletRepository;
     private final WalletTransactionRepository walletTransactionRepository;
-    
+
     public DisputeResponse toDto(Dispute dispute) {
         List<Evidence> evidences = dispute.getEvidences();
         List<EvidenceResponse> evidenceResponses = evidences.stream().map(this::toEvidenDto).toList();
-        
+
         DisputeResponse.DisputeResponseBuilder builder = DisputeResponse.builder()
                 .disputeId(dispute.getId())
                 .disputeCategoryId(dispute.getDisputeCategory().getId())
@@ -38,17 +38,17 @@ public class DisputeMapper {
                 .decision(dispute.getDecision())
                 .status(dispute.getStatus())
                 .evidences(evidenceResponses);
-        
+
         // Nếu dispute đã được giải quyết (status = ACCEPTED), tính toán thông tin tiền hoàn
         if (dispute.getStatus() == DisputeStatus.ACCEPTED && dispute.getOrder() != null) {
             try {
                 Order order = dispute.getOrder();
                 Optional<SystemWallet> systemWalletOpt = systemWalletRepository.findByOrder(order);
-                
+
                 if (systemWalletOpt.isPresent()) {
                     SystemWallet systemWallet = systemWalletOpt.get();
                     BigDecimal systemBalance = systemWallet.getBalance();
-                    
+
                     // Tìm wallet transaction refund cho buyer từ database
                     // Query theo order id và type = REFUND
                     String descriptionPattern = "%Refund money from dispute%";
@@ -58,18 +58,18 @@ public class DisputeMapper {
                                     TransactionType.REFUND,
                                     descriptionPattern
                             );
-                    
+
                     // Lọc transaction có description chứa "Refund money from dispute" và type = REFUND
                     // (chỉ lấy transaction của buyer, không phải seller - seller có type = DEPOSIT)
                     Optional<WalletTransaction> refundTransaction = refundTransactions.stream()
                             .filter(wt -> wt.getType() == TransactionType.REFUND)
-                            .filter(wt -> wt.getDescription() != null && 
+                            .filter(wt -> wt.getDescription() != null &&
                                     wt.getDescription().startsWith("Refund money from dispute"))
                             .findFirst();
-                    
+
                     if (refundTransaction.isPresent()) {
                         BigDecimal refundAmount = refundTransaction.get().getAmount();
-                        
+
                         // Tính refund percent dựa trên system wallet balance ban đầu
                         // Lưu ý: systemBalance hiện tại đã bị giảm sau khi refund
                         // Balance ban đầu = systemBalance hiện tại + refundAmount (phần buyer) + phần seller
@@ -88,9 +88,9 @@ public class DisputeMapper {
                                         .doubleValue();
                             }
                         }
-                        
+
                         builder.refundAmount(refundAmount)
-                               .refundPercent(refundPercent);
+                                .refundPercent(refundPercent);
                     }
                 }
             } catch (Exception e) {
@@ -101,7 +101,7 @@ public class DisputeMapper {
                 e.printStackTrace();
             }
         }
-        
+
         return builder.build();
     }
 

@@ -68,7 +68,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     public WalletTransaction handleRefundMoney(Wallet wallet, BigDecimal money, boolean isRefund, String description) {
         return handleRefundMoney(wallet, money, isRefund, description, null);
     }
-    
+
     public WalletTransaction handleRefundMoney(Wallet wallet, BigDecimal money, boolean isRefund, String description, Order order) {
         log.info(">>> [Wallet Transaction Service] Handling refund money: Started.");
         try {

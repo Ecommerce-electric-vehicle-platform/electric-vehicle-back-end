@@ -33,34 +33,34 @@ public class EscrowAutoResolveTask {
     public void autoResolveEscrow() {
         try {
             log.info(">>> [EscrowAutoResolveTask] Starting auto resolve escrow task");
-            
+
             LocalDateTime currentTime = DateUtils.getCurrentVietnamTime();
             log.info(">>> [EscrowAutoResolveTask] Current time: {}", currentTime);
-            
+
             // Tìm tất cả escrow records có status ESCROW_HOLD và endAt đã qua
             // Lưu ý: endAt chỉ được set khi order được complete (status = COMPLETED)
             // Nếu endAt = null, nghĩa là order chưa complete, không nên auto release
             List<SystemWallet> escrowRecords = systemWalletRepository.findAll().stream()
                     .filter(sw -> sw.getStatus() == SystemWalletStatus.ESCROW_HOLD)
-                    .filter(sw -> sw.getEndAt() != null && 
+                    .filter(sw -> sw.getEndAt() != null &&
                             (sw.getEndAt().isBefore(currentTime) || sw.getEndAt().isEqual(currentTime)))
                     .toList();
-            
+
             log.info(">>> [EscrowAutoResolveTask] Found {} escrow records to resolve (endAt <= currentTime, order must be COMPLETED)", escrowRecords.size());
-            
+
             for (SystemWallet escrowRecord : escrowRecords) {
                 try {
-                    log.info(">>> [EscrowAutoResolveTask] Processing escrow record ID: {}, endAt: {}, balance: {}", 
+                    log.info(">>> [EscrowAutoResolveTask] Processing escrow record ID: {}, endAt: {}, balance: {}",
                             escrowRecord.getId(), escrowRecord.getEndAt(), escrowRecord.getBalance());
-                    
+
                     // Tìm seller wallet
                     Wallet sellerWallet = walletRepository.findByWalletId(escrowRecord.getSellerWalletId())
                             .orElseThrow(() -> new IllegalArgumentException(
                                     "Seller wallet not found with id: " + escrowRecord.getSellerWalletId()));
-                    
+
                     BigDecimal balanceBefore = sellerWallet.getBalance();
                     BigDecimal transferAmount = escrowRecord.getBalance();
-                    
+
                     // Tạo wallet transaction để ghi lại việc chuyển tiền
                     WalletTransaction walletTransaction = WalletTransaction.builder()
                             .wallet(sellerWallet)
@@ -68,34 +68,34 @@ public class EscrowAutoResolveTask {
                             .amount(transferAmount)
                             .balanceBefore(balanceBefore)
                             .status(TransactionStatus.SUCCESS)
-                            .description("Tiền được chuyển tự động từ escrow cho đơn hàng #" + 
+                            .description("Tiền được chuyển tự động từ escrow cho đơn hàng #" +
                                     (escrowRecord.getOrder() != null ? escrowRecord.getOrder().getOrderCode() : "N/A"))
                             .externalTransactionReference("ESCROW_AUTO_" + escrowRecord.getId())
                             .order(escrowRecord.getOrder())
                             .build();
                     walletTransactionRepository.save(walletTransaction);
-                    
+
                     // Chuyển tiền từ escrow về ví người bán
                     sellerWallet.setBalance(balanceBefore.add(transferAmount));
                     walletRepository.save(sellerWallet);
-                    
+
                     // Cập nhật status của escrow record thành IS_SOLVED
                     escrowRecord.setStatus(SystemWalletStatus.IS_SOLVED);
                     // Ghi lại thời gian thực tế đã giải quyết (endAt ban đầu là thời gian dự kiến, giờ là thời gian thực tế)
                     escrowRecord.setEndAt(DateUtils.getCurrentVietnamTime());
                     systemWalletRepository.save(escrowRecord);
-                    
+
                     log.info(">>> [EscrowAutoResolveTask] Successfully resolved escrow record ID: {}, " +
-                            "Transferred amount: {}, Seller wallet balance: {} -> {}", 
+                                    "Transferred amount: {}, Seller wallet balance: {} -> {}",
                             escrowRecord.getId(), transferAmount, balanceBefore, sellerWallet.getBalance());
                 } catch (Exception e) {
-                    log.error(">>> [EscrowAutoResolveTask] Error resolving escrow record ID: {}", 
+                    log.error(">>> [EscrowAutoResolveTask] Error resolving escrow record ID: {}",
                             escrowRecord.getId(), e);
                     // Tiếp tục xử lý các record khác nếu một record bị lỗi
                 }
             }
-            
-            log.info(">>> [EscrowAutoResolveTask] Completed auto resolve escrow task. Processed {} records", 
+
+            log.info(">>> [EscrowAutoResolveTask] Completed auto resolve escrow task. Processed {} records",
                     escrowRecords.size());
         } catch (Exception e) {
             log.error(">>> [EscrowAutoResolveTask] Error in auto resolve escrow task", e);

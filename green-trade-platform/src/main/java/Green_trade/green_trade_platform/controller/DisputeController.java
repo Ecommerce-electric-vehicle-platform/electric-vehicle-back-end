@@ -13,6 +13,14 @@ import Green_trade.green_trade_platform.response.DisputeResponse;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +41,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/dispute")
 @Slf4j
 @AllArgsConstructor
+@Tag(name = "Dispute Management", description = "APIs for managing order disputes, evidence, and resolutions")
 public class DisputeController {
     private final DisputeServiceImpl disputeService;
     private final EvidenceServiceImpl evidenceService;
@@ -58,12 +67,68 @@ public class DisputeController {
                     - Only completed orders can have disputes
                     - If an order already has a pending dispute, a new dispute cannot be raised
                     - If all previous disputes have been resolved (ACCEPTED or REJECTED), a new dispute can be raised
-                    """
+                    """,
+            tags = {"Dispute Management"},
+            security = @SecurityRequirement(name = "bearerAuth")
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Dispute raised successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "RAISE DISPUTE SUCCESSFULLY",
+                                              "data": {
+                                                "disputeId": 1,
+                                                "orderId": 123,
+                                                "category": "PRODUCT_DEFECT",
+                                                "description": "Product received is damaged",
+                                                "status": "PENDING",
+                                                "evidences": ["https://cloudinary.com/evidence1.jpg"]
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Validation failed or order has pending dispute",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "RAISE DISPUTE FAILED: Order already has pending dispute",
+                                              "data": null,
+                                              "error": "Order already has pending dispute"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Order not found"
+            )
+    })
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
     @PostMapping("/raise-dispute")
     public ResponseEntity<RestResponse<DisputeResponse, Object>> raiseDispute(
+            @Parameter(description = "Dispute request with order ID, category, and description", required = true)
             @ModelAttribute RaiseDisputeRequest request,
+            @Parameter(description = "Evidence pictures (images) supporting the dispute", required = true)
             @RequestPart("pictures") List<MultipartFile> files
     ) throws Exception {
         try {
@@ -111,11 +176,30 @@ public class DisputeController {
                         - Automated workflow checking pending disputes for manual intervention
                     
                         **Permissions:** Requires admin or dispute-manager role.
-                    """
+                    """,
+            tags = {"Dispute Management"},
+            security = @SecurityRequirement(name = "bearerAuth")
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Pending disputes retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - Admin role required"
+            )
+    })
     @GetMapping("")
     public ResponseEntity<?> getDisputes(
+            @Parameter(description = "Page number (0-based)", example = "0")
             @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page", example = "10")
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         log.info(">>> [Dispute controller]: getDisputes");
@@ -168,11 +252,38 @@ public class DisputeController {
                             "refundPercent": 80
                         }
                         ```
-                    """
+                    """,
+            tags = {"Dispute Management"},
+            security = @SecurityRequirement(name = "bearerAuth")
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Dispute resolved successfully",
+                    content = @Content(schema = @Schema(implementation = Notification.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Invalid request data"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - Admin role required"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Dispute not found"
+            )
+    })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/resolve")
-    public ResponseEntity<?> handleDispute(@RequestBody ResolveDisputeRequest request) {
+    public ResponseEntity<?> handleDispute(
+            @Parameter(description = "Dispute resolution request with decision and refund details", required = true)
+            @RequestBody ResolveDisputeRequest request) {
         log.info(">>> [Dispute Controller]: Started.");
         try {
             log.info(">>> [Dispute Controller] Refund percent: {}", request.getRefundPercent());
@@ -198,12 +309,12 @@ public class DisputeController {
                         .to(buyerWallet.getBuyer().getEmail())
                         .subject("Kết quả xử lý khiếu nại đơn hàng #" + order.getId())
                         .message("""
-                💚 <strong>Kết quả xử lý khiếu nại</strong><br><br>
-                Khiếu nại của bạn đã được Green Trade xem xét và phê duyệt hoàn tiền.<br>
-                Phần trăm hoàn tiền: %s%%<br><br>
-                Vui lòng kiểm tra ví của bạn để xác nhận giao dịch hoàn tiền đã được xử lý.<br><br>
-                Cảm ơn bạn đã tin tưởng Green Trade Platform!
-                """.formatted(request.getRefundPercent()))
+                                💚 <strong>Kết quả xử lý khiếu nại</strong><br><br>
+                                Khiếu nại của bạn đã được Green Trade xem xét và phê duyệt hoàn tiền.<br>
+                                Phần trăm hoàn tiền: %s%%<br><br>
+                                Vui lòng kiểm tra ví của bạn để xác nhận giao dịch hoàn tiền đã được xử lý.<br><br>
+                                Cảm ơn bạn đã tin tưởng Green Trade Platform!
+                                """.formatted(request.getRefundPercent()))
                         .build();
 
                 MailRequest sellerMailRequest = MailRequest.builder()
@@ -211,12 +322,12 @@ public class DisputeController {
                         .to(sellerWallet.getBuyer().getEmail())
                         .subject("Kết quả khiếu nại đơn hàng #" + order.getId())
                         .message("""
-                ⚠️ <strong>Thông báo kết quả khiếu nại</strong><br><br>
-                Khiếu nại liên quan đến <strong>đơn hàng #%s</strong> đã được xử lý.<br><br>
-                🔹 <strong>Tỷ lệ thanh toán giữ lại:</strong> %s%%<br><br>
-                Vui lòng kiểm tra ví của bạn để xác nhận số dư mới.<br><br>
-                Trân trọng,<br>Green Trade Platform
-                """.formatted(order.getId(), 100 - request.getRefundPercent()))
+                                ⚠️ <strong>Thông báo kết quả khiếu nại</strong><br><br>
+                                Khiếu nại liên quan đến <strong>đơn hàng #%s</strong> đã được xử lý.<br><br>
+                                🔹 <strong>Tỷ lệ thanh toán giữ lại:</strong> %s%%<br><br>
+                                Vui lòng kiểm tra ví của bạn để xác nhận số dư mới.<br><br>
+                                Trân trọng,<br>Green Trade Platform
+                                """.formatted(order.getId(), 100 - request.getRefundPercent()))
                         .build();
                 mailSender.sendBeautifulMail(sellerMailRequest);
                 mailSender.sendBeautifulMail(buyerMailRequest);
@@ -261,8 +372,8 @@ public class DisputeController {
         log.info(">>> [Dispute Controller] Check pending dispute for orderId: {}", orderId);
         try {
             boolean hasPending = disputeService.hasPendingDisputeByOrderId(orderId);
-            String message = hasPending 
-                    ? "Order has pending dispute(s). Cannot raise new dispute." 
+            String message = hasPending
+                    ? "Order has pending dispute(s). Cannot raise new dispute."
                     : "Order does not have pending dispute. Can raise new dispute.";
             return ResponseEntity.ok(responseMapper.toDto(true,
                     message,
@@ -394,13 +505,13 @@ public class DisputeController {
         log.info(">>> [Dispute Controller] Get disputes by buyerId: {}", buyerId);
         try {
             Page<DisputeResponse> disputes = disputeService.getDisputesByBuyerId(buyerId, page, size);
-            
+
             Map<String, Object> data = new HashMap<>();
             data.put("disputes", disputes.getContent());
             data.put("currentPage", disputes.getNumber());
             data.put("totalElements", disputes.getTotalElements());
             data.put("totalPages", disputes.getTotalPages());
-            
+
             return ResponseEntity.ok(responseMapper.toDto(true,
                     "GET DISPUTES BY BUYER ID SUCCESSFULLY.",
                     data,

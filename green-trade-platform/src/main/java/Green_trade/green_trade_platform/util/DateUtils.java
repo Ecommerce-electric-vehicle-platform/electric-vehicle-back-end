@@ -9,12 +9,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 public final class DateUtils {
-    
+
     // Ngăn khởi tạo instance
     private DateUtils() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
-    
+
     public static LocalDate parseAndValidateDob(String dobStr) {
         if (dobStr == null || dobStr.trim().isEmpty()) {
             throw new IllegalArgumentException("Ngày sinh không được để trống.");
@@ -46,7 +46,7 @@ public final class DateUtils {
 
     /**
      * Lấy thời gian hiện tại theo giờ Việt Nam (Asia/Ho_Chi_Minh)
-     * 
+     *
      * @return LocalDateTime hiện tại theo giờ Việt Nam
      */
     public static LocalDateTime getCurrentVietnamTime() {
@@ -56,11 +56,11 @@ public final class DateUtils {
 
     /**
      * Chuyển đổi LocalDateTime từ UTC sang giờ địa phương Việt Nam (UTC+7)
-     * 
+     * <p>
      * LƯU Ý: Hàm này CHỈ dùng khi bạn chắc chắn input là UTC và cần chuyển sang VN.
      * KHÔNG dùng với LocalDateTime.now() vì nó đã là giờ VN rồi.
      * Để lấy thời gian hiện tại, dùng getCurrentVietnamTime() thay vì convertToVietnamTime(LocalDateTime.now())
-     * 
+     *
      * @param dateTime LocalDateTime cần chuyển đổi (PHẢI là UTC)
      * @return LocalDateTime đã được chuyển đổi sang giờ Việt Nam
      */

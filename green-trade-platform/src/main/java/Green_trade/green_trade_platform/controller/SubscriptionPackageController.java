@@ -10,6 +10,7 @@ import Green_trade.green_trade_platform.service.SellerService;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SubscriptionPackageServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/packages")
 @RequiredArgsConstructor
+@Tag(name = "Subscription Package", description = "APIs for managing subscription packages including viewing active packages, signing up, canceling subscriptions, and revenue tracking")
 public class SubscriptionPackageController {
 
     private final SubscriptionPackageServiceImpl subscriptionPackageService;

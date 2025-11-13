@@ -148,7 +148,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     public Review updateReview(Long reviewId, UpdateReviewRequest request, List<MultipartFile> newImages) {
         log.info(">>> [Review Service] Update Review: Started. ReviewId: {}", reviewId);
-        
+
         // Tìm review cần update
         Review review = reviewRepository.findById(reviewId).orElseThrow(
                 () -> new IllegalArgumentException("Review not found with id: " + reviewId)
@@ -174,9 +174,9 @@ public class ReviewServiceImpl implements ReviewService {
         if (newImages != null && !newImages.isEmpty()) {
             log.info(">>> [Review Service] Upload new images into Cloudinary: Started.");
             Map<String, Object> uploadResult = uploadReviewImages(newImages);
-            
+
             List<Map<String, String>> uploadedFiles = (List<Map<String, String>>) uploadResult.get("uploaded");
-            
+
             if (uploadedFiles != null && !uploadedFiles.isEmpty()) {
                 // Xóa các hình ảnh cũ
                 if (review.getReviewImages() != null && !review.getReviewImages().isEmpty()) {
@@ -192,7 +192,7 @@ public class ReviewServiceImpl implements ReviewService {
                         reviewImagesRepository.delete(oldImage);
                     }
                 }
-                
+
                 // Thêm hình ảnh mới
                 int orderImage = 1;
                 for (Map<String, String> imageData : uploadedFiles) {

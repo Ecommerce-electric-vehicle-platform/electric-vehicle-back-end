@@ -248,27 +248,27 @@ public class PostProductServiceImpl implements PostProductService {
         PostProduct postProduct = postProductRepository.findById(request.getPostId()).orElseThrow(() -> new Exception("Post is not existed"));
         log.info(">>> [PostProductServiceImpl] postProductVerifiedRequest - found post: {}", postProduct.getId());
         Long sellerId = postProduct.getSeller().getSellerId();
-        
+
         // Check if subscription is expired
         if (subscriptionService.isServicePackageExpired(sellerId)) {
             log.info(">>> [PostProductServiceImpl] postProductVerifiedRequest - subscription expired for sellerId: {}", sellerId);
             throw new SubscriptionExpiredException();
         }
-        
+
         // Check if current subscription package allows sending verify request
         Subscription subscription = subscriptionRepository.findFirstBySeller_SellerIdOrderByEndDayDesc(sellerId)
                 .orElseThrow(() -> new Exception("Seller doesn't subscribe any service"));
-        
+
         if (subscription.getSubscriptionPackage() == null) {
             throw new Exception("Subscription package not found");
         }
-        
+
         if (!subscription.getSubscriptionPackage().isCanSendVerifyRequest()) {
-            log.info(">>> [PostProductServiceImpl] postProductVerifiedRequest - subscription package does not allow verify request for sellerId: {}, packageId: {}", 
+            log.info(">>> [PostProductServiceImpl] postProductVerifiedRequest - subscription package does not allow verify request for sellerId: {}, packageId: {}",
                     sellerId, subscription.getSubscriptionPackage().getId());
             throw new Exception("Gói đăng ký hiện tại của bạn không cho phép gửi yêu cầu xác minh sản phẩm. Vui lòng nâng cấp gói để sử dụng tính năng này.");
         }
-        
+
         postProduct.setVerifiedDecisionstatus(VerifiedDecisionStatus.PENDING);
         PostProduct result = postProductRepository.save(postProduct);
         log.info(">>> [PostProductServiceImpl] postProductVerifiedRequest - result: {}", result);
