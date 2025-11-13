@@ -65,6 +65,10 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     }
 
     public WalletTransaction handleRefundMoney(Wallet wallet, BigDecimal money, boolean isRefund, String description) {
+        return handleRefundMoney(wallet, money, isRefund, description, null);
+    }
+    
+    public WalletTransaction handleRefundMoney(Wallet wallet, BigDecimal money, boolean isRefund, String description, Order order) {
         log.info(">>> [Wallet Transaction Service] Handling refund money: Started.");
         try {
             log.info(">>> [Wallet Transaction Service] Started to create wallet transaction.");
@@ -72,6 +76,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
             if (isRefund) {
                 walletTransaction = WalletTransaction.builder()
                         .wallet(wallet)
+                        .order(order)
                         .type(TransactionType.REFUND)
                         .amount(money)
                         .balanceBefore(wallet.getBalance())
@@ -82,6 +87,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
             } else {
                 walletTransaction = WalletTransaction.builder()
                         .wallet(wallet)
+                        .order(order)
                         .type(TransactionType.DEPOSIT)
                         .amount(money)
                         .balanceBefore(wallet.getBalance())
