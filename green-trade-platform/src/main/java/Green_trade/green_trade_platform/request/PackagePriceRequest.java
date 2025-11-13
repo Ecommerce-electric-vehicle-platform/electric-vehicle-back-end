@@ -20,7 +20,7 @@ public class PackagePriceRequest {
     @Positive(message = "Price must be positive.")
     private Double price;
 
-    @NotNull(message = "isActive is required.")
+    // isActive is optional: if null when updating, keep existing value; if null when creating, default to true
     private Boolean isActive;
 
     @NotNull(message = "durationByDay is required.")

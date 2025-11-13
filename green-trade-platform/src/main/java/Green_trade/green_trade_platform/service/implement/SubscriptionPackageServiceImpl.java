@@ -250,7 +250,10 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
                     }
                     
                     existingPrice.setPrice(priceRequest.getPrice());
-                    existingPrice.setActive(priceRequest.getIsActive());
+                    // Nếu isActive là null, giữ nguyên giá trị cũ
+                    if (priceRequest.getIsActive() != null) {
+                        existingPrice.setActive(priceRequest.getIsActive());
+                    }
                     existingPrice.setDurationByDay(priceRequest.getDurationByDay());
                     existingPrice.setCurrency(priceRequest.getCurrency());
                     existingPrice.setDiscountPercent(priceRequest.getDiscountPercent());
@@ -259,10 +262,12 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
                     log.info(">>> [SubscriptionPackageServiceImpl] updateSubscriptionPackage - updated price ID: {}", existingPrice.getId());
                 } else {
                     // Create new price
+                    // Nếu isActive là null, set default là true
+                    Boolean isActive = priceRequest.getIsActive() != null ? priceRequest.getIsActive() : true;
                     PackagePrice newPrice = PackagePrice.builder()
                             .subscriptionPackage(updated)
                             .price(priceRequest.getPrice())
-                            .isActive(priceRequest.getIsActive())
+                            .isActive(isActive)
                             .durationByDay(priceRequest.getDurationByDay())
                             .currency(priceRequest.getCurrency())
                             .discountPercent(priceRequest.getDiscountPercent())
