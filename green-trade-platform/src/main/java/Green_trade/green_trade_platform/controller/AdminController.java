@@ -362,19 +362,19 @@ public class AdminController {
         // 3️⃣ Soạn nội dung email theo quyết định
         if (request.getPassed()) {
             mailRequest.setMessage("""
-                🎉 <strong>Chúc mừng bạn!</strong><br><br>
-                Bài đăng sản phẩm <strong>%s</strong> của bạn đã được phê duyệt thành công và hiện đang hiển thị trên hệ thống.<br><br>
-                Hãy đảm bảo rằng thông tin sản phẩm luôn chính xác và tuân thủ các <a href='https://green-trade-platform.com/policies' style='color:#4CAF50;font-weight:bold;'>chính sách bán hàng</a> của Green Trade.<br><br>
-                💚 Chúc bạn kinh doanh thuận lợi!
-                """.formatted(result.getTitle()));
+                    🎉 <strong>Chúc mừng bạn!</strong><br><br>
+                    Bài đăng sản phẩm <strong>%s</strong> của bạn đã được phê duyệt thành công và hiện đang hiển thị trên hệ thống.<br><br>
+                    Hãy đảm bảo rằng thông tin sản phẩm luôn chính xác và tuân thủ các <a href='https://green-trade-platform.com/policies' style='color:#4CAF50;font-weight:bold;'>chính sách bán hàng</a> của Green Trade.<br><br>
+                    💚 Chúc bạn kinh doanh thuận lợi!
+                    """.formatted(result.getTitle()));
         } else {
             mailRequest.setMessage("""
-                ⚠️ <strong>Rất tiếc!</strong><br><br>
-                Bài đăng sản phẩm <strong>%s</strong> của bạn chưa được phê duyệt.<br>
-                Nguyên nhân có thể do thông tin sản phẩm chưa đầy đủ hoặc vi phạm quy định của nền tảng.<br><br>
-                Vui lòng kiểm tra lại nội dung bài đăng và gửi yêu cầu phê duyệt lại sau khi điều chỉnh phù hợp.<br><br>
-                💚 Cảm ơn bạn đã hợp tác cùng Green Trade Platform!
-                """.formatted(result.getTitle()));
+                    ⚠️ <strong>Rất tiếc!</strong><br><br>
+                    Bài đăng sản phẩm <strong>%s</strong> của bạn chưa được phê duyệt.<br>
+                    Nguyên nhân có thể do thông tin sản phẩm chưa đầy đủ hoặc vi phạm quy định của nền tảng.<br><br>
+                    Vui lòng kiểm tra lại nội dung bài đăng và gửi yêu cầu phê duyệt lại sau khi điều chỉnh phù hợp.<br><br>
+                    💚 Cảm ơn bạn đã hợp tác cùng Green Trade Platform!
+                    """.formatted(result.getTitle()));
         }
 
         mailSender.sendBeautifulMail(mailRequest);
@@ -707,27 +707,27 @@ public class AdminController {
     @Operation(
             summary = "Admin approves or rejects a product post",
             description = """
-                Allows admin to approve or reject a product post submitted by a seller.
-                The endpoint updates the post status and sends an email notification to the seller.
-                
-                **Path Parameters:**
-                - `postId` (Long, required): ID of the product post to approve/reject
-                - `decision` (VerifiedDecisionStatus, required): Decision status. Valid values: `APPROVED` or `REJECTED`
-                
-                **Response:**
-                - Success (200): Returns updated `PostProductResponse` with new verification status
-                - Error (400/404): Returns error message if post not found or validation fails
-                
-                **Email Notification:**
-                - If APPROVED: Sends congratulatory email to seller
-                - If REJECTED: Sends rejection notice with reason
-                
-                **Example Requests:**
-                - Approve: POST /api/v1/admin/approve-post/12/APPROVED
-                - Reject: POST /api/v1/admin/approve-post/12/REJECTED
-                
-                **Permissions:** ROLE_ADMIN required.
-                """
+                    Allows admin to approve or reject a product post submitted by a seller.
+                    The endpoint updates the post status and sends an email notification to the seller.
+                    
+                    **Path Parameters:**
+                    - `postId` (Long, required): ID of the product post to approve/reject
+                    - `decision` (VerifiedDecisionStatus, required): Decision status. Valid values: `APPROVED` or `REJECTED`
+                    
+                    **Response:**
+                    - Success (200): Returns updated `PostProductResponse` with new verification status
+                    - Error (400/404): Returns error message if post not found or validation fails
+                    
+                    **Email Notification:**
+                    - If APPROVED: Sends congratulatory email to seller
+                    - If REJECTED: Sends rejection notice with reason
+                    
+                    **Example Requests:**
+                    - Approve: POST /api/v1/admin/approve-post/12/APPROVED
+                    - Reject: POST /api/v1/admin/approve-post/12/REJECTED
+                    
+                    **Permissions:** ROLE_ADMIN required.
+                    """
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Post approval/rejection processed successfully",
@@ -756,19 +756,19 @@ public class AdminController {
             // 3️⃣ Soạn nội dung email theo quyết định
             if (decision == VerifiedDecisionStatus.APPROVED) {
                 mailRequest.setMessage("""
-                🎉 <strong>Chúc mừng bạn!</strong><br><br>
-                Bài đăng sản phẩm <strong>%s</strong> của bạn đã được phê duyệt thành công và hiện đang hiển thị trên hệ thống.<br><br>
-                Hãy đảm bảo rằng thông tin sản phẩm luôn chính xác và tuân thủ các <a href='https://green-trade-platform.com/policies' style='color:#4CAF50;font-weight:bold;'>chính sách bán hàng</a> của Green Trade.<br><br>
-                💚 Chúc bạn kinh doanh thuận lợi!
-                """.formatted(postProduct.getTitle()));
+                        🎉 <strong>Chúc mừng bạn!</strong><br><br>
+                        Bài đăng sản phẩm <strong>%s</strong> của bạn đã được phê duyệt thành công và hiện đang hiển thị trên hệ thống.<br><br>
+                        Hãy đảm bảo rằng thông tin sản phẩm luôn chính xác và tuân thủ các <a href='https://green-trade-platform.com/policies' style='color:#4CAF50;font-weight:bold;'>chính sách bán hàng</a> của Green Trade.<br><br>
+                        💚 Chúc bạn kinh doanh thuận lợi!
+                        """.formatted(postProduct.getTitle()));
             } else {
                 mailRequest.setMessage("""
-                ⚠️ <strong>Rất tiếc!</strong><br><br>
-                Bài đăng sản phẩm <strong>%s</strong> của bạn chưa được phê duyệt.<br>
-                Nguyên nhân có thể do thông tin sản phẩm chưa đầy đủ hoặc vi phạm quy định của nền tảng.<br><br>
-                Vui lòng kiểm tra lại nội dung bài đăng và gửi yêu cầu phê duyệt lại sau khi điều chỉnh phù hợp.<br><br>
-                💚 Cảm ơn bạn đã hợp tác cùng Green Trade Platform!
-                """.formatted(postProduct.getTitle()));
+                        ⚠️ <strong>Rất tiếc!</strong><br><br>
+                        Bài đăng sản phẩm <strong>%s</strong> của bạn chưa được phê duyệt.<br>
+                        Nguyên nhân có thể do thông tin sản phẩm chưa đầy đủ hoặc vi phạm quy định của nền tảng.<br><br>
+                        Vui lòng kiểm tra lại nội dung bài đăng và gửi yêu cầu phê duyệt lại sau khi điều chỉnh phù hợp.<br><br>
+                        💚 Cảm ơn bạn đã hợp tác cùng Green Trade Platform!
+                        """.formatted(postProduct.getTitle()));
             }
 
             mailSender.sendBeautifulMail(mailRequest);
@@ -1344,7 +1344,7 @@ public class AdminController {
                 throw new IllegalArgumentException("Only super admin can view subscription package subscribers.");
             }
 
-            Page<SubscriberInfo> subscribersPage = 
+            Page<SubscriberInfo> subscribersPage =
                     subscriptionPackageService.getPackageSubscribers(packageId, page, size);
 
             return ResponseEntity.ok(responseMapper.toDto(

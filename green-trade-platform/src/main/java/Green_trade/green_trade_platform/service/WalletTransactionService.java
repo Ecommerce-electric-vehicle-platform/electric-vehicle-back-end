@@ -13,7 +13,7 @@ public interface WalletTransactionService {
     WalletTransaction handleSignPackageForSeller(Wallet wallet, double amount);
 
     WalletTransaction handleRefundMoney(Wallet wallet, BigDecimal money, boolean isRefund, String description);
-    
+
     WalletTransaction handleRefundMoney(Wallet wallet, BigDecimal money, boolean isRefund, String description, Order order);
 
     WalletTransaction handleWithDrawMoney(Wallet wallet, double money);

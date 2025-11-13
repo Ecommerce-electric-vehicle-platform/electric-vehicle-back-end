@@ -188,18 +188,18 @@ public class PostProductController {
             summary = "Get seller information by post product ID",
             description = """
                         Retrieves detailed information about the seller associated with a specific post product.
-                        
+                    
                         ## Workflow:
                         1. System locates the post product using the provided postId
                         2. If found, retrieves the seller linked to that post
                         3. Returns seller details (store name, contact info, verification status)
                         4. If post product not found, throws 404 error
-                        
+                    
                         ## Use Cases:
                         - Displaying seller information on product detail page
                         - Showing seller ratings and verification status
                         - Allowing buyers to view product owner details
-                        
+                    
                         ## Security:
                         - Public endpoint - No authentication required
                         - Sensitive seller data should be filtered based on user permissions

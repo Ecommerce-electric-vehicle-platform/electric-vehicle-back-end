@@ -54,17 +54,17 @@ public class DisputeServiceImpl implements DisputeService {
             if (!disputedOrder.getStatus().equals(OrderStatus.COMPLETED)) {
                 throw new Exception("Only completed order can be dispute");
             }
-            
+
             // Kiểm tra xem order đã có dispute PENDING chưa
             List<Dispute> pendingDisputes = disputeRepository.findByOrder_IdAndStatus(
-                    request.getOrderId(), 
+                    request.getOrderId(),
                     DisputeStatus.PENDING
             );
-            
+
             if (pendingDisputes != null && !pendingDisputes.isEmpty()) {
                 throw new Exception("This order already has a pending dispute. Please wait for the current dispute to be resolved before raising a new one.");
             }
-            
+
             Dispute newDispute = Dispute.builder()
                     .order(disputedOrder)
                     .disputeCategory(disputeCategory)
@@ -176,15 +176,15 @@ public class DisputeServiceImpl implements DisputeService {
     public Page<DisputeResponse> getDisputesByBuyerId(Long buyerId, int page, int size) {
         log.info(">>> [Dispute Service] Get disputes by buyerId: {}", buyerId);
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        
+
         Page<Dispute> disputes = disputeRepository.findByOrder_Buyer_BuyerId(buyerId, pageable);
         log.info(">>> [Dispute Service] Found {} disputes for buyerId: {}", disputes.getTotalElements(), buyerId);
-        
+
         List<DisputeResponse> responses = disputes.getContent()
                 .stream()
                 .map(disputeMapper::toDto)
                 .toList();
-        
+
         return new PageImpl<>(responses, pageable, disputes.getTotalElements());
     }
 

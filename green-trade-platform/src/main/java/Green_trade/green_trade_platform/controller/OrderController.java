@@ -274,7 +274,7 @@ public class OrderController {
             // Kiểm tra quyền: chỉ buyer của order mới được update review
             Review existingReview = reviewService.getReviewById(reviewId);
             Buyer currentBuyer = buyerService.getCurrentUser();
-            
+
             if (existingReview.getOrder() == null || existingReview.getOrder().getBuyer() == null) {
                 return ResponseEntity.ok(responseMapper.toDto(
                         false,
@@ -283,7 +283,7 @@ public class OrderController {
                         "Order information not found."
                 ));
             }
-            
+
             if (!existingReview.getOrder().getBuyer().getBuyerId().equals(currentBuyer.getBuyerId())) {
                 return ResponseEntity.ok(responseMapper.toDto(
                         false,
@@ -292,7 +292,7 @@ public class OrderController {
                         "You are not authorized to update this review. Only the buyer who created the review can update it."
                 ));
             }
-            
+
             Review updatedReview = reviewService.updateReview(reviewId, request, newImages);
             return ResponseEntity.ok(responseMapper.toDto(
                     true,

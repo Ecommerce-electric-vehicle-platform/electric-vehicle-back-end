@@ -25,7 +25,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     private static final String ESCROW_TRANSFER_SECONDS_KEY = "ESCROW_TRANSFER_SECONDS";
     // Default: 14 ngày = 14 * 24 * 60 * 60 = 1,209,600 giây
     private static final long DEFAULT_ESCROW_TRANSFER_SECONDS = 1209600L;
-    
+
     private static final String ORDER_DELIVERED_TO_COMPLETED_SECONDS_KEY = "ORDER_DELIVERED_TO_COMPLETED_SECONDS";
     // Default: 3 ngày = 3 * 24 * 60 * 60 = 259,200 giây
     private static final long DEFAULT_ORDER_DELIVERED_TO_COMPLETED_SECONDS = 259200L;
@@ -73,7 +73,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
                 return Long.parseLong(config.getConfigValue());
             }
         } catch (NumberFormatException e) {
-            log.warn(">>> [SystemConfigService] Invalid escrow transfer seconds config value, using default: {} seconds ({} days)", 
+            log.warn(">>> [SystemConfigService] Invalid escrow transfer seconds config value, using default: {} seconds ({} days)",
                     DEFAULT_ESCROW_TRANSFER_SECONDS, DEFAULT_ESCROW_TRANSFER_SECONDS / 86400);
         }
         return DEFAULT_ESCROW_TRANSFER_SECONDS;
@@ -88,7 +88,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
                 return Long.parseLong(config.getConfigValue());
             }
         } catch (NumberFormatException e) {
-            log.warn(">>> [SystemConfigService] Invalid order delivered to completed seconds config value, using default: {} seconds ({} days)", 
+            log.warn(">>> [SystemConfigService] Invalid order delivered to completed seconds config value, using default: {} seconds ({} days)",
                     DEFAULT_ORDER_DELIVERED_TO_COMPLETED_SECONDS, DEFAULT_ORDER_DELIVERED_TO_COMPLETED_SECONDS / 86400);
         }
         return DEFAULT_ORDER_DELIVERED_TO_COMPLETED_SECONDS;

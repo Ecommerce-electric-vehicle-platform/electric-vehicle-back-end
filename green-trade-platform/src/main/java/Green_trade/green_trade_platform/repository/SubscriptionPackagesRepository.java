@@ -11,6 +11,6 @@ import java.util.Optional;
 
 public interface SubscriptionPackagesRepository extends JpaRepository<SubscriptionPackages, Long> {
     Page<SubscriptionPackages> findByIsActiveTrue(Pageable pageable);
-    
+
     Optional<SubscriptionPackages> findByName(String name);
 }

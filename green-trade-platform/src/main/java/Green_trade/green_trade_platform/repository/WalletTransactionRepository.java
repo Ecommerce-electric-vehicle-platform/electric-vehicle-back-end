@@ -19,7 +19,7 @@ public interface WalletTransactionRepository extends JpaRepository<WalletTransac
     Optional<WalletTransaction> findByExternalTransactionReference(String txnRef);
 
     Page<WalletTransaction> findByWallet(Wallet wallet, Pageable pageable);
-    
+
     // Tìm refund transaction cho buyer từ dispute
     // Query theo description pattern vì order có thể chưa được set khi tạo transaction
     @Query("SELECT wt FROM WalletTransaction wt WHERE wt.type = :type AND wt.description LIKE :descriptionPattern")
@@ -27,7 +27,7 @@ public interface WalletTransactionRepository extends JpaRepository<WalletTransac
             @Param("type") TransactionType type,
             @Param("descriptionPattern") String descriptionPattern
     );
-    
+
     // Query theo order (nếu order đã được set)
     @Query("SELECT wt FROM WalletTransaction wt WHERE wt.order = :order AND wt.type = :type AND wt.description LIKE :descriptionPattern")
     List<WalletTransaction> findRefundTransactionsByOrderAndType(
