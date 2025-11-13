@@ -8,9 +8,17 @@ import Green_trade.green_trade_platform.repository.OrderRepository;
 import Green_trade.green_trade_platform.request.CancelOrderRequest;
 import Green_trade.green_trade_platform.request.ReviewRequest;
 import Green_trade.green_trade_platform.request.UpdateReviewRequest;
+import Green_trade.green_trade_platform.response.InvoiceResponse;
 import Green_trade.green_trade_platform.response.*;
 import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,6 +39,7 @@ import java.util.Map;
 @RequestMapping("/api/v1/order")
 @Slf4j
 @AllArgsConstructor
+@Tag(name = "Order Management", description = "APIs for managing orders, reviews, and invoices")
 public class OrderController {
 
     private final OrderServiceImpl orderService;
@@ -419,8 +428,90 @@ public class OrderController {
         }
     }
 
+    @Operation(
+            summary = "Get invoice by order ID",
+            description = """
+                    Retrieves the invoice associated with a specific order. If the invoice does not exist,
+                    a new invoice will be automatically created and generated.
+                    
+                    **Workflow:**
+                    1. System retrieves order by orderId
+                    2. Checks if invoice exists for the order
+                    3. If invoice doesn't exist:
+                       - Creates a new invoice instance
+                       - Generates invoice number
+                    4. Returns invoice details
+                    
+                    **Response Includes:**
+                    - Invoice ID and invoice number
+                    - Order information
+                    - Invoice date and status
+                    - Total amount and tax information
+                    
+                    **Use Cases:**
+                    - Viewing order invoice for buyers
+                    - Downloading invoice for accounting
+                    - Sellers viewing order invoices
+                    
+                    **Security:**
+                    - Public endpoint - No authentication required
+                    - Invoice is automatically created if missing
+                    """,
+            tags = {"Order Management"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Invoice retrieved successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "FETCH INVOICE SUCCESSFULLY",
+                                              "data": {
+                                                "id": 1,
+                                                "invoiceNumber": "INV-2024-001",
+                                                "orderId": 123,
+                                                "invoiceDate": "2024-01-15T10:30:00",
+                                                "totalAmount": 5030000.00,
+                                                "taxAmount": 0.00,
+                                                "status": "GENERATED"
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Order not found",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Order not found",
+                                              "data": null,
+                                              "error": "Order with ID 123 does not exist"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @GetMapping("/{orderId}/invoice")
-    public ResponseEntity<RestResponse<InvoiceResponse, Object>> getInvoiceByOrderId(@PathVariable Long orderId) {
+    public ResponseEntity<RestResponse<InvoiceResponse, Object>> getInvoiceByOrderId(
+            @Parameter(
+                    description = "The ID of the order to get invoice for",
+                    required = true,
+                    example = "123"
+            )
+            @PathVariable Long orderId) {
         Order order = orderService.getOrderById(orderId);
         Invoice invoice = order.getInvoice();
         if (invoice == null) {
