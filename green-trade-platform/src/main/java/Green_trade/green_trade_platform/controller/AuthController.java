@@ -22,6 +22,14 @@ import Green_trade.green_trade_platform.service.implement.SignInServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SignUpServiceImpl;
 import Green_trade.green_trade_platform.util.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -44,6 +52,7 @@ import java.util.Optional;
 @Slf4j
 @RequestMapping("/api/v1/auth")
 @AllArgsConstructor
+@Tag(name = "Authentication", description = "APIs for user authentication, registration, password management, and token refresh")
 public class AuthController {
 
     private final BuyerMapper buyerMapper;
@@ -77,10 +86,53 @@ public class AuthController {
                         **Use cases:**
                         - Customer account registration for the e-commerce platform.
                         - Initiating secure OTP-based email verification during signup.
-                    """
+                    """,
+            tags = {"Authentication"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "OTP sent to email successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "Sent OTP to email",
+                                              "data": null,
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Validation error or email already exists",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "Validation failed",
+                                              "data": null,
+                                              "error": "Email already exists or invalid input"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @PostMapping("/signup")
-    public ResponseEntity<RestResponse<Object, Object>> signUp(@Valid @RequestBody SignUpRequest req) {
+    public ResponseEntity<RestResponse<Object, Object>> signUp(
+            @Parameter(
+                    description = "User registration information including name, email, password, and username",
+                    required = true
+            )
+            @Valid @RequestBody SignUpRequest req) {
         signUpService.startSignUp(req);
         return ResponseEntity.ok(responseMapper.toDto(
                 true, "Sent OTP to email", null, null
@@ -106,10 +158,60 @@ public class AuthController {
                         - Allow users to log in to their account via web.
                         - Initialize a session for authenticated API requests.
                         - Manage secure token-based authentication (JWT).
-                    """
+                    """,
+            tags = {"Authentication"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Sign in successful",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "SIGN IN SUCCESSFULLY",
+                                              "data": {
+                                                "buyerId": 1,
+                                                "username": "john_doe",
+                                                "email": "john@example.com",
+                                                "role": "ROLE_BUYER",
+                                                "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                                "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Invalid credentials or account blocked",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "SIGN IN FAILED",
+                                              "data": null,
+                                              "error": "Invalid username or password"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @PostMapping("/signin")
-    public ResponseEntity<RestResponse<AuthResponse, Object>> signIn(@Valid @RequestBody SignInRequest req) {
+    public ResponseEntity<RestResponse<AuthResponse, Object>> signIn(
+            @Parameter(
+                    description = "User login credentials (username and password)",
+                    required = true
+            )
+            @Valid @RequestBody SignInRequest req) {
         try {
             log.info(">>> [Auth Controller] Starting sign in controller");
             Buyer user = signInService.startSignIn(req);
@@ -170,10 +272,63 @@ public class AuthController {
                         - Allow administrators to securely log into the management dashboard.
                         - Generate and return JWT tokens for admin session handling.
                         - Provide role-based access for administrative API endpoints.
-                    """
+                    """,
+            tags = {"Authentication"}
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Admin sign in successful",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "ADMIN SIGN IN SUCCESSFULLY.",
+                                              "data": {
+                                                "adminResponse": {
+                                                  "adminId": 1,
+                                                  "employeeNumber": "ADM001",
+                                                  "email": "admin@example.com",
+                                                  "fullName": "Admin User"
+                                                },
+                                                "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                                "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                                "role": "ROLE_ADMIN"
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Admin sign in failed",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "ADMIN SIGN IN FAILED.",
+                                              "data": null,
+                                              "error": "Invalid credentials or account blocked"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @PostMapping("/admin/signin")
-    public ResponseEntity<?> signInAdmin(@Valid @RequestBody SignInAdminRequest req) {
+    public ResponseEntity<?> signInAdmin(
+            @Parameter(
+                    description = "Admin login credentials (employee number and password)",
+                    required = true
+            )
+            @Valid @RequestBody SignInAdminRequest req) {
         try {
             Admin user = signInService.startSignInAdmin(req);
             if (user.getStatus() == AccountStatus.INACTIVE) {

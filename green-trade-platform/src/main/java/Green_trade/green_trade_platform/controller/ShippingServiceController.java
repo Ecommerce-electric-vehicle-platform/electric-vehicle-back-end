@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/shipping")
 @Slf4j
+@Tag(name = "Shipping Service", description = "APIs for shipping services including location data, fee calculation, and order tracking via GHN")
 public class ShippingServiceController {
 
     private final GhnServiceImpl ghnService;

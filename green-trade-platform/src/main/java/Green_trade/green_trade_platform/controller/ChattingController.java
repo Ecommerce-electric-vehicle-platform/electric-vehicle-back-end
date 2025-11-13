@@ -7,8 +7,16 @@ import Green_trade.green_trade_platform.model.*;
 import Green_trade.green_trade_platform.request.MessageRequest;
 import Green_trade.green_trade_platform.response.ConversationResponse;
 import Green_trade.green_trade_platform.response.MessageResponse;
+import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,6 +33,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/chatting")
 @AllArgsConstructor
+@Tag(name = "Chatting Management", description = "APIs for managing conversations and messages between buyers and sellers")
 public class ChattingController {
     private NotificationSocketController socketController;
     private final ConversationServiceImpl conversationService;
@@ -205,18 +214,62 @@ public class ChattingController {
     @Operation(
             summary = "Get list of messages in a conversation",
             description = """
-                    Retrieve all messages from a specific conversation.
-                    You can specify pagination parameters (page, size) 
-                    and must provide a valid conversationId.
+                    Retrieve all messages from a specific conversation with pagination support.
                     
-                    Example:
-                    GET /conversation-messages?conversationId=1&page=0&size=10
-                    """
+                    **Workflow:**
+                    1. System validates conversation exists
+                    2. Retrieves paginated messages from the conversation
+                    3. Returns messages sorted by creation date (newest first)
+                    
+                    **Query Parameters:**
+                    - `conversationId` (Long, required): ID of the conversation
+                    - `page` (int, optional): Page number (0-based), default: 0
+                    - `size` (int, optional): Number of items per page, default: 10
+                    
+                    **Response Includes:**
+                    - List of messages with content, sender, receiver, timestamps
+                    - Message type (TEXT or IMAGE)
+                    - Image URLs for image messages
+                    - Pagination metadata
+                    
+                    **Use Cases:**
+                    - Loading chat history in conversation view
+                    - Paginated message loading for performance
+                    - Viewing conversation messages
+                    
+                    **Security:**
+                    - Requires authentication (ROLE_BUYER or ROLE_SELLER)
+                    - Users can only view messages from their own conversations
+                    """,
+            tags = {"Chatting Management"},
+            security = @SecurityRequirement(name = "bearerAuth")
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Messages retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - Not authorized to view this conversation"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Conversation not found"
+            )
+    })
     @GetMapping("/conversation-messages")
     public ResponseEntity<?> getListMessage(
+            @Parameter(description = "Page number (0-based)", example = "0")
             @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page", example = "10")
             @RequestParam(name = "size", defaultValue = "10") int size,
+            @Parameter(description = "Conversation ID to get messages from", required = true, example = "1")
             @RequestParam(name = "conversationId", required = true) long id
     ) {
         try {

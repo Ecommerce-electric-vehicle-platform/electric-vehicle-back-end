@@ -7,6 +7,13 @@ import Green_trade.green_trade_platform.service.implement.AdminServiceImpl;
 import Green_trade.green_trade_platform.service.implement.BuyerServiceImpl;
 import Green_trade.green_trade_platform.service.implement.NotificationServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +25,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/notifications")
+@Tag(name = "Notification Management", description = "APIs for managing user notifications")
 public class NotificationController {
     private final NotificationServiceImpl notificationService;
     private final NotificationSocketController socketController;
@@ -43,8 +51,37 @@ public class NotificationController {
                         **Security Notes:**
                         - Requires authentication via JWT (either Buyer or Admin).
                         - Returns notifications specific to the authenticated user only.
-                    """
+                    """,
+            tags = {"Notification Management"},
+            security = @SecurityRequirement(name = "bearerAuth")
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Notifications retrieved successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = List.class),
+                            examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            [
+                                              {
+                                                "id": 1,
+                                                "title": "Order Confirmed",
+                                                "message": "Your order #123 has been confirmed",
+                                                "read": false,
+                                                "sendAt": "2024-01-15T10:00:00"
+                                              }
+                                            ]
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            )
+    })
     @GetMapping("")
     public ResponseEntity<List<Notification>> getAll() {
         Long receiverId = 0L;
@@ -85,10 +122,36 @@ public class NotificationController {
                         **Security Notes:**
                         - Requires JWT authentication (`ROLE_BUYER` or `ROLE_ADMIN`).
                         - A user can only mark their own notifications as read.
-                    """
+                    """,
+            tags = {"Notification Management"},
+            security = @SecurityRequirement(name = "bearerAuth")
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Notification marked as read successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - Not authorized to mark this notification"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Notification not found"
+            )
+    })
     @PutMapping("/{id}/read")
-    public ResponseEntity<Void> markAsRead(@PathVariable Long id) {
+    public ResponseEntity<Void> markAsRead(
+            @Parameter(
+                    description = "Notification ID to mark as read",
+                    required = true,
+                    example = "1"
+            )
+            @PathVariable Long id) {
         notificationService.markAsRead(id);
         return ResponseEntity.noContent().build();
     }
