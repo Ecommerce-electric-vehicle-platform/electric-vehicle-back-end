@@ -115,22 +115,16 @@ public class WalletServiceImpl implements WalletService {
             
             log.info(">>> [Wallet MoMo] Found wallet: {}", wallet.getWalletId());
             
-            // Chuyển đổi format để phù hợp với handleDepositIntoMoney
+            // MoMo gửi amount trực tiếp (không nhân với 100), nên sử dụng hàm riêng cho MoMo
             String amountStr = params.get("amount");
             if (amountStr == null || amountStr.trim().isEmpty()) {
                 log.error(">>> [Wallet MoMo] Missing amount in params");
                 throw new IllegalArgumentException("Missing amount from MoMo callback");
             }
             
-            Map<String, String> vnpayFormatParams = new HashMap<>();
-            vnpayFormatParams.put("vnp_TxnRef", orderId);
-            vnpayFormatParams.put("vnp_Amount", amountStr);
-            vnpayFormatParams.put("vnp_OrderInfo", orderInfo);
-            vnpayFormatParams.put("vnp_ResponseCode", params.getOrDefault("resultCode", "00"));
+            log.info(">>> [Wallet MoMo] Creating transaction with MoMo params: {}", params);
             
-            log.info(">>> [Wallet MoMo] Creating transaction with params: {}", vnpayFormatParams);
-            
-            WalletTransaction walletTransaction = walletTransactionService.handleDepositIntoMoney(wallet, vnpayFormatParams);
+            WalletTransaction walletTransaction = walletTransactionService.handleDepositIntoMoneyFromMoMo(wallet, params);
             wallet.setBalance(wallet.getBalance().add(walletTransaction.getAmount()));
             wallet = walletRepository.save(wallet);
             

@@ -11,6 +11,7 @@ import Green_trade.green_trade_platform.request.UpdateReviewRequest;
 import Green_trade.green_trade_platform.response.InvoiceResponse;
 import Green_trade.green_trade_platform.response.*;
 import Green_trade.green_trade_platform.service.implement.*;
+import Green_trade.green_trade_platform.util.DateUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -153,7 +155,7 @@ public class OrderController {
         log.info(">>> [OrderController] came cancelOrder");
         Order canceledOrder = orderService.cancelOrder(id, request);
         log.info(">>> [OrderController] cancelOrder pass");
-        systemWalletService.updateEscrowRecordStatus(canceledOrder.getSystemWallet(), SystemWalletStatus.REFUNDED);
+        systemWalletService.updateEscrowRecordStatus(canceledOrder.getSystemWallet(), SystemWalletStatus.IS_SOLVED);
         log.info(">>> [OrderController] update system wallet status successfully");
         ghnService.createCancelOrderShippingServiceResponseToDto(canceledOrder.getOrderCode(), canceledOrder.getPostProduct().getSeller().getGhnShopId());
         log.info(">>> [OrderController] cancel order ghn successfully");
@@ -291,6 +293,37 @@ public class OrderController {
                         null,
                         "You are not authorized to update this review. Only the buyer who created the review can update it."
                 ));
+            }
+
+            // Kiểm tra system wallet: nếu đã kết thúc (IS_SOLVED) thì không cho update review
+            Order order = existingReview.getOrder();
+            if (order.getSystemWallet() != null) {
+                SystemWallet systemWallet = order.getSystemWallet();
+                SystemWalletStatus status = systemWallet.getStatus();
+                
+                // Kiểm tra nếu system wallet đã kết thúc (IS_SOLVED)
+                if (status == SystemWalletStatus.IS_SOLVED) {
+                    return ResponseEntity.ok(responseMapper.toDto(
+                            false,
+                            "UPDATE REVIEW FAILED.",
+                            null,
+                            "Cannot update review. The system wallet for this order has already been completed."
+                    ));
+                }
+                
+                // Kiểm tra nếu endAt đã qua (tiền đã được giải phóng hoặc sắp được giải phóng)
+                if (systemWallet.getEndAt() != null) {
+                    LocalDateTime currentTime = DateUtils.getCurrentVietnamTime();
+                    if (systemWallet.getEndAt().isBefore(currentTime) || 
+                        systemWallet.getEndAt().isEqual(currentTime)) {
+                        return ResponseEntity.ok(responseMapper.toDto(
+                                false,
+                                "UPDATE REVIEW FAILED.",
+                                null,
+                                "Cannot update review. The system wallet for this order has already ended."
+                        ));
+                    }
+                }
             }
 
             Review updatedReview = reviewService.updateReview(reviewId, request, newImages);

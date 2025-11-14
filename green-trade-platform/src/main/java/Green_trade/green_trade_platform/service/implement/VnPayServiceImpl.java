@@ -69,9 +69,10 @@ public class VnPayServiceImpl implements VnPayService {
         log.info(">>> [VNPay] Using return URL: {}", returnUrl);
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
-        // Sử dụng timezone Etc/GMT+7 (tương đương UTC+7) như code mẫu VNPay
-        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+        // Sử dụng timezone Asia/Ho_Chi_Minh (UTC+7) - giờ Việt Nam
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        formatter.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         String vnp_CreateDate = formatter.format(cld.getTime());
         
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
