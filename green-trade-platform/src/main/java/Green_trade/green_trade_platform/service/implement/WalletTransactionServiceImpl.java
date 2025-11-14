@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 
 @Service
@@ -30,10 +31,12 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
         try {
             String amountTemp = params.get("vnp_Amount");
             long amount = Long.parseLong(amountTemp);
-            log.info(">>> Amount of transaction: {}", amount);
+            // VNPay gửi amount đã nhân với 100, nên cần chia lại cho 100
+            BigDecimal amountDecimal = BigDecimal.valueOf(amount).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            log.info(">>> Amount of transaction (VNPay): {}", amountDecimal);
             WalletTransaction walletTransaction = WalletTransaction.builder()
                     .type(TransactionType.DEPOSIT)
-                    .amount(BigDecimal.valueOf(amount))
+                    .amount(amountDecimal)
                     .balanceBefore(wallet.getBalance())
                     .status(TransactionStatus.SUCCESS)
                     .description("Deposit money into user's wallet.")
@@ -43,6 +46,29 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
             return walletTransactionRepository.save(walletTransaction);
         } catch (Exception e) {
             log.info(">>> Exception when deposit money into wallet: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public WalletTransaction handleDepositIntoMoneyFromMoMo(Wallet wallet, Map<String, String> params) {
+        try {
+            String amountTemp = params.get("amount");
+            long amount = Long.parseLong(amountTemp);
+            // MoMo gửi amount trực tiếp (không nhân với 100), nên không cần chia
+            BigDecimal amountDecimal = BigDecimal.valueOf(amount);
+            log.info(">>> Amount of transaction (MoMo): {}", amountDecimal);
+            WalletTransaction walletTransaction = WalletTransaction.builder()
+                    .type(TransactionType.DEPOSIT)
+                    .amount(amountDecimal)
+                    .balanceBefore(wallet.getBalance())
+                    .status(TransactionStatus.SUCCESS)
+                    .description("Deposit money into user's wallet from MoMo.")
+                    .externalTransactionReference(params.get("orderId"))
+                    .wallet(wallet)
+                    .build();
+            return walletTransactionRepository.save(walletTransaction);
+        } catch (Exception e) {
+            log.info(">>> Exception when deposit money into wallet from MoMo: {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }

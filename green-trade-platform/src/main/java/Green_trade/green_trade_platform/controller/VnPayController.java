@@ -24,7 +24,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import Green_trade.green_trade_platform.util.DateUtils;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -230,7 +231,7 @@ public class VnPayController {
     })
     @GetMapping("/return")
     public ResponseEntity<?> handleVnPayReturn(HttpServletRequest request) {
-        log.info(">>> [VNPay Return] New request received at {}", new Date());
+        log.info(">>> [VNPay Return] New request received at {}", DateUtils.getCurrentVietnamTime());
         log.info(">>> [VNPay param]: {}", request.toString());
         Map<String, Object> result = vnPayService.processReturn(request);
         if (result.get("response_code").equals("00")) {

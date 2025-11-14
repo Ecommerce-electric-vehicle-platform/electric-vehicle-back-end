@@ -14,7 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import Green_trade.green_trade_platform.util.DateUtils;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -116,7 +117,7 @@ public class MoMoController {
     @GetMapping("/return")
     public ResponseEntity<?> handleMoMoReturn(HttpServletRequest request) {
         try {
-            log.info(">>> [MoMo Return] New request received at {}", new Date());
+            log.info(">>> [MoMo Return] New request received at {}", DateUtils.getCurrentVietnamTime());
             
             // Log tất cả parameters từ MoMo để debug
             Map<String, String[]> paramMap = request.getParameterMap();
@@ -213,7 +214,7 @@ public class MoMoController {
     )
     @PostMapping("/ipn")
     public ResponseEntity<?> ipn(HttpServletRequest request) {
-        log.info(">>> [MoMo IPN] New IPN request received at {}", new Date());
+        log.info(">>> [MoMo IPN] New IPN request received at {}", DateUtils.getCurrentVietnamTime());
         Map<String, Object> result = moMoService.processReturn(request);
         
         // Lấy resultCode từ result
