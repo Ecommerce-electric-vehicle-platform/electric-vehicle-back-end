@@ -29,7 +29,7 @@ public class OrderAutoCompleteTask {
     private final SystemWalletServiceImpl systemWalletService;
     private final TransactionServiceImpl transactionService;
 
-    @Scheduled(cron = "0 */2 * * * ?") // Run every 2 minutes
+    @Scheduled(cron = "*/30 * * * * ?") // Run every 30 seconds
     @Transactional
     public void autoCompleteDeliveredOrders() {
         try {

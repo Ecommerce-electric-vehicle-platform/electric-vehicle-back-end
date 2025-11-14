@@ -850,6 +850,71 @@ public class AdminController {
     }
 
     @Operation(
+            summary = "Get all solved system wallets",
+            description = """
+                    Retrieves a paginated list of system wallets with IS_SOLVED status. 
+                    These are escrow records that have already been resolved (money transferred to seller or refunded to buyer).
+                    
+                    **Query Parameters:**
+                    - `page` (integer, optional): Page number (0-based index). Default: `0`
+                    - `size` (integer, optional): Number of records per page. Default: `10`
+                    
+                    **Response Structure:**
+                    - `data` (Page<SystemWalletResponse>): Paginated list containing:
+                      - `content` (array): Array of system wallet objects with:
+                        - `id` (Long): System wallet ID
+                        - `orderCode` (String): Associated order code
+                        - `balance` (BigDecimal): Amount that was held in escrow
+                        - `status` (SystemWalletStatus): Current status (IS_SOLVED)
+                        - `createdAt` (LocalDateTime): When escrow was created
+                        - `endAt` (LocalDateTime): When escrow was resolved
+                        - `buyerWalletId` (Long): Buyer's wallet ID
+                        - `sellerWalletId` (Long): Seller's wallet ID
+                      - `totalElements` (long): Total number of solved escrow records
+                      - `totalPages` (integer): Total number of pages
+                      - `number` (integer): Current page number (0-based)
+                      - `size` (integer): Page size
+                      - `numberOfElements` (integer): Number of elements in current page
+                    
+                    **Use Cases:**
+                    - Admin viewing historical escrow transactions
+                    - Reviewing completed money transfers
+                    - Audit trail for escrow resolution
+                    
+                    **Access Control:** Admin only (ROLE_ADMIN required).
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved solved system wallets",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied - Admin role required")
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/system-wallets/solved")
+    public ResponseEntity<?> getSolvedSystemWallets(
+            @Parameter(description = "Page number (0-based)", example = "0")
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(description = "Number of records per page", example = "10")
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            Page<SystemWallet> systemWallets = systemWalletService.getAllSolvedSystemWallets(page, size);
+            Page<SystemWalletResponse> responses = systemWallets.map(systemWalletMapper::toDto);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "Get all solved system wallets successfully.",
+                    responses, null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "Get all solved system wallets failed.",
+                    null, e.getMessage()
+            ));
+        }
+    }
+
+    @Operation(
             summary = "Update system wallet endAt",
             description = """
                     Updates the `endAt` time of a system wallet (escrow record). 

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class EscrowAutoResolveTask {
     private final WalletRepository walletRepository;
     private final WalletTransactionRepository walletTransactionRepository;
 
-    @Scheduled(cron = "0 */2 * * * ?") // Run every 2 minutes
+    @Scheduled(cron = "*/30 * * * * ?") // Run every 30 seconds
     @Transactional
     public void autoResolveEscrow() {
         try {
@@ -37,11 +38,34 @@ public class EscrowAutoResolveTask {
             LocalDateTime currentTime = DateUtils.getCurrentVietnamTime();
             log.info(">>> [EscrowAutoResolveTask] Current time: {}", currentTime);
 
+            // Lấy tất cả escrow records có status ESCROW_HOLD để debug
+            List<SystemWallet> allEscrowHold = systemWalletRepository.findAll().stream()
+                    .filter(sw -> sw.getStatus() == SystemWalletStatus.ESCROW_HOLD)
+                    .toList();
+            
+            log.info(">>> [EscrowAutoResolveTask] Found {} escrow records with ESCROW_HOLD status", allEscrowHold.size());
+            
+            // Log chi tiết từng record để debug
+            for (SystemWallet sw : allEscrowHold) {
+                log.info(">>> [EscrowAutoResolveTask] Escrow ID: {}, endAt: {}, orderId: {}, orderStatus: {}", 
+                        sw.getId(), 
+                        sw.getEndAt(), 
+                        sw.getOrder() != null ? sw.getOrder().getId() : "null",
+                        sw.getOrder() != null && sw.getOrder().getStatus() != null ? sw.getOrder().getStatus() : "null");
+                if (sw.getEndAt() != null) {
+                    boolean isPast = sw.getEndAt().isBefore(currentTime) || sw.getEndAt().isEqual(currentTime);
+                    Duration diff = Duration.between(currentTime, sw.getEndAt());
+                    log.info(">>> [EscrowAutoResolveTask]   -> endAt is {} (currentTime: {}, diff: {} seconds)", 
+                            isPast ? "PAST" : "FUTURE", 
+                            currentTime,
+                            diff.getSeconds());
+                }
+            }
+
             // Tìm tất cả escrow records có status ESCROW_HOLD và endAt đã qua
             // Lưu ý: endAt chỉ được set khi order được complete (status = COMPLETED)
             // Nếu endAt = null, nghĩa là order chưa complete, không nên auto release
-            List<SystemWallet> escrowRecords = systemWalletRepository.findAll().stream()
-                    .filter(sw -> sw.getStatus() == SystemWalletStatus.ESCROW_HOLD)
+            List<SystemWallet> escrowRecords = allEscrowHold.stream()
                     .filter(sw -> sw.getEndAt() != null &&
                             (sw.getEndAt().isBefore(currentTime) || sw.getEndAt().isEqual(currentTime)))
                     .toList();

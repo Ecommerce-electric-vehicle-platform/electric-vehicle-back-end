@@ -46,6 +46,7 @@ public class PostProductMapper {
                 .length(postProduct.getLength())
                 .weight(postProduct.getWeight())
                 .description(postProduct.description)
+                .isSold(postProduct.isSold())
                 .category(postProduct.getCategory().getName())
                 .build();
     }

@@ -257,6 +257,11 @@ public class SystemWalletServiceImpl {
         return systemWalletRepossitory.findAllByStatus(SystemWalletStatus.ESCROW_HOLD, pageable);
     }
 
+    public Page<SystemWallet> getAllSolvedSystemWallets(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        return systemWalletRepossitory.findAllByStatus(SystemWalletStatus.IS_SOLVED, pageable);
+    }
+
     /**
      * Cập nhật endAt của system wallet (chỉ admin mới được phép)
      *
