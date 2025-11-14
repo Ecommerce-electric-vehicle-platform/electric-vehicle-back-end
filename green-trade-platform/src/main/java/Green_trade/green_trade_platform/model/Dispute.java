@@ -51,6 +51,9 @@ public class Dispute {
     @Column(name = "description", nullable = true, unique = false)
     private String description;
 
+    @Column(name = "refund_percent", nullable = true, unique = false)
+    private Double refundPercent;
+
     @OneToMany(mappedBy = "dispute", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Evidence> evidences;

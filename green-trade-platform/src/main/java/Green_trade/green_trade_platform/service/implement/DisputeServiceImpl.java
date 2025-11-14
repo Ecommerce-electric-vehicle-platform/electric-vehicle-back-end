@@ -126,6 +126,8 @@ public class DisputeServiceImpl implements DisputeService {
             dispute.setResolutionType(ResolutionType.REFUND);
             dispute.setResolution(request.getResolution());
             dispute.setAdmin(admin);
+            // Lưu refundPercent vào dispute để sử dụng khi get dispute response
+            dispute.setRefundPercent(request.getRefundPercent());
             disputeRepository.save(dispute);
 
             notification = Notification.builder()
@@ -185,6 +187,24 @@ public class DisputeServiceImpl implements DisputeService {
                 .map(disputeMapper::toDto)
                 .toList();
 
+        return new PageImpl<>(responses, pageable, disputes.getTotalElements());
+    }
+
+    public Page<DisputeResponse> getResolvedDisputes(int page, int size) {
+        log.info(">>> [Dispute Service] Get resolved disputes: Started. page: {}, size: {}", page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        // Lấy disputes có status ACCEPTED hoặc REJECTED (đã được giải quyết)
+        List<DisputeStatus> resolvedStatuses = List.of(DisputeStatus.ACCEPTED, DisputeStatus.REJECTED);
+        Page<Dispute> disputes = disputeRepository.findAllByStatusIn(resolvedStatuses, pageable);
+        log.info(">>> [Dispute Service] Found {} resolved disputes", disputes.getTotalElements());
+
+        List<DisputeResponse> responses = disputes.getContent()
+                .stream()
+                .map(disputeMapper::toDto)
+                .toList();
+
+        log.info(">>> [Dispute Service] Get resolved disputes: Ended.");
         return new PageImpl<>(responses, pageable, disputes.getTotalElements());
     }
 

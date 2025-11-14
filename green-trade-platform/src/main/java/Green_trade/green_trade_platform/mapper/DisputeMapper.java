@@ -70,21 +70,18 @@ public class DisputeMapper {
                     if (refundTransaction.isPresent()) {
                         BigDecimal refundAmount = refundTransaction.get().getAmount();
 
-                        // Tính refund percent dựa trên system wallet balance ban đầu
-                        // Lưu ý: systemBalance hiện tại đã bị giảm sau khi refund
-                        // Balance ban đầu = systemBalance hiện tại + refundAmount (phần buyer) + phần seller
-                        // Nhưng vì không biết phần seller, ta tính dựa trên refundAmount và systemBalance
-                        // Giả sử systemBalance hiện tại là phần còn lại (phần seller), thì:
-                        // originalBalance = systemBalance + refundAmount
-                        Double refundPercent = null;
-                        if (refundAmount != null && refundAmount.compareTo(BigDecimal.ZERO) > 0) {
-                            // Tính original balance: systemBalance hiện tại + refundAmount
-                            // (vì systemBalance đã bị trừ refundAmount rồi)
-                            BigDecimal originalBalance = systemBalance.add(refundAmount);
-                            if (originalBalance.compareTo(BigDecimal.ZERO) > 0) {
+                        // Sử dụng refundPercent đã lưu trong dispute (nếu có)
+                        // Nếu không có, tính toán từ refundAmount và systemBalance
+                        Double refundPercent = dispute.getRefundPercent();
+                        
+                        if (refundPercent == null && refundAmount != null && refundAmount.compareTo(BigDecimal.ZERO) > 0) {
+                            // Fallback: Tính refundPercent từ refundAmount và systemBalance hiện tại
+                            // Giả sử systemBalance = originalBalance (vì không bị trừ sau refund)
+                            // refundPercent = (refundAmount / systemBalance) * 100
+                            if (systemBalance.compareTo(BigDecimal.ZERO) > 0) {
                                 refundPercent = refundAmount
                                         .multiply(BigDecimal.valueOf(100))
-                                        .divide(originalBalance, 2, RoundingMode.HALF_UP)
+                                        .divide(systemBalance, 2, RoundingMode.HALF_UP)
                                         .doubleValue();
                             }
                         }
