@@ -524,4 +524,95 @@ public class DisputeController {
                     e));
         }
     }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(
+            summary = "Get all resolved disputes",
+            description = """
+                    Retrieves a paginated list of all disputes that have been resolved (ACCEPTED or REJECTED).
+                    
+                    This endpoint returns disputes that have already been decided by an admin.
+                    The results are sorted by creation date (newest first) and paginated.
+                    
+                    **Query Parameters:**
+                    - `page` (integer, optional): Page number (0-based index). Default: `0`
+                    - `size` (integer, optional): Number of records per page. Default: `10`
+                    
+                    **Response Structure:**
+                    - `data` (object): Contains:
+                      - `disputes` (array): Array of resolved dispute objects
+                      - `currentPage` (integer): Current page number (0-based)
+                      - `totalElements` (long): Total number of resolved disputes
+                      - `totalPages` (integer): Total number of pages
+                      - `size` (integer): Page size
+                    
+                    **Dispute Object Includes:**
+                    - Dispute ID, status (ACCEPTED or REJECTED), creation date
+                    - Dispute category and description
+                    - Evidence and resolution details
+                    - Related order information
+                    - Refund information (if status is ACCEPTED)
+                    
+                    **Use Cases:**
+                    - Admin viewing historical disputes
+                    - Reviewing resolved dispute cases
+                    - Audit trail for dispute resolution
+                    - Statistics and reporting
+                    
+                    **Access Control:** Admin only (ROLE_ADMIN required).
+                    **Example:** GET /api/v1/dispute/resolved?page=0&size=10
+                    """,
+            tags = {"Dispute Management"},
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Resolved disputes retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - Admin role required"
+            )
+    })
+    @GetMapping("/resolved")
+    public ResponseEntity<?> getResolvedDisputes(
+            @Parameter(description = "Page number (0-based)", example = "0")
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(description = "Number of records per page", example = "10")
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        log.info(">>> [Dispute Controller] Get resolved disputes. page: {}, size: {}", page, size);
+        try {
+            Page<DisputeResponse> disputes = disputeService.getResolvedDisputes(page, size);
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("disputes", disputes.getContent());
+            data.put("currentPage", disputes.getNumber());
+            data.put("totalElements", disputes.getTotalElements());
+            data.put("totalPages", disputes.getTotalPages());
+            data.put("size", disputes.getSize());
+
+            log.info(">>> [Dispute Controller] Get resolved disputes successfully: {} disputes", disputes.getTotalElements());
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET RESOLVED DISPUTES SUCCESSFULLY.",
+                    data,
+                    null
+            ));
+        } catch (Exception e) {
+            log.error(">>> [Dispute Controller] Error getting resolved disputes: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET RESOLVED DISPUTES FAILED: " + e.getMessage(),
+                    null,
+                    e
+            ));
+        }
+    }
 }

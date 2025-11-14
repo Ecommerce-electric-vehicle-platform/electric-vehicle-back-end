@@ -24,4 +24,7 @@ public interface DisputeRepository extends JpaRepository<Dispute, Long> {
 
     // Tìm disputes có status PENDING cho một order
     List<Dispute> findByOrder_IdAndStatus(Long orderId, DisputeStatus status);
+
+    // Tìm disputes có status trong danh sách (để lấy resolved disputes: ACCEPTED hoặc REJECTED)
+    Page<Dispute> findAllByStatusIn(List<DisputeStatus> statuses, Pageable pageable);
 }
