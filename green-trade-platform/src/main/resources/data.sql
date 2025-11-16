@@ -240,6 +240,24 @@ VALUES ('ORDER_DELIVERED_TO_COMPLETED_SECONDS', '60',
         NOW(), NOW(), 1)
 ON DUPLICATE KEY UPDATE config_key = config_key;
 
+-- Cấu hình danh sách từ ngữ không phù hợp (bad words) cho filter feedback/review
+-- Format: JSON array string
+-- Admin có thể cập nhật qua API: PUT /api/v1/admin/system-config/badwords
+INSERT INTO system_config (config_key, config_value, description, created_at, updated_at, admin_id)
+VALUES ('BAD_WORDS', '["địt","dit","cặc","cac","lồn","lon","buồi","buoi","đụ","du","đm","dm","đéo","deo","đĩ","di","mẹ mày","me may","khốn","súc vật","thằng chó","thang cho","chết tiệt","chet tiet","đồ khốn","do khon","đồ ngốc","do ngoc","đồ ngu","do ngu","ngu si","ngu xuẩn","ngu xuan","đồ chó","do cho","thằng ngu","thang ngu","đồ khốn nạn","do khon nan","đồ chó má","do cho ma","đồ súc vật","do suc vat","thằng chó má","thang cho ma","đồ chết tiệt","do chet tiet","đồ khốn kiếp","do khon kiep","đồ điên","do dien","thằng điên","thang dien","đồ dại","do dai","thằng dại","thang dai","đồ ngu xuẩn","do ngu xuan","đồ chết","do chet","thằng chết","thang chet","đồ thối","do thoi","thằng thối","thang thoi","đồ hôi thối","do hoi thoi"]',
+        'Danh sách từ ngữ không phù hợp (bad words) để lọc feedback/review. Format: JSON array string. Admin có thể cập nhật qua API: PUT /api/v1/admin/system-config/badwords. Cache sẽ tự động refresh sau khi cập nhật.',
+        NOW(), NOW(), 1)
+ON DUPLICATE KEY UPDATE config_key = config_key;
+
+-- Cấu hình danh sách từ ngữ an toàn (whitelist) không bị filter
+-- Format: JSON array string
+-- Admin có thể cập nhật qua API: PUT /api/v1/admin/system-config/badwords/whitelist
+INSERT INTO system_config (config_key, config_value, description, created_at, updated_at, admin_id)
+VALUES ('BAD_WORDS_WHITELIST', '["điện","dây điện","ổ cắm","điện áp","sạc","pin","đèn","công tắc","bóng đèn","quạt","máy lạnh","máy giặt","lò vi sóng","ổ cắm điện","đèn điện","công tắc điện","dây dẫn điện","điện năng","điện lực","điện trở","điện thế","điện dung","điện cảm","điện trường","điện tích","điện cực","điện cực dương","điện cực âm","điện cực trung tính","điện cực nối đất","điện cực nối mát","sạc điện","sạc pin","sạc nhanh","sạc chậm","sạc đầy","sạc cạn","pin sạc","pin điện","pin lithium","pin axit chì","pin kiềm","pin carbon","pin lithium-ion","pin lithium-polymer","pin xe điện","sạc xe điện","xe điện","xe máy điện","bình điện","ắc quy","bình ắc quy","nạp điện","sạc pin xe điện","bộ sạc","cục sạc","đầu sạc","cáp sạc","dây sạc","ổ cắm sạc","trạm sạc","trạm sạc điện","động cơ điện","motor điện","động cơ","motor","bánh xe","lốp xe","yên xe","tay lái","phanh","phanh điện","đèn pha","đèn hậu","còi","chuông","khóa điện","chìa khóa","khóa thông minh","GPS","bluetooth","wifi","USB","app","ứng dụng","smartphone","điện thoại","màn hình","LCD","LED","màn hình LED","màn hình LCD","tốc độ","tốc độ tối đa","tốc độ tối thiểu","quãng đường","phạm vi","dung lượng pin","dung lượng bình","độ bền","tuổi thọ","bảo hành","bảo dưỡng","sửa chữa","thay thế","phụ tùng","linh kiện","phụ kiện","túi đựng","giỏ xe","yên sau","gương chiếu hậu","chắn bùn","chắn gió","áo mưa","nón bảo hiểm","mũ bảo hiểm"]',
+        'Danh sách từ ngữ an toàn (whitelist) không bị filter. Format: JSON array string. Admin có thể cập nhật qua API: PUT /api/v1/admin/system-config/badwords/whitelist. Cache sẽ tự động refresh sau khi cập nhật.',
+        NOW(), NOW(), 1)
+ON DUPLICATE KEY UPDATE config_key = config_key;
+
 -- =========================================================
 -- 👤 BUYER
 -- =========================================================
