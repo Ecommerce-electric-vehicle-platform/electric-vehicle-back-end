@@ -81,10 +81,6 @@ public class Admin {
     @JsonManagedReference
     private List<Seller> sellers;
 
-    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    private List<Announcement> announcements;
-
     @OneToMany(mappedBy = "admin")
     @ToString.Exclude
     private List<SystemWallet> systemWallets;

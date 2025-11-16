@@ -81,8 +81,6 @@ FROM invoice;
 DELETE FROM conversation;
 DELETE FROM message;
 DELETE FROM system_config;
-DROP
-EVENT IF EXISTS auto_resolve_escrow;
 
 ALTER TABLE message AUTO_INCREMENT = 1;
 ALTER TABLE conversation AUTO_INCREMENT = 1;
@@ -113,20 +111,6 @@ ALTER TABLE system_wallet AUTO_INCREMENT = 1;
 ALTER TABLE wallet_transaction AUTO_INCREMENT = 1;
 ALTER TABLE cancel_order_reason AUTO_INCREMENT = 1;
 ALTER TABLE system_config AUTO_INCREMENT = 1;
- 
- 
-CREATE
-EVENT IF NOT EXISTS auto_resolve_escrow
-ON SCHEDULE EVERY 1 DAY
-DO
-UPDATE wallet_system ws
-    JOIN wallet w
-ON ws.seller_wallet_id = w.wallet_id
-    SET
-        w.balance = w.balance + ws.balance, ws.status = 'IS_SOLVE'
-WHERE
-    ws.status = 'ESCROW_HOLD'
-  AND ws.created_at <= NOW() - INTERVAL 14 DAY;
 
 SET
 FOREIGN_KEY_CHECKS = 1;
