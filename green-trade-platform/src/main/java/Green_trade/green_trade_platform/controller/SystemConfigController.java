@@ -1,15 +1,18 @@
 package Green_trade.green_trade_platform.controller;
 
+import Green_trade.green_trade_platform.filter.BadWordFilter;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.mapper.SystemConfigMapper;
 import Green_trade.green_trade_platform.model.Admin;
 import Green_trade.green_trade_platform.model.SystemConfig;
+import Green_trade.green_trade_platform.request.BadWordConfigRequest;
 import Green_trade.green_trade_platform.request.UpdateSystemConfigRequest;
 import Green_trade.green_trade_platform.response.RestResponse;
 import Green_trade.green_trade_platform.response.SystemConfigResponse;
 import Green_trade.green_trade_platform.service.SystemConfigService;
 import Green_trade.green_trade_platform.service.implement.AdminServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SystemConfigServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/admin/system-config")
@@ -37,6 +40,8 @@ public class SystemConfigController {
     private final ResponseMapper responseMapper;
     private final AdminServiceImpl adminService;
     private final SystemConfigMapper configMapper;
+    private final BadWordFilter badWordFilter;
+    private final ObjectMapper objectMapper;
 
     @Operation(
             summary = "Get system config by key",
@@ -221,6 +226,344 @@ public class SystemConfigController {
                     "Failed to update config: " + e.getMessage(),
                     null,
                     e));
+        }
+    }
+
+    @Operation(
+            summary = "Get bad words list",
+            description = """
+                    Retrieves the current list of bad words configured in the system.
+                    Only super admins can access this endpoint.
+                    
+                    **Response:**
+                    - Returns the list of bad words as a JSON array
+                    
+                    **Use Cases:**
+                    - Viewing current bad words configuration
+                    - Admin dashboard for content filtering management
+                    """,
+            tags = {"System Config", "Bad Words"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Bad words list retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied - Super admin required"
+            )
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/badwords")
+    public ResponseEntity<?> getBadWords() {
+        try {
+            Admin admin = adminService.getCurrentUser();
+            if (!admin.isSuperAdmin()) {
+                throw new IllegalArgumentException("Only super admin can access this resource.");
+            }
+
+            List<String> badWords = badWordFilter.getBadWords();
+            Map<String, Object> data = new HashMap<>();
+            data.put("badWords", badWords);
+            data.put("count", badWords.size());
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "Bad words list retrieved successfully.",
+                    data,
+                    null
+            ));
+        } catch (Exception e) {
+            log.error(">>> [SystemConfigController] Failed to get bad words: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "Failed to retrieve bad words: " + e.getMessage(),
+                    null,
+                    e
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Update bad words list",
+            description = """
+                    Updates the list of bad words in the system. This will replace the existing list.
+                    Only super admins can update this configuration.
+                    The bad word filter cache will be automatically refreshed after update.
+                    
+                    **Request Body:**
+                    - `badWords` (List<String>, required): New list of bad words to configure
+                    
+                    **Response:**
+                    - Returns the updated bad words list
+                    
+                    **Use Cases:**
+                    - Adding new bad words to filter
+                    - Removing bad words from filter
+                    - Updating the entire bad words list
+                    """,
+            tags = {"System Config", "Bad Words"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Bad words list updated successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Invalid request data"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied - Super admin required"
+            )
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/badwords")
+    public ResponseEntity<?> updateBadWords(
+            @Parameter(description = "Bad words configuration request", required = true)
+            @Valid @RequestBody BadWordConfigRequest request) {
+        try {
+            Admin admin = adminService.getCurrentUser();
+            if (!admin.isSuperAdmin()) {
+                throw new IllegalArgumentException("Only super admin can access this resource.");
+            }
+
+            // Convert list to JSON string
+            String jsonValue = objectMapper.writeValueAsString(request.getBadWords());
+
+            // Update config
+            SystemConfig updatedConfig = systemConfigService.updateConfig(
+                    "BAD_WORDS",
+                    jsonValue,
+                    admin.getId()
+            );
+
+            // Refresh cache
+            badWordFilter.refreshBadWords();
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("badWords", request.getBadWords());
+            data.put("count", request.getBadWords().size());
+
+            log.info(">>> [SystemConfigController] Bad words updated by admin {}: {} words", admin.getId(), request.getBadWords().size());
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "Bad words list updated successfully. Cache refreshed.",
+                    data,
+                    null
+            ));
+        } catch (Exception e) {
+            log.error(">>> [SystemConfigController] Failed to update bad words: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "Failed to update bad words: " + e.getMessage(),
+                    null,
+                    e
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Get whitelist words",
+            description = """
+                    Retrieves the current list of whitelist words (safe words that should not be filtered).
+                    Only super admins can access this endpoint.
+                    
+                    **Response:**
+                    - Returns the list of whitelist words as a JSON array
+                    
+                    **Use Cases:**
+                    - Viewing current whitelist configuration
+                    - Admin dashboard for content filtering management
+                    """,
+            tags = {"System Config", "Bad Words"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Whitelist words retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied - Super admin required"
+            )
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/badwords/whitelist")
+    public ResponseEntity<?> getWhitelist() {
+        try {
+            Admin admin = adminService.getCurrentUser();
+            if (!admin.isSuperAdmin()) {
+                throw new IllegalArgumentException("Only super admin can access this resource.");
+            }
+
+            Set<String> whitelist = badWordFilter.getWhitelist();
+            Map<String, Object> data = new HashMap<>();
+            data.put("whitelist", new ArrayList<>(whitelist));
+            data.put("count", whitelist.size());
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "Whitelist words retrieved successfully.",
+                    data,
+                    null
+            ));
+        } catch (Exception e) {
+            log.error(">>> [SystemConfigController] Failed to get whitelist: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "Failed to retrieve whitelist: " + e.getMessage(),
+                    null,
+                    e
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Update whitelist words",
+            description = """
+                    Updates the list of whitelist words (safe words that should not be filtered).
+                    Only super admins can update this configuration.
+                    The bad word filter cache will be automatically refreshed after update.
+                    
+                    **Request Body:**
+                    - `badWords` (List<String>, required): New list of whitelist words to configure
+                    
+                    **Response:**
+                    - Returns the updated whitelist words
+                    
+                    **Use Cases:**
+                    - Adding new safe words to whitelist
+                    - Removing words from whitelist
+                    - Updating the entire whitelist
+                    """,
+            tags = {"System Config", "Bad Words"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Whitelist words updated successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request - Invalid request data"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied - Super admin required"
+            )
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/badwords/whitelist")
+    public ResponseEntity<?> updateWhitelist(
+            @Parameter(description = "Whitelist words configuration request", required = true)
+            @Valid @RequestBody BadWordConfigRequest request) {
+        try {
+            Admin admin = adminService.getCurrentUser();
+            if (!admin.isSuperAdmin()) {
+                throw new IllegalArgumentException("Only super admin can access this resource.");
+            }
+
+            // Convert list to JSON string
+            String jsonValue = objectMapper.writeValueAsString(request.getBadWords());
+
+            // Update config
+            SystemConfig updatedConfig = systemConfigService.updateConfig(
+                    "BAD_WORDS_WHITELIST",
+                    jsonValue,
+                    admin.getId()
+            );
+
+            // Refresh cache
+            badWordFilter.refreshWhitelist();
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("whitelist", request.getBadWords());
+            data.put("count", request.getBadWords().size());
+
+            log.info(">>> [SystemConfigController] Whitelist updated by admin {}: {} words", admin.getId(), request.getBadWords().size());
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "Whitelist words updated successfully. Cache refreshed.",
+                    data,
+                    null
+            ));
+        } catch (Exception e) {
+            log.error(">>> [SystemConfigController] Failed to update whitelist: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "Failed to update whitelist: " + e.getMessage(),
+                    null,
+                    e
+            ));
+        }
+    }
+
+    @Operation(
+            summary = "Refresh bad words cache",
+            description = """
+                    Manually refreshes the bad words and whitelist cache from the database.
+                    Only super admins can trigger this operation.
+                    
+                    **Use Cases:**
+                    - Forcing cache refresh after manual database changes
+                    - Troubleshooting cache issues
+                    - Ensuring latest configuration is loaded
+                    """,
+            tags = {"System Config", "Bad Words"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Cache refreshed successfully",
+                    content = @Content(schema = @Schema(implementation = RestResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied - Super admin required"
+            )
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/badwords/refresh")
+    public ResponseEntity<?> refreshBadWordsCache() {
+        try {
+            Admin admin = adminService.getCurrentUser();
+            if (!admin.isSuperAdmin()) {
+                throw new IllegalArgumentException("Only super admin can access this resource.");
+            }
+
+            // Refresh both caches
+            badWordFilter.refreshBadWords();
+            badWordFilter.refreshWhitelist();
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("badWordsCount", badWordFilter.getBadWords().size());
+            data.put("whitelistCount", badWordFilter.getWhitelist().size());
+
+            log.info(">>> [SystemConfigController] Bad words cache refreshed by admin {}", admin.getId());
+
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "Bad words cache refreshed successfully.",
+                    data,
+                    null
+            ));
+        } catch (Exception e) {
+            log.error(">>> [SystemConfigController] Failed to refresh cache: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "Failed to refresh cache: " + e.getMessage(),
+                    null,
+                    e
+            ));
         }
     }
 }

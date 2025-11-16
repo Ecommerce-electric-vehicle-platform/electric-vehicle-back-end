@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,9 @@ public class BuyerController {
     private final WishListMapper wishListMapper;
     private final WishListingServiceImpl wishListingService;
     private final InvoiceServiceImpl invoiceService;
+    private final FollowingServiceImpl followingService;
+    private final FollowingMapper followingMapper;
+    private final SellerMapper sellerMapper;
 
     public BuyerController(
             BuyerServiceImpl buyerService,
@@ -87,7 +91,10 @@ public class BuyerController {
             WalletServiceImpl walletService,
             WishListMapper wishListMapper,
             WishListingServiceImpl wishListingService,
-            InvoiceServiceImpl invoiceService) {
+            InvoiceServiceImpl invoiceService,
+            FollowingServiceImpl followingService,
+            FollowingMapper followingMapper,
+            SellerMapper sellerMapper) {
         this.buyerService = buyerService;
         this.responseMapper = responseMapper;
         this.buyerMapper = buyerMapper;
@@ -108,6 +115,9 @@ public class BuyerController {
         this.wishListMapper = wishListMapper;
         this.wishListingService = wishListingService;
         this.invoiceService = invoiceService;
+        this.followingService = followingService;
+        this.followingMapper = followingMapper;
+        this.sellerMapper = sellerMapper;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
@@ -1754,5 +1764,235 @@ public class BuyerController {
                 "GET TOTAL BUYERS SUCCESSFULLY.",
                 total, null
         ));
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
+    @Operation(
+            summary = "Follow a seller",
+            description = """
+                    Allows a buyer to follow a seller to receive updates on their products and store.
+                    
+                    **Path Parameters:**
+                    - `sellerId` (Long, required): Unique identifier of the seller to follow
+                    
+                    **Response:**
+                    - Returns following information with seller details and follow date
+                    
+                    **Use Cases:**
+                    - Buyer wants to stay updated with a seller's new products
+                    - Building a favorite sellers list
+                    - Creating personalized shopping experience
+                    
+                    **Validation:**
+                    - Buyer cannot follow themselves (if buyer is also a seller)
+                    - If already following, returns error
+                    - If previously unfollowed, will re-follow
+                    
+                    **Access Control:** Buyer role required (ROLE_BUYER).
+                    **Example:** POST /api/v1/buyer/follow/123
+                    """,
+            tags = {"Buyer Following Management"}
+    )
+    @PostMapping("/follow/{sellerId}")
+    public ResponseEntity<?> followSeller(
+            @Parameter(description = "Seller ID to follow", required = true, example = "1")
+            @PathVariable Long sellerId
+    ) {
+        try {
+            log.info(">>> [Buyer Controller] Follow seller: sellerId: {}", sellerId);
+            Buyer buyer = buyerService.getCurrentUser();
+            
+            Following following = followingService.followSeller(buyer, sellerId);
+            FollowingResponse response = followingMapper.toDto(following);
+            
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "FOLLOW SELLER SUCCESSFULLY.",
+                    response,
+                    null
+            ));
+        } catch (Exception e) {
+            log.error(">>> [Buyer Controller] Follow seller failed: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "FOLLOW SELLER FAILED: " + e.getMessage(),
+                    null,
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
+    @Operation(
+            summary = "Unfollow a seller",
+            description = """
+                    Allows a buyer to unfollow a seller they previously followed.
+                    
+                    **Path Parameters:**
+                    - `sellerId` (Long, required): Unique identifier of the seller to unfollow
+                    
+                    **Response:**
+                    - Returns success message
+                    
+                    **Use Cases:**
+                    - Buyer no longer wants updates from a seller
+                    - Managing followed sellers list
+                    
+                    **Access Control:** Buyer role required (ROLE_BUYER).
+                    **Example:** DELETE /api/v1/buyer/follow/123
+                    """,
+            tags = {"Buyer Following Management"}
+    )
+    @DeleteMapping("/follow/{sellerId}")
+    public ResponseEntity<?> unfollowSeller(
+            @Parameter(description = "Seller ID to unfollow", required = true, example = "1")
+            @PathVariable Long sellerId
+    ) {
+        try {
+            log.info(">>> [Buyer Controller] Unfollow seller: sellerId: {}", sellerId);
+            Buyer buyer = buyerService.getCurrentUser();
+            
+            followingService.unfollowSeller(buyer, sellerId);
+            
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "UNFOLLOW SELLER SUCCESSFULLY.",
+                    null,
+                    null
+            ));
+        } catch (Exception e) {
+            log.error(">>> [Buyer Controller] Unfollow seller failed: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "UNFOLLOW SELLER FAILED: " + e.getMessage(),
+                    null,
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
+    @Operation(
+            summary = "Get list of followed sellers",
+            description = """
+                    Retrieves a paginated list of all sellers that the authenticated buyer is currently following.
+                    
+                    **Query Parameters:**
+                    - `page` (integer, optional): Page number (0-based index). Default: `0`
+                    - `size` (integer, optional): Number of records per page. Default: `10`
+                    
+                    **Response Structure:**
+                    - `data` (object): Contains:
+                      - `followings` (array): Array of following objects with seller information
+                      - `currentPage` (integer): Current page number (0-based)
+                      - `totalElements` (long): Total number of followed sellers
+                      - `totalPages` (integer): Total number of pages
+                      - `size` (integer): Page size
+                    
+                    **Following Object Includes:**
+                    - Seller ID and seller details (store name, status, etc.)
+                    - Follow date (when buyer started following)
+                    - Is following status (always true for active followings)
+                    
+                    **Use Cases:**
+                    - Buyer viewing their followed sellers list
+                    - Seller discovery based on followed sellers
+                    - Managing favorite sellers
+                    
+                    **Access Control:** Buyer role required (ROLE_BUYER).
+                    **Example:** GET /api/v1/buyer/following?page=0&size=10
+                    """,
+            tags = {"Buyer Following Management"}
+    )
+    @GetMapping("/following")
+    public ResponseEntity<?> getFollowings(
+            @Parameter(description = "Page number (0-based)", example = "0")
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(description = "Number of records per page", example = "10")
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            log.info(">>> [Buyer Controller] Get followings. page: {}, size: {}", page, size);
+            Buyer buyer = buyerService.getCurrentUser();
+            
+            Page<Following> followings = followingService.getFollowingsByBuyer(buyer, page, size);
+            Page<FollowingResponse> responses = followings.map(followingMapper::toDto);
+            
+            Map<String, Object> data = new HashMap<>();
+            data.put("followings", responses.getContent());
+            data.put("currentPage", responses.getNumber());
+            data.put("totalElements", responses.getTotalElements());
+            data.put("totalPages", responses.getTotalPages());
+            data.put("size", responses.getSize());
+            
+            log.info(">>> [Buyer Controller] Get followings successfully: {} followings", responses.getTotalElements());
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET FOLLOWINGS SUCCESSFULLY.",
+                    data,
+                    null
+            ));
+        } catch (Exception e) {
+            log.error(">>> [Buyer Controller] Get followings failed: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET FOLLOWINGS FAILED: " + e.getMessage(),
+                    null,
+                    e.getMessage()
+            ));
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
+    @Operation(
+            summary = "Check if buyer is following a seller",
+            description = """
+                    Checks whether the authenticated buyer is currently following a specific seller.
+                    
+                    **Path Parameters:**
+                    - `sellerId` (Long, required): Unique identifier of the seller to check
+                    
+                    **Response:**
+                    - Returns boolean value (true if following, false otherwise)
+                    
+                    **Use Cases:**
+                    - Display follow/unfollow button state
+                    - Check follow status before showing seller updates
+                    
+                    **Access Control:** Buyer or Seller role required.
+                    **Example:** GET /api/v1/buyer/follow/123/status
+                    """,
+            tags = {"Buyer Following Management"}
+    )
+    @GetMapping("/follow/{sellerId}/status")
+    public ResponseEntity<?> checkFollowingStatus(
+            @Parameter(description = "Seller ID to check", required = true, example = "1")
+            @PathVariable Long sellerId
+    ) {
+        try {
+            log.info(">>> [Buyer Controller] Check following status: sellerId: {}", sellerId);
+            Buyer buyer = buyerService.getCurrentUser();
+            
+            boolean isFollowing = followingService.isFollowing(buyer, sellerId);
+            
+            Map<String, Object> data = new HashMap<>();
+            data.put("isFollowing", isFollowing);
+            data.put("sellerId", sellerId);
+            
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "CHECK FOLLOWING STATUS SUCCESSFULLY.",
+                    data,
+                    null
+            ));
+        } catch (Exception e) {
+            log.error(">>> [Buyer Controller] Check following status failed: {}", e.getMessage());
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "CHECK FOLLOWING STATUS FAILED: " + e.getMessage(),
+                    null,
+                    e.getMessage()
+            ));
+        }
     }
 }
