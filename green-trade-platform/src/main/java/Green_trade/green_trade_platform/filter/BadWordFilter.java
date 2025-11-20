@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
+
 import java.text.Normalizer;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -93,7 +94,8 @@ public class BadWordFilter {
             if (json == null || json.trim().isEmpty()) {
                 return null;
             }
-            return objectMapper.readValue(json, new TypeReference<List<String>>() {});
+            return objectMapper.readValue(json, new TypeReference<List<String>>() {
+            });
         } catch (Exception e) {
             log.error(">>> [BadWordFilter] Error parsing JSON list: {}", json, e);
             return null;

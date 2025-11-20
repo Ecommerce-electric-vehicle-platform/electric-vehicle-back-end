@@ -34,26 +34,26 @@ public class FollowingServiceImpl {
     @Transactional
     public Following followSeller(Buyer buyer, Long sellerId) {
         log.info(">>> [Following Service] Follow seller: buyerId: {}, sellerId: {}", buyer.getBuyerId(), sellerId);
-        
+
         Seller seller = sellerRepository.findById(sellerId)
                 .orElseThrow(() -> new IllegalArgumentException("Seller not found with id: " + sellerId));
-        
+
         // Kiểm tra xem buyer có phải là chính seller này không
         if (buyer.getBuyerId().equals(seller.getBuyer().getBuyerId())) {
             throw new IllegalArgumentException("Cannot follow yourself");
         }
-        
+
         // Tìm following record (nếu có)
         FollowingId followingId = FollowingId.builder()
                 .buyerId(buyer.getBuyerId())
                 .sellerId(sellerId)
                 .build();
-        
+
         Optional<Following> existingFollowing = followingRepository.findById(followingId);
-        
+
         Following following;
         LocalDateTime currentTime = DateUtils.getCurrentVietnamTime();
-        
+
         if (existingFollowing.isPresent()) {
             // Nếu đã có record, check xem đã unfollow chưa
             following = existingFollowing.get();
@@ -78,7 +78,7 @@ public class FollowingServiceImpl {
                     .build();
             log.info(">>> [Following Service] New follow: buyerId: {}, sellerId: {}", buyer.getBuyerId(), sellerId);
         }
-        
+
         return followingRepository.save(following);
     }
 
@@ -89,13 +89,13 @@ public class FollowingServiceImpl {
     @Transactional
     public void unfollowSeller(Buyer buyer, Long sellerId) {
         log.info(">>> [Following Service] Unfollow seller: buyerId: {}, sellerId: {}", buyer.getBuyerId(), sellerId);
-        
+
         Following following = followingRepository.findActiveFollowing(buyer.getBuyerId(), sellerId)
                 .orElseThrow(() -> new IllegalArgumentException("Not following this seller"));
-        
+
         following.setUnfollowedAt(DateUtils.getCurrentVietnamTime());
         followingRepository.save(following);
-        
+
         log.info(">>> [Following Service] Unfollowed seller successfully: buyerId: {}, sellerId: {}", buyer.getBuyerId(), sellerId);
     }
 

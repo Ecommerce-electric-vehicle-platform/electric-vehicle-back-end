@@ -300,7 +300,7 @@ public class OrderController {
             if (order.getSystemWallet() != null) {
                 SystemWallet systemWallet = order.getSystemWallet();
                 SystemWalletStatus status = systemWallet.getStatus();
-                
+
                 // Kiểm tra nếu system wallet đã kết thúc (IS_SOLVED)
                 if (status == SystemWalletStatus.IS_SOLVED) {
                     return ResponseEntity.ok(responseMapper.toDto(
@@ -310,12 +310,12 @@ public class OrderController {
                             "Cannot update review. The system wallet for this order has already been completed."
                     ));
                 }
-                
+
                 // Kiểm tra nếu endAt đã qua (tiền đã được giải phóng hoặc sắp được giải phóng)
                 if (systemWallet.getEndAt() != null) {
                     LocalDateTime currentTime = DateUtils.getCurrentVietnamTime();
-                    if (systemWallet.getEndAt().isBefore(currentTime) || 
-                        systemWallet.getEndAt().isEqual(currentTime)) {
+                    if (systemWallet.getEndAt().isBefore(currentTime) ||
+                            systemWallet.getEndAt().isEqual(currentTime)) {
                         return ResponseEntity.ok(responseMapper.toDto(
                                 false,
                                 "UPDATE REVIEW FAILED.",
