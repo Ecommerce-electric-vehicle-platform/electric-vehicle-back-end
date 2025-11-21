@@ -39,6 +39,6 @@ public class PostProductResponse {
     private String description;
     private boolean isSold;
     private List<ProductImageResponse> images;
-    private String category;
+    private int categoryId;
     // width height length weight description
 }
