@@ -29,7 +29,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/ai")
-@Tag(name = "AI Content Suggestion", description = "Endpoints for AI-assisted content creation workflows.")
+@Tag(name = "AI Service Controller", description = "Endpoints for AI Service workflows.")
 public class AIServiceController {
 
     private final GeminiServiceImpl geminiService;
