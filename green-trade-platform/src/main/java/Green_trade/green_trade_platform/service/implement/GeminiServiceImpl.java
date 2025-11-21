@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.service.implement;
 
 import Green_trade.green_trade_platform.exception.CategoryNotFound;
+import Green_trade.green_trade_platform.exception.ThirdPartyAIException;
 import Green_trade.green_trade_platform.repository.CategoryRepository;
 import Green_trade.green_trade_platform.request.UploadPostContentAISupportRequest;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -98,7 +99,7 @@ public class GeminiServiceImpl {
 
         } catch (Exception e) {
             log.error(">>> [Gemini] Lỗi khi gọi Gemini API: {}", e.getMessage(), e);
-            return "";
+            throw new ThirdPartyAIException("Không thể kết nối với dịch vụ AI bên thứ ba.", e);
         }
     }
 
@@ -174,7 +175,7 @@ public class GeminiServiceImpl {
 
             if (!candidates.isArray() || candidates.size() == 0) {
                 log.warn(">>> [Gemini] Không tìm thấy candidates trong response");
-                return "";
+                throw new ThirdPartyAIException("Dịch vụ AI trả về phản hồi không hợp lệ (missing candidates).");
             }
 
             JsonNode content = candidates.get(0).path("content");
@@ -182,7 +183,7 @@ public class GeminiServiceImpl {
 
             if (!parts.isArray() || parts.size() == 0) {
                 log.warn(">>> [Gemini] Không tìm thấy parts trong content");
-                return "";
+                throw new ThirdPartyAIException("Dịch vụ AI trả về phản hồi không hợp lệ (missing parts).");
             }
 
             String text = parts.get(0).path("text").asText("");
@@ -191,7 +192,7 @@ public class GeminiServiceImpl {
 
         } catch (Exception e) {
             log.error(">>> [Gemini] Lỗi khi parse JSON response: {}", e.getMessage(), e);
-            return "";
+            throw new ThirdPartyAIException("Không thể xử lý phản hồi từ dịch vụ AI bên thứ ba.", e);
         }
     }
 
