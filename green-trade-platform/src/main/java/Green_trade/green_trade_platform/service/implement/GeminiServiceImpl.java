@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.exception.CategoryNotFound;
 import Green_trade.green_trade_platform.repository.CategoryRepository;
 import Green_trade.green_trade_platform.request.UploadPostContentAISupportRequest;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -46,10 +47,9 @@ public class GeminiServiceImpl {
         // ====== Tạo parts: trước là ảnh, cuối cùng là text prompt ======
         List<Map<String, Object>> parts = new ArrayList<>();
 
-        // Thêm ảnh (nên giới hạn 1-3 tấm cho nhẹ, Gemini vẫn hiểu đủ)
+        // Thêm ảnh
         if (files != null) {
-            int limit = Math.min(files.size(), 3); // ví dụ: chỉ lấy tối đa 3 ảnh
-            for (int i = 0; i < limit; i++) {
+            for (int i = 0; i < files.size(); i++) {
                 MultipartFile file = files.get(i);
                 try {
                     String base64 = Base64.getEncoder().encodeToString(file.getBytes());
@@ -107,7 +107,7 @@ public class GeminiServiceImpl {
      */
     private String buildPrompt(UploadPostContentAISupportRequest request) throws Exception {
         String categoryName = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new Exception("Category not found")).getName();
+                .orElseThrow(() -> new CategoryNotFound()).getName();
 
         return """
                 Bạn là trợ lý viết nội dung cho sàn thương mại điện tử chuyên xe điện, pin và thiết bị đã qua sử dụng.
@@ -128,7 +128,6 @@ public class GeminiServiceImpl {
                 - Cao (cm): %s
                 - Nặng (gram): %s
                 
-                Địa điểm giao dịch: %s
                 Phân loại: %s
                 
                 Viết nội dung theo đúng FORMAT cố định sau (không được thay đổi):
@@ -160,7 +159,6 @@ public class GeminiServiceImpl {
                         n(request.getWidth()),
                         n(request.getHeight()),
                         n(request.getWeight()),
-                        n(request.getLocationTrading()),
                         n(categoryName)
                 );
     }

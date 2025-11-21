@@ -23,7 +23,7 @@ public class AIServiceController {
         this.responseMapper = responseMapper;
     }
 
-    @PostMapping("/content-upload-post")
+    @PostMapping("/content-upload-post-description")
     public ResponseEntity<RestResponse<?, ?>> suggestContentUploadPostDescription(
             @ModelAttribute UploadPostContentAISupportRequest request,
             @RequestPart("pictures") List<MultipartFile> files
