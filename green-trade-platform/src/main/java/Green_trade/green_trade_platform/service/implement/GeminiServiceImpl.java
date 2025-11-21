@@ -107,7 +107,8 @@ public class GeminiServiceImpl {
      * Prompt dùng các field của UploadPostContentAISupportRequest
      */
     private String buildPrompt(UploadPostContentAISupportRequest request) throws Exception {
-        String categoryName = categoryRepository.findById(request.getCategoryId())
+        Long categoryId = request.getCategoryId();
+        String categoryName = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CategoryNotFound()).getName();
 
         return """

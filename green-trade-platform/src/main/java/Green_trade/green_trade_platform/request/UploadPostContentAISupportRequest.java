@@ -21,7 +21,6 @@ public class UploadPostContentAISupportRequest {
     private String model;
     private Long manufactureYear;
     private String usedDuration;
-    private String rejectedReason;
     private String conditionLevel;
     private BigDecimal price;
     private String length;
