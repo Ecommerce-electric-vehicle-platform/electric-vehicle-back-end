@@ -1,7 +1,7 @@
 -- =========================================================
--- 🚀 RESET DATABASE DỮ LIỆU DEMO
+-- RESET DATABASE DỮ LIỆU DEMO
 -- =========================================================
--- ⚠️ CẢNH BÁO: FILE NÀY SẼ XÓA TẤT CẢ DỮ LIỆU HIỆN CÓ!
+-- CẢNH BÁO: FILE NÀY SẼ XÓA TẤT CẢ DỮ LIỆU HIỆN CÓ!
 -- 
 -- File này hiện KHÔNG được chạy tự động (spring.sql.init.mode=never)
 -- Chỉ chạy file này khi:

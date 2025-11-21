@@ -62,8 +62,8 @@ public class VnPayServiceImpl implements VnPayService {
         vnp_Params.put("vnp_OrderType", Optional.ofNullable(req.getParameter("ordertype")).orElse("other"));
         vnp_Params.put("vnp_Locale", Optional.ofNullable(req.getParameter("language")).orElse("vn"));
         // Sử dụng return URL từ application.properties, nếu không có thì dùng default từ VnPayConfig
-        String returnUrl = vnpReturnUrl != null && !vnpReturnUrl.isEmpty() 
-                ? vnpReturnUrl 
+        String returnUrl = vnpReturnUrl != null && !vnpReturnUrl.isEmpty()
+                ? vnpReturnUrl
                 : VnPayConfig.vnp_ReturnUrl;
         vnp_Params.put("vnp_ReturnUrl", returnUrl);
         log.info(">>> [VNPay] Using return URL: {}", returnUrl);
@@ -74,9 +74,9 @@ public class VnPayServiceImpl implements VnPayService {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         formatter.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         String vnp_CreateDate = formatter.format(cld.getTime());
-        
+
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
-        
+
         // Cộng thêm 15 phút để tính expire
         cld.add(Calendar.MINUTE, 15);
         String vnp_ExpireDate = formatter.format(cld.getTime());
@@ -99,12 +99,12 @@ public class VnPayServiceImpl implements VnPayService {
                     hashData.append(fieldName);
                     hashData.append('=');
                     hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-                    
+
                     // Build query: encode với US_ASCII (theo code mẫu VNPay)
                     query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
                     query.append('=');
                     query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-                    
+
                     if (itr.hasNext()) {
                         query.append('&');
                         hashData.append('&');
@@ -119,12 +119,12 @@ public class VnPayServiceImpl implements VnPayService {
         String queryUrl = query.toString();
         String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.vnp_HashSecret, hashData.toString());
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
-        
+
         String paymentUrl = VnPayConfig.vnp_Url + "?" + queryUrl;
-        
+
         log.info(">>> [VNPay] Hash data (for hash calculation): {}", hashData.toString());
         log.info(">>> [VNPay] Secure hash: {}", vnp_SecureHash);
-        
+
         log.info(">>> [VNPay] Payment URL created successfully");
         log.info(">>> [VNPay] Return URL: {}", returnUrl);
         log.info(">>> [VNPay] Payment URL length: {}", paymentUrl.length());

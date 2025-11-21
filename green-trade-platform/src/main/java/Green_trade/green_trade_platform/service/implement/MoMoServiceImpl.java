@@ -57,7 +57,7 @@ public class MoMoServiceImpl implements MoMoService {
             String orderId = System.currentTimeMillis() + "";
             String orderInfo = buyer.getBuyerId() + " : " + buyer.getUsername() + " nạp tiền vào ví.";
             String extraData = "";
-            
+
             // MoMo yêu cầu amount là số nguyên (không có decimal)
             long amountLong = amount;
 
@@ -122,13 +122,13 @@ public class MoMoServiceImpl implements MoMoService {
             JsonObject jsonResponse = JsonParser.parseString(response.getBody()).getAsJsonObject();
 
             // Kiểm tra kết quả
-            int resultCode = jsonResponse.has("resultCode") 
-                ? jsonResponse.get("resultCode").getAsInt() 
-                : -1;
-            
-            String message = jsonResponse.has("message") 
-                ? jsonResponse.get("message").getAsString() 
-                : "Unknown error";
+            int resultCode = jsonResponse.has("resultCode")
+                    ? jsonResponse.get("resultCode").getAsInt()
+                    : -1;
+
+            String message = jsonResponse.has("message")
+                    ? jsonResponse.get("message").getAsString()
+                    : "Unknown error";
 
             Map<String, Object> result = new HashMap<>();
             result.put("requestId", requestId);
@@ -136,9 +136,9 @@ public class MoMoServiceImpl implements MoMoService {
 
             if (resultCode == 0) {
                 // Thành công
-                String payUrl = jsonResponse.has("payUrl") 
-                    ? jsonResponse.get("payUrl").getAsString() 
-                    : "";
+                String payUrl = jsonResponse.has("payUrl")
+                        ? jsonResponse.get("payUrl").getAsString()
+                        : "";
                 if (payUrl == null || payUrl.trim().isEmpty()) {
                     throw new Exception("MoMo API returned success but no payUrl");
                 }

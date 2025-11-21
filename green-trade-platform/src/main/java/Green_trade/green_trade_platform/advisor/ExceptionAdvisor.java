@@ -1,5 +1,6 @@
 package Green_trade.green_trade_platform.advisor;
 
+import Green_trade.green_trade_platform.exception.ThirdPartyAIException;
 import Green_trade.green_trade_platform.mapper.ResponseMapper;
 import Green_trade.green_trade_platform.response.RestResponse;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,22 @@ public class ExceptionAdvisor {
 
     public ExceptionAdvisor(ResponseMapper responseMapper) {
         this.responseMapper = responseMapper;
+    }
+
+    @ExceptionHandler(ThirdPartyAIException.class)
+    public ResponseEntity<RestResponse<Object, Map<String, String>>> handleThirdPartyAIException(
+            ThirdPartyAIException exception
+    ) {
+        RestResponse response = responseMapper.toDto(
+                false,
+                "Dịch vụ AI bên thứ ba đang gặp sự cố, vui lòng thử lại sau.",
+                null,
+                Map.of(
+                        "origin", "AI_THIRD_PARTY_SERVICE",
+                        "message", exception.getMessage()
+                )
+        );
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(response);
     }
 
     @ExceptionHandler(Exception.class)

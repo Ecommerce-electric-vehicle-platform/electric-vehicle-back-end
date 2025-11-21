@@ -73,7 +73,7 @@ public class DisputeMapper {
                         // Sử dụng refundPercent đã lưu trong dispute (nếu có)
                         // Nếu không có, tính toán từ refundAmount và systemBalance
                         Double refundPercent = dispute.getRefundPercent();
-                        
+
                         if (refundPercent == null && refundAmount != null && refundAmount.compareTo(BigDecimal.ZERO) > 0) {
                             // Fallback: Tính refundPercent từ refundAmount và systemBalance hiện tại
                             // Giả sử systemBalance = originalBalance (vì không bị trừ sau refund)

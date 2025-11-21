@@ -14,7 +14,7 @@ import java.util.*;
 
 @Component
 public class VnPayConfig {
-//    public static String vnp_TmnCode = "KSEJI2S0";
+    //    public static String vnp_TmnCode = "KSEJI2S0";
 //    public static String vnp_HashSecret = "TJ57O52COT9VEXTFD8VY5E7V57833KOG";
     public static String vnp_TmnCode = "VM0D23TI";
     public static String vnp_HashSecret = "RE61PN4WNZIY3MZLGA3FWK4092LGLX87";

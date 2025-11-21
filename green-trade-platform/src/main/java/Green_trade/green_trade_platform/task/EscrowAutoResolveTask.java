@@ -42,21 +42,21 @@ public class EscrowAutoResolveTask {
             List<SystemWallet> allEscrowHold = systemWalletRepository.findAll().stream()
                     .filter(sw -> sw.getStatus() == SystemWalletStatus.ESCROW_HOLD)
                     .toList();
-            
+
             log.info(">>> [EscrowAutoResolveTask] Found {} escrow records with ESCROW_HOLD status", allEscrowHold.size());
-            
+
             // Log chi tiết từng record để debug
             for (SystemWallet sw : allEscrowHold) {
-                log.info(">>> [EscrowAutoResolveTask] Escrow ID: {}, endAt: {}, orderId: {}, orderStatus: {}", 
-                        sw.getId(), 
-                        sw.getEndAt(), 
+                log.info(">>> [EscrowAutoResolveTask] Escrow ID: {}, endAt: {}, orderId: {}, orderStatus: {}",
+                        sw.getId(),
+                        sw.getEndAt(),
                         sw.getOrder() != null ? sw.getOrder().getId() : "null",
                         sw.getOrder() != null && sw.getOrder().getStatus() != null ? sw.getOrder().getStatus() : "null");
                 if (sw.getEndAt() != null) {
                     boolean isPast = sw.getEndAt().isBefore(currentTime) || sw.getEndAt().isEqual(currentTime);
                     Duration diff = Duration.between(currentTime, sw.getEndAt());
-                    log.info(">>> [EscrowAutoResolveTask]   -> endAt is {} (currentTime: {}, diff: {} seconds)", 
-                            isPast ? "PAST" : "FUTURE", 
+                    log.info(">>> [EscrowAutoResolveTask]   -> endAt is {} (currentTime: {}, diff: {} seconds)",
+                            isPast ? "PAST" : "FUTURE",
                             currentTime,
                             diff.getSeconds());
                 }

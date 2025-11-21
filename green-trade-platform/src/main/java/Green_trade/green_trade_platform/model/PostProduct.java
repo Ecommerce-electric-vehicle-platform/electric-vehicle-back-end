@@ -62,7 +62,7 @@ public class PostProduct {
     @Column(name = "weight", nullable = true, unique = false)
     private String weight;
 
-    @Column(name = "description", nullable = false, unique = false)
+    @Column(name = "description", columnDefinition = "TEXT", nullable = false, unique = false)
     public String description;
 
     @Column(name = "location_trading", nullable = false, unique = false)

@@ -1801,10 +1801,10 @@ public class BuyerController {
         try {
             log.info(">>> [Buyer Controller] Follow seller: sellerId: {}", sellerId);
             Buyer buyer = buyerService.getCurrentUser();
-            
+
             Following following = followingService.followSeller(buyer, sellerId);
             FollowingResponse response = followingMapper.toDto(following);
-            
+
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "FOLLOW SELLER SUCCESSFULLY.",
@@ -1851,9 +1851,9 @@ public class BuyerController {
         try {
             log.info(">>> [Buyer Controller] Unfollow seller: sellerId: {}", sellerId);
             Buyer buyer = buyerService.getCurrentUser();
-            
+
             followingService.unfollowSeller(buyer, sellerId);
-            
+
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "UNFOLLOW SELLER SUCCESSFULLY.",
@@ -1914,17 +1914,17 @@ public class BuyerController {
         try {
             log.info(">>> [Buyer Controller] Get followings. page: {}, size: {}", page, size);
             Buyer buyer = buyerService.getCurrentUser();
-            
+
             Page<Following> followings = followingService.getFollowingsByBuyer(buyer, page, size);
             Page<FollowingResponse> responses = followings.map(followingMapper::toDto);
-            
+
             Map<String, Object> data = new HashMap<>();
             data.put("followings", responses.getContent());
             data.put("currentPage", responses.getNumber());
             data.put("totalElements", responses.getTotalElements());
             data.put("totalPages", responses.getTotalPages());
             data.put("size", responses.getSize());
-            
+
             log.info(">>> [Buyer Controller] Get followings successfully: {} followings", responses.getTotalElements());
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
@@ -1972,13 +1972,13 @@ public class BuyerController {
         try {
             log.info(">>> [Buyer Controller] Check following status: sellerId: {}", sellerId);
             Buyer buyer = buyerService.getCurrentUser();
-            
+
             boolean isFollowing = followingService.isFollowing(buyer, sellerId);
-            
+
             Map<String, Object> data = new HashMap<>();
             data.put("isFollowing", isFollowing);
             data.put("sellerId", sellerId);
-            
+
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
                     "CHECK FOLLOWING STATUS SUCCESSFULLY.",
