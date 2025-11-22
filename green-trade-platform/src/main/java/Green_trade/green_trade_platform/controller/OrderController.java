@@ -406,13 +406,17 @@ public class OrderController {
         BuyerResponse buyerResponse = buyerMapper.toDto(foundOrder.getBuyer());
 
 
-        Map<String, Object> responseData = Map.of(
-                "order", orderResponse,
-                "product", productResponse,
-                "buyer", buyerResponse,
-                "payment", paymentResponse,
-                "shippingPartner", shippingPartnerResponse
-        );
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("order", orderResponse);
+        responseData.put("product", productResponse);
+        responseData.put("buyer", buyerResponse);
+        responseData.put("payment", paymentResponse);
+        responseData.put("shippingPartner", shippingPartnerResponse);
+        
+        // Add invoice API if order has invoice
+        if (foundOrder.getInvoice() != null) {
+            responseData.put("invoiceApi", "/api/v1/order/" + orderId + "/invoice");
+        }
 
         RestResponse<Map<String, Object>, Object> response = responseMapper.toDto(
                 true,
