@@ -17,9 +17,13 @@ import Green_trade.green_trade_platform.response.*;
 import Green_trade.green_trade_platform.model.Review;
 import Green_trade.green_trade_platform.service.ReviewService;
 import Green_trade.green_trade_platform.service.implement.OrderServiceImpl;
+import Green_trade.green_trade_platform.mapper.FollowingMapper;
+import Green_trade.green_trade_platform.service.implement.FollowingServiceImpl;
 import Green_trade.green_trade_platform.service.implement.PostProductServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SellerServiceImpl;
 import Green_trade.green_trade_platform.service.implement.SubscriptionPackageServiceImpl;
+import Green_trade.green_trade_platform.model.Following;
+import Green_trade.green_trade_platform.response.FollowerResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -40,6 +44,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,6 +65,8 @@ public class SellerController {
     private final SubscriptionPackageServiceImpl subscriptionPackageService;
     private final ReviewService reviewService;
     private final ReviewMapper reviewMapper;
+    private final FollowingServiceImpl followingService;
+    private final FollowingMapper followingMapper;
 
     @PreAuthorize("hasRole('ROLE_SELLER')")
     @Operation(
@@ -280,6 +287,78 @@ public class SellerController {
                 "GET POST PRODUCT BY SELLER SUCCESSFULLY.",
                 responsePage, null
         ));
+    }
+
+    @Operation(
+            summary = "Get list of buyers following the authenticated seller",
+            description = """
+                    This endpoint retrieves a paginated list of all buyers who are currently following the authenticated seller.
+                    
+                    The API identifies the seller based on the authentication token (JWT or session context) included in the request header.
+                    It returns a list of buyers (followers) who have followed this seller.
+                    
+                    **Usage notes:**
+                    - Only users with a **Seller** role can access this endpoint.
+                    - Each returned follower contains buyer information such as buyer ID, username, full name, avatar, email, and follow date.
+                    - Supports pagination with page and size parameters.
+                    - Results are sorted by follow date in descending order (newest first).
+                    
+                    **Query Parameters:**
+                    - `page` (integer, optional): Page number (0-based index). Default: `0`
+                    - `size` (integer, optional): Number of records per page. Default: `10`
+                    
+                    **Response Structure:**
+                    - `followers` (array): Array of follower objects with buyer information
+                    - `currentPage` (integer): Current page number (0-based)
+                    - `totalElements` (long): Total number of followers
+                    - `totalPages` (integer): Total number of pages
+                    - `size` (integer): Page size
+                    
+                    **Authentication:** Required (Bearer Token)
+                    """,
+            tags = {"Seller Management"}
+    )
+    @GetMapping("/followers")
+    @PreAuthorize("hasRole('ROLE_SELLER')")
+    public ResponseEntity<?> getFollowers(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        try {
+            log.info(">>> [Seller Controller] Get followers - page: {}, size: {}", page, size);
+            
+            Seller seller = sellerService.getCurrentUser();
+            log.info(">>> [Seller Controller] Seller: {} (ID: {})", seller.getSellerName(), seller.getSellerId());
+            
+            Page<Following> followings = followingService.getFollowersBySeller(seller.getSellerId(), page, size);
+            Page<FollowerResponse> followersPage = followings.map(followingMapper::toFollowerDto);
+            
+            Map<String, Object> data = new HashMap<>();
+            data.put("followers", followersPage.getContent());
+            data.put("currentPage", followersPage.getNumber());
+            data.put("totalElements", followersPage.getTotalElements());
+            data.put("totalPages", followersPage.getTotalPages());
+            data.put("size", followersPage.getSize());
+            data.put("hasNext", followersPage.hasNext());
+            data.put("hasPrevious", followersPage.hasPrevious());
+            
+            log.info(">>> [Seller Controller] Get followers successfully: {} followers found", followersPage.getTotalElements());
+            
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET FOLLOWERS SUCCESSFULLY.",
+                    data,
+                    null
+            ));
+        } catch (Exception e) {
+            log.error(">>> [Seller Controller] Get followers failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(responseMapper.toDto(
+                    false,
+                    "GET FOLLOWERS FAILED: " + e.getMessage(),
+                    null,
+                    e.getMessage()
+            ));
+        }
     }
 
     @Operation(

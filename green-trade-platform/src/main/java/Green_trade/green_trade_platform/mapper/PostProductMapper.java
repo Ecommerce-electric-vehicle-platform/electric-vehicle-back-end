@@ -22,6 +22,10 @@ public class PostProductMapper {
                 .map(this::toImageResponse)
                 .toList()
                 : Collections.emptyList();
+        
+        // isSolved is based on isSold field
+        boolean isSolved = postProduct.isSold();
+        
         // width height length weight description
         return PostProductResponse.builder()
                 .postId(postProduct.getId())
