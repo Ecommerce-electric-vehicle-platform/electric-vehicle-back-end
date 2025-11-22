@@ -1,7 +1,6 @@
 package Green_trade.green_trade_platform.repository;
 
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
-import Green_trade.green_trade_platform.model.Category;
 import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.model.Seller;
 import io.lettuce.core.dynamic.annotation.Param;
