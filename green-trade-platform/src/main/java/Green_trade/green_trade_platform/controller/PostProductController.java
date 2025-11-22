@@ -518,4 +518,134 @@ public class PostProductController {
             ));
         }
     }
+
+    @Operation(
+            summary = "Get products by category name with pagination",
+            description = """
+                    Filter and retrieve products based on category name with pagination support.
+                    
+                    ## Workflow:
+                    1. Client provides category name and pagination parameters
+                    2. System queries database for products matching the category name
+                    3. Returns paginated results of active and not sold products
+                    
+                    ## Query Parameters:
+                    - **name**: Category name to filter by (case-insensitive, partial match)
+                    - **page**: Page number (0-based), default: 0
+                    - **size**: Items per page, default: 10
+                    
+                    ## Filter Criteria:
+                    - Products must match the category name (case-insensitive, contains match)
+                    - Products must be active (isActive = true)
+                    - Products must not be sold (isSold = false)
+                    - Results are sorted by creation date (newest first)
+                    
+                    ## Example Requests:
+                    - Get all "Xe điện" products: `/api/v1/post-product/category?name=Xe điện&page=0&size=10`
+                    - Get all "Pin điện" products: `/api/v1/post-product/category?name=Pin điện&page=0&size=20`
+                    - Partial match: `/api/v1/post-product/category?name=xe&page=0&size=10`
+                    
+                    ## Security:
+                    - Public endpoint - No authentication required
+                    """,
+            tags = {"Product Filtering"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Products retrieved successfully",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Success Response",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "message": "GET PRODUCTS BY CATEGORY SUCCESSFULLY.",
+                                              "data": {
+                                                "content": [
+                                                  {
+                                                    "postId": 1,
+                                                    "title": "Yamaha Exciter 155",
+                                                    "brand": "Yamaha",
+                                                    "categoryId": 1,
+                                                    "price": 45000000,
+                                                    "isSold": false,
+                                                    "isActive": true
+                                                  }
+                                                ],
+                                                "pageable": {
+                                                  "pageNumber": 0,
+                                                  "pageSize": 10
+                                                },
+                                                "totalElements": 25,
+                                                "totalPages": 3,
+                                                "last": false,
+                                                "first": true
+                                              },
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "No products found or error occurred",
+                    content = @Content(
+                            schema = @Schema(implementation = RestResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Error Response",
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "message": "GET PRODUCTS BY CATEGORY FAILED.",
+                                              "data": null,
+                                              "error": "Error message here"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
+    @GetMapping("/category")
+    public ResponseEntity<?> getProductsByCategory(
+            @Parameter(
+                    description = "Category name to filter by (case-insensitive, partial match)",
+                    example = "Xe điện, Pin điện"
+            )
+            @RequestParam(name = "name", required = true) String categoryName,
+            @Parameter(
+                    description = "Page number (0-based)",
+                    example = "0"
+            )
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(
+                    description = "Number of items per page",
+                    example = "30"
+            )
+            @RequestParam(name = "size", defaultValue = "30") int size
+    ) {
+        try {
+            log.info(">>> [PostProductController] getProductsByCategory - categoryName: {}, page: {}, size: {}", categoryName, page, size);
+            
+            Page<PostProduct> products = postProductService.getProductsByCategoryName(categoryName, page, size);
+            Page<PostProductResponse> response = products.map(postProductMapper::toDto);
+            
+            return ResponseEntity.ok(responseMapper.toDto(
+                    true,
+                    "GET PRODUCTS BY CATEGORY SUCCESSFULLY.",
+                    response,
+                    null
+            ));
+        } catch (Exception e) {
+            log.error(">>> [PostProductController] getProductsByCategory failed: {}", e.getMessage(), e);
+            return ResponseEntity.ok(responseMapper.toDto(
+                    false,
+                    "GET PRODUCTS BY CATEGORY FAILED.",
+                    null,
+                    e.getMessage()
+            ));
+        }
+    }
 }

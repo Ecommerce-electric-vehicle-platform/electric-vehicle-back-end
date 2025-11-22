@@ -421,6 +421,18 @@ public class PostProductServiceImpl implements PostProductService {
         return result;
     }
 
+    /**
+     * Get products by category name with pagination
+     * Returns only active and not sold products
+     */
+    public Page<PostProduct> getProductsByCategoryName(String categoryName, int page, int size) {
+        log.info(">>> [PostProductServiceImpl] getProductsByCategoryName - categoryName: {}, page: {}, size: {}", categoryName, page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<PostProduct> result = postProductRepository.findByCategory_NameContainingIgnoreCaseAndSoldFalseAndActiveTrue(categoryName, pageable);
+        log.info(">>> [PostProductServiceImpl] getProductsByCategoryName - result: {} products found", result.getTotalElements());
+        return result;
+    }
+
     public long getTotalNewPostInMonth(LocalDateTime startDate, LocalDateTime endDate) {
         log.info(">>> [PostProductServiceImpl] getTotalNewPostInMonth - startDate: {}, endDate: {}", startDate, endDate);
         long result = postProductRepository.countNewPostsInMonth(startDate, endDate);

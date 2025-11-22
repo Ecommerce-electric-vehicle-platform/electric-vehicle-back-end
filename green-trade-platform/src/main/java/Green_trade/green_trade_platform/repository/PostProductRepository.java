@@ -1,6 +1,7 @@
 package Green_trade.green_trade_platform.repository;
 
 import Green_trade.green_trade_platform.enumerate.VerifiedDecisionStatus;
+import Green_trade.green_trade_platform.model.Category;
 import Green_trade.green_trade_platform.model.PostProduct;
 import Green_trade.green_trade_platform.model.Seller;
 import io.lettuce.core.dynamic.annotation.Param;
@@ -33,6 +34,9 @@ public interface PostProductRepository extends JpaRepository<PostProduct, Long> 
     Page<PostProduct> findByConditionLevelContainingIgnoreCase(String conditionLevel, Pageable pageable);
 
     Page<PostProduct> findByLocationTradingContainingIgnoreCase(String locationTrading, Pageable pageable);
+
+    // Filter by category name, not sold, and active
+    Page<PostProduct> findByCategory_NameContainingIgnoreCaseAndSoldFalseAndActiveTrue(String categoryName, Pageable pageable);
 
     @Query("""
                 SELECT COUNT(p)
