@@ -26,6 +26,7 @@ public class ReviewMapper {
 
     public ReviewResponse toDto(Review review) {
         return ReviewResponse.builder()
+                .reviewId(review.getId())
                 .orderId(review.getOrder() != null ? review.getOrder().getId() : null)
                 .orderResponse(review.getOrder() != null ? orderMapper.toDto(review.getOrder()) : null)
                 .feedback(review.getFeedback())

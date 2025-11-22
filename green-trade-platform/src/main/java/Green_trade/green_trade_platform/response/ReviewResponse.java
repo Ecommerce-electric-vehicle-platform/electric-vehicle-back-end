@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewResponse {
+    private Long reviewId;
     private Long orderId;
     private OrderResponse orderResponse;
     private double rating;
