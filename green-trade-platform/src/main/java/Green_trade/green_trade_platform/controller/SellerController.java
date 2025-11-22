@@ -290,29 +290,20 @@ public class SellerController {
     }
 
     @Operation(
-            summary = "Get list of buyers following the authenticated seller",
+            summary = "Get total number of followers for the authenticated seller",
             description = """
-                    This endpoint retrieves a paginated list of all buyers who are currently following the authenticated seller.
+                    This endpoint returns the total count of buyers who are currently following the authenticated seller.
                     
                     The API identifies the seller based on the authentication token (JWT or session context) included in the request header.
-                    It returns a list of buyers (followers) who have followed this seller.
+                    It returns a simple integer representing the total number of active followers.
                     
                     **Usage notes:**
                     - Only users with a **Seller** role can access this endpoint.
-                    - Each returned follower contains buyer information such as buyer ID, username, full name, avatar, email, and follow date.
-                    - Supports pagination with page and size parameters.
-                    - Results are sorted by follow date in descending order (newest first).
+                    - Returns the count of active followers only (excludes unfollowed buyers).
+                    - Response is a simple integer value.
                     
-                    **Query Parameters:**
-                    - `page` (integer, optional): Page number (0-based index). Default: `0`
-                    - `size` (integer, optional): Number of records per page. Default: `10`
-                    
-                    **Response Structure:**
-                    - `followers` (array): Array of follower objects with buyer information
-                    - `currentPage` (integer): Current page number (0-based)
-                    - `totalElements` (long): Total number of followers
-                    - `totalPages` (integer): Total number of pages
-                    - `size` (integer): Page size
+                    **Response:**
+                    - Returns an integer representing the total number of followers
                     
                     **Authentication:** Required (Bearer Token)
                     """,
@@ -320,41 +311,28 @@ public class SellerController {
     )
     @GetMapping("/followers")
     @PreAuthorize("hasRole('ROLE_SELLER')")
-    public ResponseEntity<?> getFollowers(
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size
-    ) {
+    public ResponseEntity<?> getFollowersCount() {
         try {
-            log.info(">>> [Seller Controller] Get followers - page: {}, size: {}", page, size);
+            log.info(">>> [Seller Controller] Get followers count");
             
             Seller seller = sellerService.getCurrentUser();
             log.info(">>> [Seller Controller] Seller: {} (ID: {})", seller.getSellerName(), seller.getSellerId());
             
-            Page<Following> followings = followingService.getFollowersBySeller(seller.getSellerId(), page, size);
-            Page<FollowerResponse> followersPage = followings.map(followingMapper::toFollowerDto);
+            Long followersCount = followingService.countFollowersBySeller(seller.getSellerId());
             
-            Map<String, Object> data = new HashMap<>();
-            data.put("followers", followersPage.getContent());
-            data.put("currentPage", followersPage.getNumber());
-            data.put("totalElements", followersPage.getTotalElements());
-            data.put("totalPages", followersPage.getTotalPages());
-            data.put("size", followersPage.getSize());
-            data.put("hasNext", followersPage.hasNext());
-            data.put("hasPrevious", followersPage.hasPrevious());
-            
-            log.info(">>> [Seller Controller] Get followers successfully: {} followers found", followersPage.getTotalElements());
+            log.info(">>> [Seller Controller] Get followers count successfully: {} followers", followersCount);
             
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
-                    "GET FOLLOWERS SUCCESSFULLY.",
-                    data,
+                    "GET FOLLOWERS COUNT SUCCESSFULLY.",
+                    followersCount.intValue(), // Trả về số nguyên
                     null
             ));
         } catch (Exception e) {
-            log.error(">>> [Seller Controller] Get followers failed: {}", e.getMessage(), e);
+            log.error(">>> [Seller Controller] Get followers count failed: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(responseMapper.toDto(
                     false,
-                    "GET FOLLOWERS FAILED: " + e.getMessage(),
+                    "GET FOLLOWERS COUNT FAILED: " + e.getMessage(),
                     null,
                     e.getMessage()
             ));
