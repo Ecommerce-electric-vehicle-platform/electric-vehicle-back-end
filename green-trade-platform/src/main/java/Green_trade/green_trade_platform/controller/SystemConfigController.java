@@ -342,9 +342,6 @@ public class SystemConfigController {
                     admin.getId()
             );
 
-            // Refresh cache
-            badWordFilter.refreshBadWords();
-
             Map<String, Object> data = new HashMap<>();
             data.put("badWords", request.getBadWords());
             data.put("count", request.getBadWords().size());
@@ -353,7 +350,7 @@ public class SystemConfigController {
 
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
-                    "Bad words list updated successfully. Cache refreshed.",
+                    "Bad words list updated successfully.",
                     data,
                     null
             ));
@@ -481,9 +478,6 @@ public class SystemConfigController {
                     admin.getId()
             );
 
-            // Refresh cache
-            badWordFilter.refreshWhitelist();
-
             Map<String, Object> data = new HashMap<>();
             data.put("whitelist", request.getBadWords());
             data.put("count", request.getBadWords().size());
@@ -492,7 +486,7 @@ public class SystemConfigController {
 
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
-                    "Whitelist words updated successfully. Cache refreshed.",
+                    "Whitelist words updated successfully.",
                     data,
                     null
             ));
@@ -507,64 +501,5 @@ public class SystemConfigController {
         }
     }
 
-    @Operation(
-            summary = "Refresh bad words cache",
-            description = """
-                    Manually refreshes the bad words and whitelist cache from the database.
-                    Only super admins can trigger this operation.
-                    
-                    **Use Cases:**
-                    - Forcing cache refresh after manual database changes
-                    - Troubleshooting cache issues
-                    - Ensuring latest configuration is loaded
-                    """,
-            tags = {"System Config", "Bad Words"}
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Cache refreshed successfully",
-                    content = @Content(schema = @Schema(implementation = RestResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "Access denied - Super admin required"
-            )
-    })
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping("/badwords/refresh")
-    public ResponseEntity<?> refreshBadWordsCache() {
-        try {
-            Admin admin = adminService.getCurrentUser();
-            if (!admin.isSuperAdmin()) {
-                throw new IllegalArgumentException("Only super admin can access this resource.");
-            }
-
-            // Refresh both caches
-            badWordFilter.refreshBadWords();
-            badWordFilter.refreshWhitelist();
-
-            Map<String, Object> data = new HashMap<>();
-            data.put("badWordsCount", badWordFilter.getBadWords().size());
-            data.put("whitelistCount", badWordFilter.getWhitelist().size());
-
-            log.info(">>> [SystemConfigController] Bad words cache refreshed by admin {}", admin.getId());
-
-            return ResponseEntity.ok(responseMapper.toDto(
-                    true,
-                    "Bad words cache refreshed successfully.",
-                    data,
-                    null
-            ));
-        } catch (Exception e) {
-            log.error(">>> [SystemConfigController] Failed to refresh cache: {}", e.getMessage());
-            return ResponseEntity.ok(responseMapper.toDto(
-                    false,
-                    "Failed to refresh cache: " + e.getMessage(),
-                    null,
-                    e
-            ));
-        }
-    }
 }
 

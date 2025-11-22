@@ -14,6 +14,12 @@ import java.time.LocalDateTime;
 public class ConversationResponse {
     private Long id;
     private Long buyerId;
+    private String buyerName;
+    private String buyerAvatar;
+    private Long sellerId;
+    private String sellerName;
+    private String sellerStoreName;
+    private String sellerAvatar;
     private Long postId;
     private LocalDateTime createdAt;
 }

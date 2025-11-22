@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class ConversationMapper {
+
     public Conversation toEntity(Buyer buyer, PostProduct postProduct) {
         return Conversation.builder()
                 .buyer(buyer)
@@ -19,10 +20,20 @@ public class ConversationMapper {
     }
 
     public ConversationResponse toDto(Conversation conversation) {
+        Buyer buyer = conversation.getBuyer();
+        PostProduct postProduct = conversation.getPostProduct();
+        Buyer sellerBuyer = postProduct.getSeller() != null ? postProduct.getSeller().getBuyer() : null;
+
         return ConversationResponse.builder()
                 .id(conversation.getId())
-                .buyerId(conversation.getBuyer().getBuyerId())
-                .postId(conversation.getPostProduct().getId())
+                .buyerId(buyer.getBuyerId())
+                .buyerName(buyer.getFullName() != null ? buyer.getFullName() : buyer.getUsername())
+                .buyerAvatar(buyer.getAvatarUrl())
+                .sellerId(postProduct.getSeller() != null ? postProduct.getSeller().getSellerId() : null)
+                .sellerName(postProduct.getSeller() != null ? postProduct.getSeller().getSellerName() : null)
+                .sellerStoreName(postProduct.getSeller() != null ? postProduct.getSeller().getStoreName() : null)
+                .sellerAvatar(sellerBuyer != null ? sellerBuyer.getAvatarUrl() : null)
+                .postId(postProduct.getId())
                 .createdAt(conversation.getCreatedAt())
                 .build();
     }
