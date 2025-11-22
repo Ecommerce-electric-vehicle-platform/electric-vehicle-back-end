@@ -9,6 +9,7 @@ import Green_trade.green_trade_platform.repository.DisputeCategoryRepository;
 import Green_trade.green_trade_platform.repository.DisputeRepository;
 import Green_trade.green_trade_platform.repository.NotificationRepository;
 import Green_trade.green_trade_platform.repository.OrderRepository;
+import Green_trade.green_trade_platform.repository.SystemWalletRepossitory;
 import Green_trade.green_trade_platform.request.RaiseDisputeRequest;
 import Green_trade.green_trade_platform.request.ResolveDisputeRequest;
 import Green_trade.green_trade_platform.response.DisputeResponse;
@@ -23,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -33,6 +35,7 @@ public class DisputeServiceImpl implements DisputeService {
     private final OrderRepository orderRepository;
     private final DisputeMapper disputeMapper;
     private final NotificationRepository notificationRepository;
+    private final SystemWalletRepossitory systemWalletRepository;
 
 
     public Dispute updateEvidencesForDispute(List<Evidence> evidences, Dispute dispute) {
@@ -63,6 +66,15 @@ public class DisputeServiceImpl implements DisputeService {
 
             if (pendingDisputes != null && !pendingDisputes.isEmpty()) {
                 throw new Exception("This order already has a pending dispute. Please wait for the current dispute to be resolved before raising a new one.");
+            }
+
+            // Kiểm tra xem escrow service đã được hold chưa - nếu đã hold thì không cho raise dispute
+            Optional<SystemWallet> systemWalletOpt = systemWalletRepository.findByOrder(disputedOrder);
+            if (systemWalletOpt.isPresent()) {
+                SystemWallet systemWallet = systemWalletOpt.get();
+                if (systemWallet.getStatus() == SystemWalletStatus.IS_SOLVED) {
+                    throw new Exception("Cannot raise dispute. The escrow service has already been solved for this order.");
+                }
             }
 
             Dispute newDispute = Dispute.builder()

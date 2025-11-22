@@ -295,37 +295,6 @@ public class OrderController {
                 ));
             }
 
-            // Kiểm tra system wallet: nếu đã kết thúc (IS_SOLVED) thì không cho update review
-            Order order = existingReview.getOrder();
-            if (order.getSystemWallet() != null) {
-                SystemWallet systemWallet = order.getSystemWallet();
-                SystemWalletStatus status = systemWallet.getStatus();
-
-                // Kiểm tra nếu system wallet đã kết thúc (IS_SOLVED)
-                if (status == SystemWalletStatus.IS_SOLVED) {
-                    return ResponseEntity.ok(responseMapper.toDto(
-                            false,
-                            "UPDATE REVIEW FAILED.",
-                            null,
-                            "Cannot update review. The system wallet for this order has already been completed."
-                    ));
-                }
-
-                // Kiểm tra nếu endAt đã qua (tiền đã được giải phóng hoặc sắp được giải phóng)
-                if (systemWallet.getEndAt() != null) {
-                    LocalDateTime currentTime = DateUtils.getCurrentVietnamTime();
-                    if (systemWallet.getEndAt().isBefore(currentTime) ||
-                            systemWallet.getEndAt().isEqual(currentTime)) {
-                        return ResponseEntity.ok(responseMapper.toDto(
-                                false,
-                                "UPDATE REVIEW FAILED.",
-                                null,
-                                "Cannot update review. The system wallet for this order has already ended."
-                        ));
-                    }
-                }
-            }
-
             Review updatedReview = reviewService.updateReview(reviewId, request, newImages);
             return ResponseEntity.ok(responseMapper.toDto(
                     true,
@@ -412,11 +381,6 @@ public class OrderController {
         responseData.put("buyer", buyerResponse);
         responseData.put("payment", paymentResponse);
         responseData.put("shippingPartner", shippingPartnerResponse);
-        
-        // Add invoice API if order has invoice
-        if (foundOrder.getInvoice() != null) {
-            responseData.put("invoiceApi", "/api/v1/order/" + orderId + "/invoice");
-        }
 
         RestResponse<Map<String, Object>, Object> response = responseMapper.toDto(
                 true,
