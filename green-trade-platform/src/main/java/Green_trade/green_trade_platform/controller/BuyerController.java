@@ -16,6 +16,7 @@ import Green_trade.green_trade_platform.request.ProfileRequest;
 import Green_trade.green_trade_platform.request.UpdateBuyerProfileRequest;
 import Green_trade.green_trade_platform.request.WishListRequest;
 import Green_trade.green_trade_platform.response.*;
+import Green_trade.green_trade_platform.service.NotificationService;
 import Green_trade.green_trade_platform.service.implement.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -71,6 +72,7 @@ public class BuyerController {
     private final FollowingServiceImpl followingService;
     private final FollowingMapper followingMapper;
     private final SellerMapper sellerMapper;
+    private final NotificationService notificationService;
 
     public BuyerController(
             BuyerServiceImpl buyerService,
@@ -95,7 +97,7 @@ public class BuyerController {
             InvoiceServiceImpl invoiceService,
             FollowingServiceImpl followingService,
             FollowingMapper followingMapper,
-            SellerMapper sellerMapper) {
+            SellerMapper sellerMapper, NotificationService notificationService) {
         this.buyerService = buyerService;
         this.responseMapper = responseMapper;
         this.buyerMapper = buyerMapper;
@@ -119,6 +121,7 @@ public class BuyerController {
         this.followingService = followingService;
         this.followingMapper = followingMapper;
         this.sellerMapper = sellerMapper;
+        this.notificationService = notificationService;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER')")
@@ -997,6 +1000,8 @@ public class BuyerController {
 
             //cập nhật trạng thái bài đăng bán sản phẩm
             postProductService.updateSoldStatus(true, postProduct);
+
+            Notification orderNotification = notificationService.createNotificationForSeller(postProduct.getSeller(), "New Order Request", "You have new order, please prepare your product");
 
             //tạo response
             responseData = orderMapper.toDto(newOrder);

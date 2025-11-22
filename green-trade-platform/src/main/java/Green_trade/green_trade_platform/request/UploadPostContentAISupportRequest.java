@@ -16,19 +16,37 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UploadPostContentAISupportRequest {
+    @NotBlank(message = "Title is required")
     private String title;
+
+    @NotBlank(message = "Brand is required")
     private String brand;
+
+    @NotBlank(message = "Model is required")
     private String model;
+
+    @NotBlank(message = "Manufacture Year is required")
     private Long manufactureYear;
+
+    @NotBlank(message = "Used Duration is required")
     private String usedDuration;
+
+    @NotBlank(message = "Condition Level is required")
     private String conditionLevel;
+
+    @NotBlank(message = "Price is required")
     private BigDecimal price;
+
+    @NotBlank(message = "Length is required")
     private String length;
 
+    @NotBlank(message = "Width is required")
     private String width;
 
+    @NotBlank(message = "Height is required")
     private String height;
 
+    @NotBlank(message = "Weight is required")
     private String weight;
 
     @NotBlank(message = "Location Trading is required")
