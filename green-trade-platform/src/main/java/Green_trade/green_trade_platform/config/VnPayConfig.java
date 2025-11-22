@@ -14,10 +14,10 @@ import java.util.*;
 
 @Component
 public class VnPayConfig {
-    //    public static String vnp_TmnCode = "KSEJI2S0";
-//    public static String vnp_HashSecret = "TJ57O52COT9VEXTFD8VY5E7V57833KOG";
-    public static String vnp_TmnCode = "VM0D23TI";
-    public static String vnp_HashSecret = "RE61PN4WNZIY3MZLGA3FWK4092LGLX87";
+        public static String vnp_TmnCode = "KSEJI2S0";
+    public static String vnp_HashSecret = "TJ57O52COT9VEXTFD8VY5E7V57833KOG";
+//    public static String vnp_TmnCode = "VM0D23TI";
+//    public static String vnp_HashSecret = "RE61PN4WNZIY3MZLGA3FWK4092LGLX87";
     public static String vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     public static String vnp_ReturnUrl = "http://localhost:5173/vnpay/return";
     public static String vnp_IpnUrl = "https://husbandless-inspectingly-kimora.ngrok-free.dev/api/v1/vnpay/ipn";

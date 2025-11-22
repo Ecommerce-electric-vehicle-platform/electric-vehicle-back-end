@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +27,9 @@ public class UploadPostContentAISupportRequest {
     @NotBlank(message = "Model is required")
     private String model;
 
-    @NotBlank(message = "Manufacture Year is required")
+    @NotNull(message = "Manufacture Year is required")
+    @Min(value = 1900, message = "Manufacture Year must be later than 1900")
+    @Max(value = 2100, message = "Manufacture Year seems invalid")
     private Long manufactureYear;
 
     @NotBlank(message = "Used Duration is required")
@@ -34,7 +38,8 @@ public class UploadPostContentAISupportRequest {
     @NotBlank(message = "Condition Level is required")
     private String conditionLevel;
 
-    @NotBlank(message = "Price is required")
+    @NotNull(message = "Price is required")
+    @Positive(message = "Price must be greater than zero")
     private BigDecimal price;
 
     @NotBlank(message = "Length is required")
