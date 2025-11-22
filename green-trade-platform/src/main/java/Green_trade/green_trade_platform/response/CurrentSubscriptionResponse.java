@@ -16,6 +16,7 @@ public class CurrentSubscriptionResponse {
     private String sellerName;
     private Long packageId;
     private String packageName;
+    private Double price;
     private LocalDateTime start;
     private LocalDateTime end;
 }

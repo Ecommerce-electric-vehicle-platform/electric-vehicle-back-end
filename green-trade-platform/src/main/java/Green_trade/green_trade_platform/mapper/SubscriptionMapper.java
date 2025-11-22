@@ -40,6 +40,8 @@ public class SubscriptionMapper {
                 .sellerId(subscription.getSeller().getSellerId())
                 .sellerName(subscription.getSeller().getSellerName())
                 .packageId(subscription.getSubscriptionPackage().getId())
+                .packageName(subscription.getSubscriptionPackage().getName())
+                .price(subscription.getPriceAtPurchase())
                 .start(subscription.getStartDay())
                 .end(subscription.getEndDay())
                 .build();
