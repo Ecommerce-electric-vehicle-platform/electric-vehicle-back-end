@@ -112,6 +112,9 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                         .description(description)
                         .build();
             } else {
+                String orderCodeSuffix = (order != null && order.getOrderCode() != null) 
+                    ? " #" + order.getOrderCode() 
+                    : "";
                 walletTransaction = WalletTransaction.builder()
                         .wallet(wallet)
                         .order(order)
@@ -120,7 +123,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                         .balanceBefore(wallet.getBalance())
                         .status(TransactionStatus.SUCCESS)
                         .externalTransactionReference("None")
-                        .description("Get money from order")
+                        .description("Nhận tiền từ đơn hàng" + orderCodeSuffix)
                         .build();
             }
             return walletTransactionRepository.save(walletTransaction);

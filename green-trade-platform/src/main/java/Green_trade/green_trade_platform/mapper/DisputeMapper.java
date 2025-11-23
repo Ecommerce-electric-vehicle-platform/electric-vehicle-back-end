@@ -53,7 +53,7 @@ public class DisputeMapper {
 
                     // Tìm wallet transaction refund cho buyer từ database
                     // Query theo order id và type = REFUND
-                    String descriptionPattern = "%Refund money from dispute%";
+                    String descriptionPattern = "%Hoàn tiền từ tranh chấp cho đơn hàng%";
                     List<WalletTransaction> refundTransactions = walletTransactionRepository
                             .findRefundTransactionsByOrderAndType(
                                     order,
@@ -61,12 +61,12 @@ public class DisputeMapper {
                                     descriptionPattern
                             );
 
-                    // Lọc transaction có description chứa "Refund money from dispute" và type = REFUND
+                    // Lọc transaction có description chứa "Hoàn tiền từ tranh chấp cho đơn hàng" và type = REFUND
                     // (chỉ lấy transaction của buyer, không phải seller - seller có type = DEPOSIT)
                     Optional<WalletTransaction> refundTransaction = refundTransactions.stream()
                             .filter(wt -> wt.getType() == TransactionType.REFUND)
                             .filter(wt -> wt.getDescription() != null &&
-                                    wt.getDescription().startsWith("Refund money from dispute"))
+                                    wt.getDescription().startsWith("Hoàn tiền từ tranh chấp cho đơn hàng"))
                             .findFirst();
 
                     if (refundTransaction.isPresent()) {
