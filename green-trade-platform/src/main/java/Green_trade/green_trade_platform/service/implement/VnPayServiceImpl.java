@@ -5,7 +5,6 @@ import Green_trade.green_trade_platform.service.VnPayService;
 import Green_trade.green_trade_platform.model.Buyer;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -15,18 +14,11 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static Green_trade.green_trade_platform.config.MoMoConfig.returnUrl;
+
 @Service
 @Slf4j
 public class VnPayServiceImpl implements VnPayService {
-    @Value(("${vnp_TmnCode}"))
-    private String vnpTmnCode;
-    @Value("${vnp_HashSecret}")
-    private String vnpHashSecret;
-    @Value(("${vnp_Url}"))
-    private String vnpUrl;
-    @Value(("${vnpay.return-url}"))
-    private String vnpReturnUrl;
-
     private final BuyerServiceImpl buyerService;
     private final VnPayConfig vnPayConfig;
 //    private final VnPayUtils vnPayUtils;
@@ -61,12 +53,8 @@ public class VnPayServiceImpl implements VnPayService {
         vnp_Params.put("vnp_OrderInfo", buyer.getBuyerId().toString() + " : " + buyer.getUsername() + " nạp tiền vào ví.");
         vnp_Params.put("vnp_OrderType", Optional.ofNullable(req.getParameter("ordertype")).orElse("other"));
         vnp_Params.put("vnp_Locale", Optional.ofNullable(req.getParameter("language")).orElse("vn"));
-        // Sử dụng return URL từ application.properties, nếu không có thì dùng default từ VnPayConfig
-        String returnUrl = vnpReturnUrl != null && !vnpReturnUrl.isEmpty()
-                ? vnpReturnUrl
-                : VnPayConfig.vnp_ReturnUrl;
-        vnp_Params.put("vnp_ReturnUrl", returnUrl);
-        log.info(">>> [VNPay] Using return URL: {}", returnUrl);
+        vnp_Params.put("vnp_ReturnUrl", VnPayConfig.vnp_ReturnUrl);
+        log.info(">>> [VNPay] Using return URL: {}", VnPayConfig.vnp_ReturnUrl);
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
         // Sử dụng timezone Asia/Ho_Chi_Minh (UTC+7) - giờ Việt Nam
@@ -126,7 +114,7 @@ public class VnPayServiceImpl implements VnPayService {
         log.info(">>> [VNPay] Secure hash: {}", vnp_SecureHash);
 
         log.info(">>> [VNPay] Payment URL created successfully");
-        log.info(">>> [VNPay] Return URL: {}", returnUrl);
+        log.info(">>> [VNPay] Return URL: {}", VnPayConfig.vnp_ReturnUrl);
         log.info(">>> [VNPay] Payment URL length: {}", paymentUrl.length());
         log.debug(">>> [VNPay] Full payment URL: {}", paymentUrl);
 

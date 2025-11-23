@@ -1,6 +1,8 @@
 package Green_trade.green_trade_platform.config;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Mac;
@@ -14,13 +16,36 @@ import java.util.*;
 
 @Component
 public class VnPayConfig {
-        public static String vnp_TmnCode = "KSEJI2S0";
-    public static String vnp_HashSecret = "TJ57O52COT9VEXTFD8VY5E7V57833KOG";
-//    public static String vnp_TmnCode = "VM0D23TI";
-//    public static String vnp_HashSecret = "RE61PN4WNZIY3MZLGA3FWK4092LGLX87";
-    public static String vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_ReturnUrl = "http://localhost:5173/vnpay/return";
-    public static String vnp_IpnUrl = "https://husbandless-inspectingly-kimora.ngrok-free.dev/api/v1/vnpay/ipn";
+    @Value("${vnpay.tmn-code}")
+    private String vnpTmnCodeValue;
+
+    @Value("${vnpay.hash-secret}")
+    private String vnpHashSecretValue;
+
+    @Value("${vnpay.url}")
+    private String vnpUrlValue;
+
+    @Value("${vnpay.return-url}")
+    private String vnpReturnUrlValue;
+
+    @Value("${vnpay.ipn-url}")
+    private String vnpIpnUrlValue;
+
+    // Static fields for backward compatibility
+    public static String vnp_TmnCode;
+    public static String vnp_HashSecret;
+    public static String vnp_Url;
+    public static String vnp_ReturnUrl;
+    public static String vnp_IpnUrl;
+
+    @PostConstruct
+    public void init() {
+        vnp_TmnCode = vnpTmnCodeValue;
+        vnp_HashSecret = vnpHashSecretValue;
+        vnp_Url = vnpUrlValue;
+        vnp_ReturnUrl = vnpReturnUrlValue;
+        vnp_IpnUrl = vnpIpnUrlValue;
+    }
 
     public static String getRandomNumber(int len) {
         String chars = "0123456789";

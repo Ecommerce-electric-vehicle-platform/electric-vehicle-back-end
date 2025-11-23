@@ -37,7 +37,9 @@ public class DisputeMapper {
                 .resolution(dispute.getResolution())
                 .decision(dispute.getDecision())
                 .status(dispute.getStatus())
-                .evidences(evidenceResponses);
+                .evidences(evidenceResponses)
+                .orderCode(dispute.getOrder() != null ? dispute.getOrder().getOrderCode() : null)
+                .createdAt(dispute.getCreatedAt());
 
         // Nếu dispute đã được giải quyết (status = ACCEPTED), tính toán thông tin tiền hoàn
         if (dispute.getStatus() == DisputeStatus.ACCEPTED && dispute.getOrder() != null) {

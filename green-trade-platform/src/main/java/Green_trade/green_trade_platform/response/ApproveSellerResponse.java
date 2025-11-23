@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ApproveSellerResponse {
     private Long sellerId;
+    private Long buyerId; // Thêm buyerId để dùng khi seller bị xóa (reject)
     private VerifiedDecisionStatus decision;
     private String reason;
     private LocalDateTime decidedAt;

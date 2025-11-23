@@ -133,8 +133,10 @@ public class SellerServiceImpl implements SellerService {
 
         Admin admin = adminService.getCurrentUser();
         Notification notice = null;
+        Long buyerId = seller.getBuyer().getBuyerId(); // Lấy buyerId ngay từ đầu
         ApproveSellerResponse response = ApproveSellerResponse.builder()
                 .sellerId(seller.getSellerId())
+                .buyerId(buyerId) // Lưu buyerId vào response
                 .reason(request.getMessage())
                 .decision(request.getDecision())
                 .decidedAt(DateUtils.getCurrentVietnamTime())
@@ -166,6 +168,8 @@ public class SellerServiceImpl implements SellerService {
 
         } else {
             String reason = request.getMessage();
+            // buyerId đã được lấy ở trên
+            
             mailRequest.setMessage("""
                     ⚠️ <strong>Rất tiếc!</strong><br><br>
                     Yêu cầu nâng cấp tài khoản lên Seller của bạn hiện chưa được phê duyệt.<br>
@@ -181,7 +185,7 @@ public class SellerServiceImpl implements SellerService {
 
             sellerRepository.delete(seller);
             notice = Notification.builder()
-                    .receiverId(seller.getBuyer().getBuyerId())
+                    .receiverId(buyerId)
                     .type(AccountType.BUYER)
                     .title("UPGRADE ACCOUNT INFORMATION RESULT")
                     .content(request.getMessage())
@@ -218,7 +222,6 @@ public class SellerServiceImpl implements SellerService {
         log.info(">>> [Seller Service] Buyer info: {}", buyer.getFullName());
         buyer.setActive(false);
         buyerRepository.save(buyer);
-        // ✅ Soạn nội dung email HTML
         String action = activity.equalsIgnoreCase("block") ? "bị khóa" : "được mở khóa";
         String htmlMessage = """
                 <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
@@ -240,7 +243,6 @@ public class SellerServiceImpl implements SellerService {
                 message
         );
 
-        // ✅ Gửi mail đẹp
         MailRequest mailRequest = MailRequest.builder()
                 .from("green.trade.platform.391@gmail.com")
                 .to(buyer.getEmail())
