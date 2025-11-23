@@ -12,31 +12,31 @@ import java.util.Random;
 
 @Component
 public class MoMoConfig {
-    @Value("${momo.partner-code:MOMO}")
+    @Value("${momo.partner-code}")
     private String partnerCodeValue;
 
-    @Value("${momo.access-key:F8BBA842ECF85}")
+    @Value("${momo.access-key}")
     private String accessKeyValue;
 
-    @Value("${momo.secret-key:K951B6PE1waDMi640xX08PD3vg6EkVlz}")
+    @Value("${momo.secret-key}")
     private String secretKeyValue;
 
-    @Value("${momo.endpoint:https://test-payment.momo.vn/v2/gateway/api/create}")
+    @Value("${momo.endpoint}")
     private String endpointValue;
 
-    @Value("${momo.return-url:http://localhost:8080/api/v1/momo/return}")
+    @Value("${momo.return-url}")
     private String returnUrlValue;
 
-    @Value("${momo.ipn-url:http://localhost:8080/api/v1/momo/ipn}")
+    @Value("${momo.ipn-url}")
     private String ipnUrlValue;
 
     // Static fields for backward compatibility
-    public static String partnerCode = "MOMO";
-    public static String accessKey = "F8BBA842ECF85";
-    public static String secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
-    public static String endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";
-    public static String returnUrl = "http://localhost:8080/api/v1/momo/return";
-    public static String ipnUrl = "http://localhost:8080/api/v1/momo/ipn";
+    public static String partnerCode;
+    public static String accessKey;
+    public static String secretKey;
+    public static String endpoint;
+    public static String returnUrl;
+    public static String ipnUrl;
 
     @PostConstruct
     public void init() {

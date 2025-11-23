@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import java.math.BigDecimal;
@@ -28,4 +29,8 @@ public class DisputeResponse {
     // Thông tin tiền hoàn (chỉ có khi dispute đã được giải quyết với status = ACCEPTED)
     private BigDecimal refundAmount;
     private Double refundPercent;
+    // Mã đơn hàng
+    private String orderCode;
+    // Thời gian tạo dispute
+    private LocalDateTime createdAt;
 }

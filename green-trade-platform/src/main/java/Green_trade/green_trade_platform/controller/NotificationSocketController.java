@@ -20,8 +20,18 @@ public class NotificationSocketController {
     // Called by services when new notifications are created
     public void sendUpgradeNotificationToUser(ApproveSellerResponse notification) {
         log.info(">>> [Notification Socket Controller] Send upgrade notification to user: {}", notification);
-        Buyer buyer = buyerService.findBuyerBySellerId(notification.getSellerId());
-        String destination = "/queue/notifications/" + buyer.getBuyerId();
+        
+        Long buyerId;
+ 
+        if (notification.getBuyerId() != null) {
+            buyerId = notification.getBuyerId();
+        } else {
+            // Fallback: tìm buyer bằng sellerId (cho trường hợp APPROVED)
+            Buyer buyer = buyerService.findBuyerBySellerId(notification.getSellerId());
+            buyerId = buyer.getBuyerId();
+        }
+        
+        String destination = "/queue/notifications/" + buyerId;
         messagingTemplate.convertAndSend(destination, notification);
     }
 
