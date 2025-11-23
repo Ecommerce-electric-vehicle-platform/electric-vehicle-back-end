@@ -26,11 +26,8 @@ public class DisputeResponse {
     private String resolution;
     private DisputeStatus status;
     private List<EvidenceResponse> evidences;
-    // Thông tin tiền hoàn (chỉ có khi dispute đã được giải quyết với status = ACCEPTED)
     private BigDecimal refundAmount;
     private Double refundPercent;
-    // Mã đơn hàng
-    private String orderCode;
-    // Thời gian tạo dispute
+    private String orderCode
     private LocalDateTime createdAt;
 }
