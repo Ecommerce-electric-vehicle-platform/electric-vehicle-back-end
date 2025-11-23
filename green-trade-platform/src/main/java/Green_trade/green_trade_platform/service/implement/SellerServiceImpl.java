@@ -133,7 +133,7 @@ public class SellerServiceImpl implements SellerService {
 
         Admin admin = adminService.getCurrentUser();
         Notification notice = null;
-        Long buyerId = seller.getBuyer().getBuyerId(); // Lấy buyerId ngay từ đầu
+        Long buyerId = seller.getBuyer().getBuyerId();
         ApproveSellerResponse response = ApproveSellerResponse.builder()
                 .sellerId(seller.getSellerId())
                 .buyerId(buyerId) // Lưu buyerId vào response
@@ -168,7 +168,6 @@ public class SellerServiceImpl implements SellerService {
 
         } else {
             String reason = request.getMessage();
-            // buyerId đã được lấy ở trên
             
             mailRequest.setMessage("""
                     ⚠️ <strong>Rất tiếc!</strong><br><br>

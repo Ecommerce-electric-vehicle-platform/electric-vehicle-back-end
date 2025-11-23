@@ -1,8 +1,9 @@
 package Green_trade.green_trade_platform.service.implement;
 
+import Green_trade.green_trade_platform.controller.NotificationSocketController;
+import Green_trade.green_trade_platform.enumerate.AccountType;
 import Green_trade.green_trade_platform.filter.BadWordFilter;
-import Green_trade.green_trade_platform.service.ReviewService;
-import Green_trade.green_trade_platform.mapper.ReviewMapper;
+import Green_trade.green_trade_platform.model.Notification;
 import Green_trade.green_trade_platform.model.Order;
 import Green_trade.green_trade_platform.model.Review;
 import Green_trade.green_trade_platform.model.ReviewImage;
@@ -10,8 +11,13 @@ import Green_trade.green_trade_platform.model.Seller;
 import Green_trade.green_trade_platform.repository.OrderRepository;
 import Green_trade.green_trade_platform.repository.ReviewImagesRepository;
 import Green_trade.green_trade_platform.repository.ReviewRepository;
+import Green_trade.green_trade_platform.request.MailRequest;
 import Green_trade.green_trade_platform.request.ReviewRequest;
 import Green_trade.green_trade_platform.request.UpdateReviewRequest;
+import Green_trade.green_trade_platform.service.MailService;
+import Green_trade.green_trade_platform.service.NotificationService;
+import Green_trade.green_trade_platform.service.ReviewService;
+import Green_trade.green_trade_platform.mapper.ReviewMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,6 +40,9 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewMapper reviewMapper;
     private final CloudinaryService cloudinaryService;
     private final ReviewImagesRepository reviewImagesRepository;
+    private final NotificationService notificationService;
+    private final MailService mailService;
+    private final NotificationSocketController notificationSocketController;
 
     public Review createReview(ReviewRequest request, List<MultipartFile> reviewImages) {
         log.info(">>> [Review Service] Create Review: Started.");
@@ -72,6 +81,78 @@ public class ReviewServiceImpl implements ReviewService {
             i.setReview(savedReview);
             reviewImagesRepository.save(i);
         }
+
+        // ✅ Gửi notification và email cho seller
+        try {
+            Seller seller = order.getPostProduct().getSeller();
+            if (seller != null) {
+                log.info(">>> [Review Service] Send notification and email to seller: {}", seller.getSellerId());
+                
+                // Lấy thông tin sản phẩm và đánh giá
+                String productTitle = order.getPostProduct().getTitle();
+                String ratingStars = "⭐".repeat((int) Math.round(savedReview.getRating()));
+                String feedbackText = savedReview.getFeedback() != null && !savedReview.getFeedback().trim().isEmpty() 
+                    ? savedReview.getFeedback() 
+                    : "Không có phản hồi";
+
+                // Tạo notification
+                String notificationTitle = "Đánh giá mới cho sản phẩm của bạn";
+                String notificationContent = String.format(
+                    "Bạn nhận được đánh giá %.1f/5 sao cho sản phẩm \"%s\"", 
+                    savedReview.getRating(), 
+                    productTitle
+                );
+                
+                Notification notification = Notification.builder()
+                        .receiverId(seller.getSellerId())
+                        .type(AccountType.SELLER)
+                        .title(notificationTitle)
+                        .content(notificationContent)
+                        .readAt(null)
+                        .build();
+                Notification savedNotification = notificationService.createNotification(notification);
+
+                // Gửi real-time notification qua WebSocket
+                notificationSocketController.sendNotificationToUser(savedNotification);
+
+                // Gửi email cho seller
+                String emailSubject = "Đánh giá mới cho sản phẩm của bạn";
+                String emailMessage = String.format("""
+                    <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto;'>
+                        <h2 style='color: #4CAF50;'>💚 Thông báo từ Green Trade Platform</h2>
+                        <p>Xin chào <strong>%s</strong>,</p>
+                        <p>Sản phẩm <strong>"%s"</strong> của bạn vừa nhận được một đánh giá mới từ khách hàng.</p>
+                        <div style='background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                            <p style='margin: 5px 0;'><strong>Đánh giá:</strong> %s <strong>(%.1f/5 sao)</strong></p>
+                            <p style='margin: 5px 0;'><strong>Phản hồi:</strong></p>
+                            <p style='margin: 10px 0; padding: 10px; background-color: white; border-left: 3px solid #4CAF50;'>%s</p>
+                        </div>
+                        <p>Bạn có thể xem chi tiết đánh giá trong phần quản lý sản phẩm của mình.</p>
+                        <p>💚 Cảm ơn bạn đã hợp tác cùng Green Trade Platform!</p>
+                    </div>
+                    """, 
+                    seller.getSellerName() != null ? seller.getSellerName() : seller.getBuyer().getFullName(),
+                    productTitle,
+                    ratingStars,
+                    savedReview.getRating(),
+                    feedbackText
+                );
+
+                MailRequest mailRequest = MailRequest.builder()
+                        .from("green.trade.platform.391@gmail.com")
+                        .to(seller.getBuyer().getEmail())
+                        .subject(emailSubject)
+                        .message(emailMessage)
+                        .build();
+                mailService.sendBeautifulMail(mailRequest);
+
+                log.info(">>> [Review Service] Notification and email sent successfully to seller: {}", seller.getSellerId());
+            }
+        } catch (Exception e) {
+            log.error(">>> [Review Service] Failed to send notification/email to seller: {}", e.getMessage(), e);
+            // Không throw exception để không ảnh hưởng đến việc tạo review
+        }
+
         return savedReview;
     }
 

@@ -40,7 +40,6 @@ public class MoMoConfig {
 
     @PostConstruct
     public void init() {
-        // Initialize static values from @Value after dependency injection
         partnerCode = partnerCodeValue;
         accessKey = accessKeyValue;
         secretKey = secretKeyValue;
