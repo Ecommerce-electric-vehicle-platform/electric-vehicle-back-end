@@ -28,6 +28,6 @@ public class DisputeResponse {
     private List<EvidenceResponse> evidences;
     private BigDecimal refundAmount;
     private Double refundPercent;
-    private String orderCode
+    private String orderCode;
     private LocalDateTime createdAt;
 }
