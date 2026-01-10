@@ -1,4 +1,5 @@
 # Green Trade Platform - Backend API
+#Link document: [Link text](https://docs.google.com/document/d/11utNevMSwZnWJoAaERfcBsGSEdchge7B/edit?usp=sharing&ouid=104688331555114019921&rtpof=true&sd=true)
 
 > **Nền tảng thương mại điện tử chuyên về xe điện và pin điện đã qua sử dụng**
 
